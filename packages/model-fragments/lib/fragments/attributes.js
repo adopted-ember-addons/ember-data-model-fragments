@@ -39,6 +39,12 @@ function hasOneFragment (type, options) {
 
       fragment = value;
 
+      // Set the correct owner/name on the fragment
+      fragment.setProperties({
+        _owner : this,
+        _name  : key
+      });
+
       if (this._data[key] !== fragment) {
         this.fragmentDidDirty(key, fragment);
       } else {
