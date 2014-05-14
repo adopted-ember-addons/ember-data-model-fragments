@@ -7,7 +7,7 @@ This package provides support for sub-models that can be treated much like `belo
 ```javascript
 App.Person = DS.Model.extend({
   name      : DS.hasOneFragment('name'),
-  addresses : DS.hasManyFragments('adress'),
+  addresses : DS.hasManyFragments('address'),
   titles    : DS.hasManyFragments()
 });
 
@@ -33,7 +33,7 @@ With a JSON payload of:
     "first": "Tyrion",
     "last": "Lannister"
   },
-  "adresses": [
+  "addresses": [
     {
       "street": "1 Sky Cell",
       "city": "Eyre",
