@@ -10,5 +10,5 @@
   "devDependencies": {
     "ember-mocha-adapter": "0.1.2"
   },
-  "main": "build/ember-plugin.js"
+  "main": "build/ember-data.model-fragments.js"
 }
