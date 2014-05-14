@@ -836,6 +836,8 @@ define("main",
       initializers.forEach(Application.initializer, Application);
     });
 
+    Ember.libraries.register('Ember Data - Model Fragments', '0.1.0');
+
     // Something must be exported...
     __exports__["default"] = DS;
   });

@@ -1,2 +1,5 @@
-tmp/
-node_modules/
+node_modules
+temp
+.sass-cache
+.tmp
+app/bower_components

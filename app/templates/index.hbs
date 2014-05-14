@@ -1,0 +1,30 @@
+<div class="">
+    <h1 class="">Welcome to Ember Data - Model Fragments</h1>
+
+    <ul class="well">
+      {{#each person in model}}
+      <li>
+        <h2>{{person.name.first}} {{person.name.last}}</h2>
+
+        <h3>Addresses</h3>
+        <ul>
+          {{#each address in person.addresses}}
+          <li>
+            {{address.street}}
+          </li>
+          {{/each}}
+        </ul>
+
+        <h3>Titles</h3>
+        <ul>
+          {{#each title in person.titles}}
+          <li>
+            {{title}}
+          </li>
+          {{/each}}
+        </ul>
+
+      </li>
+      {{/each}}
+    </ul>
+</div>
