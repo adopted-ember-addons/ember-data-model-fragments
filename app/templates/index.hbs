@@ -7,6 +7,8 @@
         <h2>{{person.name.first}} {{person.name.last}}</h2>
 
         <h3>Addresses</h3>
+        <button {{action 'addAddress' person}}>Add Address</button>
+
         <ul>
           {{#each address in person.addresses}}
           <li>
@@ -16,6 +18,7 @@
         </ul>
 
         <h3>Titles</h3>
+        <button {{action 'addTitle' person}}>Add Title</button>
         <ul>
           {{#each title in person.titles}}
           <li>
