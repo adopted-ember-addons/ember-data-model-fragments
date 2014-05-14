@@ -1,4 +1,4 @@
-ember data model fragments
+Ember Data - Model Fragments
 ==========
 
 ## Usage
