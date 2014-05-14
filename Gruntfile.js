@@ -177,12 +177,10 @@ module.exports = function (grunt) {
         },
         // not used since Uglify task does concat,
         // but still available if needed
-        /*concat: {
-            dist: {}
-        },*/
         concat: {
-           browser: {
-              src: [ 'lib/vendor/loader.js', '.tmp/**/*.js' ],
+            dist: {},
+            browser: {
+              src: [ 'lib/vendor/loader.js', '.tmp/lib/**/*.js' ],
               dest: 'build/ember-data.model-fragments.js',
               options: {
                 banner: '/*\n' + grunt.file.read('LICENSE') + '*/\n(function() {\n',
@@ -378,7 +376,7 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: 'lib/scripts/',
                     src: [ '**/*.js', ],
-                    dest: '.tmp'
+                    dest: '.tmp/lib'
                   },
                 ]
             }
