@@ -3,7 +3,7 @@ App.IndexController = Ember.ArrayController.extend({
       addAddress: function(person) {
 
           var a = {
-            "street": "1 Sky Cell",
+            "streets": [],
             "city": "Eyre",
             "region": "Vale of Arryn",
             "country": "Westeros"
@@ -13,6 +13,14 @@ App.IndexController = Ember.ArrayController.extend({
           person.get('addresses').pushObject(frag);
           person.save();
           console.log(person);
+      },
+      addStreet: function(address) {
+          var a = {"name":"2 Sky Cell"};
+
+          var frag = this.store.createFragment('street', a);
+          address.get('streets').pushObject(frag);
+          console.log(address);
+          address.get('_owner').save();
       },
       addTitle: function(person) {
 

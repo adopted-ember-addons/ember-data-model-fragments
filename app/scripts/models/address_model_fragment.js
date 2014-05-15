@@ -1,5 +1,5 @@
 App.Address = DS.ModelFragment.extend({
-  street  : DS.attr('string'),
+  streets : DS.hasManyFragments('street'),
   city    : DS.attr('string'),
   region  : DS.attr('string'),
   country : DS.attr('string')

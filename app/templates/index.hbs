@@ -4,6 +4,7 @@
     <ul class="well">
       {{#each person in model}}
       <li>
+        {{log person}}
         <h2>{{person.name.first}} {{person.name.last}}</h2>
 
         <h3>Addresses</h3>
@@ -12,7 +13,16 @@
         <ul>
           {{#each address in person.addresses}}
           <li>
-            {{address.street}}
+            {{address.city}}, {{address.region}}, {{address.country}}
+            <ul>
+              <button {{action 'addStreet' address}}>Add Street</button>
+
+              {{#each street in address.streets}}
+                <li>
+                  {{street.name}}
+                </li>
+              {{/each}}
+            </ul>
           </li>
           {{/each}}
         </ul>

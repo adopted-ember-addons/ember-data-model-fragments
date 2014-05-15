@@ -13,13 +13,13 @@ App.Person.FIXTURES = [
   },
   "addresses": [
     {
-      "street": "1 Sky Cell",
+      "streets": [{"name":"1 Sky Cell"}],
       "city": "Eyre",
       "region": "Vale of Arryn",
       "country": "Westeros"
     },
     {
-      "street": "1 Tower of the Hand",
+      "streets": [{"name":"1 Tower of the Hand"}],
       "city": "King's Landing",
       "region": "Crownlands",
       "country": "Westeros"
