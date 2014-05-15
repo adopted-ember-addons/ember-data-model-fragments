@@ -1,0 +1,43 @@
+<div class="">
+    <h1 class="">Welcome to Ember Data - Model Fragments</h1>
+
+    <ul class="well">
+      {{#each person in model}}
+      <li>
+        {{log person}}
+        <h2>{{person.name.first}} {{person.name.last}}</h2>
+
+        <h3>Addresses</h3>
+        <button {{action 'addAddress' person}}>Add Address</button>
+
+        <ul>
+          {{#each address in person.addresses}}
+          <li>
+            {{address.city}}, {{address.region}}, {{address.country}}
+            <ul>
+              <button {{action 'addStreet' address}}>Add Street</button>
+
+              {{#each street in address.streets}}
+                <li>
+                  {{street.name}}
+                </li>
+              {{/each}}
+            </ul>
+          </li>
+          {{/each}}
+        </ul>
+
+        <h3>Titles</h3>
+        <button {{action 'addTitle' person}}>Add Title</button>
+        <ul>
+          {{#each title in person.titles}}
+          <li>
+            {{title}}
+          </li>
+          {{/each}}
+        </ul>
+
+      </li>
+      {{/each}}
+    </ul>
+</div>
