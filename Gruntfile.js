@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     configPath: require('path').join(process.cwd(), 'tasks/options')
   });
 
-  grunt.registerTask('build', "Build to the 'dist/' directory and lint source", [
+  grunt.registerTask('build', "Build to the 'tmp/' directory and lint source", [
     'clean',
     'transpile:amd',
     'concat:browser',
@@ -13,6 +13,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('dist', "Minify and defeature-ify build", [
     'build',
+    'copy:debug',
     'emberDefeatureify:stripDebug',
     'uglify:dist',
   ]);
