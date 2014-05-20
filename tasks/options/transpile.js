@@ -6,7 +6,7 @@ module.exports = {
         expand: true,
         cwd: 'packages/model-fragments/lib/',
         src: [ '**/*.js', ],
-        dest: 'tmp'
+        dest: 'tmp/transpiled/'
       },
     ],
   },

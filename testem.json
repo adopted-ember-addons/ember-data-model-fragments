@@ -1,0 +1,16 @@
+{
+  "framework": "qunit",
+  "src_files": [
+    "bower_components/jquery/jquery.js",
+    "bower_components/handlebars/handlebars.js",
+    "bower_components/ember/ember.js",
+    "bower_components/ember-data/ember-data.js",
+    "bower_components/qunit/qunit/qunit.js",
+    "tmp/ember-data.model-fragments.js",
+    "tests/ember-setup.js",
+    "tests/ember-data-setup.js",
+    "packages/**/tests/**/*.js"
+  ],
+  "launch_in_dev": [ "Chrome" ],
+  "launch_in_ci": [ "PhantomJS" ]
+}

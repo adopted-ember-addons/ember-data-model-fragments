@@ -1,4 +1,4 @@
-## Ember Data: Model Fragments
+# Ember Data: Model Fragments [![Build Status](https://travis-ci.org/lytics/ember-data.model-fragments.svg)](https://travis-ci.org/lytics/ember-data.model-fragments)
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
@@ -99,3 +99,23 @@ person.get('isDirty'); // true
 person.rollback();
 titles.get('length'); // 2
 ```
+
+## Testing
+
+Building requires [Grunt](http://gruntjs.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can both be installed globally with:
+
+```sh
+$ npm install --global grunt testem
+```
+
+Then install NPM packages, build the plugin, and start the development test server:
+
+```sh
+$ npm install
+$ grunt build
+$ testem
+```
+
+## Contributing
+
+When reporting an issue, follow the [Ember guidelines](https://github.com/emberjs/ember.js/blob/master/CONTRIBUTING.md#reporting-a-bug). When contributing features, follow [Github guidelines](https://help.github.com/articles/fork-a-repo) for forking and creating a new pull request. All existing tests must pass (or be suitably modified), and all new features must be accompanied by tests to be considered.

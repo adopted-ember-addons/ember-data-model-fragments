@@ -1,9 +1,11 @@
 import ModelFragment from './fragments/model';
+import FragmentArray from './fragments/array/fragment';
 import FragmentTransform from './fragments/transform';
 import { hasOneFragment, hasManyFragments, fragmentOwner } from './fragments/attributes';
 import initializers from './initializers';
 
 DS.ModelFragment = ModelFragment;
+DS.FragmentArray = FragmentArray;
 DS.FragmentTransform = FragmentTransform;
 DS.hasOneFragment = hasOneFragment;
 DS.hasManyFragments = hasManyFragments;

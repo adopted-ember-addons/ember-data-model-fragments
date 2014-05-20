@@ -1,0 +1,10 @@
+{
+  "name": "ember-data.model-fragments",
+  "private": true,
+  "dependencies": {
+    "jquery": "~2.0.0",
+    "handlebars": "~1.3.0",
+    "ember": "~1.4.0",
+    "ember-data": "1.0.0-beta.7"
+  }
+}

@@ -3,5 +3,5 @@ module.exports = {
     jshintrc: ".jshintrc",
     force: true
   },
-  src: [ 'packages/model-fragments/lib/**/*.js' ]
+  src: [ 'packages/model-fragments/**/*.js' ]
 };

@@ -12,7 +12,7 @@ module.exports = {
     options: {
       enableStripDebug: true
     },
-    src: 'dist/ember-data.model-fragments.js',
+    src: 'tmp/ember-data.model-fragments.js',
     dest: 'dist/ember-data.model-fragments.prod.js'
   },
 };
