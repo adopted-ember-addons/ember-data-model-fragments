@@ -1,3 +1,4 @@
+import Ember from 'ember';
 var get = Ember.get;
 var splice = Array.prototype.splice;
 

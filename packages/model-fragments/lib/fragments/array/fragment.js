@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import PrimitiveArray from './primitive';
 
 var get = Ember.get;

@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import RootState from '../states';
 
 var get = Ember.get;

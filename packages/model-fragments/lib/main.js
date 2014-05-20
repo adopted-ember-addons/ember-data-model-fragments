@@ -1,3 +1,5 @@
+import Ember from 'ember';
+import ext from './fragments/ext';
 import ModelFragment from './fragments/model';
 import FragmentArray from './fragments/array/fragment';
 import FragmentTransform from './fragments/transform';

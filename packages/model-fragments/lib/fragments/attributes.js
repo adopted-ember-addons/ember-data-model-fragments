@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import PrimitiveArray from './array/primitive';
 import FragmentArray from './array/fragment';
 
