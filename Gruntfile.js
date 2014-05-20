@@ -5,7 +5,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('build', "Build to the 'tmp/' directory and lint source", [
-    'clean',
+    'clean:tmp',
     'transpile:amd',
     'concat:browser',
     'preprocess:version',
@@ -14,6 +14,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('dist', "Minify and defeature-ify build", [
     'build',
+    'clean:dist',
     'copy:debug',
     'emberDefeatureify:stripDebug',
     'uglify:dist',
