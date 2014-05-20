@@ -5,7 +5,7 @@ module.exports = {
     src: [ 'vendor/loader.js', 'tmp/transpiled/**/*.js' ],
     dest: 'tmp/ember-data.model-fragments.js',
     options: {
-      banner: '/*\n' + grunt.file.read('LICENSE') + '*/\n(function() {\n',
+      banner: grunt.file.read('license.js') + '(function() {\n',
       footer: '\nrequireModule("main")["default"];\n}());',
     },
   },

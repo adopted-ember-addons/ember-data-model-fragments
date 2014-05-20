@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     'clean',
     'transpile:amd',
     'concat:browser',
+    'preprocess:version',
     'jshint:src',
   ]);
 

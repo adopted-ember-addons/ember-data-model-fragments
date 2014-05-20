@@ -4,7 +4,7 @@ module.exports = {
   options: {
     report: 'min',
     wrap: true,
-    banner: '/*\n' + grunt.file.read('LICENSE') + '*/\n',
+    banner: grunt.file.read('license.js')
   },
   dist: {
     files: [

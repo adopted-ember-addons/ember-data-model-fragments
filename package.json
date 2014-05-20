@@ -21,6 +21,7 @@
     "grunt-contrib-jshint": "~0.6.3",
     "grunt-es6-module-transpiler": "~0.6.0",
     "grunt-ember-defeatureify": "~0.1.0",
+    "grunt-preprocess": "~4.0.0",
     "testem": "~0.6.15"
   }
 }

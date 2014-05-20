@@ -15,5 +15,9 @@ Ember.onLoad('Ember.Application', function(Application) {
   initializers.forEach(Application.initializer, Application);
 });
 
+if (Ember.libraries) {
+  Ember.libraries.register('Model Fragments', '/* @echo version */');
+}
+
 // Something must be exported...
 export default DS;
