@@ -56,6 +56,23 @@ Model.reopen({
     }
   }),
 
+  changedAttributes: function() {
+    var diffData = this._super();
+    var fragment;
+
+    for (var key in this._fragments) {
+      fragment = this._fragments[key];
+
+      // An actual diff of the fragment or fragment array is outside the scope
+      // of this method, so just indicate that there is a change instead
+      if (get(fragment, 'isDirty')) {
+        diffData[key] = true;
+      }
+    }
+
+    return diffData;
+  },
+
   rollback: function() {
     this._super();
 

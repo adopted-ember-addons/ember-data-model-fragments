@@ -21,6 +21,7 @@ var protoProps = [
   'isNew',
   'isValid',
   'serialize',
+  'changedAttributes',
   'eachAttribute',
   'fragmentDidDirty',
   'fragmentDidReset',

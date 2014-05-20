@@ -77,7 +77,7 @@ test("fragments are compared by reference", function() {
   ok(fragment1.compare(fragment1, fragment1) === 0, "identical objects are the same");
 });
 
-test("fragments are included in the owner record's `changedAttributes`", function() {
+test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {
   store.push(Person, {
     id: 1,
     name: {
@@ -91,10 +91,7 @@ test("fragments are included in the owner record's `changedAttributes`", functio
 
     name.set('last', 'Baratheon');
 
-    var recordAttribtues = person.changedAttributes();
-    var fragmentAttribtues = name.changedAttributes();
-
-    deepEqual(recordAttribtues.name, fragmentAttribtues, "changed attributes are included in the owner record");
+    equal(person.changedAttributes().name, true, "changed fragments are indicated in the diff object");
   }));
 });
 
