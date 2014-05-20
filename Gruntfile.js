@@ -18,4 +18,9 @@ module.exports = function(grunt) {
     'emberDefeatureify:stripDebug',
     'uglify:dist',
   ]);
+
+  grunt.registerTask('default', "Build and watch", [
+    'build',
+    'watch'
+  ]);
 };
