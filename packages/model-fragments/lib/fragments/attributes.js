@@ -36,7 +36,7 @@ function hasOneFragment (type, options) {
     }
 
     if (arguments.length > 1) {
-      Ember.assert("You can only assign a '" + type + "' fragment to this property", value instanceof this.store.modelFor(type));
+      Ember.assert("You can only assign a '" + type + "' fragment to this property", value === null || value instanceof this.store.modelFor(type));
 
       fragment = value;
 
