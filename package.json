@@ -6,7 +6,8 @@
     "url": "https://github.com/slindberg/ember-data.model-fragments.git"
   },
   "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install"
+    "postinstall": "./node_modules/bower/bin/bower install",
+    "test": "grunt build && ./node_modules/testem/testem.js ci"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -19,6 +20,7 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-jshint": "~0.6.3",
     "grunt-es6-module-transpiler": "~0.6.0",
-    "grunt-ember-defeatureify": "~0.1.0"
+    "grunt-ember-defeatureify": "~0.1.0",
+    "testem": "~0.6.15"
   }
 }
