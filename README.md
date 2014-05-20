@@ -1,4 +1,4 @@
-## Ember Data: Model Fragments
+# Ember Data: Model Fragments [![Build Status](https://travis-ci.org/lytics/ember-data.model-fragments.svg)](https://travis-ci.org/lytics/ember-data.model-fragments)
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
