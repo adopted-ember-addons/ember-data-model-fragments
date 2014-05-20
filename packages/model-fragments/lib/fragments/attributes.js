@@ -17,7 +17,7 @@ function hasOneFragment (type, options) {
   };
 
   return Ember.computed(function(key, value) {
-    var data = this._data[key] || getDefaultValue(this, options, 'array');
+    var data = this._data[key] || getDefaultValue(this, options, 'object');
     var fragment = this._fragments[key];
 
     if (data && data !== fragment) {
