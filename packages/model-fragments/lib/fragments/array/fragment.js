@@ -40,9 +40,16 @@ var FragmentArray = PrimitiveArray.extend({
     this._super(data);
   },
 
+  adapterDidCommit: function() {
+    this._super();
+
+    // Notify all records of commit
+    this.invoke('adapterDidCommit');
+  },
+
   isDirty: function() {
     return this._super() || this.isAny('isDirty');
-  }.property('@each.isDirty'),
+  }.property('@each.isDirty', '_originalState'),
 
   rollback: function() {
     this._super();

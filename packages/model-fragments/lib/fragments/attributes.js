@@ -32,6 +32,9 @@ function hasOneFragment (type, options) {
       fragment || (fragment = setOwner(this.store.buildFragment(type)));
       fragment.setupData(data);
       this._data[key] = fragment;
+    } else {
+      // Handle the adapter setting the fragment to null
+      fragment = data;
     }
 
     if (arguments.length > 1) {
@@ -89,6 +92,9 @@ function hasManyFragments(type, options) {
       fragments || (fragments = createArray());
       fragments.setupData(data);
       this._data[key] = fragments;
+    } else {
+      // Handle the adapter setting the fragment array to null
+      fragments = data;
     }
 
     if (arguments.length > 1) {

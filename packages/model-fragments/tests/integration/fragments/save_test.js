@@ -115,24 +115,28 @@ test("persisting the owner record when a fragment is dirty moves owner record, f
 });
 
 test("persisting a new owner record moves the owner record, fragment array, and all fragments into clean state", function() {
+  var payload = {
+    id: 3,
+    name: {
+      first: "Daenerys",
+      last: "Targaryen"
+    },
+    addresses: [
+      store.createFragment('address', {
+        street: "1 Stone Drum",
+        city: "Dragonstone",
+        region: "Crownlands",
+        country: "Westeros"
+      })
+    ]
+  };
+
   var person = store.createRecord('person');
-
-  person.set('name', store.createFragment('name', {
-    first: "Daenerys",
-    last: "Targaryen"
-  }));
-
-  person.set('addresses', [
-    store.createFragment('address', {
-      street: "1 Stone Drum",
-      city: "Dragonstone",
-      region: "Crownlands",
-      country: "Westeros"
-    })
-  ]);
+  person.set('name', store.createFragment('name', payload.name));
+  person.set('addresses', payload.addresses);
 
   env.adapter.createRecord = function(store, type, record) {
-    return Ember.RSVP.resolve({ id: 3 });
+    return Ember.RSVP.resolve(payload);
   };
 
   person.save().then(async(function(person) {

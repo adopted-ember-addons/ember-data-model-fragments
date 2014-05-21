@@ -1,5 +1,7 @@
 import Ember from 'ember';
+
 var get = Ember.get;
+var set = Ember.set;
 var splice = Array.prototype.splice;
 
 //
@@ -13,7 +15,7 @@ var PrimitiveArray = Ember.ArrayProxy.extend({
 
   init: function() {
     this._super();
-    this.originalState = [];
+    set(this, '_originalState', []);
   },
 
   content: function() {
@@ -24,18 +26,24 @@ var PrimitiveArray = Ember.ArrayProxy.extend({
   setupData: function(data) {
     var content = get(this, 'content');
 
-    data = this.originalState = Ember.makeArray(data);
+    data = Ember.makeArray(data);
+    set(this, '_originalState', data);
 
     // Use non-KVO mutator to prevent parent record from dirtying
     splice.apply(content, [ 0, content.length ].concat(data));
   },
 
+  adapterDidCommit: function() {
+    // Fragment array has been persisted; use the current state as the original state
+    set(this, '_originalState', this.toArray());
+  },
+
   isDirty: function() {
-    return Ember.compare(this.toArray(), this.originalState) !== 0;
-  }.property('[]'),
+    return Ember.compare(this.toArray(), get(this, '_originalState')) !== 0;
+  }.property('[]', '_originalState'),
 
   rollback: function() {
-    this.setObjects(this.originalState);
+    this.setObjects(get(this, '_originalState'));
   },
 
   serialize: function() {

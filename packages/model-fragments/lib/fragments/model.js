@@ -60,6 +60,16 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
     return this.store.createFragment(type, data);
   },
 
+  adapterDidCommit: function() {
+    // Merge in-flight attributes if any
+    if (Ember.keys(this._inFlightAttributes).length) {
+      Ember.mixin(this._data, this._inFlightAttributes);
+      this._inFlightAttributes = {};
+    }
+
+    this.transitionTo('saved');
+  },
+
   toStringExtension: function() {
     return 'owner(' + get(this, '_owner.id') + ')';
   },

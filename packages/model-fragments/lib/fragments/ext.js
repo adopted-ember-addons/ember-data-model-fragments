@@ -49,12 +49,21 @@ Model.reopen({
 
       // The data may have updated, but not changed at all, in which case
       // treat the update as a rollback
-      if (fragment && fragment !== record._data[key]) {
+      if (fragment && record._data[key] && fragment !== record._data[key]) {
         fragment.setupData(record._data[key]);
         record._data[key] = fragment;
       }
     }
   }),
+
+  adapterDidCommit: function(data) {
+    this._super.apply(this, arguments);
+
+    // Notify fragments that the record was committed
+    for (var key in this._fragments) {
+      this._fragments[key].adapterDidCommit();
+    }
+  },
 
   changedAttributes: function() {
     var diffData = this._super();
