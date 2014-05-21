@@ -191,6 +191,42 @@ test("rolling back a `DS.hasOneFragment` fragment when the owner record is dirty
   }));
 });
 
+test("a `DS.hasOneFragment` fragment property that is set to null can be rolled back", function() {
+  pushPerson(1);
+
+  store.find(Person, 1).then(async(function(person) {
+    var name = person.get('name');
+
+    person.set('name', null);
+
+    ok(person.get('isDirty'), "owner record is dirty");
+
+    person.rollback();
+
+    equal(person.get('name'), name, "property is restored");
+    ok(!name.get('isDirty'), "fragment is clean");
+    ok(!person.get('isDirty'), "owner record is clean");
+  }));
+});
+
+test("a `DS.hasOneFragment` fragment property that is null can be rolled back", function() {
+  store.push(Person, { id: 1, });
+
+  store.find(Person, 1).then(async(function(person) {
+    var name = person.get('name');
+
+    equal(name, null, "property is null");
+
+    person.set('name', store.createFragment('name', { first: 'Rob', last: 'Stark' }));
+
+    ok(person.get('isDirty'), "owner record is dirty");
+
+    person.rollback();
+
+    equal(person.get('name'), null, "property is null again");
+    ok(!person.get('isDirty'), "owner record is clean");
+  }));
+});
 
 test("adding a fragment to a fragment array dirties the fragment array and owner record", function() {
   pushPerson(1);
@@ -451,5 +487,49 @@ test("rolling back a `DS.hasManyFragments` fragment when the owner record is dir
     ok(!address.get('isDirty'), "fragment is clean");
     ok(!addresses.get('isDirty'), "fragment array is clean");
     ok(person.get('isDirty'), "owner record is still dirty");
+  }));
+});
+
+test("a `DS.hasManyFragments` fragment property that is set to null can be rolled back", function() {
+  pushPerson(1);
+
+  store.find(Person, 1).then(async(function(person) {
+    var addresses = person.get('addresses');
+
+    person.set('addresses', null);
+
+    ok(person.get('isDirty'), "owner record is dirty");
+
+    person.rollback();
+
+    equal(person.get('addresses'), addresses, "property is restored");
+    ok(!addresses.get('isDirty'), "fragment array is clean");
+    ok(!person.get('isDirty'), "owner record is clean");
+  }));
+});
+
+test("a `DS.hasManyFragments` fragment property that is null can be rolled back", function() {
+  store.push(Person, { id: 1, });
+
+  store.find(Person, 1).then(async(function(person) {
+    var addresses = person.get('addresses');
+
+    equal(addresses, null, "property is null");
+
+    person.set('addresses', [
+      store.createFragment('address', {
+        street: "1 Spear Tower",
+        city: "Sun Spear",
+        region: "Dorne",
+        country: "Westeros"
+      })
+    ]);
+
+    ok(person.get('isDirty'), "owner record is dirty");
+
+    person.rollback();
+
+    equal(person.get('addresses'), null, "property is null again");
+    ok(!person.get('isDirty'), "owner record is clean");
   }));
 });

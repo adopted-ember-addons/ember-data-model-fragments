@@ -94,7 +94,7 @@ Model.reopen({
 
     for (var key in this._fragments) {
       fragment = this._fragments[key] = this._data[key];
-      fragment.rollback();
+      fragment && fragment.rollback();
     }
   },
 
