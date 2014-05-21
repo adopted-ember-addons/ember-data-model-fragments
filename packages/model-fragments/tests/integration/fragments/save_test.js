@@ -150,6 +150,23 @@ test("persisting a new owner record moves the owner record, fragment array, and 
   }));
 });
 
+test("a new record can be persisted with null fragments", function() {
+  var person = store.createRecord('person');
+
+  equal(person.get('name'), null, "`DS.hasOneFragment` property is null");
+  equal(person.get('addresses'), null, "`DS.hasManyFragments` property is null");
+
+  env.adapter.createRecord = function(store, type, record) {
+    return Ember.RSVP.resolve({ id: 1 });
+  };
+
+  person.save().then(async(function(person) {
+    equal(person.get('name'), null, "`DS.hasOneFragment` property is still null");
+    equal(person.get('addresses'), null, "`DS.hasManyFragments` property is still null");
+    ok(!person.get('isDirty'), "owner record is clean");
+  }));
+});
+
 test("the adapter can update fragments on save", function() {
   var data = {
     id: 1,

@@ -59,9 +59,12 @@ Model.reopen({
   adapterDidCommit: function(data) {
     this._super.apply(this, arguments);
 
+    var fragment;
+
     // Notify fragments that the record was committed
     for (var key in this._fragments) {
-      this._fragments[key].adapterDidCommit();
+      fragment = this._fragments[key];
+      fragment && fragment.adapterDidCommit();
     }
   },
 

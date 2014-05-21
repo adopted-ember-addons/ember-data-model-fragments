@@ -67,6 +67,14 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
       this._inFlightAttributes = {};
     }
 
+    var fragment;
+
+    // Notify fragments that the owner record was committed
+    for (var key in this._fragments) {
+      fragment = this._fragments[key];
+      fragment && fragment.adapterDidCommit();
+    }
+
     this.transitionTo('saved');
   },
 
