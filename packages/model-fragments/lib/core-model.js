@@ -1,6 +1,10 @@
 import Ember from 'ember';
 import Model from './model';
 
+/**
+  @module ember-data.model-fragments
+*/
+
 // Ember object prototypes are lazy-loaded
 Model.proto();
 
@@ -41,7 +45,12 @@ var classProps = [
   return props;
 }, {});
 
-// CoreModel is a base model class that has state management, but no relation or persistence logic
+/**
+  CoreModel is a base model class that has state management, but no relation or
+  persistence logic.
+
+  @class CoreModel
+*/
 var CoreModel = Ember.Object.extend(protoProps, {
   eachRelationship: Ember.K,
   updateRecordArraysLater: Ember.K

@@ -1,12 +1,26 @@
 import Store from '../store';
 import Model from '../model';
 
+/**
+  @module ember-data.model-fragments
+*/
+
 var get = Ember.get;
 
-// Add fragment creation methods to the store
+/**
+  @class Store
+  @namespace DS
+*/
 Store.reopen({
-  // Create a fragment with injections applied that starts
-  // in the 'empty' state
+  /**
+    Build a new fragment of the given type with injections
+    applied that starts in the 'empty' state.
+
+    @method buildFragment
+    @private
+    @param {subclass of DS.ModelFragment} type
+    @return {DS.ModelFragment} fragment
+  */
   buildFragment: function(type) {
     type = this.modelFor(type);
 
@@ -20,7 +34,26 @@ Store.reopen({
     });
   },
 
-  // Create a fragment that starts in the 'created' state
+  /**
+    Create a new fragment that does not yet have an owner record.
+    The properties passed to this method are set on the newly created
+    fragment.
+
+    To create a new instance of the `name` fragment:
+
+    ```js
+    store.createFragment('name', {
+      first: "Alex",
+      last: "Routé"
+    });
+    ```
+
+    @method createRecord
+    @param {String} type
+    @param {Object} properties a hash of properties to set on the
+      newly created fragment.
+    @return {DS.ModelFragment} fragment
+  */
   createFragment: function(type, props) {
     var fragment = this.buildFragment(type);
 
@@ -34,18 +67,25 @@ Store.reopen({
   }
 });
 
-// Add fragment support to `DS.Model`
-// TODO: handle the case where there's no response to a commit, and
-// in-flight attributes just get merged
+/**
+  @class Model
+  @namespace DS
+  */
 Model.reopen({
   _setup: function() {
     this._super();
     this._fragments = {};
   },
 
-  // Update all fragment data before the owner's observes fire to ensure that
-  // fragment observers aren't working with stale data (this works because the
-  // owner's `_data` hash has already changed by this time)
+  /**
+    This method updates all fragment data _before_ the owner's observes fire
+    to ensure that fragment observers aren't working with stale data (this works
+    because the owner's `_data` hash has already changed by this time)
+
+    @method updateFragmentData
+    @private
+    @param {DS.Model} record
+  */
   updateFragmentData: Ember.beforeObserver('data', function(record) {
     var fragment;
 
@@ -61,6 +101,13 @@ Model.reopen({
     }
   }),
 
+  /**
+    If the adapter did not return a hash in response to a commit,
+    merge the changed attributes and relationships into the existing
+    saved data and notify all fragments of the commit.
+
+    @method adapterDidCommit
+  */
   adapterDidCommit: function(data) {
     this._super.apply(this, arguments);
 
@@ -73,6 +120,35 @@ Model.reopen({
     }
   },
 
+  /**
+    Returns an object, whose keys are changed properties, and value is
+    an [oldProp, newProp] array. When the model has fragments that have
+    changed, the property value is simply `true`.
+
+    Example
+
+    ```javascript
+    App.Mascot = DS.Model.extend({
+      type: DS.attr('string'),
+      name: DS.hasOneFragment('name')
+    });
+
+    App.Name = DS.Model.extend({
+      first : DS.attr('string'),
+      last  : DS.attr('string')
+    });
+
+    var person = store.createRecord('person');
+    person.changedAttributes(); // {}
+    person.get('name').set('first', 'Tomster');
+    person.set('type', 'Hamster');
+    person.changedAttributes(); // { name: true, type: [undefined, 'Hamster'] }
+    ```
+
+    @method changedAttributes
+    @return {Object} an object, whose keys are changed properties,
+      and value is an [oldProp, newProp] array.
+  */
   changedAttributes: function() {
     var diffData = this._super();
 
@@ -87,6 +163,22 @@ Model.reopen({
     return diffData;
   },
 
+  /**
+    If the model `isDirty` this function will discard any unsaved
+    changes, recursively doing the same for all fragment properties.
+
+    Example
+
+    ```javascript
+    record.get('name'); // 'Untitled Document'
+    record.set('name', 'Doc 1');
+    record.get('name'); // 'Doc 1'
+    record.rollback();
+    record.get('name'); // 'Untitled Document'
+    ```
+
+    @method rollback
+  */
   rollback: function() {
     this._super();
 
@@ -94,6 +186,10 @@ Model.reopen({
     this.rollbackFragments();
   },
 
+  /**
+    @method rollbackFragments
+    @private
+    */
   rollbackFragments: function() {
     var fragment;
 
@@ -103,7 +199,10 @@ Model.reopen({
     }
   },
 
-  // A fragment property became dirty
+  /**
+    @method fragmentDidDirty
+    @private
+  */
   fragmentDidDirty: function(key, fragment) {
     if (!get(this, 'isDeleted')) {
       // Add the fragment as a placeholder in the owner record's
@@ -114,7 +213,10 @@ Model.reopen({
     }
   },
 
-  // A fragment property became clean
+  /**
+    @method fragmentDidReset
+    @private
+    */
   fragmentDidReset: function(key, fragment) {
     // Make sure there's no entry in the owner record's
     // `_attributes` hash to indicate the fragment is dirty
