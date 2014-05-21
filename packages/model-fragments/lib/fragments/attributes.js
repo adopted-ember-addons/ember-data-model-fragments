@@ -17,20 +17,19 @@ function hasOneFragment (type, options) {
   };
 
   return Ember.computed(function(key, value) {
+    var record = this;
     var data = this._data[key] || getDefaultValue(this, options, 'object');
     var fragment = this._fragments[key];
 
+    function setOwner(fragment) {
+      return fragment.setProperties({
+        _owner : record,
+        _name  : key
+      });
+    }
+
     if (data && data !== fragment) {
-      if (!fragment) {
-        fragment = this.store.buildFragment(type);
-
-        // Set the correct owner/name on the fragment
-        fragment.setProperties({
-          _owner : this,
-          _name  : key
-        });
-      }
-
+      fragment || (fragment = setOwner(this.store.buildFragment(type)));
       fragment.setupData(data);
       this._data[key] = fragment;
     }
@@ -38,7 +37,7 @@ function hasOneFragment (type, options) {
     if (arguments.length > 1) {
       Ember.assert("You can only assign a '" + type + "' fragment to this property", value === null || value instanceof this.store.modelFor(type));
 
-      fragment = value;
+      fragment = value ? setOwner(value) : null;
 
       if (this._data[key] !== fragment) {
         this.fragmentDidDirty(key, fragment);
