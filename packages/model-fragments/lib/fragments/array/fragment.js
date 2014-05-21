@@ -90,11 +90,11 @@ var FragmentArray = PrimitiveArray.extend({
   },
 
   addFragment: function(fragment) {
-    return get(this, 'content').addObject(fragment);
+    return this.addObject(fragment);
   },
 
   removeFragment: function(fragment) {
-    return get(this, 'content').removeObject(fragment);
+    return this.removeObject(fragment);
   },
 
   createFragment: function(props) {
