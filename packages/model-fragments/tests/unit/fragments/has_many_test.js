@@ -1,4 +1,4 @@
-var store, Person, Address;
+var store, Person, Address, people;
 var all = Ember.RSVP.all;
 
 module("unit/fragments - DS.hasManyFragments", {
@@ -19,52 +19,53 @@ module("unit/fragments - DS.hasManyFragments", {
     store = createStore({
       address: Address
     });
+
+    people = [
+      {
+        id: 1,
+        name: "Tyrion Lannister",
+        addresses: [
+          {
+            street: "1 Sky Cell",
+            city: "Eyre",
+            region: "Vale of Arryn",
+            country: "Westeros"
+          },
+          {
+            street: "1 Tower of the Hand",
+            city: "King's Landing",
+            region: "Crownlands",
+            country: "Westeros"
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Eddard Stark",
+        addresses: [
+          {
+            street: "1 Great Keep",
+            city: "Winterfell",
+            region: "North",
+            country: "Westeros"
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "Jojen Reed",
+        addresses: null
+      }
+    ];
   },
 
   teardown: function() {
     store = null;
     Person = null;
     Address = null;
+    people = null;
   }
 });
-
-var people = [
-  {
-    id: 1,
-    name: "Tyrion Lannister",
-    addresses: [
-      {
-        street: "1 Sky Cell",
-        city: "Eyre",
-        region: "Vale of Arryn",
-        country: "Westeros"
-      },
-      {
-        street: "1 Tower of the Hand",
-        city: "King's Landing",
-        region: "Crownlands",
-        country: "Westeros"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Eddard Stark",
-    addresses: [
-      {
-        street: "1 Great Keep",
-        city: "Winterfell",
-        region: "North",
-        country: "Westeros"
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Jojen Reed",
-    addresses: null
-  }
-];
 
 function pushPerson(id) {
   store.push(Person, Ember.copy(Ember.A(people).findBy('id', id), true));

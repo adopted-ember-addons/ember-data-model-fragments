@@ -1,4 +1,4 @@
-var store, Person, Name, Address;
+var store, Person, Name, Address, people;
 
 module("integration/fragments - Dependent State", {
   setup: function() {
@@ -24,6 +24,30 @@ module("integration/fragments - Dependent State", {
       address: Address,
       name: Name
     });
+
+    people = [
+      {
+        id: 1,
+        name: {
+          first: "Tyrion",
+          last: "Lannister"
+        },
+        addresses: [
+          {
+            street: "1 Sky Cell",
+            city: "Eyre",
+            region: "Vale of Arryn",
+            country: "Westeros"
+          },
+          {
+            street: "1 Tower of the Hand",
+            city: "King's Landing",
+            region: "Crownlands",
+            country: "Westeros"
+          }
+        ]
+      }
+    ];
   },
 
   teardown: function() {
@@ -31,60 +55,13 @@ module("integration/fragments - Dependent State", {
     Person = null;
     Address = null;
     Name = null;
+    people = null;
   }
 });
-
-var people = [
-  {
-    id: 1,
-    name: {
-      first: "Tyrion",
-      last: "Lannister"
-    },
-    addresses: [
-      {
-        street: "1 Sky Cell",
-        city: "Eyre",
-        region: "Vale of Arryn",
-        country: "Westeros"
-      },
-      {
-        street: "1 Tower of the Hand",
-        city: "King's Landing",
-        region: "Crownlands",
-        country: "Westeros"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: {
-      first: "Eddard",
-      last: "Stark"
-    },
-    addresses: [
-      {
-        street: "1 Great Keep",
-        city: "Winterfell",
-        region: "North",
-        country: "Westeros"
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: {
-      first: "Jojen",
-      last: "Reed"
-    },
-    addresses: null
-  }
-];
 
 function pushPerson(id) {
   store.push(Person, Ember.copy(Ember.A(people).findBy('id', id), true));
 }
-
 
 test("changing a `DS.hasOneFragment` fragment property dirties the fragment and owner record", function() {
   store.push(Person, {
