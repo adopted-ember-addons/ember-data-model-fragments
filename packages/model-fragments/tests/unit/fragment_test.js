@@ -95,6 +95,22 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
   }));
 });
 
+test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function() {
+  store.push(Person, {
+    id: 1,
+    name: {
+      first: "Rob",
+      last: "Stark"
+    }
+  });
+
+  store.find(Person, 1).then(async(function(person) {
+    person.set('name', null);
+
+    equal(person.changedAttributes().name, true, "null fragments are indicated in the diff object");
+  }));
+});
+
 test("changes to attributes can be rolled back", function() {
   store.push(Person, {
     id: 1,

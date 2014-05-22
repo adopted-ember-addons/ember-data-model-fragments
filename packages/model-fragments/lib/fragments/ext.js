@@ -70,17 +70,14 @@ Model.reopen({
 
   changedAttributes: function() {
     var diffData = this._super();
-    var fragment;
 
-    for (var key in this._fragments) {
-      fragment = this._fragments[key];
-
+    Ember.keys(this._fragments).forEach(function(name) {
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
-      if (get(fragment, 'isDirty')) {
-        diffData[key] = true;
+      if (name in this._attributes) {
+        diffData[name] = true;
       }
-    }
+    }, this);
 
     return diffData;
   },
