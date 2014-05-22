@@ -20,6 +20,10 @@ module.exports = function(grunt) {
     'uglify:dist',
   ]);
 
+  grunt.registerTask('docs', "Build documentation to the docs/ directory", [
+    'yuidoc'
+  ]);
+
   grunt.registerTask('default', "Build and watch", [
     'build',
     'watch'

@@ -2,16 +2,102 @@ import Ember from 'ember';
 import CoreModel from '../core-model';
 import FragmentRootState from './states';
 
+/**
+  @module ember-data.model-fragments
+*/
+
 var get = Ember.get;
 
+/**
+  The class that all nested object structures, or 'fragments', descend from.
+  Fragments are bound to a single 'owner' record (an instance of `DS.Model`)
+  and cannot change owners once set. They behave like models, but they have
+  no `save` method since their persistence is managed entirely through their
+  owner. Because of this, a fragment's state directly influences its owner's
+  state, e.g. when a record's fragment `isDirty`, its owner `isDirty`.
+
+  Example:
+
+  ```javascript
+  App.Person = DS.Model.extend({
+    name: DS.hasOneFragment('name')
+  });
+
+  App.Name = DS.ModelFragment.extend({
+    first  : DS.attr('string'),
+    last   : DS.attr('string')
+  });
+  ```
+
+  With JSON response:
+
+  ```json
+  {
+    "id": "1",
+    "name": {
+      "first": "Robert",
+      "last": "Jackson"
+    }
+  }
+  ```
+
+  ```javascript
+  var person = store.getbyid('person', '1');
+  var name = person.get('name');
+
+  person.get('isDirty'); // false
+  name.get('isDirty'); // false
+  name.get('first'); // 'Robert'
+
+  name.set('first', 'The Animal');
+  name.get('isDirty'); // true
+  person.get('isDirty'); // true
+
+  person.rollback();
+  name.get('first'); // 'Robert'
+  person.get('isDirty'); // false
+  person.get('isDirty'); // false
+  ```
+
+  @class ModelFragment
+  @namespace DS
+  @extends CoreModel
+  @uses Ember.Comparable
+  @uses Ember.Copyable
+*/
 var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
+  /**
+    The fragment's property name on the owner record.
+
+    @property _name
+    @private
+    @type {String}
+  */
   _name: null,
 
+  /**
+    A reference to the fragment's owner record.
+
+    @property _owner
+    @private
+    @type {DS.Model}
+  */
   _owner: null,
 
+  /**
+    A reference to a state object descriptor indicating fragment's current state.
+
+    @property currentState
+    @private
+    @type {Object}
+  */
   currentState: FragmentRootState.empty,
 
-  // Initialize/merge data
+  /**
+    @method setupData
+    @private
+    @param {Object} data
+  */
   setupData: function(data) {
     var store = get(this, 'store');
     var key = get(this, 'name');
@@ -24,42 +110,78 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
     // TODO: do normalization in the transform, not on the fly
     this._data = serializer.normalize(type, data, key);
 
+    // Initiate state change
     this.send('pushedData');
 
+    // Notify attribute properties/observers of internal change to `_data`
     this.notifyPropertyChange('data');
   },
 
-  // Rollback the fragment
+  /**
+    Like `DS.Model#rollback`, if the fragment `isDirty` this function will
+    discard any unsaved changes, recursively doing the same for all fragment
+    properties.
+
+    Example
+
+    ```javascript
+    fragment.get('type'); // 'Human'
+    fragment.set('type', 'Hamster');
+    fragment.get('type'); // 'Hamster'
+    fragment.rollback();
+    fragment.get('type'); // 'Human'
+    ```
+
+    @method rollback
+  */
   rollback: function() {
     this._attributes = {};
 
+    // Rollback fragments from the bottom up
     this.rollbackFragments();
 
+    // Initiate state change
     this.send('rolledBack');
 
+    // Notify attribute properties/observers of internal change to `_data`
     this.notifyPropertyChange('data');
   },
 
-  // Basic identity comparison to allow `FragmentArray` to diff arrays
+  /**
+    Compare two fragments by identity to allow `FragmentArray` to diff arrays.
+
+    @method compare
+    @param a {DS.ModelFragment} the first fragment to compare
+    @param b {DS.ModelFragment} the second fragment to compare
+    @return {Integer} the result of the comparison
+  */
   compare: function(f1, f2) {
     return f1 === f2 ? 0 : 1;
   },
 
-  // Copying a fragment has special semantics: a new fragment is created
-  // in the `loaded.created` state, without the same owner set, so that it
-  // can be added to another record safely
-  // TODO: handle copying sub-fragments
+  /**
+    Create a new fragment that is a copy of the current fragment. Copied
+    fragments do not have the same owner record set, so they may be added
+    to other records safely.
+
+    @method copy
+    @return {DS.ModelFragment} the newly created fragment
+  */
   copy: function() {
     var store = get(this, 'store');
     var type = store.modelFor(this.constructor);
     var data = {};
 
+    // TODO: handle copying sub-fragments
     Ember.merge(data, this._data);
     Ember.merge(data, this._attributes);
 
     return this.store.createFragment(type, data);
   },
 
+  /**
+    @method adapterDidCommit
+  */
   adapterDidCommit: function() {
     // Merge in-flight attributes if any
     if (Ember.keys(this._inFlightAttributes).length) {
@@ -75,6 +197,7 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
       fragment && fragment.adapterDidCommit();
     }
 
+    // Transition directly to a clean state
     this.transitionTo('saved');
   },
 

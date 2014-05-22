@@ -1,13 +1,20 @@
 import Transform from '../transform';
 
-//
-// Fragment Transform
-//
+/**
+  @module ember-data.model-fragments
+*/
 
-// Delegate to the specific serializer for the fragment
+/**
+  Transform for all fragment attributes which delegates work to
+  fragment serializers.
+
+  @class FragmentTransform
+  @namespace DS
+  @extends DS.Transform
+*/
 var FragmentTransform = Transform.extend({
   deserialize: function(data) {
-    // TODO: figure out how to get a handle to the fragment here
+    // TODO: figure out how to get a handle to the fragment type here
     // without having to patch `DS.JSONSerializer#applyTransforms`
     return data;
   },

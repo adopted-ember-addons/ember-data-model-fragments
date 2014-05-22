@@ -1,11 +1,11 @@
 import Ember from 'ember';
 import RootState from '../states';
 
-var get = Ember.get;
+/**
+  @module ember-data.model-fragments
+*/
 
-//
-// Fragment State Machine
-//
+var get = Ember.get;
 
 var didSetProperty = RootState.loaded.saved.didSetProperty;
 var propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
@@ -20,7 +20,31 @@ var dirtySetup = function(fragment) {
   }
 };
 
+/**
+  Like `DS.Model` instances, all fragments have a `currentState` property
+  that reflects where they are in the model lifecycle. However, there are much
+  fewer states that a fragment can be in, since the `loading` state doesn't
+  apply, `inFlight` states are no different than the owner record's, and there
+  is no concept of a `deleted` state.
+
+  This is the simplified hierarchy of valid states for a fragment:
+
+  ```text
+  * root
+    * empty
+    * loaded
+      * created
+      * saved
+      * updated
+  ```
+
+  Note that there are no `uncommitted` sub-states because it's implied by the
+  `created` and `updated` states (since there are no `inFlight` substates).
+
+  @class FragmentRootState
+*/
 var FragmentRootState = {
+  // Include all `DS.Model` state booleans for consistency
   isEmpty: false,
   isLoading: false,
   isLoaded: false,

@@ -6,6 +6,13 @@ import FragmentTransform from './fragments/transform';
 import { hasOneFragment, hasManyFragments, fragmentOwner } from './fragments/attributes';
 import initializers from './initializers';
 
+/**
+  Ember Data Model Fragments
+
+  @module ember-data.model-fragments
+  @main ember-data.model-fragments
+*/
+
 DS.ModelFragment = ModelFragment;
 DS.FragmentArray = FragmentArray;
 DS.FragmentTransform = FragmentTransform;
