@@ -1,6 +1,6 @@
 {
   "name": "ember-data.model-fragments",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "main": "dist/ember-data.model-fragments.js",
   "ignore": [
