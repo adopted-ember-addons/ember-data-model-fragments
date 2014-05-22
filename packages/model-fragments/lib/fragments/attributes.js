@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import PrimitiveArray from './array/primitive';
+import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
 
 var get = Ember.get;
@@ -78,7 +78,7 @@ function hasManyFragments(type, options) {
     var fragments = this._fragments[key] || null;
 
     function createArray() {
-      var arrayClass = type ? FragmentArray : PrimitiveArray;
+      var arrayClass = type ? FragmentArray : StatefulArray;
 
       return arrayClass.create({
         type  : type,

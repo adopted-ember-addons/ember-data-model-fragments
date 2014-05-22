@@ -5,10 +5,10 @@ var set = Ember.set;
 var splice = Array.prototype.splice;
 
 //
-// Primitive Arrays
+// State-aware Arrays
 //
 
-var PrimitiveArray = Ember.ArrayProxy.extend({
+var StatefulArray = Ember.ArrayProxy.extend({
   owner: null,
 
   name: null,
@@ -69,4 +69,4 @@ var PrimitiveArray = Ember.ArrayProxy.extend({
   }
 });
 
-export default PrimitiveArray;
+export default StatefulArray;

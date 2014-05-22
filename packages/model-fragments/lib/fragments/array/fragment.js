@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import PrimitiveArray from './primitive';
+import StatefulArray from './stateful';
 
 var get = Ember.get;
 var map = Ember.EnumerableUtils.map;
@@ -8,7 +8,7 @@ var map = Ember.EnumerableUtils.map;
 // Fragment Arrays
 //
 
-var FragmentArray = PrimitiveArray.extend({
+var FragmentArray = StatefulArray.extend({
   type: null,
 
   // Initialize/merge fragments with data array
