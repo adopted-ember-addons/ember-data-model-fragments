@@ -10,6 +10,11 @@ Store.reopen({
   buildFragment: function(type) {
     type = this.modelFor(type);
 
+    // TODO: ModelFragment should be able to be referenced by an import here,
+    // but because CoreModel depends on the changes to DS.Model in this file,
+    // it would create a circular reference
+    Ember.assert("The '" + type + "' model must be a subclass of DS.ModelFragment", DS.ModelFragment.detect(type));
+
     return type.create({
       store: this
     });
@@ -124,4 +129,4 @@ Model.reopen({
   }
 });
 
-export default Model;
+export { Store, Model };

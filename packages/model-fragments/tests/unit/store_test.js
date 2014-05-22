@@ -12,7 +12,8 @@ module("unit/fragments - DS.Store", {
     });
 
     store = createStore({
-      name: Name,
+      person: Person,
+      name: Name
     });
   },
 
