@@ -82,7 +82,7 @@ test("setting fragments from other records throws an error", function() {
     store.find(Person, 2)
   ]).then(async(function(people) {
     throws(function() {
-      person[1].set('name', person[0].get('name'));
+      people[1].set('name', people[0].get('name'));
     }, "error is thrown when setting to a fragment of another record");
   }));
 });

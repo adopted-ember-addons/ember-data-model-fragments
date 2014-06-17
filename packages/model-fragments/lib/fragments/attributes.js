@@ -57,6 +57,7 @@ function hasOneFragment (type, options) {
     var fragment = this._fragments[key];
 
     function setOwner(fragment) {
+      Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
       return fragment.setProperties({
         _owner : record,
         _name  : key
