@@ -26,6 +26,8 @@ var FragmentArray = StatefulArray.extend({
     @type {String}
   */
   type: null,
+  
+  options: null,
 
   /**
     @method setupData
@@ -35,7 +37,8 @@ var FragmentArray = StatefulArray.extend({
   setupData: function(data) {
     var record = get(this, 'owner');
     var store = get(record, 'store');
-    var type = get(this, 'type');
+    var declaredType = get(this, 'type');
+    var options = get(this, 'options');
     var key = get(this, 'name');
     var content = get(this, 'content');
 
@@ -45,7 +48,8 @@ var FragmentArray = StatefulArray.extend({
 
       // Create a new fragment from the data array if needed
       if (!fragment) {
-        fragment = store.buildFragment(type);
+        var actualType = store.getActualFragmentType(declaredType, options, data);
+        fragment = store.buildFragment(actualType);
 
         fragment.setProperties({
           _owner : record,

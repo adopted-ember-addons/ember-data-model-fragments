@@ -64,6 +64,27 @@ Store.reopen({
     fragment.send('loadedData');
 
     return fragment;
+  },
+
+  /**
+   * `DS.getActualFragmentType` returns the actual type of a fragment based on its declared type
+   * and whether it is configured to be polymorphic.
+   * 
+   * @method getActualFragmentType
+   * @param {String} declaredType the type as declared by `DS.hasOneFragment` or `DS.hasManyFragments`
+   * @param {Object} options the fragment options
+   * @param {Object} data the fragment data
+   * @return {String} the actual fragment type
+   */
+  getActualFragmentType: function(declaredType, options, data) {
+    if (!options.polymorphic || !data) {
+      return declaredType;
+    }
+    
+    var typeKey = options.typeKey || 'typeKey';
+    var actualType = data[typeKey];
+    
+    return actualType || declaredType;
   }
 });
 
