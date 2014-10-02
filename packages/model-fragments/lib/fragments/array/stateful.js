@@ -54,8 +54,8 @@ var StatefulArray = Ember.ArrayProxy.extend({
     data = Ember.makeArray(data);
     set(this, '_originalState', data);
 
-    // Use non-KVO mutator to prevent parent record from dirtying
-    splice.apply(content, [ 0, content.length ].concat(data));
+    // Completely replace the contents with the new data
+    this.replaceContent(0, get(this, 'content.length'), data);
   },
 
   /**
