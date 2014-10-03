@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.0
+ * @version   0.2.1
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -165,6 +165,11 @@ define("fragments/array/fragment",
       */
       type: null,
 
+      init: function() {
+        this._super();
+        this._isInitializing = false;
+      },
+
       /**
         @method setupData
         @private
@@ -176,6 +181,10 @@ define("fragments/array/fragment",
         var type = get(this, 'type');
         var key = get(this, 'name');
         var content = get(this, 'content');
+
+        // Mark the fragment array as initializing so that state changes are ignored
+        // until after all fragments' data is setup
+        this._isInitializing = true;
 
         // Map data to existing fragments and create new ones where necessary
         data = map(Ember.makeArray(data), function(data, i) {
@@ -196,6 +205,8 @@ define("fragments/array/fragment",
 
           return fragment;
         });
+
+        this._isInitializing = false;
 
         this._super(data);
       },
@@ -392,8 +403,8 @@ define("fragments/array/stateful",
         data = Ember.makeArray(data);
         set(this, '_originalState', data);
 
-        // Use non-KVO mutator to prevent parent record from dirtying
-        splice.apply(content, [ 0, content.length ].concat(data));
+        // Completely replace the contents with the new data
+        this.replaceContent(0, get(this, 'content.length'), data);
       },
 
       /**
@@ -540,7 +551,7 @@ define("fragments/attributes",
         var fragment = this._fragments[key];
 
         function setOwner(fragment) {
-          return fragment.setProperties({
+                    return fragment.setProperties({
             _owner : record,
             _name  : key
           });
@@ -847,8 +858,9 @@ define("fragments/ext",
 
         // Notify fragments that the record was committed
         for (var key in this._fragments) {
-          fragment = this._fragments[key];
-          fragment && fragment.adapterDidCommit();
+          if (fragment = this._fragments[key]) {
+            fragment.adapterDidCommit();
+          }
         }
       },
 
@@ -1165,8 +1177,9 @@ define("fragments/model",
 
         // Notify fragments that the owner record was committed
         for (var key in this._fragments) {
-          fragment = this._fragments[key];
-          fragment && fragment.adapterDidCommit();
+          if (fragment = this._fragments[key]) {
+            fragment.adapterDidCommit();
+          }
         }
 
         // Transition directly to a clean state
@@ -1276,7 +1289,7 @@ define("fragments/states",
             var key = get(fragment, '_name');
 
             // Abort if fragment is still initializing
-            if (!record._fragments[key]) { return; }
+            if (!record._fragments[key] || fragment._isInitializing) { return; }
 
             // Reset the property on the owner record if no other siblings
             // are dirty (or there are no siblings)
@@ -1426,7 +1439,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.0');
+      Ember.libraries.register('Model Fragments', '0.2.1');
     }
 
     // Something must be exported...
