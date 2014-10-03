@@ -85,7 +85,7 @@ var FragmentRootState = {
         var key = get(fragment, '_name');
 
         // Abort if fragment is still initializing
-        if (!record._fragments[key]) { return; }
+        if (!record._fragments[key] || fragment._isInitializing) { return; }
 
         // Reset the property on the owner record if no other siblings
         // are dirty (or there are no siblings)
