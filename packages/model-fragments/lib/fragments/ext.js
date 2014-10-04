@@ -64,7 +64,7 @@ Store.reopen({
     fragment.send('loadedData');
 
     return fragment;
-  },
+  }
 });
 
 /**
