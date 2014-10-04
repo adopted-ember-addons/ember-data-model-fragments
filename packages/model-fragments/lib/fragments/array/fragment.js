@@ -30,6 +30,11 @@ var FragmentArray = StatefulArray.extend({
   
   options: null,
 
+  init: function() {
+    this._super();
+    this._isInitializing = false;
+  },
+
   /**
     @method setupData
     @private
@@ -42,6 +47,10 @@ var FragmentArray = StatefulArray.extend({
     var options = get(this, 'options');
     var key = get(this, 'name');
     var content = get(this, 'content');
+
+    // Mark the fragment array as initializing so that state changes are ignored
+    // until after all fragments' data is setup
+    this._isInitializing = true;
 
     // Map data to existing fragments and create new ones where necessary
     data = map(Ember.makeArray(data), function(data, i) {
@@ -63,6 +72,8 @@ var FragmentArray = StatefulArray.extend({
 
       return fragment;
     });
+
+    this._isInitializing = false;
 
     this._super(data);
   },

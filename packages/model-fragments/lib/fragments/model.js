@@ -193,8 +193,9 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
 
     // Notify fragments that the owner record was committed
     for (var key in this._fragments) {
-      fragment = this._fragments[key];
-      fragment && fragment.adapterDidCommit();
+      if (fragment = this._fragments[key]) {
+        fragment.adapterDidCommit();
+      }
     }
 
     // Transition directly to a clean state

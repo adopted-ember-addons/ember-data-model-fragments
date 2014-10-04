@@ -115,8 +115,9 @@ Model.reopen({
 
     // Notify fragments that the record was committed
     for (var key in this._fragments) {
-      fragment = this._fragments[key];
-      fragment && fragment.adapterDidCommit();
+      if (fragment = this._fragments[key]) {
+        fragment.adapterDidCommit();
+      }
     }
   },
 
