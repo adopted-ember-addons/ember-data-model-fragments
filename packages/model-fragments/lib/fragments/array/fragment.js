@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import StatefulArray from './stateful';
+import { getActualFragmentType } from '../model';
 
 /**
   @module ember-data.model-fragments
@@ -48,7 +49,7 @@ var FragmentArray = StatefulArray.extend({
 
       // Create a new fragment from the data array if needed
       if (!fragment) {
-        var actualType = store.getActualFragmentType(declaredType, options, data);
+        var actualType = getActualFragmentType(declaredType, options, data);
         fragment = store.buildFragment(actualType);
 
         fragment.setProperties({

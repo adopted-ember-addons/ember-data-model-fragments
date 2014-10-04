@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
+import { getActualFragmentType } from './model';
 
 /**
   @module ember-data.model-fragments
@@ -55,7 +56,7 @@ function hasOneFragment(declaredType, options) {
     var record = this;
     var data = this._data[key] || getDefaultValue(this, options, 'object');
     var fragment = this._fragments[key];
-    var actualType = this.store.getActualFragmentType(declaredType, options, data);
+    var actualType = getActualFragmentType(declaredType, options, data);
 
     function setOwner(fragment) {
       Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
