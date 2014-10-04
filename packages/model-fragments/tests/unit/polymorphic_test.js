@@ -27,6 +27,26 @@ module("unit/fragments - polymorphism", {
       elephant: Elephant,
       lion: Lion,
     });
+    
+    store.push(Zoo, {
+      id: 1,
+      name: 'Chilly Zoo',
+      city: 'Winterfell',
+      star: {
+        $type: 'lion',
+        name: 'Mittens',
+        hasManes: 'true',
+      },
+      animals: [{
+        $type: 'lion',
+        name: 'Mittens',
+        hasManes: 'true',
+      }, {
+        $type: 'elephant',
+        name: 'Snuitje',
+        trunkLength: 4,
+      }]
+    });
   },
 
   teardown: function() {
@@ -39,17 +59,6 @@ module("unit/fragments - polymorphism", {
 });
 
 test("hasOneFragment supports polymorphism", function() {
-  store.push(Zoo, {
-    id: 1,
-    name: 'Chilly Zoo',
-    city: 'Winterfell',
-    star: {
-      $type: 'lion',
-      name: 'Mittens',
-      hasManes: 'true',
-    }
-  });
-
   store.find(Zoo, 1).then(async(function(zoo) {
     equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
     equal(zoo.get("city"), "Winterfell", "zoo city is correct");
@@ -63,22 +72,7 @@ test("hasOneFragment supports polymorphism", function() {
 });
 
 test("hasManyFragments supports polymorphism", function() {
-  store.push(Zoo, {
-    id: 2,
-    name: 'Chilly Zoo',
-    city: 'Winterfell',
-    animals: [{
-      $type: 'lion',
-      name: 'Mittens',
-      hasManes: 'true',
-    }, {
-      $type: 'elephant',
-      name: 'Snuitje',
-      trunkLength: 4,
-    }]
-  });
-
-  store.find(Zoo, 2).then(async(function(zoo) {
+  store.find(Zoo, 1).then(async(function(zoo) {
     var animals = zoo.get("animals");
     equal(animals.get("length"), 2);
     
@@ -95,3 +89,4 @@ test("hasManyFragments supports polymorphism", function() {
     equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
   }));
 });
+
