@@ -227,7 +227,7 @@ function getActualFragmentType(declaredType, options, data) {
     return declaredType;
   }
   
-  var typeKey = options.typeKey || 'typeKey';
+  var typeKey = options.typeKey || 'type';
   var actualType = data[typeKey];
   
   return actualType || declaredType;
