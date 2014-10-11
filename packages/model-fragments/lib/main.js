@@ -3,7 +3,7 @@ import ext from './fragments/ext';
 import ModelFragment from './fragments/model';
 import FragmentArray from './fragments/array/fragment';
 import FragmentTransform from './fragments/transform';
-import { hasOneFragment, hasManyFragments, fragmentOwner, fragmentType } from './fragments/attributes';
+import { hasOneFragment, hasManyFragments, fragmentOwner } from './fragments/attributes';
 import initializers from './initializers';
 
 /**
@@ -19,7 +19,6 @@ DS.FragmentTransform = FragmentTransform;
 DS.hasOneFragment = hasOneFragment;
 DS.hasManyFragments = hasManyFragments;
 DS.fragmentOwner = fragmentOwner;
-DS.fragmentType = fragmentType;
 
 Ember.onLoad('Ember.Application', function(Application) {
   initializers.forEach(Application.initializer, Application);

@@ -5,12 +5,11 @@ module("unit/fragments - polymorphism", {
     Zoo = DS.Model.extend({
       name: DS.attr("string"),
       city: DS.attr("string"),
-      star: DS.hasOneFragment("animal", { polymorphic: true, typeKey: 'species' }),
-      animals: DS.hasManyFragments("animal", { polymorphic: true, typeKey: 'species' }),
+      star: DS.hasOneFragment("animal", { polymorphic: true, typeKey: '$type' }),
+      animals: DS.hasManyFragments("animal", { polymorphic: true, typeKey: '$type' }),
     });
 
     Animal = DS.ModelFragment.extend({
-      species: DS.fragmentType(),
       name: DS.attr("string"),
     });
     
@@ -34,16 +33,16 @@ module("unit/fragments - polymorphism", {
       name: 'Chilly Zoo',
       city: 'Winterfell',
       star: {
-        species: 'lion',
+        $type: 'lion',
         name: 'Mittens',
         hasManes: 'true',
       },
       animals: [{
-        species: 'lion',
+        $type: 'lion',
         name: 'Mittens',
         hasManes: 'true',
       }, {
-        species: 'elephant',
+        $type: 'elephant',
         name: 'Snuitje',
         trunkLength: 4,
       }]
@@ -91,15 +90,3 @@ test("hasManyFragments supports polymorphism", function() {
   }));
 });
 
-test("hasOneFragment polymorphic serialization", function() {
-  store.modelFor('zoo'); // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  
-  store.find(Zoo, 1).then(async(function(zoo) {
-    var star = zoo.get("star");
-    var s = zoo.serialize();
-
-    equal(s.star.species, 'lion');
-    equal(s.animals[0].species, 'lion');
-    equal(s.animals[1].species, 'elephant');
-  }));
-});

@@ -228,20 +228,6 @@ function fragmentOwner() {
   return Ember.computed.alias('_owner').readOnly();
 }
 
-function fragmentType() {
-  var meta = {
-    type: 'string',
-    isAttribute: true,
-    isFragmentType: true
-  };
-  return Ember.computed(function() {
-    return this.constructor.typeKey;
-  })
-  .property()
-  .meta(meta)
-  .readOnly();
-}
-
 // The default value of a fragment is either an array or an object,
 // which should automatically get deep copied
 function getDefaultValue(record, options, type) {
@@ -261,4 +247,4 @@ function getDefaultValue(record, options, type) {
   return Ember.copy(value, true);
 }
 
-export { hasOneFragment, hasManyFragments, fragmentOwner, fragmentType };
+export { hasOneFragment, hasManyFragments, fragmentOwner };
