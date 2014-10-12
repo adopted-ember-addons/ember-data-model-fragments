@@ -103,11 +103,11 @@ titles.get('length'); // 2
 ## Polymorphism
 
 Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `hasOneFragment` or `hasManyFragments`
-with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to `type`.
+with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to 'type'.
 
 The typeKey's value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass.
 
-In the following example the declared type of `animals` is `animal`, which corresponds to the class App.Animal. App.Animal has two subclasses: App.Elephant and App.Lion,
+In the following example the declared type of `animals` is `animal`, which corresponds to the class `App.Animal`. `App.Animal` has two subclasses: `App.Elephant` and `App.Lion`,
 so to typeKey's value can be 'animal', 'elephant' or 'lion'. 
 
 ```javascript
