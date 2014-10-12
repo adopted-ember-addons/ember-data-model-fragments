@@ -60,7 +60,7 @@ test("copied fragments can be added to any record", function() {
 test("fragments are `Ember.Comparable`", function() {
   var fragment = store.createFragment('name');
 
-  ok(Ember.Comparable.detect(fragment), "fragments are copiable");
+  ok(Ember.Comparable.detect(fragment), "fragments are comparable");
 });
 
 test("fragments are compared by reference", function() {
