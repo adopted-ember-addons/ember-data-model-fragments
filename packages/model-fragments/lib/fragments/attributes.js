@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
+import { getActualFragmentType } from './model';
 
 /**
   @module ember-data.model-fragments
@@ -41,7 +42,7 @@ var get = Ember.get;
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasOneFragment (type, options) {
+function hasOneFragment(declaredType, options) {
   options = options || {};
 
   var meta = {
@@ -55,6 +56,7 @@ function hasOneFragment (type, options) {
     var record = this;
     var data = this._data[key] || getDefaultValue(this, options, 'object');
     var fragment = this._fragments[key];
+    var actualType = getActualFragmentType(declaredType, options, data);
 
     function setOwner(fragment) {
       Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
@@ -68,7 +70,7 @@ function hasOneFragment (type, options) {
     // may not be initialized yet, in which case the data will contain a
     // partial raw response
     if (data && data !== fragment) {
-      fragment || (fragment = setOwner(this.store.buildFragment(type)));
+      fragment || (fragment = setOwner(this.store.buildFragment(actualType)));
       fragment.setupData(data);
       this._data[key] = fragment;
     } else {
@@ -78,7 +80,7 @@ function hasOneFragment (type, options) {
 
     // Handle being called as a setter
     if (arguments.length > 1) {
-      Ember.assert("You can only assign a '" + type + "' fragment to this property", value === null || value instanceof this.store.modelFor(type));
+      Ember.assert("You can only assign a '" + declaredType + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredType));
 
       fragment = value ? setOwner(value) : null;
 
@@ -131,11 +133,11 @@ function hasOneFragment (type, options) {
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasManyFragments(type, options) {
-  // If a type is not given, it implies an array of primitives
-  if (Ember.typeOf(type) !== 'string') {
-    options = type;
-    type = null;
+function hasManyFragments(declaredType, options) {
+  // If a declaredType is not given, it implies an array of primitives
+  if (Ember.typeOf(declaredType) !== 'string') {
+    options = declaredType;
+    declaredType = null;
   }
 
   options = options || {};
@@ -154,12 +156,13 @@ function hasManyFragments(type, options) {
     var fragments = this._fragments[key] || null;
 
     function createArray() {
-      var arrayClass = type ? FragmentArray : StatefulArray;
+      var arrayClass = declaredType ? FragmentArray : StatefulArray;
 
       return arrayClass.create({
-        type  : type,
-        name  : key,
-        owner : record
+        type    : declaredType,
+        options : options,
+        name    : key,
+        owner   : record
       });
     }
 
