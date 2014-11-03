@@ -12,7 +12,7 @@ module("unit/fragments - polymorphism", {
     Animal = DS.ModelFragment.extend({
       name: DS.attr("string"),
     });
-    
+
     Elephant = Animal.extend({
       trunkLength: DS.attr("number"),
     });
@@ -27,7 +27,7 @@ module("unit/fragments - polymorphism", {
       elephant: Elephant,
       lion: Lion,
     });
-    
+
     store.push(Zoo, {
       id: 1,
       name: 'Chilly Zoo',
@@ -62,7 +62,7 @@ test("hasOneFragment supports polymorphism", function() {
   store.find(Zoo, 1).then(async(function(zoo) {
     equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
     equal(zoo.get("city"), "Winterfell", "zoo city is correct");
-    
+
     var star = zoo.get("star");
     ok(star instanceof Animal, "zoo's star is an animal");
     equal(star.get("name"), "Mittens", "animal name is correct");
@@ -75,7 +75,7 @@ test("hasManyFragments supports polymorphism", function() {
   store.find(Zoo, 1).then(async(function(zoo) {
     var animals = zoo.get("animals");
     equal(animals.get("length"), 2);
-    
+
     var first = animals.objectAt(0);
     ok(first instanceof Animal);
     equal(first.get("name"), "Mittens", "first animal's name is correct");

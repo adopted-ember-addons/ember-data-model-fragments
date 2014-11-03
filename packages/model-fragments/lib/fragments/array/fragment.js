@@ -27,7 +27,7 @@ var FragmentArray = StatefulArray.extend({
     @type {String}
   */
   type: null,
-  
+
   options: null,
 
   init: function() {

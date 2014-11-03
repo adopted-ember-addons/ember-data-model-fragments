@@ -215,7 +215,7 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
 /**
  * `getActualFragmentType` returns the actual type of a fragment based on its declared type
  * and whether it is configured to be polymorphic.
- * 
+ *
  * @private
  * @param {String} declaredType the type as declared by `DS.hasOneFragment` or `DS.hasManyFragments`
  * @param {Object} options the fragment options
@@ -226,10 +226,10 @@ function getActualFragmentType(declaredType, options, data) {
   if (!options.polymorphic || !data) {
     return declaredType;
   }
-  
+
   var typeKey = options.typeKey || 'type';
   var actualType = data[typeKey];
-  
+
   return actualType || declaredType;
 }
 
