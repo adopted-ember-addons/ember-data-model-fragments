@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.1
+ * @version   0.2.2
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -133,11 +133,12 @@ define("ember",
     __exports__["default"] = Ember;
   });
 define("fragments/array/fragment", 
-  ["ember","./stateful","exports"],
-  function(__dependency1__, __dependency2__, __exports__) {
+  ["ember","./stateful","../model","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
     "use strict";
     var Ember = __dependency1__["default"];
     var StatefulArray = __dependency2__["default"];
+    var getActualFragmentType = __dependency3__.getActualFragmentType;
 
     /**
       @module ember-data.model-fragments
@@ -165,6 +166,8 @@ define("fragments/array/fragment",
       */
       type: null,
 
+      options: null,
+
       init: function() {
         this._super();
         this._isInitializing = false;
@@ -178,7 +181,8 @@ define("fragments/array/fragment",
       setupData: function(data) {
         var record = get(this, 'owner');
         var store = get(record, 'store');
-        var type = get(this, 'type');
+        var declaredType = get(this, 'type');
+        var options = get(this, 'options');
         var key = get(this, 'name');
         var content = get(this, 'content');
 
@@ -192,7 +196,8 @@ define("fragments/array/fragment",
 
           // Create a new fragment from the data array if needed
           if (!fragment) {
-            fragment = store.buildFragment(type);
+            var actualType = getActualFragmentType(declaredType, options, data);
+            fragment = store.buildFragment(actualType);
 
             fragment.setProperties({
               _owner : record,
@@ -491,12 +496,13 @@ define("fragments/array/stateful",
     __exports__["default"] = StatefulArray;
   });
 define("fragments/attributes", 
-  ["ember","./array/stateful","./array/fragment","exports"],
-  function(__dependency1__, __dependency2__, __dependency3__, __exports__) {
+  ["ember","./array/stateful","./array/fragment","./model","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {
     "use strict";
     var Ember = __dependency1__["default"];
     var StatefulArray = __dependency2__["default"];
     var FragmentArray = __dependency3__["default"];
+    var getActualFragmentType = __dependency4__.getActualFragmentType;
 
     /**
       @module ember-data.model-fragments
@@ -537,7 +543,7 @@ define("fragments/attributes",
       @param {Object} options a hash of options
       @return {Attribute}
     */
-    function hasOneFragment (type, options) {
+    function hasOneFragment(declaredType, options) {
       options = options || {};
 
       var meta = {
@@ -551,6 +557,7 @@ define("fragments/attributes",
         var record = this;
         var data = this._data[key] || getDefaultValue(this, options, 'object');
         var fragment = this._fragments[key];
+        var actualType = getActualFragmentType(declaredType, options, data);
 
         function setOwner(fragment) {
           Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
@@ -564,7 +571,7 @@ define("fragments/attributes",
         // may not be initialized yet, in which case the data will contain a
         // partial raw response
         if (data && data !== fragment) {
-          fragment || (fragment = setOwner(this.store.buildFragment(type)));
+          fragment || (fragment = setOwner(this.store.buildFragment(actualType)));
           fragment.setupData(data);
           this._data[key] = fragment;
         } else {
@@ -574,7 +581,7 @@ define("fragments/attributes",
 
         // Handle being called as a setter
         if (arguments.length > 1) {
-          Ember.assert("You can only assign a '" + type + "' fragment to this property", value === null || value instanceof this.store.modelFor(type));
+          Ember.assert("You can only assign a '" + declaredType + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredType));
 
           fragment = value ? setOwner(value) : null;
 
@@ -627,11 +634,11 @@ define("fragments/attributes",
       @param {Object} options a hash of options
       @return {Attribute}
     */
-    function hasManyFragments(type, options) {
-      // If a type is not given, it implies an array of primitives
-      if (Ember.typeOf(type) !== 'string') {
-        options = type;
-        type = null;
+    function hasManyFragments(declaredType, options) {
+      // If a declaredType is not given, it implies an array of primitives
+      if (Ember.typeOf(declaredType) !== 'string') {
+        options = declaredType;
+        declaredType = null;
       }
 
       options = options || {};
@@ -650,12 +657,13 @@ define("fragments/attributes",
         var fragments = this._fragments[key] || null;
 
         function createArray() {
-          var arrayClass = type ? FragmentArray : StatefulArray;
+          var arrayClass = declaredType ? FragmentArray : StatefulArray;
 
           return arrayClass.create({
-            type  : type,
-            name  : key,
-            owner : record
+            type    : declaredType,
+            options : options,
+            name    : key,
+            owner   : record
           });
         }
 
@@ -1203,7 +1211,29 @@ define("fragments/model",
       }
     });
 
+    /**
+     * `getActualFragmentType` returns the actual type of a fragment based on its declared type
+     * and whether it is configured to be polymorphic.
+     *
+     * @private
+     * @param {String} declaredType the type as declared by `DS.hasOneFragment` or `DS.hasManyFragments`
+     * @param {Object} options the fragment options
+     * @param {Object} data the fragment data
+     * @return {String} the actual fragment type
+     */
+    function getActualFragmentType(declaredType, options, data) {
+      if (!options.polymorphic || !data) {
+        return declaredType;
+      }
+
+      var typeKey = options.typeKey || 'type';
+      var actualType = data[typeKey];
+
+      return actualType || declaredType;
+    }
+
     __exports__["default"] = ModelFragment;
+    __exports__.getActualFragmentType = getActualFragmentType;
   });
 define("fragments/states", 
   ["ember","../states","exports"],
@@ -1446,7 +1476,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.1');
+      Ember.libraries.register('Model Fragments', '0.2.2');
     }
 
     // Something must be exported...

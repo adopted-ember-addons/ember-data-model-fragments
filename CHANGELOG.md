@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.2.2 (November 3, 2014)
+
+* Added support for polymorphic fragments
+
 ### v0.2.1 (October 2, 2014)
 
 * Fixed infinite recursion issue with nested hasManyFragments
