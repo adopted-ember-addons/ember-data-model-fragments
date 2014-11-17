@@ -119,6 +119,83 @@ person.rollback();
 titles.get('length'); // 2
 ```
 
+## Nesting
+
+Nesting of fragments is fully supported:
+
+```javascript
+App.User = DS.Model.extend({
+  name   : DS.attr('string'),
+  orders : DS.hasManyFragments('order')
+});
+
+App.Order = DS.ModelFragment.extend({
+  amount   : DS.attr('string'),
+  products : DS.hasManyFragments('product')
+});
+
+App.Product = DS.ModelFragment.extend({
+  name  : DS.attr('string'),
+  sku   : DS.attr('string'),
+  price : DS.attr('string')
+});
+```
+
+With a JSON payload of:
+
+```json
+{
+  "id": "1",
+  "name": "Tyrion Lannister",
+  "orders": [
+    {
+      "amount": "799.98",
+      "products" : [
+        {
+          "name": "Tears of Lys",
+          "sku": "poison-bd-32",
+          "price": "499.99"
+        },
+        {
+          "name": "The Strangler",
+          "sku": "poison-md-24",
+          "price": "299.99"
+        }
+      ]
+    },
+    {
+      "amount": "10999.99",
+      "products": [
+        {
+          "name": "Lives of Four Kings",
+          "sku": "old-book-32",
+          "price": "10999.99"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Dirty state propagates up to the parent record, rollback cascades down:
+
+```javascript
+var user = store.getById('user', '1');
+var product = user.get('orders.firstObject.products.lastObject');
+
+user.get('isDirty'); // false
+product.get('price'); // '299.99'
+
+product.set('price', '1.99');
+user.get('isDirty'); // true
+
+user.rollback();
+user.get('isDirty'); // false
+product.get('price'); // '299.99'
+```
+
+However, note that fragments do not currently support `DS.belongsTo` or `DS.hasMany` properties. See the [Limitations](#relationships-to-models) section below.
+
 ## Polymorphism
 
 Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `hasOneFragment` or `hasManyFragments`
