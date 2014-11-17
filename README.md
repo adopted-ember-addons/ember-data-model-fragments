@@ -12,8 +12,8 @@ App.Person = DS.Model.extend({
 });
 
 App.Name = DS.ModelFragment.extend({
-  first  : DS.attr('string'),
-  last   : DS.attr('string')
+  first : DS.attr('string'),
+  last  : DS.attr('string')
 });
 
 App.Address = DS.ModelFragment.extend({
@@ -65,13 +65,21 @@ person.get('isDirty'); // true
 
 person.rollback();
 name.get('first'); // 'Tyrion'
+
+// New fragments are created through the store and assigned directly
+person.set('name', store.createFragment('name', {
+  first : 'Hugor',
+  last  : 'Hill'
+}));
+person.get('isDirty'); // true
 ```
 
 The `addresses` attribute can be treated similar to a `hasMany` relationship:
 
 ```javascript
 var person = store.getById('person', '1');
-var address = person.get('addresses.lastObject');
+var addresses = person.get('addresses');
+var address = addresses.get('lastObject');
 
 person.get('isDirty'); // false
 address.get('country'); // 'Westeros'
@@ -82,15 +90,16 @@ person.get('isDirty'); // true
 person.rollback();
 address.get('country'); // 'Westeros'
 
-person.get('addresses.length');  // 2
-person.get('addresses').createFragment({
-      "street": "1 Shy Maid",
-      "city": "Rhoyne River",
-      "region": "Free Cities",
-      "country": "Essos"
-  
+// Fragments can be created and added directly through the fragment array
+addresses.get('length'); // 2
+addresses.createFragment({
+  street  : '1 Shy Maid',
+  city    : 'Rhoyne River',
+  region  : 'Free Cities',
+  country : 'Essos'
 });
-person.get('addresses.length');  // 3
+addresses.get('length'); // 3
+person.get('isDirty'); // true
 ```
 
 The `titles` attribute can be treated as an `Ember.Array`:
