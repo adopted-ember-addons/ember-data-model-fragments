@@ -81,6 +81,16 @@ person.get('isDirty'); // true
 
 person.rollback();
 address.get('country'); // 'Westeros'
+
+person.get('addresses.length');  // 2
+person.get('addresses').createFragment({
+      "street": "1 Shy Maid",
+      "city": "Rhoyne River",
+      "region": "Free Cities",
+      "country": "Essos"
+  
+});
+person.get('addresses.length');  // 3
 ```
 
 The `titles` attribute can be treated as an `Ember.Array`:
