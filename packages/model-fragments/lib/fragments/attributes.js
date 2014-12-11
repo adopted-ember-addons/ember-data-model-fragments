@@ -92,7 +92,7 @@ function hasOneFragment(declaredType, options) {
     }
 
     return this._fragments[key] = fragment;
-  }).property('data').meta(meta);
+  }).property('isDirty').meta(meta);
 }
 
 /**
@@ -194,7 +194,7 @@ function hasManyFragments(declaredType, options) {
     }
 
     return this._fragments[key] = fragments;
-  }).property('data').meta(meta);
+  }).property('isDirty').meta(meta);
 }
 
 // Like `DS.belongsTo`, when used within a model fragment is a reference
