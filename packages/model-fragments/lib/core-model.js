@@ -13,6 +13,7 @@ Model.proto();
 var protoProps = [
   '_setup',
   '_unhandledEvent',
+  '_notifyProperties',
   'send',
   'transitionTo',
   'data',
