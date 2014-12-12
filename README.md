@@ -2,6 +2,8 @@
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
+:warning: This project is not yet compatible with Ember Data v1.0.0-beta.12
+
 ## Example
 
 ```javascript
