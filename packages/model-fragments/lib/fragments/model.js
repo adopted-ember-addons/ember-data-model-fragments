@@ -134,6 +134,7 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
     @method rollback
   */
   rollback: function() {
+    var toNotify = Ember.keys(this._attributes);
     this._attributes = {};
 
     // Rollback fragments from the bottom up
@@ -141,9 +142,9 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
 
     // Initiate state change
     this.send('rolledBack');
-
-    // Notify attribute properties/observers of internal change to `_data`
-    this.notifyPropertyChange('data');
+    for (var i=0; i<toNotify.length; i++) {
+      this.notifyPropertyChange(toNotify[i]);
+    }
   },
 
   /**
