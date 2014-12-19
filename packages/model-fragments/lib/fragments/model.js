@@ -100,7 +100,6 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
   */
   setupData: function(data) {
     var store = get(this, 'store');
-    var key = get(this, 'name');
     var type = store.modelFor(this.constructor);
     var serializer = store.serializerFor(type);
 
@@ -108,7 +107,7 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
     this._attributes = {};
 
     // TODO: do normalization in the transform, not on the fly
-    this._data = serializer.normalize(type, data, key);
+    this._data = serializer.normalize(type, data);
 
     // Initiate state change
     this.send('pushedData');
