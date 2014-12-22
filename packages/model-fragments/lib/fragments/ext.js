@@ -87,6 +87,7 @@ Model.reopen({
     @param {DS.Model} record
   */
   updateFragmentData: Ember.beforeObserver('data', function(record) {
+    /*
     var fragment;
 
     for (var key in record._fragments) {
@@ -99,6 +100,7 @@ Model.reopen({
         record._data[key] = fragment;
       }
     }
+    */
   }),
 
   /**
@@ -192,11 +194,11 @@ Model.reopen({
     @private
     */
   rollbackFragments: function() {
-    var fragment;
-
     for (var key in this._fragments) {
-      fragment = this._fragments[key] = this._data[key];
-      fragment && fragment.rollback();
+      if (this._fragments[key]) {
+        this._fragments[key].rollback();
+      }
+      this._fragments[key] = null;
     }
   },
 

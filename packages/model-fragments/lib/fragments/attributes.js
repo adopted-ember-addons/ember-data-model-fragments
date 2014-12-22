@@ -42,7 +42,7 @@ var get = Ember.get;
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasOneFragment(declaredType, options) {
+function hasOneFragment(declaredTypeName, options) {
   options = options || {};
 
   var meta = {
@@ -56,7 +56,8 @@ function hasOneFragment(declaredType, options) {
     var record = this;
     var data = this._data[key] || getDefaultValue(this, options, 'object');
     var fragment = this._fragments[key];
-    var actualType = getActualFragmentType(declaredType, options, data);
+    var actualTypeName = getActualFragmentType(declaredTypeName, options, data);
+    var actualType = this.store.modelFor(actualTypeName);
 
     function setOwner(fragment) {
       Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
@@ -68,9 +69,16 @@ function hasOneFragment(declaredType, options) {
 
     // Regardless of whether being called as a setter or getter, the fragment
     // may not be initialized yet, in which case the data will contain a
-    // partial raw response
-    if (data && data !== fragment) {
-      fragment || (fragment = setOwner(this.store.buildFragment(actualType)));
+    // raw response or a stashed away fragment
+
+    //If we already have a processed fragment in _data and our current fragmet is
+    //null simply reuse the one from data. We can be in this state after a rollback
+    //for example
+    if (data instanceof actualType && !fragment) {
+      fragment = data;
+    //Else initialize the fragment
+    } else if (data && data !== fragment) {
+      fragment || (fragment = setOwner(this.store.buildFragment(actualTypeName)));
       fragment.setupData(data);
       this._data[key] = fragment;
     } else {
@@ -80,7 +88,7 @@ function hasOneFragment(declaredType, options) {
 
     // Handle being called as a setter
     if (arguments.length > 1) {
-      Ember.assert("You can only assign a '" + declaredType + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredType));
+      Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredTypeName));
 
       fragment = value ? setOwner(value) : null;
 
@@ -133,11 +141,11 @@ function hasOneFragment(declaredType, options) {
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasManyFragments(declaredType, options) {
-  // If a declaredType is not given, it implies an array of primitives
-  if (Ember.typeOf(declaredType) !== 'string') {
-    options = declaredType;
-    declaredType = null;
+function hasManyFragments(declaredTypeName, options) {
+  // If a declaredTypeName is not given, it implies an array of primitives
+  if (Ember.typeOf(declaredTypeName) !== 'string') {
+    options = declaredTypeName;
+    declaredTypeName = null;
   }
 
   options = options || {};
@@ -156,18 +164,23 @@ function hasManyFragments(declaredType, options) {
     var fragments = this._fragments[key] || null;
 
     function createArray() {
-      var arrayClass = declaredType ? FragmentArray : StatefulArray;
+      var arrayClass = declaredTypeName ? FragmentArray : StatefulArray;
 
       return arrayClass.create({
-        type    : declaredType,
+        type    : declaredTypeName,
         options : options,
         name    : key,
         owner   : record
       });
     }
 
+    //If we already have a processed fragment in _data and our current fragmet is
+    //null simply reuse the one from data. We can be in this state after a rollback
+    //for example
+    if (data instanceof FragmentArray && !fragments) {
+      fragments = data;
     // Create a fragment array and initialize with data
-    if (data && data !== fragments) {
+    } else if (data && data !== fragments) {
       fragments || (fragments = createArray());
       fragments.setupData(data);
       this._data[key] = fragments;

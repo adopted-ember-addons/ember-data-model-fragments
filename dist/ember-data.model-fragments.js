@@ -543,7 +543,7 @@ define("fragments/attributes",
       @param {Object} options a hash of options
       @return {Attribute}
     */
-    function hasOneFragment(declaredType, options) {
+    function hasOneFragment(declaredTypeName, options) {
       options = options || {};
 
       var meta = {
@@ -557,7 +557,8 @@ define("fragments/attributes",
         var record = this;
         var data = this._data[key] || getDefaultValue(this, options, 'object');
         var fragment = this._fragments[key];
-        var actualType = getActualFragmentType(declaredType, options, data);
+        var actualTypeName = getActualFragmentType(declaredTypeName, options, data);
+        var actualType = this.store.modelFor(actualTypeName);
 
         function setOwner(fragment) {
           Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
@@ -569,9 +570,16 @@ define("fragments/attributes",
 
         // Regardless of whether being called as a setter or getter, the fragment
         // may not be initialized yet, in which case the data will contain a
-        // partial raw response
-        if (data && data !== fragment) {
-          fragment || (fragment = setOwner(this.store.buildFragment(actualType)));
+        // raw response or a stashed away fragment
+
+        //If we already have a processed fragment in _data and our current fragmet is
+        //null simply reuse the one from data. We can be in this state after a rollback
+        //for example
+        if (data instanceof actualType && !fragment) {
+          fragment = data;
+        //Else initialize the fragment
+        } else if (data && data !== fragment) {
+          fragment || (fragment = setOwner(this.store.buildFragment(actualTypeName)));
           fragment.setupData(data);
           this._data[key] = fragment;
         } else {
@@ -581,7 +589,7 @@ define("fragments/attributes",
 
         // Handle being called as a setter
         if (arguments.length > 1) {
-          Ember.assert("You can only assign a '" + declaredType + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredType));
+          Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredTypeName));
 
           fragment = value ? setOwner(value) : null;
 
@@ -634,11 +642,11 @@ define("fragments/attributes",
       @param {Object} options a hash of options
       @return {Attribute}
     */
-    function hasManyFragments(declaredType, options) {
-      // If a declaredType is not given, it implies an array of primitives
-      if (Ember.typeOf(declaredType) !== 'string') {
-        options = declaredType;
-        declaredType = null;
+    function hasManyFragments(declaredTypeName, options) {
+      // If a declaredTypeName is not given, it implies an array of primitives
+      if (Ember.typeOf(declaredTypeName) !== 'string') {
+        options = declaredTypeName;
+        declaredTypeName = null;
       }
 
       options = options || {};
@@ -657,18 +665,23 @@ define("fragments/attributes",
         var fragments = this._fragments[key] || null;
 
         function createArray() {
-          var arrayClass = declaredType ? FragmentArray : StatefulArray;
+          var arrayClass = declaredTypeName ? FragmentArray : StatefulArray;
 
           return arrayClass.create({
-            type    : declaredType,
+            type    : declaredTypeName,
             options : options,
             name    : key,
             owner   : record
           });
         }
 
+        //If we already have a processed fragment in _data and our current fragmet is
+        //null simply reuse the one from data. We can be in this state after a rollback
+        //for example
+        if (data instanceof FragmentArray && !fragments) {
+          fragments = data;
         // Create a fragment array and initialize with data
-        if (data && data !== fragments) {
+        } else if (data && data !== fragments) {
           fragments || (fragments = createArray());
           fragments.setupData(data);
           this._data[key] = fragments;
@@ -845,6 +858,7 @@ define("fragments/ext",
         @param {DS.Model} record
       */
       updateFragmentData: Ember.beforeObserver('data', function(record) {
+        /*
         var fragment;
 
         for (var key in record._fragments) {
@@ -857,6 +871,7 @@ define("fragments/ext",
             record._data[key] = fragment;
           }
         }
+        */
       }),
 
       /**
@@ -950,11 +965,11 @@ define("fragments/ext",
         @private
         */
       rollbackFragments: function() {
-        var fragment;
-
         for (var key in this._fragments) {
-          fragment = this._fragments[key] = this._data[key];
-          fragment && fragment.rollback();
+          if (this._fragments[key]) {
+            this._fragments[key].rollback();
+          }
+          this._fragments[key] = null;
         }
       },
 
@@ -1099,7 +1114,6 @@ define("fragments/model",
       */
       setupData: function(data) {
         var store = get(this, 'store');
-        var key = get(this, 'name');
         var type = store.modelFor(this.constructor);
         var serializer = store.serializerFor(type);
 
@@ -1107,7 +1121,7 @@ define("fragments/model",
         this._attributes = {};
 
         // TODO: do normalization in the transform, not on the fly
-        this._data = serializer.normalize(type, data, key);
+        this._data = serializer.normalize(type, data);
 
         // Initiate state change
         this.send('pushedData');
@@ -1134,6 +1148,7 @@ define("fragments/model",
         @method rollback
       */
       rollback: function() {
+        var toNotify = Ember.keys(this._attributes);
         this._attributes = {};
 
         // Rollback fragments from the bottom up
@@ -1141,9 +1156,9 @@ define("fragments/model",
 
         // Initiate state change
         this.send('rolledBack');
-
-        // Notify attribute properties/observers of internal change to `_data`
-        this.notifyPropertyChange('data');
+        for (var i=0; i<toNotify.length; i++) {
+          this.notifyPropertyChange(toNotify[i]);
+        }
       },
 
       /**
