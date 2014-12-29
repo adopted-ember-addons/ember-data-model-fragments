@@ -5,7 +5,8 @@ module("integration/fragments - Dependent State", {
     Person = DS.Model.extend({
       title     : DS.attr("string"),
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address")
+      addresses : DS.hasManyFragments("address"),
+      titles    : DS.hasManyFragments()
     });
 
     Name = DS.ModelFragment.extend({
@@ -45,6 +46,10 @@ module("integration/fragments - Dependent State", {
             region: "Crownlands",
             country: "Westeros"
           }
+        ],
+        titles: [
+          "Hand of the King",
+          "Master of Coin"
         ]
       }
     ];
@@ -394,6 +399,26 @@ test("rolling back the owner record returns all `DS.hasManyFragments` fragments,
     ok(!person.get('isDirty'), "owner record is clean");
   }));
 });
+
+test("rolling back the owner record returns all `DS.hasManyFragments` primitive values, the array, and the owner record to a clean state", function() {
+  pushPerson(1);
+
+  store.find(Person, 1).then(async(function(person) {
+    var titles = person.get('titles');
+    var values = titles.toArray();
+
+    // Dirty the primitive array
+    titles.popObject();
+    titles.unshiftObject('Giant of Lannister');
+
+    person.rollback();
+
+    deepEqual(values, person.get('titles').toArray(), "primitive values are reset");
+    ok(!titles.get('isDirty'), "fragment array is clean");
+    ok(!person.get('isDirty'), "owner record is clean");
+  }));
+});
+
 
 test("rolling back a `DS.hasManyFragments` fragment array returns all fragments, the fragment array, and the owner record to a clean state", function() {
   pushPerson(1);
