@@ -1,16 +1,23 @@
 {
   "name": "ember-data-model-fragments",
+  "description": "Ember Data plugin to support nested JSON documents",
   "version": "0.2.2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/slindberg/ember-data.model-fragments.git"
+    "url": "https://github.com/lytics/ember-data.model-fragments.git"
   },
+  "author": "Steven Lindberg <steven@lytics.io>",
+  "license": "MIT",
   "scripts": {
     "postinstall": "./node_modules/bower/bin/bower install",
     "test": "grunt build && ./node_modules/testem/testem.js ci"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "ember",
+    "ember-data",
+    "ember-cli",
+    "fragments"
   ],
   "ember-addon": {
     "main": "ember-addon/index.js"
