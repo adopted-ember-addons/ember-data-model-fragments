@@ -121,6 +121,45 @@ person.rollback();
 titles.get('length'); // 2
 ```
 
+## Default Values
+
+Ember Data attributes [support a `defaultValue` config option](http://emberjs.com/api/data/classes/DS.html#method_attr) that provides a default value when a model is created through `store#createRecord()`. Similarly, `DS.hasOneFragment` and `DS.hasManyFragments` properties support a `defaultValue` option:
+
+```javascript
+App.Person = DS.Model.extend({
+  name      : DS.hasOneFragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
+  addresses : DS.hasManyFragments('address', { defaultValue: [] }),
+  titles    : DS.hasManyFragments(null, { defaultValue: [] })
+});
+```
+
+Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, both `DS.hasOneFragment` and `DS.hasManyFragments` properties will default to `null`. Note that this may cause confusion when creating a record with a `DS.hasManyFragments` property:
+
+```javascript
+var person = store.createRecord('person');
+var addresses = person.get('addresses'); // null
+
+// Fails with "Cannot read property 'createFragment' of null"
+addresses.createFragment({
+  ...
+});
+```
+
+Like `DS.attr`, the `defaultValue` option can be a function that is invoked to generate the default value:
+
+```javascript
+App.Person = DS.Model.extend({
+  name: DS.hasOneFragment('name', {
+    defaultValue: function() {
+      return {
+        first: 'Unsullied',
+        last: Ember.uuid()
+      }
+    }
+  })
+});
+```
+
 ## Nesting
 
 Nesting of fragments is fully supported:
