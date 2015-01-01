@@ -4,6 +4,29 @@ This package provides support for sub-models that can be treated much like `belo
 
 :warning: This project is not yet compatible with Ember Data v1.0.0-beta.12
 
+## Installation
+
+To install as an Ember CLI addon:
+
+``` sh
+$ ember install:addon ember-data-model-fragments
+```
+
+Or if you are using Ember CLI < 1.5.0:
+
+```sh
+$ npm install ember-data-model-fragments --save-dev
+$ ember generate ember-data-model-fragments
+```
+
+You may then start creating fragments with:
+
+```sh
+$ ember generate fragment foo someAttr:string anotherAttr:boolean
+```
+
+Which will create the module `app/models/foo.js` which exports a `DS.ModelFragment` class with the given attributes.
+
 ## Example
 
 ```javascript
