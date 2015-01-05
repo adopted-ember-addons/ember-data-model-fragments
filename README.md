@@ -17,7 +17,7 @@ To install as an Ember CLI addon:
 $ ember install:addon ember-data-model-fragments
 ```
 
-Or if you are using Ember CLI < 0.1.15:
+Or if you are using Ember CLI < 0.1.5:
 
 ```sh
 $ npm install ember-data-model-fragments --save-dev
