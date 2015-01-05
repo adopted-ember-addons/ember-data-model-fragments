@@ -218,6 +218,9 @@ test("changes to array contents and fragments can be rolled back", function() {
 });
 
 test("serializing creates a new Array with contents the result of serializing each fragment", function() {
+  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
+  store.modelFor('person');
+
   var names = [
     {
       first: "Rhaegar",
@@ -233,17 +236,14 @@ test("serializing creates a new Array with contents the result of serializing ea
     }
   ];
 
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: names
   });
 
   env.container.register('serializer:name', DS.JSONSerializer);
 
-  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  store.modelFor('person');
-
-  store.find(Person, 1).then(async(function(person) {
+  store.find('person', 1).then(async(function(person) {
     var serialized = person.serialize();
 
     deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
