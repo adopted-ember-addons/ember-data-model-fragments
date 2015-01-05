@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "ember": "^1.4.0",
-    "ember-data": "canary"
+    "ember-data": "^1.0.0-beta.14"
   },
   "devDependencies": {
     "qunit": "^1.14.0",
