@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.2.4 (January 5, 2015)
+
+* Updated to support Ember Data v1.0.0-beta.14 (igort)
+
 ### v0.2.3 (January 5, 2015)
 
 * Added Ember CLI addon

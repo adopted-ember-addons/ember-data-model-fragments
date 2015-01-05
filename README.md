@@ -2,8 +2,12 @@
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
-:warning: This project is not compatible with Ember Data v1.0.0-beta.12
-  It is compatible with current canary/beta.13 and versions >= beta.7 but not beta.12
+:warning: This project is not compatible with Ember Data v1.0.0-beta.12, due to a bug in that version. Use the following table to decide which version of this project to use with your app:
+
+| Ember Data | Model Fragments |
+|------------|-----------------|
+| > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
+| > v1.0.0-beta.14 | > v0.2.4 |
 
 ## Installation
 

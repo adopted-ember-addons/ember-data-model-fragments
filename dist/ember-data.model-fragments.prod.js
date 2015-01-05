@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.3
+ * @version   0.2.4
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -79,7 +79,6 @@ define("core-model",
       '_unhandledEvent',
       'send',
       'transitionTo',
-      'data',
       'isEmpty',
       'isLoading',
       'isLoaded',
@@ -597,7 +596,7 @@ define("fragments/attributes",
         }
 
         return this._fragments[key] = fragment;
-      }).property('data').meta(meta);
+      }).property().meta(meta);
     }
 
     /**
@@ -674,7 +673,7 @@ define("fragments/attributes",
         //If we already have a processed fragment in _data and our current fragmet is
         //null simply reuse the one from data. We can be in this state after a rollback
         //for example
-        if (data instanceof FragmentArray && !fragments) {
+        if (data instanceof StatefulArray && !fragments) {
           fragments = data;
         // Create a fragment array and initialize with data
         } else if (data && data !== fragments) {
@@ -703,7 +702,7 @@ define("fragments/attributes",
         }
 
         return this._fragments[key] = fragments;
-      }).property('data').meta(meta);
+      }).property().meta(meta);
     }
 
     // Like `DS.belongsTo`, when used within a model fragment is a reference
@@ -840,32 +839,6 @@ define("fragments/ext",
         this._super();
         this._fragments = {};
       },
-
-      /**
-        This method updates all fragment data _before_ the owner's observes fire
-        to ensure that fragment observers aren't working with stale data (this works
-        because the owner's `_data` hash has already changed by this time)
-
-        @method updateFragmentData
-        @private
-        @param {DS.Model} record
-      */
-      updateFragmentData: Ember.beforeObserver('data', function(record) {
-        /*
-        var fragment;
-
-        for (var key in record._fragments) {
-          fragment = record._fragments[key];
-
-          // The data may have updated, but not changed at all, in which case
-          // treat the update as a rollback
-          if (fragment && record._data[key] && fragment !== record._data[key]) {
-            fragment.setupData(record._data[key]);
-            record._data[key] = fragment;
-          }
-        }
-        */
-      }),
 
       /**
         If the adapter did not return a hash in response to a commit,
@@ -1118,9 +1091,6 @@ define("fragments/model",
 
         // Initiate state change
         this.send('pushedData');
-
-        // Notify attribute properties/observers of internal change to `_data`
-        this.notifyPropertyChange('data');
       },
 
       /**
@@ -1484,7 +1454,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.3');
+      Ember.libraries.register('Model Fragments', '0.2.4');
     }
 
     // Something must be exported...
