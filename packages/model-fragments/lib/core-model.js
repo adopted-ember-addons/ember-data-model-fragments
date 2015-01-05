@@ -15,7 +15,6 @@ var protoProps = [
   '_unhandledEvent',
   'send',
   'transitionTo',
-  'data',
   'isEmpty',
   'isLoading',
   'isLoaded',

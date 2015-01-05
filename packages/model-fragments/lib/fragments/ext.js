@@ -78,32 +78,6 @@ Model.reopen({
   },
 
   /**
-    This method updates all fragment data _before_ the owner's observes fire
-    to ensure that fragment observers aren't working with stale data (this works
-    because the owner's `_data` hash has already changed by this time)
-
-    @method updateFragmentData
-    @private
-    @param {DS.Model} record
-  */
-  updateFragmentData: Ember.beforeObserver('data', function(record) {
-    /*
-    var fragment;
-
-    for (var key in record._fragments) {
-      fragment = record._fragments[key];
-
-      // The data may have updated, but not changed at all, in which case
-      // treat the update as a rollback
-      if (fragment && record._data[key] && fragment !== record._data[key]) {
-        fragment.setupData(record._data[key]);
-        record._data[key] = fragment;
-      }
-    }
-    */
-  }),
-
-  /**
     If the adapter did not return a hash in response to a commit,
     merge the changed attributes and relationships into the existing
     saved data and notify all fragments of the commit.

@@ -111,9 +111,6 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
 
     // Initiate state change
     this.send('pushedData');
-
-    // Notify attribute properties/observers of internal change to `_data`
-    this.notifyPropertyChange('data');
   },
 
   /**
