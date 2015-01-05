@@ -372,13 +372,14 @@ Currently, fragments cannot have normal `DS.belongsTo` or `DS.hasMany` relations
 Building requires [Grunt](http://gruntjs.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can both be installed globally with:
 
 ```sh
-$ npm install --global grunt-cli testem
+$ npm install --global grunt-cli bower testem
 ```
 
 Then install NPM packages, build the plugin, and start the development test server:
 
 ```sh
 $ npm install
+$ bower install
 $ grunt build
 $ testem
 ```
