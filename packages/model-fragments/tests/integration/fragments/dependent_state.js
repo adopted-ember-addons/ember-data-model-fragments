@@ -208,7 +208,7 @@ test("a `DS.hasOneFragment` fragment property that is set to null can be rolled 
 
     person.rollback();
 
-    equal(person.get('name'), name, "property is restored");
+    deepEqual(person.get('name'), name, "property is restored");
     ok(!name.get('isDirty'), "fragment is clean");
     ok(!person.get('isDirty'), "owner record is clean");
   }));

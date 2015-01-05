@@ -2,7 +2,8 @@
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
-:warning: This project is not yet compatible with Ember Data v1.0.0-beta.12
+:warning: This project is not compatible with Ember Data v1.0.0-beta.12
+  It is compatible with current canary/beta.13 and versions >= beta.7 but not beta.12
 
 ## Installation
 
@@ -367,7 +368,7 @@ Currently, fragments cannot have normal `DS.belongsTo` or `DS.hasMany` relations
 Building requires [Grunt](http://gruntjs.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can both be installed globally with:
 
 ```sh
-$ npm install --global grunt testem
+$ npm install --global grunt-cli testem
 ```
 
 Then install NPM packages, build the plugin, and start the development test server:
