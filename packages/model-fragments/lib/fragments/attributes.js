@@ -177,7 +177,7 @@ function hasManyFragments(declaredTypeName, options) {
     //If we already have a processed fragment in _data and our current fragmet is
     //null simply reuse the one from data. We can be in this state after a rollback
     //for example
-    if (data instanceof FragmentArray && !fragments) {
+    if (data instanceof StatefulArray && !fragments) {
       fragments = data;
     // Create a fragment array and initialize with data
     } else if (data && data !== fragments) {
