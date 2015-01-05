@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.2.3 (January 5, 2015)
+
+* Added Ember CLI addon
+* Updated Ember Data version dependency in Bower package
+
 ### v0.2.2 (November 3, 2014)
 
 * Added support for polymorphic fragments
