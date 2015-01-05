@@ -142,11 +142,9 @@ var FragmentArray = StatefulArray.extend({
   },
 
   replaceContent: function(idx, amt, fragments) {
+    var array = this;
     var record = get(this, 'owner');
-    var store = get(record, 'store');
-    var type = get(this, 'type');
     var key = get(this, 'name');
-    var originalState = this.originalState;
 
     // Since all array manipulation methods end up using this method, ensure
     // ensure that fragments are the correct type and have an owner and name
@@ -154,8 +152,16 @@ var FragmentArray = StatefulArray.extend({
       fragments.forEach(function(fragment) {
         var owner = get(fragment, '_owner');
 
-        Ember.assert("You can only add '" + type + "' fragments to this property", fragment instanceof store.modelFor(type));
         Ember.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
+        Ember.assert("You can only add '" + get(array, 'type') + "' fragments to this property", (function (type) {
+          if (fragment instanceof type) {
+            return true;
+          } else if (Ember.MODEL_FACTORY_INJECTIONS) {
+            return fragment instanceof type.superclass;
+          }
+
+          return false;
+        })(get(record, 'store').modelFor(get(array, 'type'))));
 
         if (!owner) {
           fragment.setProperties({

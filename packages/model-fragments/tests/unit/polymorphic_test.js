@@ -6,7 +6,7 @@ module("unit/fragments - polymorphism", {
       name: DS.attr("string"),
       city: DS.attr("string"),
       star: DS.hasOneFragment("animal", { polymorphic: true, typeKey: '$type' }),
-      animals: DS.hasManyFragments("animal", { polymorphic: true, typeKey: '$type' }),
+      animals: DS.hasManyFragments("animal", { polymorphic: true, typeKey: '$type', defaultValue: [] }),
     });
 
     Animal = DS.ModelFragment.extend({
@@ -90,3 +90,60 @@ test("hasManyFragments supports polymorphism", function() {
   }));
 });
 
+test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
+  expect(1);
+
+  var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+  Ember.MODEL_FACTORY_INJECTIONS = true;
+
+  try {
+    Ember.run(function () {
+      var zoo = store.createRecord(Zoo, { name: 'The World' });
+      var animal = store.createFragment(Elephant, { name: 'Mr. Pink' });
+
+      zoo.set('star', animal);
+
+      equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
+    });
+  } finally {
+    Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
+  }
+});
+
+test("rolling back a `DS.hasOneFragment` fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
+  expect(1);
+
+  var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+  Ember.MODEL_FACTORY_INJECTIONS = true;
+
+  return Ember.RSVP.Promise.resolve(store.find(Zoo, 1)).then(function(zoo) {
+    var animal = zoo.get('star');
+
+    zoo.set('star', null);
+    zoo.rollback();
+
+    equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
+  }).finally(function() {
+    Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
+  });
+});
+
+test("`DS.hasManyFragments` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
+  expect(1);
+
+  var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+  Ember.MODEL_FACTORY_INJECTIONS = true;
+
+  try {
+    Ember.run(function () {
+      var zoo = store.createRecord(Zoo, { name: 'The World' });
+      var animal = store.createFragment(Elephant, { name: 'Whitey' });
+
+      zoo.get('animals').pushObject(animal);
+
+      equal(zoo.get('animals.firstObject.name'), animal.get('name'), 'The type check succeeded');
+    });
+  } finally {
+    Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
+  }
+});
