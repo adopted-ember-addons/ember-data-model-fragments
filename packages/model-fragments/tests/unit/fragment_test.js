@@ -132,7 +132,10 @@ test("changes to attributes can be rolled back", function() {
 });
 
 test("fragment properties are serialized as normal attributes using their own serializers", function() {
-  store.push(Person, {
+  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
+  store.modelFor('person');
+
+  store.push('person', {
     id: 1,
     name: {
       first: "Aerys",
@@ -146,10 +149,7 @@ test("fragment properties are serialized as normal attributes using their own se
     }
   }));
 
-  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  store.modelFor('person');
-
-  store.find(Person, 1).then(async(function(person) {
+  store.find('person', 1).then(async(function(person) {
     var name = person.get('name');
 
     var serialized = person.serialize();

@@ -54,10 +54,10 @@ function hasOneFragment(declaredTypeName, options) {
 
   return Ember.computed(function(key, value) {
     var record = this;
+    var store = this.store;
     var data = this._data[key] || getDefaultValue(this, options, 'object');
     var fragment = this._fragments[key];
     var actualTypeName = getActualFragmentType(declaredTypeName, options, data);
-    var actualType = this.store.modelFor(actualTypeName);
 
     function setOwner(fragment) {
       Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
@@ -71,14 +71,14 @@ function hasOneFragment(declaredTypeName, options) {
     // may not be initialized yet, in which case the data will contain a
     // raw response or a stashed away fragment
 
-    //If we already have a processed fragment in _data and our current fragmet is
-    //null simply reuse the one from data. We can be in this state after a rollback
-    //for example
-    if (data instanceof actualType && !fragment) {
+    // If we already have a processed fragment in _data and our current fragmet is
+    // null simply reuse the one from data. We can be in this state after a rollback
+    // for example
+    if (!fragment && isInstanceOfType(store.modelFor(actualTypeName), data)) {
       fragment = data;
-    //Else initialize the fragment
+    // Else initialize the fragment
     } else if (data && data !== fragment) {
-      fragment || (fragment = setOwner(this.store.buildFragment(actualTypeName)));
+      fragment || (fragment = setOwner(store.buildFragment(actualTypeName)));
       fragment.setupData(data);
       this._data[key] = fragment;
     } else {
@@ -88,7 +88,7 @@ function hasOneFragment(declaredTypeName, options) {
 
     // Handle being called as a setter
     if (arguments.length > 1) {
-      Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || value instanceof this.store.modelFor(declaredTypeName));
+      Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || isInstanceOfType(store.modelFor(declaredTypeName), value));
 
       fragment = value ? setOwner(value) : null;
 
@@ -101,6 +101,18 @@ function hasOneFragment(declaredTypeName, options) {
 
     return this._fragments[key] = fragment;
   }).property().meta(meta);
+}
+
+// Check whether a fragment is an instance of the given type, respecting model
+// factory injections
+function isInstanceOfType(type, fragment) {
+  if (fragment instanceof type) {
+    return true;
+  } else if (Ember.MODEL_FACTORY_INJECTIONS) {
+    return fragment instanceof type.superclass;
+  }
+
+  return false;
 }
 
 /**
