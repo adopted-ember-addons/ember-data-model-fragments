@@ -209,3 +209,41 @@ test("the adapter can update fragments on save", function() {
     equal(addresses.get('firstObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
   }));
 });
+
+
+test("observe fragments which are changed on save", function() {
+  var data = {
+    id: 1,
+    name: {
+      first: "Eddard",
+      last: "Stark"
+    },
+    addresses: [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ]
+  };
+
+  var PersonController = Ember.ObjectController.extend({
+    observer: function() {
+      this.set('model.observed', true);
+    }.observes('addresses.[]')
+  });
+
+  store.push(Person, data);
+
+  env.adapter.updateRecord = function(store, type, record) {
+    return Ember.RSVP.resolve(data);
+  };
+
+  store.find('person', 1).then(async(function(person) {
+    var controller = PersonController.create({ model: person });
+    return person.save();
+  })).then(async(function(person) {
+    ok(person.get('observed'), "The change to `addresses.[]` was observed");
+  }));
+});
