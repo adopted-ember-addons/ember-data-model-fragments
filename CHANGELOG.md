@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.2.5 (January 6, 2015)
+
+* Support type checks with `Ember.MODEL_FACTORY_INJECTIONS` set to true
+* Fixed issue with broken ember-cli install:addon
+
 ### v0.2.4 (January 5, 2015)
 
 * Updated to support Ember Data v1.0.0-beta.14 (igort)

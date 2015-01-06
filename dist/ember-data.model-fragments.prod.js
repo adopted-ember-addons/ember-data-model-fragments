@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.4
+ * @version   0.2.5
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -279,11 +279,9 @@ define("fragments/array/fragment",
       },
 
       replaceContent: function(idx, amt, fragments) {
+        var array = this;
         var record = get(this, 'owner');
-        var store = get(record, 'store');
-        var type = get(this, 'type');
         var key = get(this, 'name');
-        var originalState = this.originalState;
 
         // Since all array manipulation methods end up using this method, ensure
         // ensure that fragments are the correct type and have an owner and name
@@ -552,10 +550,10 @@ define("fragments/attributes",
 
       return Ember.computed(function(key, value) {
         var record = this;
+        var store = this.store;
         var data = this._data[key] || getDefaultValue(this, options, 'object');
         var fragment = this._fragments[key];
         var actualTypeName = getActualFragmentType(declaredTypeName, options, data);
-        var actualType = this.store.modelFor(actualTypeName);
 
         function setOwner(fragment) {
                     return fragment.setProperties({
@@ -568,14 +566,14 @@ define("fragments/attributes",
         // may not be initialized yet, in which case the data will contain a
         // raw response or a stashed away fragment
 
-        //If we already have a processed fragment in _data and our current fragmet is
-        //null simply reuse the one from data. We can be in this state after a rollback
-        //for example
-        if (data instanceof actualType && !fragment) {
+        // If we already have a processed fragment in _data and our current fragmet is
+        // null simply reuse the one from data. We can be in this state after a rollback
+        // for example
+        if (!fragment && isInstanceOfType(store.modelFor(actualTypeName), data)) {
           fragment = data;
-        //Else initialize the fragment
+        // Else initialize the fragment
         } else if (data && data !== fragment) {
-          fragment || (fragment = setOwner(this.store.buildFragment(actualTypeName)));
+          fragment || (fragment = setOwner(store.buildFragment(actualTypeName)));
           fragment.setupData(data);
           this._data[key] = fragment;
         } else {
@@ -597,6 +595,18 @@ define("fragments/attributes",
 
         return this._fragments[key] = fragment;
       }).property().meta(meta);
+    }
+
+    // Check whether a fragment is an instance of the given type, respecting model
+    // factory injections
+    function isInstanceOfType(type, fragment) {
+      if (fragment instanceof type) {
+        return true;
+      } else if (Ember.MODEL_FACTORY_INJECTIONS) {
+        return fragment instanceof type.superclass;
+      }
+
+      return false;
     }
 
     /**
@@ -1454,7 +1464,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.4');
+      Ember.libraries.register('Model Fragments', '0.2.5');
     }
 
     // Something must be exported...
