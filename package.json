@@ -19,7 +19,8 @@
     "fragments"
   ],
   "ember-addon": {
-    "main": "ember-addon/index.js"
+    "main": "ember-addon/index.js",
+    "defaultBlueprint": "ember-data-model-fragments"
   },
   "files": [
     "ember-addon"
