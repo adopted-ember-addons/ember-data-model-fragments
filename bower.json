@@ -7,6 +7,7 @@
     "bower_components",
     "node_modules",
     "tmp",
+    "ember-addon",
     "packages",
     "vendor",
     "tests",
@@ -15,7 +16,9 @@
     ".travis.yml",
     "Gruntfile.js",
     "package.json",
-    "testem.json"
+    "license.js",
+    "testem.json",
+    "test.html.mustache"
   ],
   "dependencies": {
     "ember": "^1.4.0",
