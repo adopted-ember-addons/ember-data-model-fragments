@@ -211,7 +211,9 @@ test("the adapter can update fragments on save", function() {
 });
 
 
-test("observe fragments which are changed on save", function() {
+test("`DS.hasManyFragments` array properties are notified on save", function() {
+  expect(2);
+
   var data = {
     id: 1,
     name: {
@@ -228,9 +230,9 @@ test("observe fragments which are changed on save", function() {
     ]
   };
 
-  var PersonController = Ember.ObjectController.extend({
+  var PersonProxy = Ember.ObjectProxy.extend({
     observer: function() {
-      this.set('model.observed', true);
+      ok(true, "The array change was observed");
     }.observes('addresses.[]')
   });
 
@@ -240,10 +242,47 @@ test("observe fragments which are changed on save", function() {
     return Ember.RSVP.resolve(data);
   };
 
-  store.find('person', 1).then(async(function(person) {
-    var controller = PersonController.create({ model: person });
+  return store.find(Person, 1).then(function(person) {
+    var controller = PersonProxy.create({ content: person });
     return person.save();
-  })).then(async(function(person) {
-    ok(person.get('observed'), "The change to `addresses.[]` was observed");
-  }));
+  });
+});
+
+test("`DS.hasManyFragments` properties are notifed on reload", function() {
+  expect(2);
+
+  var Army = DS.Model.extend({
+    name     : DS.attr('string'),
+    soldiers : DS.hasManyFragments()
+  });
+
+  var data = {
+    id: 1,
+    name: "Golden Company",
+    soldiers: [
+      "Aegor Rivers",
+      "Jon Connington",
+      "Tristan Rivers"
+    ]
+  };
+
+  var ArmyProxy = Ember.ObjectProxy.extend({
+    observer: function() {
+      equal(this.get('soldiers.length'), 2, "The array change to was observed");
+    }.observes('soldiers.[]')
+  });
+
+  store.push(Army, data);
+
+  env.adapter.find = function(store, type, record) {
+    var updated = Ember.copy(data, true);
+    updated.soldiers.shift();
+
+    return Ember.RSVP.resolve(updated);
+  };
+
+  return store.find(Army, 1).then(function(army) {
+    var proxy = ArmyProxy.create({ content: army });
+    return army.reload();
+  });
 });

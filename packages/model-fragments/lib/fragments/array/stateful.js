@@ -36,6 +36,7 @@ var StatefulArray = Ember.ArrayProxy.extend({
 
   init: function() {
     this._super();
+    this._pendingData = undefined;
     set(this, '_originalState', []);
   },
 
@@ -49,13 +50,34 @@ var StatefulArray = Ember.ArrayProxy.extend({
     @param {Object} data
   */
   setupData: function(data) {
-    var content = get(this, 'content');
+    // Since replacing the contents of the array can trigger changes to fragment
+    // array properties, this method can get invoked recursively with the same
+    // data, so short circuit here once it's been setup the first time
+    if (this._pendingData === data) {
+      return;
+    }
 
-    data = Ember.makeArray(data);
-    set(this, '_originalState', data);
+    this._pendingData = data;
+
+    var processedData = this._processData(data);
+
+    // This data is canonical, so create rollback point
+    set(this, '_originalState', processedData);
 
     // Completely replace the contents with the new data
-    this.replaceContent(0, get(this, 'content.length'), data);
+    this.replaceContent(0, get(this, 'content.length'), processedData);
+
+    this._pendingData = undefined;
+  },
+
+  /**
+    @method _processData
+    @private
+    @param {Object} data
+  */
+  _processData: function(data) {
+    // Simply ensure that the data is an actual array
+    return Ember.makeArray(data);
   },
 
   /**
