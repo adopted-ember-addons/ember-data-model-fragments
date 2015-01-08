@@ -36,11 +36,11 @@ var FragmentArray = StatefulArray.extend({
   },
 
   /**
-    @method setupData
+    @method _processData
     @private
     @param {Object} data
   */
-  setupData: function(data) {
+  _processData: function(data) {
     var record = get(this, 'owner');
     var store = get(record, 'store');
     var declaredType = get(this, 'type');
@@ -53,7 +53,7 @@ var FragmentArray = StatefulArray.extend({
     this._isInitializing = true;
 
     // Map data to existing fragments and create new ones where necessary
-    data = map(Ember.makeArray(data), function(data, i) {
+    var processedData = map(Ember.makeArray(data), function(data, i) {
       var fragment = content[i];
 
       // Create a new fragment from the data array if needed
@@ -75,7 +75,7 @@ var FragmentArray = StatefulArray.extend({
 
     this._isInitializing = false;
 
-    this._super(data);
+    return processedData;
   },
 
   /**

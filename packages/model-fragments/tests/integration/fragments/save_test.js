@@ -209,3 +209,80 @@ test("the adapter can update fragments on save", function() {
     equal(addresses.get('firstObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
   }));
 });
+
+
+test("`DS.hasManyFragments` array properties are notified on save", function() {
+  expect(2);
+
+  var data = {
+    id: 1,
+    name: {
+      first: "Eddard",
+      last: "Stark"
+    },
+    addresses: [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ]
+  };
+
+  var PersonProxy = Ember.ObjectProxy.extend({
+    observer: function() {
+      ok(true, "The array change was observed");
+    }.observes('addresses.[]')
+  });
+
+  store.push(Person, data);
+
+  env.adapter.updateRecord = function(store, type, record) {
+    return Ember.RSVP.resolve(data);
+  };
+
+  return store.find(Person, 1).then(function(person) {
+    var controller = PersonProxy.create({ content: person });
+    return person.save();
+  });
+});
+
+test("`DS.hasManyFragments` properties are notifed on reload", function() {
+  expect(2);
+
+  var Army = DS.Model.extend({
+    name     : DS.attr('string'),
+    soldiers : DS.hasManyFragments()
+  });
+
+  var data = {
+    id: 1,
+    name: "Golden Company",
+    soldiers: [
+      "Aegor Rivers",
+      "Jon Connington",
+      "Tristan Rivers"
+    ]
+  };
+
+  var ArmyProxy = Ember.ObjectProxy.extend({
+    observer: function() {
+      equal(this.get('soldiers.length'), 2, "The array change to was observed");
+    }.observes('soldiers.[]')
+  });
+
+  store.push(Army, data);
+
+  env.adapter.find = function(store, type, record) {
+    var updated = Ember.copy(data, true);
+    updated.soldiers.shift();
+
+    return Ember.RSVP.resolve(updated);
+  };
+
+  return store.find(Army, 1).then(function(army) {
+    var proxy = ArmyProxy.create({ content: army });
+    return army.reload();
+  });
+});
