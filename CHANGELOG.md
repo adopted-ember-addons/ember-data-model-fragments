@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.2.6 (January 8, 2015)
+
+* Fixed infinite recursion issue after save when observing fragment array props
+* Fixed issue with `ember install:addon` not invoking correct blueprint
+* Fixed issue with Ember CLI including addon dir in JS tree
+
 ### v0.2.5 (January 6, 2015)
 
 * Support type checks with `Ember.MODEL_FACTORY_INJECTIONS` set to true

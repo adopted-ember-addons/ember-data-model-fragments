@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.5
+ * @version   0.2.6
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -173,11 +173,11 @@ define("fragments/array/fragment",
       },
 
       /**
-        @method setupData
+        @method _processData
         @private
         @param {Object} data
       */
-      setupData: function(data) {
+      _processData: function(data) {
         var record = get(this, 'owner');
         var store = get(record, 'store');
         var declaredType = get(this, 'type');
@@ -190,7 +190,7 @@ define("fragments/array/fragment",
         this._isInitializing = true;
 
         // Map data to existing fragments and create new ones where necessary
-        data = map(Ember.makeArray(data), function(data, i) {
+        var processedData = map(Ember.makeArray(data), function(data, i) {
           var fragment = content[i];
 
           // Create a new fragment from the data array if needed
@@ -212,7 +212,7 @@ define("fragments/array/fragment",
 
         this._isInitializing = false;
 
-        this._super(data);
+        return processedData;
       },
 
       /**
@@ -397,6 +397,7 @@ define("fragments/array/stateful",
 
       init: function() {
         this._super();
+        this._pendingData = undefined;
         set(this, '_originalState', []);
       },
 
@@ -410,13 +411,34 @@ define("fragments/array/stateful",
         @param {Object} data
       */
       setupData: function(data) {
-        var content = get(this, 'content');
+        // Since replacing the contents of the array can trigger changes to fragment
+        // array properties, this method can get invoked recursively with the same
+        // data, so short circuit here once it's been setup the first time
+        if (this._pendingData === data) {
+          return;
+        }
 
-        data = Ember.makeArray(data);
-        set(this, '_originalState', data);
+        this._pendingData = data;
+
+        var processedData = this._processData(data);
+
+        // This data is canonical, so create rollback point
+        set(this, '_originalState', processedData);
 
         // Completely replace the contents with the new data
-        this.replaceContent(0, get(this, 'content.length'), data);
+        this.replaceContent(0, get(this, 'content.length'), processedData);
+
+        this._pendingData = undefined;
+      },
+
+      /**
+        @method _processData
+        @private
+        @param {Object} data
+      */
+      _processData: function(data) {
+        // Simply ensure that the data is an actual array
+        return Ember.makeArray(data);
       },
 
       /**
@@ -1479,7 +1501,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.5');
+      Ember.libraries.register('Model Fragments', '0.2.6');
     }
 
     // Something must be exported...
