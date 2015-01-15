@@ -111,6 +111,9 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
 
     // Initiate state change
     this.send('pushedData');
+
+    // Changed properties must be notified manually
+    notifyProperties(this, Ember.keys(data));
   },
 
   /**
@@ -139,9 +142,9 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
 
     // Initiate state change
     this.send('rolledBack');
-    for (var i=0; i<toNotify.length; i++) {
-      this.notifyPropertyChange(toNotify[i]);
-    }
+
+    // Changed properties must be notified manually
+    notifyProperties(this, toNotify);
   },
 
   /**
@@ -208,6 +211,14 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
     this._setup();
   }
 });
+
+function notifyProperties(context, propNames) {
+  Ember.beginPropertyChanges();
+  for (var i = 0, l = propNames.length; i < l; i++) {
+    context.notifyPropertyChange(propNames[i]);
+  }
+  Ember.endPropertyChanges();
+}
 
 /**
  * `getActualFragmentType` returns the actual type of a fragment based on its declared type
