@@ -151,6 +151,34 @@ test("rolling back the owner record returns a `DS.hasOneFragment` fragment and o
   }));
 });
 
+test("a record can be rolled back multiple times", function() {
+  store.push(Person, {
+    id: 1,
+    name: {
+      first: "Arya",
+      last: "Stark"
+    }
+  });
+
+  store.find(Person, 1).then(async(function(person) {
+    var name = person.get('name');
+
+    name.set('last', '');
+    person.rollback();
+
+    equal(name.get('last'), 'Stark', "fragment has correct values");
+    ok(!name.get('isDirty'), "fragment is clean");
+    ok(!person.get('isDirty'), "owner record is clean");
+
+    name.set('last', '');
+    person.rollback();
+
+    equal(name.get('last'), 'Stark', "fragment has correct values");
+    ok(!name.get('isDirty'), "fragment is clean");
+    ok(!person.get('isDirty'), "owner record is clean");
+  }));
+});
+
 test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the owner record to a clean state", function() {
   store.push(Person, {
     id: 1,

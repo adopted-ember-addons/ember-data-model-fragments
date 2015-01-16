@@ -172,7 +172,6 @@ Model.reopen({
       if (this._fragments[key]) {
         this._fragments[key].rollback();
       }
-      this._fragments[key] = null;
     }
   },
 
