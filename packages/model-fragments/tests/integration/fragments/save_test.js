@@ -210,6 +210,48 @@ test("the adapter can update fragments on save", function() {
   }));
 });
 
+test("the adapter can update fragments on reload", function() {
+  var data = {
+    id: 1,
+    name: {
+      first: "Brandon",
+      last: "Stark"
+    },
+    addresses: [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ]
+  };
+
+  store.push(Person, data);
+
+  env.adapter.find = function(store, type, id, record) {
+    var payload = Ember.copy(data, true);
+
+    payload.name.first = 'Bran';
+    payload.addresses[0].street = '1 Broken Tower';
+
+    return Ember.RSVP.resolve(payload);
+  };
+
+  return store.find(Person, 1).then(function(person) {
+    // Access values that will change to prime CP cache
+    person.get('name.first');
+    person.get('addresses.firstObject.street');
+
+    return person.reload();
+  }).then(function(person) {
+    var name = person.get('name');
+    var addresses = person.get('addresses');
+
+    equal(name.get('first'), 'Bran', "`DS.hasOneFragment` fragment correctly updated");
+    equal(addresses.get('firstObject.street'), '1 Broken Tower', "`DS.hasManyFragments` fragment correctly updated");
+  });
+});
 
 test("`DS.hasManyFragments` array properties are notified on save", function() {
   expect(2);
