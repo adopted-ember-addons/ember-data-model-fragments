@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.2.7 (January 16, 2015)
+
+* Fixed issue with multiple rollbacks failing
+* Fixed issue with changed properties not being notified on reload
+
 ### v0.2.6 (January 8, 2015)
 
 * Fixed infinite recursion issue after save when observing fragment array props

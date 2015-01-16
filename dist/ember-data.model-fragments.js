@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.6
+ * @version   0.2.7
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -982,7 +982,6 @@ define("fragments/ext",
           if (this._fragments[key]) {
             this._fragments[key].rollback();
           }
-          this._fragments[key] = null;
         }
       },
 
@@ -1138,6 +1137,9 @@ define("fragments/model",
 
         // Initiate state change
         this.send('pushedData');
+
+        // Changed properties must be notified manually
+        notifyProperties(this, Ember.keys(data));
       },
 
       /**
@@ -1166,9 +1168,9 @@ define("fragments/model",
 
         // Initiate state change
         this.send('rolledBack');
-        for (var i=0; i<toNotify.length; i++) {
-          this.notifyPropertyChange(toNotify[i]);
-        }
+
+        // Changed properties must be notified manually
+        notifyProperties(this, toNotify);
       },
 
       /**
@@ -1235,6 +1237,14 @@ define("fragments/model",
         this._setup();
       }
     });
+
+    function notifyProperties(context, propNames) {
+      Ember.beginPropertyChanges();
+      for (var i = 0, l = propNames.length; i < l; i++) {
+        context.notifyPropertyChange(propNames[i]);
+      }
+      Ember.endPropertyChanges();
+    }
 
     /**
      * `getActualFragmentType` returns the actual type of a fragment based on its declared type
@@ -1501,7 +1511,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.6');
+      Ember.libraries.register('Model Fragments', '0.2.7');
     }
 
     // Something must be exported...
