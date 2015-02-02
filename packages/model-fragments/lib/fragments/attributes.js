@@ -79,8 +79,10 @@ function hasOneFragment(declaredTypeName, options) {
     // Else initialize the fragment
     } else if (data && data !== fragment) {
       fragment || (fragment = setOwner(store.buildFragment(actualTypeName)));
-      fragment.setupData(data);
+      //Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
+      //again we have it cached already
       this._data[key] = fragment;
+      fragment.setupData(data);
     } else {
       // Handle the adapter setting the fragment to null
       fragment = data;
@@ -194,8 +196,8 @@ function hasManyFragments(declaredTypeName, options) {
     // Create a fragment array and initialize with data
     } else if (data && data !== fragments) {
       fragments || (fragments = createArray());
-      fragments.setupData(data);
       this._data[key] = fragments;
+      fragments.setupData(data);
     } else {
       // Handle the adapter setting the fragment array to null
       fragments = data;
