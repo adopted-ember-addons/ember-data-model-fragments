@@ -4,7 +4,7 @@ module("integration/fragments - Persisting Records With Fragments", {
   setup: function() {
     Person = DS.Model.extend({
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address")
+      addresses : DS.hasManyFragments("address"),
     });
 
     Name = DS.ModelFragment.extend({
@@ -250,6 +250,42 @@ test("the adapter can update fragments on reload", function() {
 
     equal(name.get('first'), 'Bran', "`DS.hasOneFragment` fragment correctly updated");
     equal(addresses.get('firstObject.street'), '1 Broken Tower', "`DS.hasManyFragments` fragment correctly updated");
+  });
+});
+
+/*
+  Currently in certain annoying cases in Ember, including aliases or proxies that are actively observed,
+  CPs are consumed as soon as they are changed. If we are not careful, this can cause infinite loops when
+  updating existing fragment data
+*/
+test("the adapter can update fragments without infinite loops when CPs are eagerly consumed", function() {
+  var data = {
+    id: 1,
+    name: {
+      first: "Brandon",
+      last: "Stark"
+    },
+    addresses: [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ]
+  };
+
+  store.push(Person, data);
+
+  return store.find(Person, 1).then(function(person) {
+    var personController = Ember.ObjectController.create({ content: person });
+
+    Ember.addObserver(personController, 'name.first', function() {
+    });
+    personController.get('name.first');
+
+    store.push(Person, data);
+    equal(person.get('name.first'), 'Brandon');
   });
 });
 
