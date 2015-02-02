@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.2.8 (February 2, 2015)
+
+* Fixed infinite loops when reloading observed fragments (igort)
+
 ### v0.2.7 (January 16, 2015)
 
 * Fixed issue with multiple rollbacks failing
@@ -27,7 +31,7 @@
 
 ### v0.2.2 (November 3, 2014)
 
-* Added support for polymorphic fragments
+* Added support for polymorphic fragments (marcus-nl)
 
 ### v0.2.1 (October 2, 2014)
 
