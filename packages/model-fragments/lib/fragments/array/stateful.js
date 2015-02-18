@@ -81,6 +81,15 @@ var StatefulArray = Ember.ArrayProxy.extend({
   },
 
   /**
+    @method _createSnapshot
+    @private
+  */
+  _createSnapshot: function() {
+    // Since elements are not models, a snapshot is simply a mapping of raw values
+    return this.toArray();
+  },
+
+  /**
     @method adapterDidCommit
   */
   adapterDidCommit: function() {

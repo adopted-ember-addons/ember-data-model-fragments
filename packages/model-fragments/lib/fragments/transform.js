@@ -1,8 +1,13 @@
+import Snapshot from '../snapshot';
 import Transform from '../transform';
 
 /**
   @module ember-data.model-fragments
 */
+
+var get = Ember.get;
+var isArray = Ember.isArray;
+var map = Ember.EnumerableUtils.map;
 
 /**
   Transform for all fragment attributes which delegates work to
@@ -19,9 +24,24 @@ var FragmentTransform = Transform.extend({
     return data;
   },
 
-  serialize: function(fragment) {
-    return fragment ? fragment.serialize() : null;
+  serialize: function(snapshot) {
+    if (!snapshot) {
+      return null;
+    } else if (isArray(snapshot)) {
+      return map(snapshot, serializeSnapshot);
+    } else {
+      return serializeSnapshot(snapshot);
+    }
   }
 });
+
+function serializeSnapshot(snapshot) {
+  // The snapshot can be a primitive value (which could be an object)
+  if (!(snapshot instanceof Snapshot)) {
+    return snapshot;
+  }
+
+  return get(snapshot, 'record.store').serializerFor(snapshot.typeKey).serialize(snapshot);
+}
 
 export default FragmentTransform;
