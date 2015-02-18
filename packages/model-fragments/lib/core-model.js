@@ -13,6 +13,7 @@ Model.proto();
 var protoProps = [
   '_setup',
   '_unhandledEvent',
+  '_createSnapshot',
   'send',
   'transitionTo',
   'isEmpty',
