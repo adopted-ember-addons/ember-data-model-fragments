@@ -66,6 +66,9 @@ var get = Ember.get;
   @uses Ember.Copyable
 */
 var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
+  _createSnapshot: function() {
+    return new DS.Snapshot(this);
+  },
   /**
     The fragment's property name on the owner record.
 
