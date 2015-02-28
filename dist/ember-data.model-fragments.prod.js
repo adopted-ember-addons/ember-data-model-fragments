@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.2.7
+ * @version   0.3.0
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -77,6 +77,7 @@ define("core-model",
     var protoProps = [
       '_setup',
       '_unhandledEvent',
+      '_createSnapshot',
       'send',
       'transitionTo',
       'isEmpty',
@@ -213,6 +214,17 @@ define("fragments/array/fragment",
         this._isInitializing = false;
 
         return processedData;
+      },
+
+      /**
+        @method _createSnapshot
+        @private
+      */
+      _createSnapshot: function() {
+        // Snapshot each fragment
+        return map(this, function(fragment) {
+          return fragment._createSnapshot();
+        });
       },
 
       /**
@@ -429,6 +441,15 @@ define("fragments/array/stateful",
       _processData: function(data) {
         // Simply ensure that the data is an actual array
         return Ember.makeArray(data);
+      },
+
+      /**
+        @method _createSnapshot
+        @private
+      */
+      _createSnapshot: function() {
+        // Since elements are not models, a snapshot is simply a mapping of raw values
+        return this.toArray();
       },
 
       /**
@@ -872,6 +893,30 @@ define("fragments/ext",
       _setup: function() {
         this._super();
         this._fragments = {};
+      },
+
+      /**
+        Override parent method to snapshot fragment attributes before they are
+        passed to the `DS.Model#serialize`.
+
+        @method _createSnapshot
+        @private
+      */
+      _createSnapshot: function() {
+        var snapshot = this._super.apply(this, arguments);
+        var attrs = snapshot._attributes;
+
+        Ember.keys(attrs).forEach(function(key) {
+          var attr = attrs[key];
+
+          // If the attribute has a `_createSnapshot` method, invoke it before the
+          // snapshot gets passed to the serializer
+          if (attr && typeof attr._createSnapshot === 'function') {
+            attrs[key] = attr._createSnapshot();
+          }
+        });
+
+        return snapshot;
       },
 
       /**
@@ -1415,14 +1460,19 @@ define("fragments/states",
     __exports__["default"] = FragmentRootState;
   });
 define("fragments/transform", 
-  ["../transform","exports"],
-  function(__dependency1__, __exports__) {
+  ["../snapshot","../transform","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
     "use strict";
-    var Transform = __dependency1__["default"];
+    var Snapshot = __dependency1__["default"];
+    var Transform = __dependency2__["default"];
 
     /**
       @module ember-data.model-fragments
     */
+
+    var get = Ember.get;
+    var isArray = Ember.isArray;
+    var map = Ember.EnumerableUtils.map;
 
     /**
       Transform for all fragment attributes which delegates work to
@@ -1439,10 +1489,25 @@ define("fragments/transform",
         return data;
       },
 
-      serialize: function(fragment) {
-        return fragment ? fragment.serialize() : null;
+      serialize: function(snapshot) {
+        if (!snapshot) {
+          return null;
+        } else if (isArray(snapshot)) {
+          return map(snapshot, serializeSnapshot);
+        } else {
+          return serializeSnapshot(snapshot);
+        }
       }
     });
+
+    function serializeSnapshot(snapshot) {
+      // The snapshot can be a primitive value (which could be an object)
+      if (!(snapshot instanceof Snapshot)) {
+        return snapshot;
+      }
+
+      return get(snapshot, 'record.store').serializerFor(snapshot.typeKey).serialize(snapshot);
+    }
 
     __exports__["default"] = FragmentTransform;
   });
@@ -1498,7 +1563,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.2.7');
+      Ember.libraries.register('Model Fragments', '0.3.0');
     }
 
     // Something must be exported...
@@ -1509,6 +1574,12 @@ define("model",
   function(__exports__) {
     "use strict";
     __exports__["default"] = DS.Model;
+  });
+define("snapshot", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    __exports__["default"] = DS.Snapshot;
   });
 define("states", 
   ["exports"],

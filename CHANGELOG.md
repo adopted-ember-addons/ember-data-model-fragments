@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.3.0 (February 27, 2015)
+
+* Added support for Snapshots to support Ember Data v1.0.0-beta.15
+* Added explicit ordering to ember-cli addon
+
 ### v0.2.8 (February 2, 2015)
 
 * Fixed infinite loops when reloading observed fragments (igort)
