@@ -78,6 +78,30 @@ Model.reopen({
   },
 
   /**
+    Override parent method to snapshot fragment attributes before they are
+    passed to the `DS.Model#serialize`.
+
+    @method _createSnapshot
+    @private
+  */
+  _createSnapshot: function() {
+    var snapshot = this._super.apply(this, arguments);
+    var attrs = snapshot._attributes;
+
+    Ember.keys(attrs).forEach(function(key) {
+      var attr = attrs[key];
+
+      // If the attribute has a `_createSnapshot` method, invoke it before the
+      // snapshot gets passed to the serializer
+      if (attr && typeof attr._createSnapshot === 'function') {
+        attrs[key] = attr._createSnapshot();
+      }
+    });
+
+    return snapshot;
+  },
+
+  /**
     If the adapter did not return a hash in response to a commit,
     merge the changed attributes and relationships into the existing
     saved data and notify all fragments of the commit.

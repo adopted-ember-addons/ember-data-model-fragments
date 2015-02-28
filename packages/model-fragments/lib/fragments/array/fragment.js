@@ -79,6 +79,17 @@ var FragmentArray = StatefulArray.extend({
   },
 
   /**
+    @method _createSnapshot
+    @private
+  */
+  _createSnapshot: function() {
+    // Snapshot each fragment
+    return map(this, function(fragment) {
+      return fragment._createSnapshot();
+    });
+  },
+
+  /**
     @method adapterDidCommit
   */
   adapterDidCommit: function() {
