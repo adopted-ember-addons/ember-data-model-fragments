@@ -23,6 +23,7 @@
     "after": "ember-data"
   },
   "files": [
+    "index.js",
     "ember-addon"
   ],
   "devDependencies": {
