@@ -3,13 +3,11 @@ var env, store, User, Order, Product;
 module("integration/fragments - Nested fragments", {
   setup: function() {
     User = DS.Model.extend({
-      name      : DS.attr("string"),
-      orders    : DS.hasManyFragments("order")
+      name: DS.attr("string")
     });
 
     Order = DS.ModelFragment.extend({
-      amount   : DS.attr("string"),
-      products : DS.hasManyFragments("product")
+      amount: DS.attr("string")
     });
 
     Product = DS.ModelFragment.extend({
@@ -37,6 +35,14 @@ module("integration/fragments - Nested fragments", {
 });
 
 test("`DS.hasManyFragment` properties can be nested", function() {
+  User.reopen({
+    orders: DS.hasManyFragments("order")
+  });
+
+  Order.reopen({
+    products: DS.hasManyFragments("product")
+  });
+
   var data = {
     id: 1,
     name: 'Tyrion Lannister',
@@ -79,7 +85,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     return Ember.RSVP.resolve(payload);
   };
 
-  store.find(User, 1).then(async(function(user) {
+  return store.find(User, 1).then(function(user) {
     equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are deserialized properly");
 
     var product = user.get('orders.firstObject.products.firstObject');
@@ -95,8 +101,64 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     ok(user.get('isDirty'), "dirty state propagates to owner");
 
     return user.save();
-  })).then(async(function(user) {
+  }).then(function(user) {
     ok(!user.get('isDirty'), "owner record is clean");
     equal(user.get('orders.firstObject.products.length'), 1, "fragment array length is correct");
-  }));
+  });
+});
+
+test("Nested fragment properties are not reset after multiple saves", function() {
+  User.reopen({
+    order: DS.hasOneFragment("order")
+  });
+
+  Order.reopen({
+    product: DS.hasOneFragment("product")
+  });
+
+  var newPrice;
+  var data = {
+    id: 1,
+    name: 'Tyrion Lannister',
+    order: {
+      amount  : '799.98',
+      product : {
+        name   : 'Tears of Lys',
+        sku    : 'poison-bd-32',
+        price  : "499.99"
+      }
+    }
+  };
+
+  store.push(User, Ember.copy(data, true));
+
+  env.adapter.updateRecord = function(store, type, record) {
+    var payload = Ember.copy(data, true);
+
+    payload.order.product.price = newPrice;
+
+    return Ember.RSVP.resolve(payload);
+  };
+
+  return store.find(User, 1).then(function(user) {
+    var product = user.get('order.product');
+
+    newPrice = '1.99';
+    product.set('price', newPrice);
+
+    return user.save();
+  }).then(function(user) {
+    var product = user.get('order.product');
+
+    equal(product.get('price'), newPrice, "fragment property value is correct");
+
+    newPrice = '2.99';
+    product.set('price', newPrice);
+
+    return user.save();
+  }).then(function(user) {
+    var product = user.get('order.product');
+
+    equal(product.get('price'), newPrice, "fragment property value is correct");
+  });
 });
