@@ -11,9 +11,10 @@ module.exports = {
   fileMapTokens: function() {
     return {
       __name__: function(options) {
-        // In pod format, name the model 'fragment' to differentiate
+        // The name defaults to the blueprint name, which is 'fragment', but
+        // it needs to be named 'model' for the resolver to find it
         if (options.pod) {
-          return 'fragment';
+          return 'model';
         }
         return options.dasherizedModuleName;
       },
