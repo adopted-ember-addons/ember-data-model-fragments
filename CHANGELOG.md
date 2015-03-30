@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.3.1 (March 30, 2015)
+
+* Fixed "properly formatted package" ember-cli warning
+* Fixed bad file name in 'fragment' blueprint using pod structure
+
 ### v0.3.0 (February 27, 2015)
 
 * Added support for Snapshots to support Ember Data v1.0.0-beta.15
