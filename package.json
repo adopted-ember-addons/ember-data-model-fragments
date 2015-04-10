@@ -18,8 +18,8 @@
     "ember-cli",
     "fragments"
   ],
+  "main": "ember-addon/index.js",
   "ember-addon": {
-    "main": "ember-addon/index.js",
     "after": "ember-data"
   },
   "files": [
