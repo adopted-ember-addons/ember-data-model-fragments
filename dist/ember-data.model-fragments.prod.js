@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.3.1
+ * @version   0.3.2
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -1563,7 +1563,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.3.1');
+      Ember.libraries.register('Model Fragments', '0.3.2');
     }
 
     // Something must be exported...

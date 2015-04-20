@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.3.2 (April 20, 2015)
+
+* Removed duplicate addon definition
+
 ### v0.3.1 (March 30, 2015)
 
 * Fixed "properly formatted package" ember-cli warning
