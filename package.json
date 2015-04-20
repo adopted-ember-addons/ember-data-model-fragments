@@ -28,7 +28,8 @@
   ],
   "devDependencies": {
     "defeatureify": "~0.1.4",
-    "ember-cli": "^0.1.5",
+    "ember-cli": "0.2.3",
+    "ember-cli-release": "0.2.3",
     "grunt": "~0.4.1",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-concat": "~0.3.0",
