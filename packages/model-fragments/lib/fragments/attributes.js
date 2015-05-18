@@ -93,6 +93,7 @@ function hasOneFragment(declaredTypeName, options) {
   return Ember.computed({
     set: function(key, value) {
       var fragment = setupFragment(this, key, value);
+      var store = this.store;
 
       Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || isInstanceOfType(store.modelFor(declaredTypeName), value));
       fragment = value ? setOwner(value, this, key) : null;
