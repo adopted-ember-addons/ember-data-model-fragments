@@ -10,6 +10,15 @@ import { getActualFragmentType } from './model';
 
 var get = Ember.get;
 
+function setFragmentOwner(fragment, record, key) {
+  Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
+  return fragment.setProperties({
+    _owner : record,
+    _name  : key
+  });
+}
+
+
 /**
   `DS.hasOneFragment` defines an attribute on a `DS.Model` or `DS.ModelFragment`
   instance. Much like `DS.belongsTo`, it creates a property that returns a
@@ -53,14 +62,6 @@ function hasOneFragment(declaredTypeName, options) {
     options: options
   };
 
-  function setOwner(fragment, record, key) {
-    Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
-    return fragment.setProperties({
-      _owner : record,
-      _name  : key
-    });
-  }
-
   function setupFragment(record, key, value) {
     var store = record.store;
     var data = record._data[key] || getDefaultValue(record, options, 'object');
@@ -78,7 +79,7 @@ function hasOneFragment(declaredTypeName, options) {
       fragment = data;
     // Else initialize the fragment
     } else if (data && data !== fragment) {
-      fragment || (fragment = setOwner(store.buildFragment(actualTypeName), record, key));
+      fragment || (fragment = setFragmentOwner(store.buildFragment(actualTypeName), record, key));
       //Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
       //again we have it cached already
       record._data[key] = fragment;
@@ -97,7 +98,7 @@ function hasOneFragment(declaredTypeName, options) {
       var store = this.store;
 
       Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || isInstanceOfType(store.modelFor(declaredTypeName), value));
-      fragment = value ? setOwner(value, this, key) : null;
+      fragment = value ? setFragmentOwner(value, this, key) : null;
 
       if (this._data[key] !== fragment) {
         this.fragmentDidDirty(key, fragment);
