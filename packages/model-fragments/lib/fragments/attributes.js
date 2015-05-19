@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import computedPolyfill from '../addons/ember-new-computed/index';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
 import { getActualFragmentType } from './model';
@@ -90,7 +91,7 @@ function hasOneFragment(declaredTypeName, options) {
     return fragment;
   }
 
-  return Ember.computed({
+  return computedPolyfill({
     set: function(key, value) {
       var fragment = setupFragment(this, key, value);
       var store = this.store;
@@ -213,7 +214,7 @@ function hasManyFragments(declaredTypeName, options) {
     return fragments;
   }
 
-  return Ember.computed({
+  return computedPolyfill({
     set: function(key, value) {
       var fragments = setupArrayFragment(this, key, value);
 
