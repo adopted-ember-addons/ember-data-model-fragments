@@ -1,6 +1,6 @@
 ;(function(){
 
-  Ember.RSVP.configure('onerror', function(reason) {
+  Ember.RSVP.on('error', function(reason) {
     // only print error messages if they're exceptions;
     // otherwise, let a future turn of the event loop
     // handle the error.
@@ -8,38 +8,6 @@
       Ember.Logger.log(reason, reason.stack)
       throw reason;
     }
-  });
-
-  Ember.RSVP.resolve = syncForTest(Ember.RSVP.resolve);
-
-  Ember.View.reopen({
-    _insertElementLater: syncForTest()
-  });
-
-  DS.Store.reopen({
-    save: syncForTest(),
-    createRecord: syncForTest(),
-    deleteRecord: syncForTest(),
-    push: syncForTest(),
-    pushMany: syncForTest(),
-    filter: syncForTest(),
-    find: syncForTest(),
-    findMany: syncForTest(),
-    findByIds: syncForTest(),
-    didSaveRecord: syncForTest(),
-    didSaveRecords: syncForTest(),
-    didUpdateAttribute: syncForTest(),
-    didUpdateAttributes: syncForTest(),
-    didUpdateRelationship: syncForTest(),
-    didUpdateRelationships: syncForTest()
-  });
-
-  DS.Model.reopen({
-    save: syncForTest(),
-    reload: syncForTest(),
-    deleteRecord: syncForTest(),
-    dataDidChange: Ember.observer(syncForTest(), 'data'),
-    updateRecordArraysLater: syncForTest()
   });
 
   var transforms = {
@@ -56,6 +24,4 @@
       return this._super(attributeType, true) || transforms[attributeType];
     }
   });
-
-  Ember.RSVP.Promise.prototype.then = syncForTest(Ember.RSVP.Promise.prototype.then);
 })();
