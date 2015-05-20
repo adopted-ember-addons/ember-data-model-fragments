@@ -278,11 +278,10 @@ test("the adapter can update fragments without infinite loops when CPs are eager
   store.push(Person, data);
 
   return store.find(Person, 1).then(function(person) {
-    var personController = Ember.ObjectController.create({ content: person });
+    var personController = Ember.Controller.create({ content: person });
 
-    Ember.addObserver(personController, 'name.first', function() {
-    });
-    personController.get('name.first');
+    Ember.addObserver(personController, 'model.name.first', function() {});
+    personController.get('model.name.first');
 
     store.push(Person, data);
     equal(person.get('name.first'), 'Brandon');
