@@ -42,6 +42,6 @@
     "grunt-es6-module-transpiler": "~0.6.0",
     "grunt-preprocess": "~4.0.0",
     "load-grunt-config": "~0.7.0",
-    "testem": "0.6.24"
+    "testem": "0.8.3"
   }
 }
