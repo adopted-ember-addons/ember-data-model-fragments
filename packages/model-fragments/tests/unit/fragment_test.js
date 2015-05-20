@@ -52,16 +52,16 @@ test("copied fragments can be added to any record", function() {
 
   store.push(Person, { id: 2 });
 
-  all([
+  return all([
     store.find(Person, 1),
     store.find(Person, 2)
-  ]).then(async(function(people) {
+  ]).then(function(people) {
     var copy = people[0].get('name').copy();
 
     people[1].set('name', copy);
 
     ok(true, "fragment copies can be assigned to other records");
-  }));
+  });
 });
 
 test("fragments are `Ember.Comparable`", function() {
@@ -93,13 +93,13 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
     }
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var name = person.get('name');
 
     name.set('last', 'Baratheon');
 
     equal(person.changedAttributes().name, true, "changed fragments are indicated in the diff object");
-  }));
+  });
 });
 
 test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function() {
@@ -111,11 +111,11 @@ test("fragment properties that are set to null are indicated in the owner record
     }
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     person.set('name', null);
 
     equal(person.changedAttributes().name, true, "null fragments are indicated in the diff object");
-  }));
+  });
 });
 
 test("changes to attributes can be rolled back", function() {
@@ -127,7 +127,7 @@ test("changes to attributes can be rolled back", function() {
     }
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var name = person.get('name');
 
     name.set('last', 'Bolton');
@@ -135,7 +135,7 @@ test("changes to attributes can be rolled back", function() {
 
     ok(name.get('last', 'Snow'), "fragment properties are restored");
     ok(!name.get('isDirty'), "fragment is in clean state");
-  }));
+  });
 });
 
 test("fragment properties are serialized as normal attributes using their own serializers", function() {
@@ -156,13 +156,13 @@ test("fragment properties are serialized as normal attributes using their own se
     }
   }));
 
-  store.find('person', 1).then(async(function(person) {
+  return store.find('person', 1).then(function(person) {
     var name = person.get('name');
 
     var serialized = person.serialize();
 
     equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");
-  }));
+  });
 });
 
 test("fragment properties are snapshotted as normal attributes on the owner record snapshot", function() {

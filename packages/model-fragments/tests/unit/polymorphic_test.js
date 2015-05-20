@@ -59,7 +59,7 @@ module("unit/fragments - polymorphism", {
 });
 
 test("hasOneFragment supports polymorphism", function() {
-  store.find(Zoo, 1).then(async(function(zoo) {
+  return store.find(Zoo, 1).then(function(zoo) {
     equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
     equal(zoo.get("city"), "Winterfell", "zoo city is correct");
 
@@ -68,11 +68,11 @@ test("hasOneFragment supports polymorphism", function() {
     equal(star.get("name"), "Mittens", "animal name is correct");
     ok(star instanceof Lion, "zoo's star is a lion");
     ok(star.get("hasManes"), "lion has manes");
-  }));
+  });
 });
 
 test("hasManyFragments supports polymorphism", function() {
-  store.find(Zoo, 1).then(async(function(zoo) {
+  return store.find(Zoo, 1).then(function(zoo) {
     var animals = zoo.get("animals");
     equal(animals.get("length"), 2);
 
@@ -87,7 +87,7 @@ test("hasManyFragments supports polymorphism", function() {
     equal(second.get("name"), "Snuitje", "second animal's name is correct");
     ok(second instanceof Elephant);
     equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
-  }));
+  });
 });
 
 test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {

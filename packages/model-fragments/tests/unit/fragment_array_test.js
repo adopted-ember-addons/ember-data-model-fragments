@@ -38,7 +38,7 @@ test("fragments can be created and added through the fragment array", function()
     ]
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var fragments = person.get('names');
     var length = fragments.get('length');
 
@@ -49,7 +49,7 @@ test("fragments can be created and added through the fragment array", function()
 
     equal(fragments.get('length'), length + 1, "property size is correct");
     equal(fragments.indexOf(fragment), length, "new fragment is in correct location");
-  }));
+  });
 });
 
 test("fragments can be added to the fragment array", function() {
@@ -63,7 +63,7 @@ test("fragments can be added to the fragment array", function() {
     ]
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var fragments = person.get('names');
     var length = fragments.get('length');
 
@@ -75,7 +75,7 @@ test("fragments can be added to the fragment array", function() {
 
     equal(fragments.get('length'), length + 1, "property size is correct");
     equal(fragments.indexOf(fragment), length, "fragment is in correct location");
-  }));
+  });
 });
 
 test("fragments can be removed from the fragment array", function() {
@@ -89,7 +89,7 @@ test("fragments can be removed from the fragment array", function() {
     ]
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
     var length = fragments.get('length');
@@ -98,7 +98,7 @@ test("fragments can be removed from the fragment array", function() {
 
     equal(fragments.get('length'), length - 1, "property size is correct");
     ok(!fragments.contains(fragment), "fragment is removed");
-  }));
+  });
 });
 
 test("changes to array contents change the fragment array 'isDirty' property", function() {
@@ -116,7 +116,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     ]
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
     var newFragment = store.createFragment('name', {
@@ -151,7 +151,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     fragments.unshiftObject(fragment);
 
     ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
-  }));
+  });
 });
 
 test("changes to array contents change the fragment array 'isDirty' property", function() {
@@ -165,7 +165,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     ]
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
 
@@ -178,7 +178,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     fragment.set('last', 'Snow');
 
     ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
-  }));
+  });
 });
 
 test("changes to array contents and fragments can be rolled back", function() {
@@ -196,7 +196,7 @@ test("changes to array contents and fragments can be rolled back", function() {
     ]
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
 
@@ -214,7 +214,7 @@ test("changes to array contents and fragments can be rolled back", function() {
     ok(!fragments.get('isDirty'), "fragment array is not dirty");
     ok(!fragments.isAny('isDirty'), "all fragments are in clean state");
     deepEqual(fragments.toArray(), originalState, "original array contents is restored");
-  }));
+  });
 });
 
 test("serializing creates a new Array with contents the result of serializing each fragment", function() {
@@ -243,9 +243,9 @@ test("serializing creates a new Array with contents the result of serializing ea
 
   env.container.register('serializer:name', DS.JSONSerializer);
 
-  store.find('person', 1).then(async(function(person) {
+  return store.find('person', 1).then(function(person) {
     var serialized = person.serialize();
 
     deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
-  }));
+  });
 });
