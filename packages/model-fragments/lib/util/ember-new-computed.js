@@ -1,13 +1,22 @@
-import canUseNewSyntax from './utils/can-use-new-syntax';
-
 var Ember = window.Ember;
 var computed = Ember.computed;
+var supportsSetterGetter;
+
+try {
+  Ember.computed({
+    set: function() { },
+    get: function() { }
+  });
+  supportsSetterGetter = true;
+} catch(e) {
+  supportsSetterGetter = false;
+}
 
 export default function() {
   var polyfillArguments = [];
   var config = arguments[arguments.length - 1];
 
-  if (typeof config === 'function' || canUseNewSyntax) {
+  if (typeof config === 'function' || supportsSetterGetter) {
     return computed.apply(this, arguments);
   }
 

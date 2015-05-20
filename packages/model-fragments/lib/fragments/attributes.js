@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import computedPolyfill from '../addons/ember-new-computed/index';
+import computedPolyfill from '../util/ember-new-computed';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
 import { getActualFragmentType } from './model';
