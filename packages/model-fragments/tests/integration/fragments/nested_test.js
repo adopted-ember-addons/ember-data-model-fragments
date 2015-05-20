@@ -18,7 +18,7 @@ module("integration/fragments - Nested fragments", {
       price : DS.attr("string")
     });
 
-    env = setupStore({
+    env = setupEnv({
       user    : User,
       order   : Order,
       product : Product
@@ -79,7 +79,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     return Ember.RSVP.resolve(payload);
   };
 
-  store.find(User, 1).then(async(function(user) {
+  return store.find(User, 1).then(function(user) {
     equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are deserialized properly");
 
     var product = user.get('orders.firstObject.products.firstObject');
@@ -95,8 +95,8 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     ok(user.get('isDirty'), "dirty state propagates to owner");
 
     return user.save();
-  })).then(async(function(user) {
+  }).then(function(user) {
     ok(!user.get('isDirty'), "owner record is clean");
     equal(user.get('orders.firstObject.products.length'), 1, "fragment array length is correct");
-  }));
+  });
 });

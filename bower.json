@@ -24,7 +24,6 @@
     "ember-data": "^1.0.0-beta.15"
   },
   "devDependencies": {
-    "qunit": "^1.14.0",
     "jquery": "^2.0.0",
     "ember": "^1.10.0"
   }

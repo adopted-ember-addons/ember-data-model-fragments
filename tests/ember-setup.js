@@ -1,45 +1,48 @@
-window.async = function(callback, timeout) {
-    stop();
+Ember.RSVP.on('error', function(reason) {
+  // only print error messages if they're exceptions;
+  // otherwise, let a future turn of the event loop
+  // handle the error.
+  if (reason && reason instanceof Error) {
+    Ember.Logger.log(reason, reason.stack);
+    throw reason;
+  }
+});
 
-    timeout = setTimeout(function() {
-      start();
-      ok(false, "Timeout was reached");
-    }, timeout || 200);
-
-    return function() {
-      clearTimeout(timeout);
-
-      start();
-
-      var args = arguments;
-      return Ember.run(function() {
-        return callback.apply(this, args);
-      });
-    };
-  };
-
-window.setupStore = function(options) {
+window.setupEnv = function(options) {
+  var container, registry;
   var env = {};
   options = options || {};
 
-  var container = env.container = new Ember.Container();
+  if (Ember.Registry) {
+    registry = env.registry = new Ember.Registry();
+    container = env.container = registry.container();
+  } else {
+    container = env.container = new Ember.Container();
+    registry = env.registry = container;
+  }
 
   var adapter = env.adapter = (options.adapter || DS.Adapter);
   delete options.adapter;
 
   for (var prop in options) {
-    container.register('model:' + prop, options[prop]);
+    registry.register('model:' + prop, options[prop]);
   }
 
-  container.register('store:main', DS.Store.extend({
+  registry.register('store:main', DS.Store.extend({
     adapter: adapter
   }));
 
-  container.register('serializer:-default', DS.JSONSerializer);
-  container.register('serializer:-rest', DS.RESTSerializer);
-  container.register('adapter:-rest', DS.RESTAdapter);
+  registry.register('serializer:-default', DS.JSONSerializer);
+  registry.register('serializer:-rest', DS.RESTSerializer);
+  registry.register('adapter:-rest', DS.RESTAdapter);
 
-  container.injection('serializer', 'store', 'store:main');
+  registry.register('transform:boolean', DS.BooleanTransform);
+  registry.register('transform:date', DS.DateTransform);
+  registry.register('transform:number', DS.NumberTransform);
+  registry.register('transform:string', DS.StringTransform);
+  registry.register('transform:fragment', DS.FragmentTransform);
+
+  registry.injection('serializer', 'store', 'store:main');
 
   env.serializer = container.lookup('serializer:-default');
   env.restSerializer = container.lookup('serializer:-rest');
@@ -50,34 +53,6 @@ window.setupStore = function(options) {
 };
 
 window.createStore = function(options) {
-  return setupStore(options).store;
+  return setupEnv(options).store;
 };
 
-var syncForTest = window.syncForTest = function(fn) {
-  var callSuper;
-
-  if (typeof fn !== "function") { callSuper = true; }
-
-  return function() {
-    var override = false, ret;
-
-    if (Ember.run && !Ember.run.currentRunLoop) {
-      Ember.run.begin();
-      override = true;
-    }
-
-    try {
-      if (callSuper) {
-        ret = this._super.apply(this, arguments);
-      } else {
-        ret = fn.apply(this, arguments);
-      }
-    } finally {
-      if (override) {
-        Ember.run.end();
-      }
-    }
-
-    return ret;
-  };
-};

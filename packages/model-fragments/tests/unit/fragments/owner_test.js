@@ -34,11 +34,11 @@ test("fragments can reference their owner record", function() {
     }
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var name = person.get('name');
 
     equal(name.get('person'), person, "`DS.fragmentOwner` property is reference to the owner record");
-  }));
+  });
 });
 
 test("attempting to change a fragment's owner record throws an error", function() {
@@ -58,15 +58,15 @@ test("attempting to change a fragment's owner record throws an error", function(
     }
   });
 
-  all([
+  return all([
     store.find(Person, 1),
     store.find(Person, 2)
-  ]).then(async(function(people) {
+  ]).then(function(people) {
     var name = people[0].get('name');
 
     throws(function() {
       name.set('person', people[1]);
 
     }, "setting the owner property throws an error");
-  }));
+  });
 });

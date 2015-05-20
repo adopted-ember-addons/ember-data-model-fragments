@@ -34,17 +34,17 @@ test("object literals are converted to instances of `DS.ModelFragment`", functio
     }
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     ok(person.get('name') instanceof Name, "name property is an `DS.ModelFragment` instance");
 
     equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
-  }));
+  });
 });
 
 test("a fragment can be created through the store and set", function() {
   store.push(Person, { id: 1 });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var name = store.createFragment('name', {
       first: "Davos",
       last: "Seaworth"
@@ -53,17 +53,17 @@ test("a fragment can be created through the store and set", function() {
     person.set('name', name);
 
     equal(person.get('name.first'), 'Davos', "new fragment is correctly set");
-  }));
+  });
 });
 
 test("setting to a non-fragment model throws an error", function() {
   store.push(Person, { id: 1 });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     throws(function() {
       person.set('name', store.createRecord('person'));
     }, "error is thrown when setting non-fragment");
-  }));
+  });
 });
 
 test("setting fragments from other records throws an error", function() {
@@ -77,14 +77,14 @@ test("setting fragments from other records throws an error", function() {
 
   store.push(Person, { id: 2 });
 
-  all([
+  return all([
     store.find(Person, 1),
     store.find(Person, 2)
-  ]).then(async(function(people) {
+  ]).then(function(people) {
     throws(function() {
       people[1].set('name', people[0].get('name'));
     }, "error is thrown when setting to a fragment of another record");
-  }));
+  });
 });
 
 test("null values are allowed", function() {
@@ -93,9 +93,9 @@ test("null values are allowed", function() {
     name: null
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     equal(person.get('name'), null, "property is null");
-  }));
+  });
 });
 
 test("setting to null is allowed", function() {
@@ -107,10 +107,10 @@ test("setting to null is allowed", function() {
     }
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     person.set('name', null);
     equal(person.get('name'), null, "property is null");
-  }));
+  });
 });
 
 test("fragments can have default values", function() {

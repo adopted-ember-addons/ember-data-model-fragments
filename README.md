@@ -21,11 +21,8 @@ This package provides support for sub-models that can be treated much like `belo
 To install as an Ember CLI addon:
 
 ```sh
-$ npm install ember-data-model-fragments --save-dev
-$ ember generate ember-data-model-fragments
+$ ember install ember-data-model-fragments
 ```
-
-:warning: Due to a bug in Ember CLI, the `install:addon` command cannot be used to install this addon using v0.1.5.
 
 You may then start creating fragments with:
 
@@ -434,6 +431,8 @@ $ bower install
 $ grunt build
 $ testem
 ```
+
+If you encounter errors, ensure that your global testem NPM package is up to date.
 
 ## Contributing
 

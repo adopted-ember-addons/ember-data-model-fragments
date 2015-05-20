@@ -74,24 +74,24 @@ function pushPerson(id) {
 test("properties are instances of `DS.FragmentArray`", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var addresses = person.get('addresses');
 
     ok(Ember.isArray(addresses), "property is array-like");
     ok(addresses instanceof DS.FragmentArray, "property is an instance of `DS.FragmentArray`");
-  }));
+  });
 });
 
 test("arrays of object literals are deserialized into instances of `DS.ModelFragment`", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var addresses = person.get('addresses');
 
     ok(addresses.every(function(address) {
       return address instanceof Address;
     }), "each fragment is a `DS.ModelFragment` instance");
-  }));
+  });
 });
 
 test("arrays of primitives are converted to an array-ish containing original values", function() {
@@ -106,7 +106,7 @@ test("arrays of primitives are converted to an array-ish containing original val
     titles: values
   });
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var titles = person.get('titles');
 
     ok(Ember.isArray(titles), "titles property is array-like");
@@ -115,14 +115,14 @@ test("arrays of primitives are converted to an array-ish containing original val
       return title === values[index];
     }), "each title matches the original value");
 
-  }));
+  });
 });
 
 
 test("fragments created through the store can be added to the fragment array", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var addresses = person.get('addresses');
     var length = addresses.get('length');
 
@@ -137,13 +137,13 @@ test("fragments created through the store can be added to the fragment array", f
 
     equal(addresses.get('length'), length + 1, "address property size is correct");
     equal(addresses.indexOf(address), length, "new fragment is in correct location");
-  }));
+  });
 });
 
 test("adding a non-fragment model throws an error", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var addresses = person.get('addresses');
 
     throws(function() {
@@ -151,29 +151,29 @@ test("adding a non-fragment model throws an error", function() {
 
       addresses.addFragment(otherPerson);
     }, "error is thrown when adding a DS.Model instance");
-  }));
+  });
 });
 
 test("adding fragments from other records throws an error", function() {
   pushPerson(1);
   pushPerson(2);
 
-  all([
+  return all([
     store.find(Person, 1),
     store.find(Person, 2)
-  ]).then(async(function(people) {
+  ]).then(function(people) {
     var address = people[0].get('addresses.firstObject');
 
     throws(function() {
       people[1].get('addresses').addFragment(address);
     }, "error is thrown when adding a fragment from another record");
-  }));
+  });
 });
 
 test("setting to an array of fragments is allowed", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     var addresses = person.get('addresses');
 
     var address = store.createFragment('address', {
@@ -188,35 +188,35 @@ test("setting to an array of fragments is allowed", function() {
     equal(person.get('addresses'), addresses, "fragment array is the same object");
     equal(person.get('addresses.length'), 1, "fragment array has the correct length");
     equal(person.get('addresses.firstObject'), address, "fragment array contains the new fragment");
-  }));
+  });
 });
 
 test("null values are allowed", function() {
   pushPerson(3);
 
-  store.find(Person, 3).then(async(function(person) {
+  return store.find(Person, 3).then(function(person) {
     equal(person.get('addresses'), null, "property is null");
-  }));
+  });
 });
 
 test("setting to null is allowed", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     person.set('addresses', null);
 
     equal(person.get('addresses'), null, "property is null");
-  }));
+  });
 });
 
 test("setting to an array of non-fragments throws an error", function() {
   pushPerson(1);
 
-  store.find(Person, 1).then(async(function(person) {
+  return store.find(Person, 1).then(function(person) {
     throws(function() {
       person.set('addresses', [ 'address' ]);
     }, "error is thrown when setting to an array of non-fragments");
-  }));
+  });
 });
 
 test("fragments can have default values", function() {

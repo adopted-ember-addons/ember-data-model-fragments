@@ -1,10 +1,11 @@
 {
   "framework": "qunit",
-  "test_page": "test.html.mustache",
   "src_files": [
+    "bower_components/jquery/dist/jquery.js",
+    "bower_components/ember/ember.debug.js",
+    "bower_components/ember-data/ember-data.js",
     "tmp/ember-data.model-fragments.js",
     "tests/ember-setup.js",
-    "tests/ember-data-setup.js",
     "packages/**/tests/**/*.js"
   ],
   "launch_in_dev": [ "Chrome" ],
