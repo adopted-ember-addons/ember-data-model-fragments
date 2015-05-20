@@ -3,7 +3,7 @@
  * @copyright Copyright 2014 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.3.2
+ * @version   0.3.3
  */
 (function() {
 var define, requireModule, require, requirejs;
@@ -544,19 +544,29 @@ define("fragments/array/stateful",
     __exports__["default"] = StatefulArray;
   });
 define("fragments/attributes", 
-  ["ember","./array/stateful","./array/fragment","./model","exports"],
-  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __exports__) {
+  ["ember","../util/ember-new-computed","./array/stateful","./array/fragment","./model","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __exports__) {
     "use strict";
     var Ember = __dependency1__["default"];
-    var StatefulArray = __dependency2__["default"];
-    var FragmentArray = __dependency3__["default"];
-    var getActualFragmentType = __dependency4__.getActualFragmentType;
+    var computedPolyfill = __dependency2__["default"];
+    var StatefulArray = __dependency3__["default"];
+    var FragmentArray = __dependency4__["default"];
+    var getActualFragmentType = __dependency5__.getActualFragmentType;
 
     /**
       @module ember-data.model-fragments
     */
 
     var get = Ember.get;
+
+    function setFragmentOwner(fragment, record, key) {
+      Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
+      return fragment.setProperties({
+        _owner : record,
+        _name  : key
+      });
+    }
+
 
     /**
       `DS.hasOneFragment` defines an attribute on a `DS.Model` or `DS.ModelFragment`
@@ -601,20 +611,11 @@ define("fragments/attributes",
         options: options
       };
 
-      return Ember.computed(function(key, value) {
-        var record = this;
-        var store = this.store;
-        var data = this._data[key] || getDefaultValue(this, options, 'object');
-        var fragment = this._fragments[key];
+      function setupFragment(record, key, value) {
+        var store = record.store;
+        var data = record._data[key] || getDefaultValue(record, options, 'object');
+        var fragment = record._fragments[key];
         var actualTypeName = getActualFragmentType(declaredTypeName, options, data);
-
-        function setOwner(fragment) {
-          Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
-          return fragment.setProperties({
-            _owner : record,
-            _name  : key
-          });
-        }
 
         // Regardless of whether being called as a setter or getter, the fragment
         // may not be initialized yet, in which case the data will contain a
@@ -627,31 +628,40 @@ define("fragments/attributes",
           fragment = data;
         // Else initialize the fragment
         } else if (data && data !== fragment) {
-          fragment || (fragment = setOwner(store.buildFragment(actualTypeName)));
+          fragment || (fragment = setFragmentOwner(store.buildFragment(actualTypeName), record, key));
           //Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
           //again we have it cached already
-          this._data[key] = fragment;
+          record._data[key] = fragment;
           fragment.setupData(data);
         } else {
           // Handle the adapter setting the fragment to null
           fragment = data;
         }
 
-        // Handle being called as a setter
-        if (arguments.length > 1) {
-          Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || isInstanceOfType(store.modelFor(declaredTypeName), value));
+        return fragment;
+      }
 
-          fragment = value ? setOwner(value) : null;
+      return computedPolyfill({
+        set: function(key, value) {
+          var fragment = setupFragment(this, key, value);
+          var store = this.store;
+
+          Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || isInstanceOfType(store.modelFor(declaredTypeName), value));
+          fragment = value ? setFragmentOwner(value, this, key) : null;
 
           if (this._data[key] !== fragment) {
             this.fragmentDidDirty(key, fragment);
           } else {
             this.fragmentDidReset(key, fragment);
           }
-        }
 
-        return this._fragments[key] = fragment;
-      }).property().meta(meta);
+          return this._fragments[key] = fragment;
+        },
+        get: function(key) {
+          var fragment = setupFragment(this, key);
+          return this._fragments[key] = fragment;
+        }
+      }).meta(meta);
     }
 
     // Check whether a fragment is an instance of the given type, respecting model
@@ -721,21 +731,20 @@ define("fragments/attributes",
         kind: 'hasMany'
       };
 
-      return Ember.computed(function(key, value) {
-        var record = this;
-        var data = this._data[key] || getDefaultValue(this, options, 'array');
-        var fragments = this._fragments[key] || null;
+      function createArray(record, key) {
+        var arrayClass = declaredTypeName ? FragmentArray : StatefulArray;
 
-        function createArray() {
-          var arrayClass = declaredTypeName ? FragmentArray : StatefulArray;
+        return arrayClass.create({
+          type    : declaredTypeName,
+          options : options,
+          name    : key,
+          owner   : record
+        });
+      }
 
-          return arrayClass.create({
-            type    : declaredTypeName,
-            options : options,
-            name    : key,
-            owner   : record
-          });
-        }
+      function setupArrayFragment(record, key, value) {
+        var data = record._data[key] || getDefaultValue(record, options, 'array');
+        var fragments = record._fragments[key] || null;
 
         //If we already have a processed fragment in _data and our current fragmet is
         //null simply reuse the one from data. We can be in this state after a rollback
@@ -744,17 +753,23 @@ define("fragments/attributes",
           fragments = data;
         // Create a fragment array and initialize with data
         } else if (data && data !== fragments) {
-          fragments || (fragments = createArray());
-          this._data[key] = fragments;
+          fragments || (fragments = createArray(record, key));
+          record._data[key] = fragments;
           fragments.setupData(data);
         } else {
           // Handle the adapter setting the fragment array to null
           fragments = data;
         }
 
-        if (arguments.length > 1) {
+        return fragments;
+      }
+
+      return computedPolyfill({
+        set: function(key, value) {
+          var fragments = setupArrayFragment(this, key, value);
+
           if (Ember.isArray(value)) {
-            fragments || (fragments = createArray());
+            fragments || (fragments = createArray(this, key));
             fragments.setObjects(value);
           } else if (value === null) {
             fragments = null;
@@ -767,10 +782,14 @@ define("fragments/attributes",
           } else {
             this.fragmentDidReset(key, fragments);
           }
-        }
 
-        return this._fragments[key] = fragments;
-      }).property().meta(meta);
+          return this._fragments[key] = fragments;
+        },
+        get: function(key) {
+          var fragments = setupArrayFragment(this, key);
+          return this._fragments[key] = fragments;
+        }
+      }).meta(meta);
     }
 
     // Like `DS.belongsTo`, when used within a model fragment is a reference
@@ -1578,7 +1597,7 @@ define("main",
     });
 
     if (Ember.libraries) {
-      Ember.libraries.register('Model Fragments', '0.3.2');
+      Ember.libraries.register('Model Fragments', '0.3.3');
     }
 
     // Something must be exported...
@@ -1613,6 +1632,56 @@ define("transform",
   function(__exports__) {
     "use strict";
     __exports__["default"] = DS.Transform;
+  });
+define("util/ember-new-computed", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var Ember = window.Ember;
+    var computed = Ember.computed;
+    var supportsSetterGetter;
+
+    try {
+      Ember.computed({
+        set: function() { },
+        get: function() { }
+      });
+      supportsSetterGetter = true;
+    } catch(e) {
+      supportsSetterGetter = false;
+    }
+
+    __exports__["default"] = function() {
+      var polyfillArguments = [];
+      var config = arguments[arguments.length - 1];
+
+      if (typeof config === 'function' || supportsSetterGetter) {
+        return computed.apply(this, arguments);
+      }
+
+      for (var i = 0, l = arguments.length - 1; i < l; i++) {
+        polyfillArguments.push(arguments[i]);
+      }
+
+      var func;
+      if (config.set) {
+        func = function(key, value) {
+          if (arguments.length > 1) {
+            return config.set.call(this, key, value);
+          } else {
+            return config.get.call(this, key);
+          }
+        };
+      } else {
+        func = function(key) {
+          return config.get.call(this, key);
+        };
+      }
+
+      polyfillArguments.push(func);
+
+      return computed.apply(this, polyfillArguments);
+    }
   });
 requireModule("main")["default"];
 }());

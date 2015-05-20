@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.3.3 (May 20, 2015)
+
+* Removed deprecations in test suite
+* Removed computed property deprecations (jakesjews)
+* Added fragment transform module for unit testing ember-cli apps (rwjblue)
+
 ### v0.3.2 (April 20, 2015)
 
 * Removed duplicate addon definition
