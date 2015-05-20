@@ -19,7 +19,7 @@ module("integration/fragments - Persisting Records With Fragments", {
       country : DS.attr("string")
     });
 
-    env = setupStore({
+    env = setupEnv({
       person  : Person,
       name    : Name,
       address : Address

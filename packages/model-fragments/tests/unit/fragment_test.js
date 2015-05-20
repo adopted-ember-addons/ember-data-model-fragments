@@ -18,7 +18,7 @@ module("unit/fragments - DS.ModelFragment", {
       exiled : DS.attr("boolean")
     });
 
-    env = setupStore({
+    env = setupEnv({
       person: Person,
       name: Name,
       house: House
@@ -150,7 +150,7 @@ test("fragment properties are serialized as normal attributes using their own se
     }
   });
 
-  env.container.register('serializer:name', DS.JSONSerializer.extend({
+  env.registry.register('serializer:name', DS.JSONSerializer.extend({
     serialize: function() {
       return 'Mad King';
     }
@@ -205,7 +205,7 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
 
   store.push('person', person);
 
-  env.container.register('serializer:person', DS.JSONSerializer.extend({
+  env.registry.register('serializer:person', DS.JSONSerializer.extend({
     serialize: function(snapshot) {
       var name = snapshot.attr('name');
       ok(name instanceof DS.Snapshot, "`hasOneFragment` snapshot attribute is a snapshot");

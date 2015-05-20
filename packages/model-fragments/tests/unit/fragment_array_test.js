@@ -11,7 +11,7 @@ module("unit/fragments - DS.FragmentArray", {
       last  : DS.attr("string")
     });
 
-    env = setupStore({
+    env = setupEnv({
       person: Person,
       name: Name
     });
@@ -241,7 +241,7 @@ test("serializing creates a new Array with contents the result of serializing ea
     names: names
   });
 
-  env.container.register('serializer:name', DS.JSONSerializer);
+  env.registry.register('serializer:name', DS.JSONSerializer);
 
   return store.find('person', 1).then(function(person) {
     var serialized = person.serialize();

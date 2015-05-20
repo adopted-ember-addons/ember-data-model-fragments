@@ -18,7 +18,7 @@ module("integration/fragments - Nested fragments", {
       price : DS.attr("string")
     });
 
-    env = setupStore({
+    env = setupEnv({
       user    : User,
       order   : Order,
       product : Product
