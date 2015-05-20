@@ -1,10 +1,15 @@
-var env, store, User, Order, Product;
+var env, store, User, Info, Order, Product;
 
 module("integration/fragments - Nested fragments", {
   setup: function() {
     User = DS.Model.extend({
-      name      : DS.attr("string"),
-      orders    : DS.hasManyFragments("order")
+      info   : DS.hasOneFragment("info"),
+      orders : DS.hasManyFragments("order")
+    });
+
+    Info = DS.ModelFragment.extend({
+      name  : DS.attr("string"),
+      notes : DS.hasManyFragments()
     });
 
     Order = DS.ModelFragment.extend({
@@ -15,11 +20,12 @@ module("integration/fragments - Nested fragments", {
     Product = DS.ModelFragment.extend({
       name  : DS.attr("string"),
       sku   : DS.attr("string"),
-      price : DS.attr("string")
+      price : DS.attr("string"),
     });
 
     env = setupEnv({
       user    : User,
+      info    : Info,
       order   : Order,
       product : Product
     });
@@ -30,16 +36,20 @@ module("integration/fragments - Nested fragments", {
   teardown: function() {
     env = null;
     store = null;
-    Name = null;
-    Person = null;
-    Address = null;
+    User = null;
+    Info = null;
+    Order = null;
+    Product = null;
   }
 });
 
 test("`DS.hasManyFragment` properties can be nested", function() {
   var data = {
     id: 1,
-    name: 'Tyrion Lannister',
+    info: {
+      name: 'Tyrion Lannister',
+      notes: [ 'smart', 'short' ]
+    },
     orders: [
       {
         amount   : '799.98',
@@ -47,7 +57,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
           {
             name   : 'Tears of Lys',
             sku    : 'poison-bd-32',
-            price  : "499.99"
+            price  : '499.99'
           },
           {
             name   : 'The Strangler',
@@ -99,4 +109,35 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     ok(!user.get('isDirty'), "owner record is clean");
     equal(user.get('orders.firstObject.products.length'), 1, "fragment array length is correct");
   });
+});
+
+test("Nested fragments fragments can have default values", function() {
+  var defaultInfo = {
+    notes: [ 'dangerous', 'sorry' ]
+  };
+  var defaultOrders = [
+    {
+      amount   : '1499.99',
+      products : [
+        {
+          name  : 'Live Manticore',
+          sku   : 'manticore-lv-2',
+          price : '1499.99',
+        }
+      ]
+    },
+  ];
+
+  var Assassin = DS.Model.extend({
+    info   : DS.hasOneFragment("info", { defaultValue: defaultInfo }),
+    orders : DS.hasManyFragments("order", { defaultValue: defaultOrders })
+  });
+
+  var user = store.createRecord(Assassin);
+
+  ok(user.get('info'), "a nested fragment is created with the default value");
+  deepEqual(user.get('info.notes').toArray(), defaultInfo.notes, "a doubly nested fragment array is created with the default value");
+  ok(user.get('orders.firstObject'), "a nested fragment array is created with the default value");
+  equal(user.get('orders.firstObject.amount'), defaultOrders[0].amount, "a nested fragment is created with the default value");
+  equal(user.get('orders.firstObject.products.firstObject.name'), defaultOrders[0].products[0].name, "a nested fragment is created with the default value");
 });
