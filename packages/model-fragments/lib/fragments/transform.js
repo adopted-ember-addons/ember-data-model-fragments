@@ -41,7 +41,9 @@ function serializeSnapshot(snapshot) {
     return snapshot;
   }
 
-  return get(snapshot, 'record.store').serializerFor(snapshot.typeKey).serialize(snapshot);
+  var modelName = snapshot.modelName || snapshot.typeKey;
+
+  return get(snapshot, 'record.store').serializerFor(modelName).serialize(snapshot);
 }
 
 export default FragmentTransform;
