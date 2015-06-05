@@ -79,7 +79,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     ]
   };
 
-  store.push(User, Ember.copy(data, true));
+  store.push('user', Ember.copy(data, true));
 
   env.adapter.updateRecord = function(store, type, record) {
     var payload = Ember.copy(data, true);
@@ -89,7 +89,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     return Ember.RSVP.resolve(payload);
   };
 
-  return store.find(User, 1).then(function(user) {
+  return store.find('user', 1).then(function(user) {
     equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are deserialized properly");
 
     var product = user.get('orders.firstObject.products.firstObject');
@@ -133,7 +133,9 @@ test("Nested fragments fragments can have default values", function() {
     orders : DS.hasManyFragments("order", { defaultValue: defaultOrders })
   });
 
-  var user = store.createRecord(Assassin);
+  env.registry.register('model:assassin', Assassin);
+
+  var user = store.createRecord('assassin');
 
   ok(user.get('info'), "a nested fragment is created with the default value");
   deepEqual(user.get('info.notes').toArray(), defaultInfo.notes, "a doubly nested fragment array is created with the default value");

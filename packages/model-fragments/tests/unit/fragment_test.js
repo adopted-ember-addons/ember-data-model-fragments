@@ -42,7 +42,7 @@ test("fragments are `Ember.Copyable`", function() {
 });
 
 test("copied fragments can be added to any record", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Jon",
@@ -50,11 +50,11 @@ test("copied fragments can be added to any record", function() {
     }
   });
 
-  store.push(Person, { id: 2 });
+  store.push('person', { id: 2 });
 
   return all([
-    store.find(Person, 1),
-    store.find(Person, 2)
+    store.find('person', 1),
+    store.find('person', 2)
   ]).then(function(people) {
     var copy = people[0].get('name').copy();
 
@@ -85,7 +85,7 @@ test("fragments are compared by reference", function() {
 });
 
 test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Loras",
@@ -93,7 +93,7 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
     }
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var name = person.get('name');
 
     name.set('last', 'Baratheon');
@@ -103,7 +103,7 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
 });
 
 test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Rob",
@@ -111,7 +111,7 @@ test("fragment properties that are set to null are indicated in the owner record
     }
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     person.set('name', null);
 
     equal(person.changedAttributes().name, true, "null fragments are indicated in the diff object");
@@ -119,7 +119,7 @@ test("fragment properties that are set to null are indicated in the owner record
 });
 
 test("changes to attributes can be rolled back", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Ramsay",
@@ -127,7 +127,7 @@ test("changes to attributes can be rolled back", function() {
     }
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var name = person.get('name');
 
     name.set('last', 'Bolton');

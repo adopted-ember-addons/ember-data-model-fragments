@@ -1,4 +1,4 @@
-var store, Person, Address, people;
+var env, store, Person, Address, people;
 var all = Ember.RSVP.all;
 
 module("unit/fragments - DS.hasManyFragments", {
@@ -16,9 +16,12 @@ module("unit/fragments - DS.hasManyFragments", {
       country : DS.attr("string")
     });
 
-    store = createStore({
+    env = setupEnv({
+      person: Person,
       address: Address
     });
+
+    store = env.store;
 
     people = [
       {
@@ -68,13 +71,13 @@ module("unit/fragments - DS.hasManyFragments", {
 });
 
 function pushPerson(id) {
-  store.push(Person, Ember.copy(Ember.A(people).findBy('id', id), true));
+  store.push('person', Ember.copy(Ember.A(people).findBy('id', id), true));
 }
 
 test("properties are instances of `DS.FragmentArray`", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
     ok(Ember.isArray(addresses), "property is array-like");
@@ -85,7 +88,7 @@ test("properties are instances of `DS.FragmentArray`", function() {
 test("arrays of object literals are deserialized into instances of `DS.ModelFragment`", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
     ok(addresses.every(function(address) {
@@ -97,7 +100,7 @@ test("arrays of object literals are deserialized into instances of `DS.ModelFrag
 test("arrays of primitives are converted to an array-ish containing original values", function() {
   var values = [ "Hand of the King", "Master of Coin" ];
 
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Tyrion",
@@ -106,7 +109,7 @@ test("arrays of primitives are converted to an array-ish containing original val
     titles: values
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var titles = person.get('titles');
 
     ok(Ember.isArray(titles), "titles property is array-like");
@@ -122,7 +125,7 @@ test("arrays of primitives are converted to an array-ish containing original val
 test("fragments created through the store can be added to the fragment array", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
     var length = addresses.get('length');
 
@@ -143,7 +146,7 @@ test("fragments created through the store can be added to the fragment array", f
 test("adding a non-fragment model throws an error", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
     throws(function() {
@@ -159,8 +162,8 @@ test("adding fragments from other records throws an error", function() {
   pushPerson(2);
 
   return all([
-    store.find(Person, 1),
-    store.find(Person, 2)
+    store.find('person', 1),
+    store.find('person', 2)
   ]).then(function(people) {
     var address = people[0].get('addresses.firstObject');
 
@@ -173,7 +176,7 @@ test("adding fragments from other records throws an error", function() {
 test("setting to an array of fragments is allowed", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
     var address = store.createFragment('address', {
@@ -194,7 +197,7 @@ test("setting to an array of fragments is allowed", function() {
 test("null values are allowed", function() {
   pushPerson(3);
 
-  return store.find(Person, 3).then(function(person) {
+  return store.find('person', 3).then(function(person) {
     equal(person.get('addresses'), null, "property is null");
   });
 });
@@ -202,7 +205,7 @@ test("null values are allowed", function() {
 test("setting to null is allowed", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     person.set('addresses', null);
 
     equal(person.get('addresses'), null, "property is null");
@@ -212,7 +215,7 @@ test("setting to null is allowed", function() {
 test("setting to an array of non-fragments throws an error", function() {
   pushPerson(1);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     throws(function() {
       person.set('addresses', [ 'address' ]);
     }, "error is thrown when setting to an array of non-fragments");
@@ -234,7 +237,9 @@ test("fragments can have default values", function() {
     addresses: DS.hasManyFragments('address', { defaultValue: defaultValue })
   });
 
-  var throne = store.createRecord(Throne, { name: 'Iron' });
+  env.registry.register('model:throne', Throne);
+
+  var throne = store.createRecord('throne', { name: 'Iron' });
 
   equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
 });
@@ -254,7 +259,9 @@ test("fragment default values can be functions", function() {
     addresses: DS.hasManyFragments('address', { defaultValue: function() { return defaultValue; } })
   });
 
-  var sword = store.createRecord(Sword, { name: 'Ice' });
+  env.registry.register('model:sword', Sword);
+
+  var sword = store.createRecord('sword', { name: 'Ice' });
 
   equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
 });

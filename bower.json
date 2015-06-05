@@ -21,7 +21,7 @@
     "test.html.mustache"
   ],
   "dependencies": {
-    "ember-data": "^1.0.0-beta.15"
+    "ember-data": "1.0.0-beta.17"
   },
   "devDependencies": {
     "jquery": "^2.0.0",

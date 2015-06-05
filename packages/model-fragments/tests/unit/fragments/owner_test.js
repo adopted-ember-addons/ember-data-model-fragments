@@ -14,6 +14,7 @@ module("unit/fragments - DS.fragmentOwner", {
     });
 
     store = createStore({
+      person: Person,
       name: Name
     });
   },
@@ -26,7 +27,7 @@ module("unit/fragments - DS.fragmentOwner", {
 });
 
 test("fragments can reference their owner record", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Samwell",
@@ -34,7 +35,7 @@ test("fragments can reference their owner record", function() {
     }
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var name = person.get('name');
 
     equal(name.get('person'), person, "`DS.fragmentOwner` property is reference to the owner record");
@@ -42,7 +43,7 @@ test("fragments can reference their owner record", function() {
 });
 
 test("attempting to change a fragment's owner record throws an error", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Samwell",
@@ -50,7 +51,7 @@ test("attempting to change a fragment's owner record throws an error", function(
     }
   });
 
-  store.push(Person, {
+  store.push('person', {
     id: 2,
     name: {
       first: "Samwell",
@@ -59,8 +60,8 @@ test("attempting to change a fragment's owner record throws an error", function(
   });
 
   return all([
-    store.find(Person, 1),
-    store.find(Person, 2)
+    store.find('person', 1),
+    store.find('person', 2)
   ]).then(function(people) {
     var name = people[0].get('name');
 

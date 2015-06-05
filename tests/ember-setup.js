@@ -21,16 +21,20 @@ window.setupEnv = function(options) {
     registry = env.registry = container;
   }
 
-  var adapter = env.adapter = (options.adapter || DS.Adapter);
+  var adapter = env.adapter = (options.adapter || '-default');
   delete options.adapter;
 
   for (var prop in options) {
-    registry.register('model:' + prop, options[prop]);
+    registry.register('model:' + Ember.String.dasherize(prop), options[prop]);
   }
 
   registry.register('store:main', DS.Store.extend({
     adapter: adapter
   }));
+
+  registry.optionsForType('serializer', { singleton: false });
+  registry.optionsForType('adapter', { singleton: false });
+  registry.register('adapter:-default', DS.Adapter);
 
   registry.register('serializer:-default', DS.JSONSerializer);
   registry.register('serializer:-rest', DS.RESTSerializer);

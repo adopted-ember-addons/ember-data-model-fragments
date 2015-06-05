@@ -38,7 +38,7 @@ module("integration/fragments - Persisting Records With Fragments", {
 });
 
 test("persisting the owner record in a clean state maintains clean state", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Tyrion",
@@ -58,7 +58,7 @@ test("persisting the owner record in a clean state maintains clean state", funct
     return Ember.RSVP.resolve();
   };
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     return person.save();
   }).then(function(person) {
     var name = person.get('name');
@@ -72,7 +72,7 @@ test("persisting the owner record in a clean state maintains clean state", funct
 });
 
 test("persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Eddard",
@@ -92,7 +92,7 @@ test("persisting the owner record when a fragment is dirty moves owner record, f
     return Ember.RSVP.resolve();
   };
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var name = person.get('name');
     var address = person.get('addresses.firstObject');
 
@@ -184,7 +184,7 @@ test("the adapter can update fragments on save", function() {
     ]
   };
 
-  store.push(Person, data);
+  store.push('person', data);
 
   env.adapter.updateRecord = function(store, type, record) {
     var payload = Ember.copy(data, true);
@@ -195,7 +195,7 @@ test("the adapter can update fragments on save", function() {
     return Ember.RSVP.resolve(payload);
   };
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     return person.save();
   }).then(function(person) {
     var name = person.get('name');
@@ -227,7 +227,7 @@ test("the adapter can update fragments on reload", function() {
     ]
   };
 
-  store.push(Person, data);
+  store.push('person', data);
 
   env.adapter.find = function(store, type, id, record) {
     var payload = Ember.copy(data, true);
@@ -238,7 +238,7 @@ test("the adapter can update fragments on reload", function() {
     return Ember.RSVP.resolve(payload);
   };
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     // Access values that will change to prime CP cache
     person.get('name.first');
     person.get('addresses.firstObject.street');
@@ -275,15 +275,15 @@ test("the adapter can update fragments without infinite loops when CPs are eager
     ]
   };
 
-  store.push(Person, data);
+  store.push('person', data);
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var personController = Ember.Controller.create({ content: person });
 
     Ember.addObserver(personController, 'model.name.first', function() {});
     personController.get('model.name.first');
 
-    store.push(Person, data);
+    store.push('person', data);
     equal(person.get('name.first'), 'Brandon');
   });
 });
@@ -313,13 +313,13 @@ test("`DS.hasManyFragments` array properties are notified on save", function() {
     }.observes('addresses.[]')
   });
 
-  store.push(Person, data);
+  store.push('person', data);
 
   env.adapter.updateRecord = function(store, type, record) {
     return Ember.RSVP.resolve(data);
   };
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var controller = PersonProxy.create({ content: person });
     return person.save();
   });
@@ -332,6 +332,8 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
     name     : DS.attr('string'),
     soldiers : DS.hasManyFragments()
   });
+
+  env.registry.register('model:army', Army);
 
   var data = {
     id: 1,
@@ -349,7 +351,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
     }.observes('soldiers.[]')
   });
 
-  store.push(Army, data);
+  store.push('army', data);
 
   env.adapter.find = function(store, type, record) {
     var updated = Ember.copy(data, true);
@@ -358,7 +360,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
     return Ember.RSVP.resolve(updated);
   };
 
-  return store.find(Army, 1).then(function(army) {
+  return store.find('army', 1).then(function(army) {
     var proxy = ArmyProxy.create({ content: army });
     return army.reload();
   });
