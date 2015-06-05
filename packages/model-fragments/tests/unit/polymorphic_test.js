@@ -28,7 +28,7 @@ module("unit/fragments - polymorphism", {
       lion: Lion,
     });
 
-    store.push(Zoo, {
+    store.push('zoo', {
       id: 1,
       name: 'Chilly Zoo',
       city: 'Winterfell',
@@ -59,7 +59,7 @@ module("unit/fragments - polymorphism", {
 });
 
 test("hasOneFragment supports polymorphism", function() {
-  return store.find(Zoo, 1).then(function(zoo) {
+  return store.find('zoo', 1).then(function(zoo) {
     equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
     equal(zoo.get("city"), "Winterfell", "zoo city is correct");
 
@@ -72,7 +72,7 @@ test("hasOneFragment supports polymorphism", function() {
 });
 
 test("hasManyFragments supports polymorphism", function() {
-  return store.find(Zoo, 1).then(function(zoo) {
+  return store.find('zoo', 1).then(function(zoo) {
     var animals = zoo.get("animals");
     equal(animals.get("length"), 2);
 
@@ -98,8 +98,8 @@ test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_IN
 
   try {
     Ember.run(function () {
-      var zoo = store.createRecord(Zoo, { name: 'The World' });
-      var animal = store.createFragment(Elephant, { name: 'Mr. Pink' });
+      var zoo = store.createRecord('zoo', { name: 'The World' });
+      var animal = store.createFragment('elephant', { name: 'Mr. Pink' });
 
       zoo.set('star', animal);
 
@@ -116,7 +116,7 @@ test("rolling back a `DS.hasOneFragment` fragment property that was set to null 
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
-  return Ember.RSVP.Promise.resolve(store.find(Zoo, 1)).then(function(zoo) {
+  return Ember.RSVP.Promise.resolve(store.find('zoo', 1)).then(function(zoo) {
     var animal = zoo.get('star');
 
     zoo.set('star', null);
@@ -136,8 +136,8 @@ test("`DS.hasManyFragments` type-checks check the superclass when MODEL_FACTORY_
 
   try {
     Ember.run(function () {
-      var zoo = store.createRecord(Zoo, { name: 'The World' });
-      var animal = store.createFragment(Elephant, { name: 'Whitey' });
+      var zoo = store.createRecord('zoo', { name: 'The World' });
+      var animal = store.createFragment('elephant', { name: 'Whitey' });
 
       zoo.get('animals').pushObject(animal);
 

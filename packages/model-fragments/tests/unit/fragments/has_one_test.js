@@ -1,4 +1,4 @@
-var store, Person, Name;
+var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
 module("unit/fragments - DS.hasOneFragment", {
@@ -13,9 +13,12 @@ module("unit/fragments - DS.hasOneFragment", {
       last  : DS.attr("string")
     });
 
-    store = createStore({
+    env = setupEnv({
+      person: Person,
       name: Name
     });
+
+    store = env.store;
   },
 
   teardown: function() {
@@ -26,7 +29,7 @@ module("unit/fragments - DS.hasOneFragment", {
 });
 
 test("object literals are converted to instances of `DS.ModelFragment`", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Tyrion",
@@ -34,7 +37,7 @@ test("object literals are converted to instances of `DS.ModelFragment`", functio
     }
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     ok(person.get('name') instanceof Name, "name property is an `DS.ModelFragment` instance");
 
     equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
@@ -42,9 +45,9 @@ test("object literals are converted to instances of `DS.ModelFragment`", functio
 });
 
 test("a fragment can be created through the store and set", function() {
-  store.push(Person, { id: 1 });
+  store.push('person', { id: 1 });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var name = store.createFragment('name', {
       first: "Davos",
       last: "Seaworth"
@@ -57,9 +60,9 @@ test("a fragment can be created through the store and set", function() {
 });
 
 test("setting to a non-fragment model throws an error", function() {
-  store.push(Person, { id: 1 });
+  store.push('person', { id: 1 });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     throws(function() {
       person.set('name', store.createRecord('person'));
     }, "error is thrown when setting non-fragment");
@@ -67,7 +70,7 @@ test("setting to a non-fragment model throws an error", function() {
 });
 
 test("setting fragments from other records throws an error", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Roose",
@@ -75,11 +78,11 @@ test("setting fragments from other records throws an error", function() {
     }
   });
 
-  store.push(Person, { id: 2 });
+  store.push('person', { id: 2 });
 
   return all([
-    store.find(Person, 1),
-    store.find(Person, 2)
+    store.find('person', 1),
+    store.find('person', 2)
   ]).then(function(people) {
     throws(function() {
       people[1].set('name', people[0].get('name'));
@@ -88,18 +91,18 @@ test("setting fragments from other records throws an error", function() {
 });
 
 test("null values are allowed", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: null
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     equal(person.get('name'), null, "property is null");
   });
 });
 
 test("setting to null is allowed", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     name: {
       first: "Barristan",
@@ -107,7 +110,7 @@ test("setting to null is allowed", function() {
     }
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     person.set('name', null);
     equal(person.get('name'), null, "property is null");
   });
@@ -123,7 +126,9 @@ test("fragments can have default values", function() {
     name: DS.hasOneFragment("name", { defaultValue: defaultValue }),
   });
 
-  var ship = store.createRecord(Ship);
+  env.registry.register('model:ship', Ship);
+
+  var ship = store.createRecord('ship');
 
   equal(ship.get('name.first'), defaultValue.first, "the default value is correct");
 });
@@ -138,7 +143,9 @@ test("fragment default values can be functions", function() {
     name: DS.hasOneFragment("name", { defaultValue: function() { return defaultValue; } }),
   });
 
-  var sword = store.createRecord(Sword);
+  env.registry.register('model:sword', Sword);
+
+  var sword = store.createRecord('sword');
 
   equal(sword.get('name.first'), defaultValue.first, "the default value is correct");
 });

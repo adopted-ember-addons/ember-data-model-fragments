@@ -28,7 +28,7 @@ module("unit/fragments - DS.FragmentArray", {
 });
 
 test("fragments can be created and added through the fragment array", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: [
       {
@@ -38,7 +38,7 @@ test("fragments can be created and added through the fragment array", function()
     ]
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var length = fragments.get('length');
 
@@ -53,7 +53,7 @@ test("fragments can be created and added through the fragment array", function()
 });
 
 test("fragments can be added to the fragment array", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: [
       {
@@ -63,7 +63,7 @@ test("fragments can be added to the fragment array", function() {
     ]
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var length = fragments.get('length');
 
@@ -79,7 +79,7 @@ test("fragments can be added to the fragment array", function() {
 });
 
 test("fragments can be removed from the fragment array", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: [
       {
@@ -89,7 +89,7 @@ test("fragments can be removed from the fragment array", function() {
     ]
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
     var length = fragments.get('length');
@@ -102,7 +102,7 @@ test("fragments can be removed from the fragment array", function() {
 });
 
 test("changes to array contents change the fragment array 'isDirty' property", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: [
       {
@@ -116,7 +116,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     ]
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
     var newFragment = store.createFragment('name', {
@@ -155,7 +155,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
 });
 
 test("changes to array contents change the fragment array 'isDirty' property", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: [
       {
@@ -165,7 +165,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     ]
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
 
@@ -182,7 +182,7 @@ test("changes to array contents change the fragment array 'isDirty' property", f
 });
 
 test("changes to array contents and fragments can be rolled back", function() {
-  store.push(Person, {
+  store.push('person', {
     id: 1,
     names: [
       {
@@ -196,7 +196,7 @@ test("changes to array contents and fragments can be rolled back", function() {
     ]
   });
 
-  return store.find(Person, 1).then(function(person) {
+  return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
 
