@@ -1,5 +1,5 @@
-import Store from '../store';
-import Model from '../model';
+import Store from 'ember-data/system/store';
+import Model from 'ember-data/system/model';
 
 /**
   @module ember-data.model-fragments

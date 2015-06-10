@@ -4,9 +4,11 @@
     "bower_components/jquery/dist/jquery.js",
     "bower_components/ember/ember.debug.js",
     "bower_components/ember-data/ember-data.js",
-    "tmp/ember-data.model-fragments.js",
+    "bower_components/loader.js/loader.js",
+    "dist/ember-data.model-fragments.js",
     "tests/ember-setup.js",
-    "packages/**/tests/**/*.js"
+    "dist/ember-data.model-fragments-tests.js",
+    "tests/runner.js"
   ],
   "launch_in_dev": [ "Chrome" ],
   "launch_in_ci": [ "PhantomJS" ]

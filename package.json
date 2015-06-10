@@ -1,6 +1,6 @@
 {
   "name": "ember-data-model-fragments",
-  "description": "Ember Data plugin to support nested JSON documents",
+  "description": "Ember Data addon to support nested JSON documents",
   "version": "0.3.3",
   "repository": {
     "type": "git",
@@ -9,7 +9,10 @@
   "author": "Steven Lindberg <steven@lytics.io>",
   "license": "MIT",
   "scripts": {
-    "test": "grunt build && ./node_modules/testem/testem.js ci"
+    "build": "ember build",
+    "build:production": "ember build --environment=production",
+    "start": "ember serve",
+    "test": "npm run build:production && ./node_modules/testem/testem.js ci"
   },
   "keywords": [
     "ember-addon",
@@ -27,21 +30,22 @@
     "ember-addon"
   ],
   "devDependencies": {
-    "defeatureify": "~0.1.4",
-    "ember-cli": "0.2.3",
+    "broccoli-defeatureify": "^1.0.0",
+    "broccoli-es3-safe-recast": "^2.0.0",
+    "broccoli-es6-module-transpiler": "^0.5.0",
+    "broccoli-funnel": "^0.2.3",
+    "broccoli-jshint": "^0.5.6",
+    "broccoli-merge-trees": "^0.2.1",
+    "broccoli-replace": "^0.3.1",
+    "broccoli-sourcemap-concat": "^0.4.4",
+    "broccoli-uglify-js": "^0.1.3",
+    "defeatureify": "^0.2.2",
+    "ember-cli": "^0.2.7",
     "ember-cli-release": "0.2.3",
-    "grunt": "~0.4.1",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-copy": "~0.5.0",
-    "grunt-contrib-jshint": "~0.6.3",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-watch": "~0.6.1",
-    "grunt-contrib-yuidoc": "~0.5.0",
-    "grunt-ember-defeatureify": "~0.1.0",
-    "grunt-es6-module-transpiler": "~0.6.0",
-    "grunt-preprocess": "~4.0.0",
-    "load-grunt-config": "~0.7.0",
+    "es6-module-transpiler": "^0.9.6",
+    "es6-module-transpiler-amd-formatter": "^0.3.0",
+    "es6-module-transpiler-package-resolver": "^1.0.1",
+    "git-repo-version": "^0.3.0",
     "testem": "0.8.3"
   }
 }

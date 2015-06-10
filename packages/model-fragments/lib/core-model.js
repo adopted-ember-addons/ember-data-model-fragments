@@ -1,5 +1,6 @@
 import Ember from 'ember';
-import Model from './model';
+// DS.Model gets munged to add fragment support, which must be included by CoreModel
+import { Model } from './fragments/ext';
 
 /**
   @module ember-data.model-fragments
