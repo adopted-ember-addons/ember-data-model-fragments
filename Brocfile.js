@@ -75,12 +75,7 @@ function prodTree(main, outputName) {
   var es3Safe = es3SafeRecast(main);
   var stripped = defeatureify(es3Safe, {
     debugStatements: [
-      "Ember.warn",
-      "Ember.assert",
-      "Ember.deprecate",
-      "Ember.debug",
-      "Ember.Logger.info",
-      "Ember.runInDebug"
+      "ember$lib$main$$default.assert"
     ],
     enableStripDebug: true
   });
