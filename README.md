@@ -187,6 +187,7 @@ App.Person = DS.Model.extend({
   })
 });
 ```
+
 ## Serializing
 
 Serializing records with fragment attributes works using a special `DS.Transform` that serializes each fragment or fragment array. This results in fragments being nested in JSON as expected, and avoids the need for any custom serialization logic for most cases. This also means that model fragments can have their own custom serializers, just as normal models can:
@@ -206,7 +207,7 @@ App.NameSerializer = DS.JSONSerializer.extend({
 });
 ```
 
-If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.Snapshot.html) can be accessed using the [`Snapshot#attr`](http://emberjs.com/api/data/classes/DS.Snapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
+If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.AdapterSnapshot.html) can be accessed using the [`AdapterSnapshot#attr`](http://emberjs.com/api/data/classes/DS.AdapterSnapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
 
 ```javascript
 // Fragment snapshots are accessed using `snapshot.attr()`
@@ -214,12 +215,12 @@ App.PersonSerializer = DS.JSONSerializer.extend({
   serialize: function(snapshot, options) {
     var json = this._super(snapshot, options);
 
-    // Returns a `DS.Snapshot` instance of the fragment
+    // Returns a `DS.AdapterSnapshot` instance of the fragment
     var nameSnapshot = snapshot.attr('name');
 
     json.full_name = nameSnapshot.attr('given') + ' ' + nameSnapshot.attr('family');
 
-    // Returns a plain array of `DS.Snapshot` instances
+    // Returns a plain array of `DS.AdapterSnapshot` instances
     var addressSnapshots = snapshot.attr('addresses');
 
     json.countries = addressSnapshots.map(function(addressSnapshot) {
