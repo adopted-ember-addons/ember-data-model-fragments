@@ -208,12 +208,12 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   env.registry.register('serializer:person', DS.JSONSerializer.extend({
     serialize: function(snapshot) {
       var name = snapshot.attr('name');
-      ok(name instanceof DS.Snapshot, "`hasOneFragment` snapshot attribute is a snapshot");
+      ok(name instanceof DS.AdapterSnapshot, "`hasOneFragment` snapshot attribute is a snapshot");
       equal(name.attr('first'), person.name.first, "`hasOneFragment` attributes are snapshoted correctly");
 
       var houses = snapshot.attr('houses');
       ok(Array.isArray(houses), "`hasManyFragments` attribute is an array");
-      ok(houses[0] instanceof DS.Snapshot, "`hasManyFragments` attribute is an array of snapshots");
+      ok(houses[0] instanceof DS.AdapterSnapshot, "`hasManyFragments` attribute is an array of snapshots");
       equal(houses[0].attr('name'), person.houses[0].name, "`hasManyFragments` attributes are snapshotted correctly");
 
       var children = snapshot.attr('children');

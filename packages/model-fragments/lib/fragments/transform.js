@@ -1,4 +1,4 @@
-import Snapshot from '../snapshot';
+import AdapterSnapshot from '../adapter-snapshot';
 import Transform from '../transform';
 
 /**
@@ -37,7 +37,7 @@ var FragmentTransform = Transform.extend({
 
 function serializeSnapshot(snapshot) {
   // The snapshot can be a primitive value (which could be an object)
-  if (!(snapshot instanceof Snapshot)) {
+  if (!(snapshot instanceof AdapterSnapshot)) {
     return snapshot;
   }
 
