@@ -1,5 +1,5 @@
-import Snapshot from '../snapshot';
-import Transform from '../transform';
+import Snapshot from 'ember-data/system/snapshot';
+import Transform from 'ember-data/system/transform';
 
 /**
   @module ember-data.model-fragments

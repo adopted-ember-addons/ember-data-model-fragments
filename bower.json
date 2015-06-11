@@ -9,22 +9,20 @@
     "tmp",
     "ember-addon",
     "packages",
-    "vendor",
+    "config",
     "tests",
-    "tasks",
     ".gitignore",
     ".travis.yml",
-    "Gruntfile.js",
+    "Brocfile.js",
     "package.json",
-    "license.js",
-    "testem.json",
-    "test.html.mustache"
+    "testem.json"
   ],
   "dependencies": {
     "ember-data": "1.0.0-beta.17"
   },
   "devDependencies": {
     "jquery": "^2.0.0",
-    "ember": "^1.10.0"
+    "ember": "^1.10.0",
+    "loader.js": "~3.2.1"
   }
 }

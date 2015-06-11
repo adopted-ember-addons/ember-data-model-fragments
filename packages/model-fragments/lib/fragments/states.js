@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import RootState from '../states';
+import RootState from 'ember-data/system/model/states';
 
 /**
   @module ember-data.model-fragments
