@@ -417,22 +417,27 @@ Currently, fragments cannot have normal `DS.belongsTo` or `DS.hasMany` relations
 
 ## Testing
 
-Building requires [Grunt](http://gruntjs.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can both be installed globally with:
+Building requires [Ember CLI](http://www.ember-cli.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem) and [Bower](http://bower.io/), which can all be installed globally with:
 
 ```sh
-$ npm install --global grunt-cli bower testem
+$ npm install --global ember-cli bower testem
 ```
 
-Then install NPM packages, build the plugin, and start the development test server:
+Then install NPM & Bower packages, build the project, and start the development test server:
 
 ```sh
-$ npm install
-$ bower install
-$ grunt build
+$ npm install && bower install
+$ ember build
 $ testem
 ```
 
-If you encounter errors, ensure that your global testem NPM package is up to date.
+If you encounter test errors, ensure that your global testem NPM package is up to date.
+
+When developing, it is often convenient to build the project with `ember serve` which will watch for file changes and rebuild, which triggers the test runner to re-run tests. A production build with debugging aids stripped out can also be made by running:
+
+```sh
+$ ember build --environment=production
+```
 
 ## Contributing
 
