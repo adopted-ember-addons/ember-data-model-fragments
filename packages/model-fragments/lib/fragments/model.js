@@ -1,5 +1,6 @@
 import Ember from 'ember';
-import CoreModel from '../core-model';
+// DS.Model gets munged to add fragment support, which must be included by CoreModel
+import { Model } from './ext';
 import FragmentRootState from './states';
 
 /**
@@ -65,7 +66,7 @@ var get = Ember.get;
   @uses Ember.Comparable
   @uses Ember.Copyable
 */
-var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
+var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
     The fragment's property name on the owner record.
 
