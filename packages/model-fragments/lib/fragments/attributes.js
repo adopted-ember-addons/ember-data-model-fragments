@@ -2,7 +2,9 @@ import Ember from 'ember';
 import computedPolyfill from '../util/ember-new-computed';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
-import { getActualFragmentType } from './model';
+import { fragmentDidDirty, fragmentDidReset } from './states';
+import { setFragmentOwner, getActualFragmentType } from './model';
+import { internalModelFor } from './model';
 
 /**
   @module ember-data.model-fragments
@@ -10,14 +12,21 @@ import { getActualFragmentType } from './model';
 
 var get = Ember.get;
 
-function setFragmentOwner(fragment, record, key) {
-  Ember.assert("Fragments can only belong to one owner, try copying instead", !get(fragment, '_owner') || get(fragment, '_owner') === record);
-  return fragment.setProperties({
-    _owner : record,
-    _name  : key
-  });
-}
+// Create a unique type string for the combination of fragment property type,
+// fragment model name, and polymorphic type key
+function metaTypeFor(type, modelName, options) {
+  var metaType = '-mf-' + type;
 
+  if (modelName) {
+    metaType += '$' + modelName;
+  }
+
+  if (options && options.polymorphic) {
+    metaType += '$' + (options.typeKey || 'type');
+  }
+
+  return metaType;
+}
 
 /**
   `DS.hasOneFragment` defines an attribute on a `DS.Model` or `DS.ModelFragment`
@@ -52,21 +61,16 @@ function setFragmentOwner(fragment, record, key) {
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasOneFragment(declaredTypeName, options) {
+function hasOneFragment(declaredModelName, options) {
   options = options || {};
 
-  var meta = {
-    type: 'fragment',
-    isAttribute: true,
-    isFragment: true,
-    options: options
-  };
+  var metaType = metaTypeFor('fragment', declaredModelName, options);
 
-  function setupFragment(record, key, value) {
-    var store = record.store;
-    var data = record._data[key] || getDefaultValue(record, options, 'object');
-    var fragment = record._fragments[key];
-    var actualTypeName = getActualFragmentType(declaredTypeName, options, data);
+  function setupFragment(store, record, key) {
+    var internalModel = internalModelFor(record);
+    var data = internalModel._data[key] || getDefaultValue(internalModel, options, 'object');
+    var fragment = internalModel._fragments[key];
+    var actualTypeName = getActualFragmentType(declaredModelName, options, data);
 
     // Regardless of whether being called as a setter or getter, the fragment
     // may not be initialized yet, in which case the data will contain a
@@ -79,11 +83,13 @@ function hasOneFragment(declaredTypeName, options) {
       fragment = data;
     // Else initialize the fragment
     } else if (data && data !== fragment) {
-      fragment || (fragment = setFragmentOwner(store.buildFragment(actualTypeName), record, key));
-      //Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
-      //again we have it cached already
-      record._data[key] = fragment;
-      fragment.setupData(data);
+      fragment || (fragment = setFragmentOwner(store.createFragment(actualTypeName), record, key));
+      // Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
+      // again we have it cached already
+      internalModel._data[key] = fragment;
+      internalModelFor(fragment).setupData({
+        attributes: data
+      });
     } else {
       // Handle the adapter setting the fragment to null
       fragment = data;
@@ -92,27 +98,22 @@ function hasOneFragment(declaredTypeName, options) {
     return fragment;
   }
 
-  return computedPolyfill({
-    set: function(key, value) {
-      var fragment = setupFragment(this, key, value);
-      var store = this.store;
+  function setFragmentValue(record, key, fragment, value) {
+    Ember.assert("You can only assign a '" + declaredModelName + "' fragment to this property", value === null || isInstanceOfType(record.store.modelFor(declaredModelName), value));
 
-      Ember.assert("You can only assign a '" + declaredTypeName + "' fragment to this property", value === null || isInstanceOfType(store.modelFor(declaredTypeName), value));
-      fragment = value ? setFragmentOwner(value, this, key) : null;
+    var internalModel = internalModelFor(record);
+    fragment = value ? setFragmentOwner(value, record, key) : null;
 
-      if (this._data[key] !== fragment) {
-        this.fragmentDidDirty(key, fragment);
-      } else {
-        this.fragmentDidReset(key, fragment);
-      }
-
-      return this._fragments[key] = fragment;
-    },
-    get: function(key) {
-      var fragment = setupFragment(this, key);
-      return this._fragments[key] = fragment;
+    if (internalModel._data[key] !== fragment) {
+      fragmentDidDirty(record, key, fragment);
+    } else {
+      fragmentDidReset(record, key);
     }
-  }).meta(meta);
+
+    return fragment;
+  }
+
+  return fragmentProperty(metaType, options, setupFragment, setFragmentValue);
 }
 
 // Check whether a fragment is an instance of the given type, respecting model
@@ -165,47 +166,83 @@ function isInstanceOfType(type, fragment) {
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasManyFragments(declaredTypeName, options) {
-  // If a declaredTypeName is not given, it implies an array of primitives
-  if (Ember.typeOf(declaredTypeName) !== 'string') {
-    options = declaredTypeName;
-    declaredTypeName = null;
+function hasManyFragments(modelName, options) {
+  options || (options = {});
+
+  // If a modelName is not given, it implies an array of primitives
+  if (Ember.typeOf(modelName) !== 'string') {
+    return arrayProperty(options);
   }
 
+  var metaType = metaTypeFor('fragment-array', modelName, options);
+
+  return fragmentArrayProperty(metaType, options, function createFragmentArray(record, key) {
+    return FragmentArray.create({
+      type: modelName,
+      options: options,
+      name: key,
+      owner: record
+    });
+  });
+}
+
+function arrayProperty(options) {
+  options || (options = {});
+
+  var metaType = metaTypeFor('array');
+
+  return fragmentArrayProperty(metaType, options, function createStatefulArray(record, key) {
+    return StatefulArray.create({
+      options: options,
+      name: key,
+      owner: record
+    });
+  });
+}
+
+function fragmentProperty(type, options, setupFragment, setFragmentValue) {
   options = options || {};
 
   var meta = {
-    type: 'fragment',
+    type: type,
     isAttribute: true,
     isFragment: true,
-    options: options,
-    kind: 'hasMany'
+    options: options
   };
 
-  function createArray(record, key) {
-    var arrayClass = declaredTypeName ? FragmentArray : StatefulArray;
+  return computedPolyfill({
+    get: function(key) {
+      var internalModel = internalModelFor(this);
+      var fragment = setupFragment(this.store, this, key);
 
-    return arrayClass.create({
-      type    : declaredTypeName,
-      options : options,
-      name    : key,
-      owner   : record
-    });
-  }
+      return internalModel._fragments[key] = fragment;
+    },
+    set: function(key, value) {
+      var internalModel = internalModelFor(this);
+      var fragment = setupFragment(this.store, this, key);
 
-  function setupArrayFragment(record, key, value) {
-    var data = record._data[key] || getDefaultValue(record, options, 'array');
-    var fragments = record._fragments[key] || null;
+      fragment = setFragmentValue(this, key, fragment, value);
 
-    //If we already have a processed fragment in _data and our current fragmet is
-    //null simply reuse the one from data. We can be in this state after a rollback
-    //for example
+      return internalModel._fragments[key] = fragment;
+    }
+  }).meta(meta);
+}
+
+function fragmentArrayProperty(metaType, options, createArray) {
+  function setupFragmentArray(store, record, key) {
+    var internalModel = internalModelFor(record);
+    var data = internalModel._data[key] || getDefaultValue(internalModel, options, 'array');
+    var fragments = internalModel._fragments[key] || null;
+
+    // If we already have a processed fragment in _data and our current fragmet is
+    // null simply reuse the one from data. We can be in this state after a rollback
+    // for example
     if (data instanceof StatefulArray && !fragments) {
       fragments = data;
     // Create a fragment array and initialize with data
     } else if (data && data !== fragments) {
       fragments || (fragments = createArray(record, key));
-      record._data[key] = fragments;
+      internalModel._data[key] = fragments;
       fragments.setupData(data);
     } else {
       // Handle the adapter setting the fragment array to null
@@ -215,32 +252,28 @@ function hasManyFragments(declaredTypeName, options) {
     return fragments;
   }
 
-  return computedPolyfill({
-    set: function(key, value) {
-      var fragments = setupArrayFragment(this, key, value);
+  function setFragmentValue(record, key, fragments, value) {
+    var internalModel = internalModelFor(record);
 
-      if (Ember.isArray(value)) {
-        fragments || (fragments = createArray(this, key));
-        fragments.setObjects(value);
-      } else if (value === null) {
-        fragments = null;
-      } else {
-        Ember.assert("A fragment array property can only be assigned an array or null");
-      }
-
-      if (this._data[key] !== fragments || get(fragments, 'isDirty')) {
-        this.fragmentDidDirty(key, fragments);
-      } else {
-        this.fragmentDidReset(key, fragments);
-      }
-
-      return this._fragments[key] = fragments;
-    },
-    get: function(key) {
-      var fragments = setupArrayFragment(this, key);
-      return this._fragments[key] = fragments;
+    if (Ember.isArray(value)) {
+      fragments || (fragments = createArray(record, key));
+      fragments.setObjects(value);
+    } else if (value === null) {
+      fragments = null;
+    } else {
+      Ember.assert("A fragment array property can only be assigned an array or null");
     }
-  }).meta(meta);
+
+    if (internalModel._data[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
+      fragmentDidDirty(record, key, fragments);
+    } else {
+      fragmentDidReset(record, key);
+    }
+
+    return fragments;
+  }
+
+  return fragmentProperty(metaType, options, setupFragmentArray, setFragmentValue);
 }
 
 // Like `DS.belongsTo`, when used within a model fragment is a reference
@@ -271,7 +304,9 @@ function hasManyFragments(declaredTypeName, options) {
 */
 function fragmentOwner() {
   // TODO: add a warning when this is used on a non-fragment
-  return Ember.computed.alias('_owner').readOnly();
+  return Ember.computed(function() {
+    return internalModelFor(this)._owner;
+  }).readOnly();
 }
 
 // The default value of a fragment is either an array or an object,

@@ -1,6 +1,12 @@
 import Store from 'ember-data/system/store';
 import Model from 'ember-data/system/model';
+import InternalModel from 'ember-data/system/model/internal-model';
 import JSONSerializer from 'ember-data/serializers/json-serializer';
+import FragmentRootState from './states';
+import {
+  internalModelFor,
+  default as ModelFragment
+} from './model';
 
 /**
   @module ember-data.model-fragments
@@ -13,28 +19,6 @@ var get = Ember.get;
   @namespace DS
 */
 Store.reopen({
-  /**
-    Build a new fragment of the given type with injections
-    applied that starts in the 'empty' state.
-
-    @method buildFragment
-    @private
-    @param {subclass of DS.ModelFragment} type
-    @return {DS.ModelFragment} fragment
-  */
-  buildFragment: function(type) {
-    type = this.modelFor(type);
-
-    // TODO: ModelFragment should be able to be referenced by an import here,
-    // but because CoreModel depends on the changes to DS.Model in this file,
-    // it would create a circular reference
-    Ember.assert("The '" + type + "' model must be a subclass of DS.ModelFragment", DS.ModelFragment.detect(type));
-
-    return type.create({
-      store: this
-    });
-  },
-
   /**
     Create a new fragment that does not yet have an owner record.
     The properties passed to this method are set on the newly created
@@ -55,14 +39,26 @@ Store.reopen({
       newly created fragment.
     @return {DS.ModelFragment} fragment
   */
-  createFragment: function(type, props) {
-    var fragment = this.buildFragment(type);
+  createFragment: function(modelName, props) {
+    var type = this.modelFor(modelName);
+
+    Ember.assert("The '" + type + "' model must be a subclass of DS.ModelFragment", ModelFragment.detect(type));
+
+    var internalModel = new InternalModel(type, null, this, this.container);
+
+    // Re-wire the internal model to use the fragment state machine
+    internalModel.currentState = FragmentRootState.empty;
+
+    internalModel._name = null;
+    internalModel._owner = null;
+
+    internalModel.loadedData();
+
+    var fragment = internalModel.getRecord();
 
     if (props) {
       fragment.setProperties(props);
     }
-
-    fragment.send('loadedData');
 
     return fragment;
   }
@@ -73,55 +69,6 @@ Store.reopen({
   @namespace DS
   */
 Model.reopen({
-  _setup: function() {
-    this._super();
-    this._fragments = {};
-  },
-
-  /**
-    Override parent method to snapshot fragment attributes before they are
-    passed to the `DS.Model#serialize`.
-
-    @method _createSnapshot
-    @private
-  */
-  _createSnapshot: function() {
-    var snapshot = this._super.apply(this, arguments);
-    var attrs = snapshot._attributes;
-
-    Ember.keys(attrs).forEach(function(key) {
-      var attr = attrs[key];
-
-      // If the attribute has a `_createSnapshot` method, invoke it before the
-      // snapshot gets passed to the serializer
-      if (attr && typeof attr._createSnapshot === 'function') {
-        attrs[key] = attr._createSnapshot();
-      }
-    });
-
-    return snapshot;
-  },
-
-  /**
-    If the adapter did not return a hash in response to a commit,
-    merge the changed attributes and relationships into the existing
-    saved data and notify all fragments of the commit.
-
-    @method adapterDidCommit
-  */
-  adapterDidCommit: function(data) {
-    this._super.apply(this, arguments);
-
-    var fragment;
-
-    // Notify fragments that the record was committed
-    for (var key in this._fragments) {
-      if (fragment = this._fragments[key]) {
-        fragment.adapterDidCommit();
-      }
-    }
-  },
-
   /**
     Returns an object, whose keys are changed properties, and value is
     an [oldProp, newProp] array. When the model has fragments that have
@@ -153,81 +100,96 @@ Model.reopen({
   */
   changedAttributes: function() {
     var diffData = this._super();
+    var internalModel = internalModelFor(this);
 
-    Ember.keys(this._fragments).forEach(function(name) {
+    Ember.keys(internalModel._fragments).forEach(function(name) {
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
-      if (name in this._attributes) {
+      if (name in internalModel._attributes) {
         diffData[name] = true;
       }
     }, this);
 
     return diffData;
   },
+});
 
-  /**
-    If the model `isDirty` this function will discard any unsaved
-    changes, recursively doing the same for all fragment properties.
+// Replace a method on an object with a new one that calls the original and then
+// invokes a function with the result
+function decorateMethod(obj, name, fn) {
+  var originalFn = obj[name];
 
-    Example
+  obj[name] = function() {
+    var value = originalFn.apply(this, arguments);
 
-    ```javascript
-    record.get('name'); // 'Untitled Document'
-    record.set('name', 'Doc 1');
-    record.get('name'); // 'Doc 1'
-    record.rollback();
-    record.get('name'); // 'Untitled Document'
-    ```
+    return fn.call(this, value, arguments);
+  };
+}
 
-    @method rollback
-  */
-  rollback: function() {
-    this._super();
+var InternalModelPrototype = InternalModel.prototype;
 
-    // Rollback fragments after data changes -- otherwise observers get tangled up
-    this.rollbackFragments();
-  },
+/**
+  Override parent method to snapshot fragment attributes before they are
+  passed to the `DS.Model#serialize`.
 
-  /**
-    @method rollbackFragments
-    @private
-    */
-  rollbackFragments: function() {
-    for (var key in this._fragments) {
-      if (this._fragments[key]) {
-        this._fragments[key].rollback();
-      }
+  @method _createSnapshot
+  @private
+*/
+decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
+  var attrs = snapshot._attributes;
+
+  Ember.keys(attrs).forEach(function(key) {
+    var attr = attrs[key];
+
+    // If the attribute has a `_createSnapshot` method, invoke it before the
+    // snapshot gets passed to the serializer
+    if (attr && typeof attr._createSnapshot === 'function') {
+      attrs[key] = attr._createSnapshot();
     }
-  },
+  });
 
-  /**
-    @method fragmentDidDirty
-    @private
-  */
-  fragmentDidDirty: function(key, fragment) {
-    if (!get(this, 'isDeleted')) {
-      // Add the fragment as a placeholder in the owner record's
-      // `_attributes` hash to indicate it is dirty
-      this._attributes[key] = fragment;
+  return snapshot;
+});
 
-      this.send('becomeDirty');
+/**
+  If the model `hasDirtyAttributes` this function will discard any unsaved
+  changes, recursively doing the same for all fragment properties.
+
+  Example
+
+  ```javascript
+  record.get('name'); // 'Untitled Document'
+  record.set('name', 'Doc 1');
+  record.get('name'); // 'Doc 1'
+  record.rollbackAttributes();
+  record.get('name'); // 'Untitled Document'
+  ```
+
+  @method rollbackAttributes
+*/
+decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
+  for (var key in this._fragments) {
+    if (this._fragments[key]) {
+      this._fragments[key].rollbackAttributes();
     }
-  },
+  }
+});
 
-  /**
-    @method fragmentDidReset
-    @private
-    */
-  fragmentDidReset: function(key, fragment) {
-    // Make sure there's no entry in the owner record's
-    // `_attributes` hash to indicate the fragment is dirty
-    delete this._attributes[key];
+/**
+  If the adapter did not return a hash in response to a commit,
+  merge the changed attributes and relationships into the existing
+  saved data and notify all fragments of the commit.
 
-    // Don't reset if the record is new, otherwise it will enter the 'deleted' state
-    // NOTE: This case almost never happens with attributes because their initial value
-    // is always undefined, which is *usually* not what attributes get 'reset' to
-    if (!get(this, 'isNew')) {
-      this.send('propertyWasReset', key);
+  @method adapterDidCommit
+*/
+decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommit(returnValue, args) {
+  var attributes = (args[0] && args[0].attributes) || {};
+  var fragment;
+
+  // Notify fragments that the record was committed
+  for (var key in this._fragments) {
+    if (fragment = this._fragments[key]) {
+      fragment._adapterDidCommit(attributes[key]);
     }
   }
 });

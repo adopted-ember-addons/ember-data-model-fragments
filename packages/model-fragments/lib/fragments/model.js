@@ -1,13 +1,14 @@
 import Ember from 'ember';
 // DS.Model gets munged to add fragment support, which must be included by CoreModel
 import { Model } from './ext';
-import FragmentRootState from './states';
 
 /**
   @module ember-data.model-fragments
 */
 
 var get = Ember.get;
+var create = Ember.create;
+var merge = Ember.merge;
 
 /**
   The class that all nested object structures, or 'fragments', descend from.
@@ -69,87 +70,6 @@ var get = Ember.get;
 */
 var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
-    The fragment's property name on the owner record.
-
-    @property _name
-    @private
-    @type {String}
-  */
-  _name: null,
-
-  /**
-    A reference to the fragment's owner record.
-
-    @property _owner
-    @private
-    @type {DS.Model}
-  */
-  _owner: null,
-
-  /**
-    A reference to a state object descriptor indicating fragment's current state.
-
-    @property currentState
-    @private
-    @type {Object}
-  */
-  currentState: FragmentRootState.empty,
-
-  /**
-    @method setupData
-    @private
-    @param {Object} data
-  */
-  setupData: function(data) {
-    var store = get(this, 'store');
-    var type = store.modelFor(this.constructor);
-    var serializer = store.serializerFor(type);
-
-    // Setting data means the record is now clean
-    this._attributes = {};
-
-    // TODO: do normalization in the transform, not on the fly
-    this._data = serializer.normalize(type, data);
-
-    // Initiate state change
-    this.send('pushedData');
-
-    // Changed properties must be notified manually
-    notifyProperties(this, Ember.keys(data));
-  },
-
-  /**
-    Like `DS.Model#rollback`, if the fragment `isDirty` this function will
-    discard any unsaved changes, recursively doing the same for all fragment
-    properties.
-
-    Example
-
-    ```javascript
-    fragment.get('type'); // 'Human'
-    fragment.set('type', 'Hamster');
-    fragment.get('type'); // 'Hamster'
-    fragment.rollback();
-    fragment.get('type'); // 'Human'
-    ```
-
-    @method rollback
-  */
-  rollback: function() {
-    var toNotify = Ember.keys(this._attributes);
-    this._attributes = {};
-
-    // Rollback fragments from the bottom up
-    this.rollbackFragments();
-
-    // Initiate state change
-    this.send('rolledBack');
-
-    // Changed properties must be notified manually
-    notifyProperties(this, toNotify);
-  },
-
-  /**
     Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 
     @method compare
@@ -171,56 +91,28 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   */
   copy: function() {
     var store = get(this, 'store');
-    var type = store.modelFor(this.constructor);
     var data = {};
 
     // TODO: handle copying sub-fragments
-    Ember.merge(data, this._data);
-    Ember.merge(data, this._attributes);
+    merge(data, this._data);
+    merge(data, this._attributes);
 
-    return this.store.createFragment(type, data);
+    return this.store.createFragment(this.constructor.modelName, data);
   },
 
   /**
     @method adapterDidCommit
   */
-  adapterDidCommit: function() {
-    // Merge in-flight attributes if any
-    if (Ember.keys(this._inFlightAttributes).length) {
-      Ember.mixin(this._data, this._inFlightAttributes);
-      this._inFlightAttributes = {};
-    }
-
-    var fragment;
-
-    // Notify fragments that the owner record was committed
-    for (var key in this._fragments) {
-      if (fragment = this._fragments[key]) {
-        fragment.adapterDidCommit();
-      }
-    }
-
-    // Transition directly to a clean state
-    this.transitionTo('saved');
+  _adapterDidCommit: function(data) {
+    internalModelFor(this).setupData({
+      attributes: data || {}
+    });
   },
 
   toStringExtension: function() {
-    return 'owner(' + get(this, '_owner.id') + ')';
-  },
-
-  init: function() {
-    this._super();
-    this._setup();
+    return 'owner(' + get(internalModelFor(this)._owner, 'id') + ')';
   }
 });
-
-function notifyProperties(context, propNames) {
-  Ember.beginPropertyChanges();
-  for (var i = 0, l = propNames.length; i < l; i++) {
-    context.notifyPropertyChange(propNames[i]);
-  }
-  Ember.endPropertyChanges();
-}
 
 /**
  * `getActualFragmentType` returns the actual type of a fragment based on its declared type
@@ -232,7 +124,7 @@ function notifyProperties(context, propNames) {
  * @param {Object} data the fragment data
  * @return {String} the actual fragment type
  */
-function getActualFragmentType(declaredType, options, data) {
+export function getActualFragmentType(declaredType, options, data) {
   if (!options.polymorphic || !data) {
     return declaredType;
   }
@@ -243,5 +135,29 @@ function getActualFragmentType(declaredType, options, data) {
   return actualType || declaredType;
 }
 
+// Returns the internal model for the given record/fragment
+export function internalModelFor(record) {
+  var internalModel = record._internalModel;
+
+  // Ensure the internal model has a fragments hash, since we can't override the
+  // constructor function anymore
+  if (!internalModel._fragments) {
+    internalModel._fragments = create(null);
+  }
+
+  return internalModel;
+}
+
+// Sets the owner/key values on a fragment
+export function setFragmentOwner(fragment, record, key) {
+  var internalModel = internalModelFor(fragment);
+
+  Ember.assert("Fragments can only belong to one owner, try copying instead", !internalModel._owner || internalModel._owner === record);
+
+  internalModel._owner = record;
+  internalModel._name = key;
+
+  return fragment;
+}
+
 export default ModelFragment;
-export { getActualFragmentType };

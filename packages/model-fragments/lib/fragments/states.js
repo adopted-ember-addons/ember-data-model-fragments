@@ -6,17 +6,18 @@ import RootState from 'ember-data/system/model/states';
 */
 
 var get = Ember.get;
+var create = Ember.create;
 
 var didSetProperty = RootState.loaded.saved.didSetProperty;
 var propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
 
-var dirtySetup = function(fragment) {
-  var record = get(fragment, '_owner');
-  var key = get(fragment, '_name');
+var dirtySetup = function(internalModel) {
+  var record = internalModel._owner;
+  var key = internalModel._name;
 
   // A newly created fragment may not have an owner yet
   if (record) {
-    record.fragmentDidDirty(key, fragment);
+    fragmentDidDirty(record, key, internalModel);
   }
 };
 
@@ -65,39 +66,41 @@ var FragmentRootState = {
   empty: {
     isEmpty: true,
 
-    loadedData: function(fragment) {
-      fragment.transitionTo('loaded.created');
+    loadedData: function(internalModel) {
+      internalModel.transitionTo('loaded.created');
     },
 
-    pushedData: function(fragment) {
-      fragment.transitionTo('loaded.saved');
+    pushedData: function(internalModel) {
+      internalModel.transitionTo('loaded.saved');
     }
   },
 
   loaded: {
-    pushedData: function(fragment) {
-      fragment.transitionTo('saved');
+    pushedData: function(internalModel) {
+      internalModel.transitionTo('saved');
     },
 
     saved: {
-      setup: function(fragment) {
-        var record = get(fragment, '_owner');
-        var key = get(fragment, '_name');
+      setup: function(internalModel) {
+        var record = internalModel._owner;
+        var key = internalModel._name;
 
         // Abort if fragment is still initializing
-        if (!record._fragments[key] || fragment._isInitializing) { return; }
+        if (!record._internalModel._fragments[key] || internalModel._isInitializing) { return; }
 
         // Reset the property on the owner record if no other siblings
         // are dirty (or there are no siblings)
-        if (!get(record, key + '.isDirty')) {
-          record.fragmentDidReset(key, fragment);
+        if (!get(record, key + '.hasDirtyAttributes')) {
+          fragmentDidReset(record, key, internalModel);
         }
       },
 
       pushedData: Ember.K,
 
-      becomeDirty: function(fragment) {
-        fragment.transitionTo('updated');
+      didCommit: Ember.K,
+
+      becomeDirty: function(internalModel) {
+        internalModel.transitionTo('updated');
       }
     },
 
@@ -105,6 +108,10 @@ var FragmentRootState = {
       isDirty: true,
 
       setup: dirtySetup,
+
+      didCommit: function(internalModel) {
+        internalModel.transitionTo('saved');
+      }
     },
 
     updated: {
@@ -114,8 +121,12 @@ var FragmentRootState = {
 
       propertyWasReset: propertyWasReset,
 
-      rolledBack: function(fragment) {
-        fragment.transitionTo('saved');
+      didCommit: function(internalModel) {
+        internalModel.transitionTo('saved');
+      },
+
+      rolledBack: function(internalModel) {
+        internalModel.transitionTo('saved');
       }
     }
   }
@@ -131,7 +142,7 @@ function mixin(original, hash) {
 
 // Wouldn't it be awesome if this was public?
 function wireState(object, parent, name) {
-  object = mixin(parent ? Ember.create(parent) : {}, object);
+  object = mixin(parent ? create(parent) : {}, object);
   object.parentState = parent;
   object.stateName = name;
 
@@ -150,3 +161,26 @@ function wireState(object, parent, name) {
 FragmentRootState = wireState(FragmentRootState, null, 'root');
 
 export default FragmentRootState;
+
+export function fragmentDidDirty(record, key, fragment) {
+  if (!get(record, 'isDeleted')) {
+    // Add the fragment as a placeholder in the owner record's
+    // `_attributes` hash to indicate it is dirty
+    record._internalModel._attributes[key] = fragment;
+
+    record.send('becomeDirty');
+  }
+}
+
+export function fragmentDidReset(record, key) {
+  // Make sure there's no entry in the owner record's
+  // `_attributes` hash to indicate the fragment is dirty
+  delete record._internalModel._attributes[key];
+
+  // Don't reset if the record is new, otherwise it will enter the 'deleted' state
+  // NOTE: This case almost never happens with attributes because their initial value
+  // is always undefined, which is *usually* not what attributes get 'reset' to
+  if (!get(record, 'isNew')) {
+    record.send('propertyWasReset', key);
+  }
+}

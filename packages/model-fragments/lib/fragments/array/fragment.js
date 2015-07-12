@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import StatefulArray from './stateful';
-import { getActualFragmentType } from '../model';
+import { internalModelFor, setFragmentOwner, getActualFragmentType } from '../model';
 
 /**
   @module ember-data.model-fragments
@@ -60,16 +60,15 @@ var FragmentArray = StatefulArray.extend({
       // Create a new fragment from the data array if needed
       if (!fragment) {
         var actualType = getActualFragmentType(declaredType, options, data);
-        fragment = store.buildFragment(actualType);
+        fragment = store.createFragment(actualType);
 
-        fragment.setProperties({
-          _owner : record,
-          _name  : key
-        });
+        setFragmentOwner(fragment, record, key);
       }
 
       // Initialize the fragment with the data
-      fragment.setupData(data);
+      internalModelFor(fragment).setupData({
+        attributes: data
+      });
 
       return fragment;
     });
@@ -92,12 +91,19 @@ var FragmentArray = StatefulArray.extend({
 
   /**
     @method adapterDidCommit
+    @private
   */
-  adapterDidCommit: function() {
-    this._super();
+  _adapterDidCommit: function(data) {
+    this._super(data);
 
-    // Notify all records of commit
-    this.invoke('adapterDidCommit');
+    // If the adapter update did not contain new data, just notify each fragment
+    // so it can transition to a clean state
+    if (!data) {
+      // Notify all records of commit
+      this.forEach(function(fragment, index) {
+        fragment._adapterDidCommit();
+      });
+    }
   },
 
   /**
@@ -162,7 +168,7 @@ var FragmentArray = StatefulArray.extend({
     // ensure that fragments are the correct type and have an owner and name
     if (fragments) {
       fragments.forEach(function(fragment) {
-        var owner = get(fragment, '_owner');
+        var owner = internalModelFor(fragment)._owner;
 
         Ember.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
         Ember.assert("You can only add '" + get(array, 'type') + "' fragments to this property", (function (type) {
@@ -176,10 +182,7 @@ var FragmentArray = StatefulArray.extend({
         })(get(record, 'store').modelFor(get(array, 'type'))));
 
         if (!owner) {
-          fragment.setProperties({
-            _owner : record,
-            _name  : key
-          });
+          setFragmentOwner(fragment, record, key);
         }
       });
     }

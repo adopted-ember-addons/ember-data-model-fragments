@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import { fragmentDidDirty, fragmentDidReset } from '../states';
 
 /**
   @module ember-data.model-fragments
@@ -93,9 +94,13 @@ var StatefulArray = Ember.ArrayProxy.extend({
     @method adapterDidCommit
     @private
   */
-  adapterDidCommit: function() {
-    // Fragment array has been persisted; use the current state as the original state
-    set(this, '_originalState', this.toArray());
+  _adapterDidCommit: function(data) {
+    if (data) {
+      this.setupData(data);
+    } else {
+      // Fragment array has been persisted; use the current state as the original state
+      set(this, '_originalState', this.toArray());
+    }
   },
 
   /**
@@ -176,9 +181,9 @@ var StatefulArray = Ember.ArrayProxy.extend({
 
     // Any change to the size of the fragment array means a potential state change
     if (get(this, 'hasDirtyAttributes')) {
-      record.fragmentDidDirty(key, this);
+      fragmentDidDirty(record, key, this);
     } else {
-      record.fragmentDidReset(key, this);
+      fragmentDidReset(record, key);
     }
   },
 
