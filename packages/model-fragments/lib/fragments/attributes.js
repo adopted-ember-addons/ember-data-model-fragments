@@ -131,7 +131,7 @@ function isInstanceOfType(type, fragment) {
   `DS.hasManyFragments` defines an attribute on a `DS.Model` or
   `DS.ModelFragment` instance. Much like `DS.hasMany`, it creates a property
   that returns an array of fragments of the given type. The array is aware of
-  its original state and so has a `isDirty` property and a `rollback` method.
+  its original state and so has a `hasDirtyAttributes` property and a `rollback` method.
   If a fragment type is not given, values are not converted to fragments, but
   passed straight through.
 
@@ -147,7 +147,7 @@ function isInstanceOfType(type, fragment) {
 
   ```javascript
   App.Person = DS.Model.extend({
-    addresses: DS.hasManyFragments('name', { defaultValue: [] })
+    addresses: DS.hasManyFragments('address', { defaultValue: [] })
   });
 
   App.Address = DS.ModelFragment.extend({

@@ -15,7 +15,8 @@ var get = Ember.get;
   and cannot change owners once set. They behave like models, but they have
   no `save` method since their persistence is managed entirely through their
   owner. Because of this, a fragment's state directly influences its owner's
-  state, e.g. when a record's fragment `isDirty`, its owner `isDirty`.
+  state, e.g. when a record's fragment `hasDirtyAttributes`, its owner
+  `hasDirtyAttributes`.
 
   Example:
 
@@ -46,18 +47,18 @@ var get = Ember.get;
   var person = store.getbyid('person', '1');
   var name = person.get('name');
 
-  person.get('isDirty'); // false
-  name.get('isDirty'); // false
+  person.get('hasDirtyAttributes'); // false
+  name.get('hasDirtyAttributes'); // false
   name.get('first'); // 'Robert'
 
   name.set('first', 'The Animal');
-  name.get('isDirty'); // true
-  person.get('isDirty'); // true
+  name.get('hasDirtyAttributes'); // true
+  person.get('hasDirtyAttributes'); // true
 
-  person.rollback();
+  person.rollbackAttributes();
   name.get('first'); // 'Robert'
-  person.get('isDirty'); // false
-  person.get('isDirty'); // false
+  person.get('hasDirtyAttributes'); // false
+  person.get('hasDirtyAttributes'); // false
   ```
 
   @class ModelFragment

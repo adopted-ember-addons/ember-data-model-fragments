@@ -6,6 +6,7 @@ import Ember from 'ember';
 
 var get = Ember.get;
 var set = Ember.set;
+var computed = Ember.computed;
 var splice = Array.prototype.splice;
 
 /**
@@ -20,7 +21,6 @@ var StatefulArray = Ember.ArrayProxy.extend({
     A reference to the array's owner record.
 
     @property owner
-    @private
     @type {DS.Model}
   */
   owner: null,
@@ -40,9 +40,9 @@ var StatefulArray = Ember.ArrayProxy.extend({
     set(this, '_originalState', []);
   },
 
-  content: function() {
+  content: computed(function() {
     return Ember.A();
-  }.property(),
+  }),
 
   /**
     @method setupData
@@ -91,11 +91,21 @@ var StatefulArray = Ember.ArrayProxy.extend({
 
   /**
     @method adapterDidCommit
+    @private
   */
   adapterDidCommit: function() {
     // Fragment array has been persisted; use the current state as the original state
     set(this, '_originalState', this.toArray());
   },
+
+  /**
+    @method isDirty
+    @deprecated Use `hasDirtyAttributes` instead
+  */
+  isDirty: computed('hasDirtyAttributes', function() {
+    Ember.deprecate('The `isDirty` method of fragment arrays has been deprecated, please use `hasDirtyAttributes` instead');
+    return this.get('hasDirtyAttributes');
+  }),
 
   /**
     If this property is `true` the contents of the array do not match its
@@ -111,13 +121,22 @@ var StatefulArray = Ember.ArrayProxy.extend({
     array.get('isDirty'); // true
     ```
 
-    @property isDirty
+    @property hasDirtyAttributes
     @type {Boolean}
     @readOnly
   */
-  isDirty: function() {
+  hasDirtyAttributes: computed('[]', '_originalState', function() {
     return Ember.compare(this.toArray(), get(this, '_originalState')) !== 0;
-  }.property('[]', '_originalState'),
+  }),
+
+  /**
+    @method rollback
+    @deprecated Use `rollbackAttributes()` instead
+  */
+  rollback: function() {
+    Ember.deprecate('Using array.rollback() has been deprecated. Use array.rollbackAttributes() to discard any unsaved changes to fragments in the array.');
+    this.rollbackAttributes();
+  },
 
   /**
     This method reverts local changes of the array's contents to its original
@@ -129,13 +148,13 @@ var StatefulArray = Ember.ArrayProxy.extend({
     array.toArray(); // [ 'Tom', 'Yehuda' ]
     array.popObject(); // 'Yehuda'
     array.toArray(); // [ 'Tom' ]
-    array.rollback();
+    array.rollbackAttributes();
     array.toArray(); // [ 'Tom', 'Yehuda' ]
     ```
 
-    @method rollback
+    @method rollbackAttributes
   */
-  rollback: function() {
+  rollbackAttributes: function() {
     this.setObjects(get(this, '_originalState'));
   },
 
@@ -156,7 +175,7 @@ var StatefulArray = Ember.ArrayProxy.extend({
     var key = get(this, 'name');
 
     // Any change to the size of the fragment array means a potential state change
-    if (this.get('isDirty')) {
+    if (get(this, 'hasDirtyAttributes')) {
       record.fragmentDidDirty(key, this);
     } else {
       record.fragmentDidReset(key, this);

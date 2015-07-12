@@ -8,6 +8,7 @@ import { getActualFragmentType } from '../model';
 
 var get = Ember.get;
 var map = Ember.EnumerableUtils.map;
+var computed = Ember.computed;
 
 /**
   A state-aware array of fragments that is tied to an attribute of a `DS.Model`
@@ -107,38 +108,38 @@ var FragmentArray = StatefulArray.extend({
 
     ```javascript
     array.toArray(); // [ <Fragment:1>, <Fragment:2> ]
-    array.get('isDirty'); // false
+    array.get('hasDirtyAttributes'); // false
     array.get('firstObject').set('prop', 'newValue');
-    array.get('isDirty'); // true
+    array.get('hasDirtyAttributes'); // true
     ```
 
-    @property isDirty
+    @property hasDirtyAttributes
     @type {Boolean}
     @readOnly
   */
-  isDirty: function() {
-    return this._super() || this.isAny('isDirty');
-  }.property('@each.isDirty', '_originalState'),
+  hasDirtyAttributes: computed('@each.hasDirtyAttributes', '_originalState', function() {
+    return this._super() || this.isAny('hasDirtyAttributes');
+  }),
 
   /**
     This method reverts local changes of the array's contents to its original
-    state, and calls `rollback` on each fragment.
+    state, and calls `rollbackAttributes` on each fragment.
 
     Example
 
     ```javascript
-    array.get('firstObject').get('isDirty'); // true
-    array.get('isDirty'); // true
-    array.rollback();
-    array.get('firstObject').get('isDirty'); // false
-    array.get('isDirty'); // false
+    array.get('firstObject').get('hasDirtyAttributes'); // true
+    array.get('hasDirtyAttributes'); // true
+    array.rollbackAttributes();
+    array.get('firstObject').get('hasDirtyAttributes'); // false
+    array.get('hasDirtyAttributes'); // false
     ```
 
-    @method rollback
+    @method rollbackAttributes
   */
-  rollback: function() {
+  rollbackAttributes: function() {
     this._super();
-    this.invoke('rollback');
+    this.invoke('rollbackAttributes');
   },
 
   /**
