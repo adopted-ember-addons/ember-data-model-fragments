@@ -1,5 +1,6 @@
 import Store from 'ember-data/system/store';
 import Model from 'ember-data/system/model';
+import JSONSerializer from 'ember-data/serializers/json-serializer';
 
 /**
   @module ember-data.model-fragments
@@ -231,4 +232,47 @@ Model.reopen({
   }
 });
 
-export { Store, Model };
+/**
+  @class JSONSerializer
+  @namespace DS
+*/
+JSONSerializer.reopen({
+  /**
+    Enables fragment properties to have custom transforms based on the fragment
+    type, so that deserialization does not have to happen on the fly
+
+    @method transformFor
+    @private
+  */
+  transformFor: function(attributeType) {
+    if (attributeType.indexOf('-mf-') === 0) {
+      return getFragmentTransform(this.container, this.store, attributeType);
+    }
+
+    return this._super.apply(this, arguments);
+  }
+});
+
+// Retrieve or create a transform for the specific fragment type
+function getFragmentTransform(container, store, attributeType) {
+  var registry = container._registry || container;
+  var containerKey = 'transform:' + attributeType;
+  var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+  var transformType = match[1];
+  var modelName = match[2];
+  var polymorphicTypeProp = match[3];
+
+  if (!registry.has(containerKey)) {
+    var transformClass = container.lookupFactory('transform:' + transformType);
+
+    registry.register(containerKey, transformClass.extend({
+      store: store,
+      modelName: modelName,
+      polymorphicTypeProp: polymorphicTypeProp
+    }));
+  }
+
+  return container.lookup(containerKey);
+}
+
+export { Store, Model, JSONSerializer };

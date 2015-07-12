@@ -3,7 +3,9 @@ import DS from 'ember-data';
 import { Store, Model } from './fragments/ext';
 import ModelFragment from './fragments/model';
 import FragmentArray from './fragments/array/fragment';
-import FragmentTransform from './fragments/transform';
+import FragmentTransform from './fragments/transforms/fragment';
+import FragmentArrayTransform from './fragments/transforms/fragment-array';
+import ArrayTransform from './fragments/transforms/array';
 import { hasOneFragment, hasManyFragments, fragmentOwner } from './fragments/attributes';
 import initializers from './initializers';
 
@@ -11,6 +13,8 @@ function exportMethods(scope) {
   scope.ModelFragment = ModelFragment;
   scope.FragmentArray = FragmentArray;
   scope.FragmentTransform = FragmentTransform;
+  scope.FragmentArrayTransform = FragmentArrayTransform;
+  scope.ArrayTransform = ArrayTransform;
   scope.hasOneFragment = hasOneFragment;
   scope.hasManyFragments = hasManyFragments;
   scope.fragmentOwner = fragmentOwner;

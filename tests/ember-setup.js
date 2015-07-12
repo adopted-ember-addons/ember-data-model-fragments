@@ -41,6 +41,8 @@ window.setupEnv = function(options) {
   registry.register('transform:number', DS.NumberTransform);
   registry.register('transform:string', DS.StringTransform);
   registry.register('transform:fragment', DS.FragmentTransform);
+  registry.register('transform:fragment-array', DS.FragmentArrayTransform);
+  registry.register('transform:array', DS.ArrayTransform);
 
   registry.injection('serializer', 'store', 'store:main');
 
