@@ -366,6 +366,10 @@ test("the adapter can update fragments without infinite loops when CPs are eager
   });
 });
 
+// TODO: The data in the adapter response is not actually changing here, which
+// means that the property actually _shouldn't_ be notified. Doing so requires
+// value diffing of deserialized model data, which means either saving a copy of
+// the data before giving it to the fragment
 test("`DS.hasManyFragments` array properties are notified on save", function() {
   expect(1);
 
