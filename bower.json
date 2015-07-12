@@ -18,7 +18,7 @@
     "testem.json"
   ],
   "dependencies": {
-    "ember-data": "1.0.0-beta.17"
+    "ember-data": "^1.13.5"
   },
   "devDependencies": {
     "jquery": "^2.0.0",
