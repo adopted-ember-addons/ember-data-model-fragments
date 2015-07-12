@@ -72,7 +72,11 @@ module("unit/fragments - DS.hasManyFragments", {
 });
 
 function pushPerson(id) {
-  store.push('person', Ember.copy(Ember.A(people).findBy('id', id), true));
+  store.push({
+    type: 'person',
+    id: id,
+    attributes: Ember.A(people).findBy('id', id)
+  });
 }
 
 test("properties are instances of `DS.FragmentArray`", function() {
@@ -101,13 +105,16 @@ test("arrays of object literals are deserialized into instances of `DS.ModelFrag
 test("arrays of primitives are converted to an array-ish containing original values", function() {
   var values = [ "Hand of the King", "Master of Coin" ];
 
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Tyrion",
-      last: "Lannister"
-    },
-    titles: values
+    attributes: {
+      name: {
+        first: "Tyrion",
+        last: "Lannister"
+      },
+      titles: values
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -121,7 +128,6 @@ test("arrays of primitives are converted to an array-ish containing original val
 
   });
 });
-
 
 test("fragments created through the store can be added to the fragment array", function() {
   pushPerson(1);

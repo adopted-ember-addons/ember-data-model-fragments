@@ -69,15 +69,22 @@ module("integration/fragments - Dependent State", {
 });
 
 function pushPerson(id) {
-  store.push('person', Ember.copy(Ember.A(people).findBy('id', id), true));
+  store.push({
+    type: 'person',
+    id: id,
+    attributes: Ember.A(people).findBy('id', id)
+  });
 }
 
 test("changing a `DS.hasOneFragment` fragment property dirties the fragment and owner record", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Jamie",
-      last: "Lannister"
+    attributes: {
+      name: {
+        first: "Jamie",
+        last: "Lannister"
+      }
     }
   });
 
@@ -92,11 +99,14 @@ test("changing a `DS.hasOneFragment` fragment property dirties the fragment and 
 });
 
 test("restoring a `DS.hasOneFragment` fragment to its original state returns the fragment and owner record to a clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Hoster",
-      last: "Tully"
+    attributes: {
+      name: {
+        first: "Hoster",
+        last: "Tully"
+      }
     }
   });
 
@@ -112,11 +122,14 @@ test("restoring a `DS.hasOneFragment` fragment to its original state returns the
 });
 
 test("restoring a `DS.hasOneFragment` fragment to its original state when the owner record was dirty returns the fragment to a clean state maintains the owner record's dirty state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Jorah",
-      last: "Mormont"
+    attributes: {
+      name: {
+        first: "Jorah",
+        last: "Mormont"
+      }
     }
   });
 
@@ -135,11 +148,14 @@ test("restoring a `DS.hasOneFragment` fragment to its original state when the ow
 });
 
 test("rolling back the owner record returns a `DS.hasOneFragment` fragment and owner record to a clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Catelyn",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Catelyn",
+        last: "Stark"
+      }
     }
   });
 
@@ -156,11 +172,14 @@ test("rolling back the owner record returns a `DS.hasOneFragment` fragment and o
 });
 
 test("a record can be rolled back multiple times", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Arya",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Arya",
+        last: "Stark"
+      }
     }
   });
 
@@ -184,11 +203,14 @@ test("a record can be rolled back multiple times", function() {
 });
 
 test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the owner record to a clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Sansa",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Sansa",
+        last: "Stark"
+      }
     }
   });
 
@@ -206,11 +228,14 @@ test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the o
 });
 
 test("rolling back a `DS.hasOneFragment` fragment when the owner record is dirty returns the fragment to a clean state and maintains the owner record's dirty state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Sansa",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Sansa",
+        last: "Stark"
+      }
     }
   });
 
@@ -247,7 +272,11 @@ test("a `DS.hasOneFragment` fragment property that is set to null can be rolled 
 });
 
 test("a `DS.hasOneFragment` fragment property that is null can be rolled back", function() {
-  store.push('person', { id: 1, });
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
 
   return store.find('person', 1).then(function(person) {
     var name = person.get('name');
@@ -566,7 +595,11 @@ test("a `DS.hasManyFragments` fragment property that is set to null can be rolle
 });
 
 test("a `DS.hasManyFragments` fragment property that is null can be rolled back", function() {
-  store.push('person', { id: 1, });
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
 
   return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');

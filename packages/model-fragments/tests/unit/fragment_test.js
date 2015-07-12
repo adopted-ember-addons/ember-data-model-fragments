@@ -42,15 +42,22 @@ test("fragments are `Ember.Copyable`", function() {
 });
 
 test("copied fragments can be added to any record", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Jon",
-      last: "Snow"
+    attributes: {
+      name: {
+        first: "Jon",
+        last: "Snow"
+      }
     }
   });
 
-  store.push('person', { id: 2 });
+  store.push({
+    type: 'person',
+    id: 2,
+    attributes: {}
+  });
 
   return all([
     store.find('person', 1),
@@ -85,11 +92,14 @@ test("fragments are compared by reference", function() {
 });
 
 test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Loras",
-      last: "Tyrell"
+    attributes: {
+      name: {
+        first: "Loras",
+        last: "Tyrell"
+      }
     }
   });
 
@@ -103,11 +113,14 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
 });
 
 test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Rob",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Rob",
+        last: "Stark"
+      }
     }
   });
 
@@ -119,11 +132,14 @@ test("fragment properties that are set to null are indicated in the owner record
 });
 
 test("changes to attributes can be rolled back", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Ramsay",
-      last: "Snow"
+    attributes: {
+      name: {
+        first: "Ramsay",
+        last: "Snow"
+      }
     }
   });
 
@@ -142,11 +158,14 @@ test("fragment properties are serialized as normal attributes using their own se
   // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
   store.modelFor('person');
 
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Aerys",
-      last: "Targaryen"
+    attributes: {
+      name: {
+        first: "Aerys",
+        last: "Targaryen"
+      }
     }
   });
 
@@ -177,7 +196,6 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   });
 
   var person = {
-    id: 1,
     name: {
       first : "Catelyn",
       last  : "Stark"
@@ -203,7 +221,11 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
     ]
   };
 
-  store.push('person', person);
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: person
+  });
 
   env.registry.register('serializer:person', env.serializer.extend({
     serialize: function(snapshot) {

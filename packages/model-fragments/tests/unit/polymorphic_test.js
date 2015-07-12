@@ -28,8 +28,9 @@ module("unit/fragments - polymorphism", {
       lion: Lion,
     });
 
-    store.push('zoo', {
-      id: 1,
+    store = env.store;
+
+    zoo = {
       name: 'Chilly Zoo',
       city: 'Winterfell',
       star: {
@@ -63,6 +64,12 @@ module("unit/fragments - polymorphism", {
 });
 
 test("hasOneFragment supports polymorphism", function() {
+  store.push({
+    type: 'zoo',
+    id: 1,
+    attributes: zoo
+  });
+
   return store.find('zoo', 1).then(function(zoo) {
     equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
     equal(zoo.get("city"), "Winterfell", "zoo city is correct");
@@ -76,6 +83,12 @@ test("hasOneFragment supports polymorphism", function() {
 });
 
 test("hasManyFragments supports polymorphism", function() {
+  store.push({
+    type: 'zoo',
+    id: 1,
+    attributes: zoo
+  });
+
   return store.find('zoo', 1).then(function(zoo) {
     var animals = zoo.get("animals");
     equal(animals.get("length"), 2);
@@ -97,6 +110,12 @@ test("hasManyFragments supports polymorphism", function() {
 test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
   expect(1);
 
+  store.push({
+    type: 'zoo',
+    id: 1,
+    attributes: zoo
+  });
+
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
@@ -117,10 +136,16 @@ test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_IN
 test("rolling back a `DS.hasOneFragment` fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
   expect(1);
 
+  store.push({
+    type: 'zoo',
+    id: 1,
+    attributes: zoo
+  });
+
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
-  return Ember.RSVP.Promise.resolve(store.find('zoo', 1)).then(function(zoo) {
+  return store.find('zoo', 1).then(function(zoo) {
     var animal = zoo.get('star');
 
     zoo.set('star', null);

@@ -30,11 +30,14 @@ module("unit/fragments - DS.hasOneFragment", {
 });
 
 test("object literals are converted to instances of `DS.ModelFragment`", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Tyrion",
-      last: "Lannister"
+    attributes: {
+      name: {
+        first: "Tyrion",
+        last: "Lannister"
+      }
     }
   });
 
@@ -46,7 +49,11 @@ test("object literals are converted to instances of `DS.ModelFragment`", functio
 });
 
 test("a fragment can be created through the store and set", function() {
-  store.push('person', { id: 1 });
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
 
   return store.find('person', 1).then(function(person) {
     var name = store.createFragment('name', {
@@ -61,7 +68,11 @@ test("a fragment can be created through the store and set", function() {
 });
 
 test("setting to a non-fragment model throws an error", function() {
-  store.push('person', { id: 1 });
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
 
   return store.find('person', 1).then(function(person) {
     throws(function() {
@@ -71,15 +82,22 @@ test("setting to a non-fragment model throws an error", function() {
 });
 
 test("setting fragments from other records throws an error", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Roose",
-      last: "Bolton"
+    attributes: {
+      name: {
+        first: "Roose",
+        last: "Bolton"
+      }
     }
   });
 
-  store.push('person', { id: 2 });
+  store.push({
+    type: 'person',
+    id: 2,
+    attributes: {}
+  });
 
   return all([
     store.find('person', 1),
@@ -92,9 +110,12 @@ test("setting fragments from other records throws an error", function() {
 });
 
 test("null values are allowed", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: null
+    attributes: {
+      name: null
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -103,11 +124,14 @@ test("null values are allowed", function() {
 });
 
 test("setting to null is allowed", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Barristan",
-      last: "Selmy"
+    attributes: {
+      name: {
+        first: "Barristan",
+        last: "Selmy"
+      }
     }
   });
 

@@ -28,14 +28,17 @@ module("unit/fragments - DS.FragmentArray", {
 });
 
 test("fragments can be created and added through the fragment array", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Tyrion",
-        last: "Lannister"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Tyrion",
+          last: "Lannister"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -53,14 +56,17 @@ test("fragments can be created and added through the fragment array", function()
 });
 
 test("fragments can be added to the fragment array", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Tyrion",
-        last: "Lannister"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Tyrion",
+          last: "Lannister"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -79,14 +85,17 @@ test("fragments can be added to the fragment array", function() {
 });
 
 test("fragments can be removed from the fragment array", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Arya",
-        last: "Stark"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Arya",
+          last: "Stark"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -102,18 +111,21 @@ test("fragments can be removed from the fragment array", function() {
 });
 
 test("changes to array contents change the fragment array 'isDirty' property", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Aegon",
-        last: "Targaryen"
-      },
-      {
-        first: "Visenya",
-        last: "Targaryen"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Aegon",
+          last: "Targaryen"
+        },
+        {
+          first: "Visenya",
+          last: "Targaryen"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -155,14 +167,17 @@ test("changes to array contents change the fragment array 'isDirty' property", f
 });
 
 test("changes to array contents change the fragment array 'isDirty' property", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Jon",
-        last: "Snow"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Jon",
+          last: "Snow"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -182,18 +197,21 @@ test("changes to array contents change the fragment array 'isDirty' property", f
 });
 
 test("changes to array contents and fragments can be rolled back", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Catelyn",
-        last: "Tully"
-      },
-      {
-        first: "Catelyn",
-        last: "Stark"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Catelyn",
+          last: "Tully"
+        },
+        {
+          first: "Catelyn",
+          last: "Stark"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -236,9 +254,12 @@ test("serializing creates a new Array with contents the result of serializing ea
     }
   ];
 
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: names
+    attributes: {
+      names: names
+    }
   });
 
   env.registry.register('serializer:name', env.serializer);

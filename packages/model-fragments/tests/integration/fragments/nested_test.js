@@ -45,7 +45,6 @@ module("integration/fragments - Nested fragments", {
 
 test("`DS.hasManyFragment` properties can be nested", function() {
   var data = {
-    id: 1,
     info: {
       name: 'Tyrion Lannister',
       notes: [ 'smart', 'short' ]
@@ -79,11 +78,16 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     ]
   };
 
-  store.push('user', Ember.copy(data, true));
+  store.push({
+    type: 'user',
+    id: 1,
+    attributes: Ember.copy(data, true)
+  });
 
   env.adapter.updateRecord = function(store, type, record) {
     var payload = Ember.copy(data, true);
 
+    payload.id = 1;
     payload.orders[0].products.splice(0, 1);
 
     return Ember.RSVP.resolve(payload);

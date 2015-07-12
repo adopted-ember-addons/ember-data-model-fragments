@@ -30,11 +30,14 @@ module("unit/fragments - DS.fragmentOwner", {
 });
 
 test("fragments can reference their owner record", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Samwell",
-      last: "Tarly"
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
     }
   });
 
@@ -46,19 +49,25 @@ test("fragments can reference their owner record", function() {
 });
 
 test("attempting to change a fragment's owner record throws an error", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Samwell",
-      last: "Tarly"
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
     }
   });
 
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 2,
-    name: {
-      first: "Samwell",
-      last: "Tarly"
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
     }
   });
 
