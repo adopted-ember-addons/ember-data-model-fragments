@@ -367,7 +367,7 @@ test("the adapter can update fragments without infinite loops when CPs are eager
 });
 
 test("`DS.hasManyFragments` array properties are notified on save", function() {
-  expect(2);
+  expect(1);
 
   var data = {
     name: {
@@ -384,10 +384,11 @@ test("`DS.hasManyFragments` array properties are notified on save", function() {
     ]
   };
 
-  var PersonProxy = Ember.ObjectProxy.extend({
-    observer: function() {
+  var PersonObserver = Ember.Object.extend({
+    person: null,
+    observer: Ember.observer('person.addresses.[]', function(obj, key) {
       ok(true, "The array change was observed");
-    }.observes('addresses.[]')
+    })
   });
 
   store.push({
@@ -405,13 +406,13 @@ test("`DS.hasManyFragments` array properties are notified on save", function() {
   };
 
   return store.find('person', 1).then(function(person) {
-    var controller = PersonProxy.create({ content: person });
+    PersonObserver.create({ person: person });
     return person.save();
   });
 });
 
 test("`DS.hasManyFragments` properties are notifed on reload", function() {
-  expect(2);
+  expect(1);
 
   var Army = DS.Model.extend({
     name     : DS.attr('string'),
@@ -429,10 +430,11 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
     ]
   };
 
-  var ArmyProxy = Ember.ObjectProxy.extend({
-    observer: function() {
-      equal(this.get('soldiers.length'), 2, "The array change to was observed");
-    }.observes('soldiers.[]')
+  var ArmyObserver = Ember.Object.extend({
+    army: null,
+    observer: Ember.observer('army.soldiers.[]', function() {
+      equal(this.get('army.soldiers.length'), 2, "The array change to was observed");
+    })
   });
 
   store.push({
@@ -451,7 +453,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
   };
 
   return store.find('army', 1).then(function(army) {
-    var proxy = ArmyProxy.create({ content: army });
+    var proxy = ArmyObserver.create({ army: army });
     return army.reload();
   });
 });
