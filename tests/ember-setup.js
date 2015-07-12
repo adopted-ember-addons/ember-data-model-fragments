@@ -56,7 +56,3 @@ window.setupEnv = function(options) {
   return env;
 };
 
-window.createStore = function(options) {
-  return setupEnv(options).store;
-};
-

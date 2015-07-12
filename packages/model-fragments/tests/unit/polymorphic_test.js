@@ -1,4 +1,4 @@
-var store, Zoo, Animal, Elephant, Lion;
+var env, store, zoo, Zoo, Animal, Elephant, Lion;
 
 module("unit/fragments - polymorphism", {
   setup: function() {
@@ -21,7 +21,7 @@ module("unit/fragments - polymorphism", {
       hasManes: DS.attr("boolean"),
     });
 
-    store = createStore({
+    env = setupEnv({
       zoo: Zoo,
       animal: Animal,
       elephant: Elephant,
@@ -37,19 +37,23 @@ module("unit/fragments - polymorphism", {
         name: 'Mittens',
         hasManes: 'true',
       },
-      animals: [{
-        $type: 'lion',
-        name: 'Mittens',
-        hasManes: 'true',
-      }, {
-        $type: 'elephant',
-        name: 'Snuitje',
-        trunkLength: 4,
-      }]
-    });
+      animals: [
+        {
+          $type: 'lion',
+          name: 'Mittens',
+          hasManes: 'true',
+        },
+        {
+          $type: 'elephant',
+          name: 'Snuitje',
+          trunkLength: 4,
+        }
+      ]
+    };
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Zoo = null;
     Animal = null;

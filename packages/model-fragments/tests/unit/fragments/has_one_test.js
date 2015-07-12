@@ -22,6 +22,7 @@ module("unit/fragments - DS.hasOneFragment", {
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Person = null;
     Name = null;

@@ -63,6 +63,7 @@ module("unit/fragments - DS.hasManyFragments", {
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Person = null;
     Address = null;

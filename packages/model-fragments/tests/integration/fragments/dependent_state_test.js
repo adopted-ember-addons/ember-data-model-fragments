@@ -1,4 +1,4 @@
-var store, Person, Name, Address, people;
+var env, store, Person, Name, Address, people;
 
 module("integration/fragments - Dependent State", {
   setup: function() {
@@ -21,11 +21,13 @@ module("integration/fragments - Dependent State", {
       country : DS.attr("string")
     });
 
-    store = createStore({
+    env = setupEnv({
       person: Person,
-      address: Address,
-      name: Name
+      name: Name,
+      address: Address
     });
+
+    store = env.store;
 
     people = [
       {
@@ -57,6 +59,7 @@ module("integration/fragments - Dependent State", {
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Person = null;
     Address = null;

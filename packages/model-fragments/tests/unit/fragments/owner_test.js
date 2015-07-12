@@ -1,4 +1,4 @@
-var store, Person, Name;
+var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
 module("unit/fragments - DS.fragmentOwner", {
@@ -13,13 +13,16 @@ module("unit/fragments - DS.fragmentOwner", {
       person: DS.fragmentOwner()
     });
 
-    store = createStore({
+    env = setupEnv({
       person: Person,
       name: Name
     });
+
+    store = env.store;
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Person = null;
     Name = null;

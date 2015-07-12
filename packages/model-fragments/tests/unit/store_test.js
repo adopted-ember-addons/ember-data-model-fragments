@@ -1,4 +1,4 @@
-var store, Person, Name;
+var env, store, Person, Name;
 
 module("unit/fragments - DS.Store", {
   setup: function() {
@@ -11,10 +11,12 @@ module("unit/fragments - DS.Store", {
       last  : DS.attr("string")
     });
 
-    store = createStore({
+    env = setupEnv({
       person: Person,
       name: Name
     });
+
+    store = env.store;
   },
 
   teardown: function() {
