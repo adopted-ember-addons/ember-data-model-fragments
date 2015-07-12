@@ -241,7 +241,7 @@ test("serializing creates a new Array with contents the result of serializing ea
     names: names
   });
 
-  env.registry.register('serializer:name', DS.JSONSerializer);
+  env.registry.register('serializer:name', env.serializer);
 
   return store.find('person', 1).then(function(person) {
     var serialized = person.serialize();

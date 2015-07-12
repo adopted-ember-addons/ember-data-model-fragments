@@ -35,11 +35,7 @@ window.setupEnv = function(options) {
   registry.optionsForType('serializer', { singleton: false });
   registry.optionsForType('adapter', { singleton: false });
   registry.register('adapter:-default', DS.Adapter);
-
   registry.register('serializer:-default', DS.JSONSerializer);
-  registry.register('serializer:-rest', DS.RESTSerializer);
-  registry.register('adapter:-rest', DS.RESTAdapter);
-
   registry.register('transform:boolean', DS.BooleanTransform);
   registry.register('transform:date', DS.DateTransform);
   registry.register('transform:number', DS.NumberTransform);
@@ -48,8 +44,7 @@ window.setupEnv = function(options) {
 
   registry.injection('serializer', 'store', 'store:main');
 
-  env.serializer = container.lookup('serializer:-default');
-  env.restSerializer = container.lookup('serializer:-rest');
+  env.serializer = container.lookupFactory('serializer:-default');
   env.store = container.lookup('store:main');
   env.adapter = env.store.get('defaultAdapter');
 

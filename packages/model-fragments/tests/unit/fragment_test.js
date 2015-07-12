@@ -150,7 +150,7 @@ test("fragment properties are serialized as normal attributes using their own se
     }
   });
 
-  env.registry.register('serializer:name', DS.JSONSerializer.extend({
+  env.registry.register('serializer:name', env.serializer.extend({
     serialize: function() {
       return 'Mad King';
     }
@@ -205,7 +205,7 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
 
   store.push('person', person);
 
-  env.registry.register('serializer:person', DS.JSONSerializer.extend({
+  env.registry.register('serializer:person', env.serializer.extend({
     serialize: function(snapshot) {
       var name = snapshot.attr('name');
       ok(name instanceof DS.Snapshot, "`hasOneFragment` snapshot attribute is a snapshot");
