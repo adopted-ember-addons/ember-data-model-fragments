@@ -90,7 +90,6 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     @return {DS.ModelFragment} the newly created fragment
   */
   copy: function() {
-    var store = get(this, 'store');
     var data = {};
 
     // TODO: handle copying sub-fragments

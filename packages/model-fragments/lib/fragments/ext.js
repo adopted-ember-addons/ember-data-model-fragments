@@ -12,8 +12,6 @@ import {
   @module ember-data.model-fragments
 */
 
-var get = Ember.get;
-
 /**
   @class Store
   @namespace DS

@@ -57,7 +57,7 @@ test("persisting the owner record in a clean state maintains clean state", funct
     }
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     return Ember.RSVP.resolve();
   };
 
@@ -94,7 +94,7 @@ test("persisting the owner record when a fragment is dirty moves owner record, f
     }
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     return Ember.RSVP.resolve();
   };
 
@@ -140,7 +140,7 @@ test("persisting a new owner record moves the owner record, fragment array, and 
   person.set('name', store.createFragment('name', data.name));
   person.set('addresses', data.addresses);
 
-  env.adapter.createRecord = function(store, type, record) {
+  env.adapter.createRecord = function() {
     var payload = Ember.copy(data, true);
 
     payload.id = 3;
@@ -165,7 +165,7 @@ test("a new record can be persisted with null fragments", function() {
   equal(person.get('name'), null, "`DS.hasOneFragment` property is null");
   equal(person.get('addresses'), null, "`DS.hasManyFragments` property is null");
 
-  env.adapter.createRecord = function(store, type, record) {
+  env.adapter.createRecord = function() {
     var payload = { id: 1 };
 
     return Ember.RSVP.resolve(payload);
@@ -200,7 +200,7 @@ test("the adapter can update fragments on save", function() {
     attributes: data
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     var payload = Ember.copy(data, true);
 
     payload.id = 1;
@@ -247,7 +247,7 @@ test("existing fragments are updated on save", function() {
     attributes: data
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     var payload = Ember.copy(data, true);
 
     payload.id = 1;
@@ -269,7 +269,7 @@ test("existing fragments are updated on save", function() {
     addresses = person.get('addresses');
     address = addresses.get('firstObject');
     return person.save();
-  }).then(function(person) {
+  }).then(function() {
     equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
     equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
     equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
@@ -298,7 +298,7 @@ test("the adapter can update fragments on reload", function() {
     attributes: data
   });
 
-  env.adapter.find = function(store, type, id, record) {
+  env.adapter.find = function() {
     var payload = Ember.copy(data, true);
 
     payload.id = 1;
@@ -390,7 +390,7 @@ test("`DS.hasManyFragments` array properties are notified on save", function() {
 
   var PersonObserver = Ember.Object.extend({
     person: null,
-    observer: Ember.observer('person.addresses.[]', function(obj, key) {
+    observer: Ember.observer('person.addresses.[]', function() {
       ok(true, "The array change was observed");
     })
   });
@@ -447,7 +447,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
     attributes: data
   });
 
-  env.adapter.find = function(store, type, record) {
+  env.adapter.find = function() {
     var payload = Ember.copy(data, true);
 
     payload.id = 1;
@@ -457,7 +457,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
   };
 
   return store.find('army', 1).then(function(army) {
-    var proxy = ArmyObserver.create({ army: army });
+    ArmyObserver.create({ army: army });
     return army.reload();
   });
 });

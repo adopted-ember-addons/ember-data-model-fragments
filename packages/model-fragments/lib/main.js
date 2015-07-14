@@ -1,3 +1,4 @@
+/* jshint unused: false */
 import Ember from 'ember';
 import DS from 'ember-data';
 import { Store, Model } from './fragments/ext';

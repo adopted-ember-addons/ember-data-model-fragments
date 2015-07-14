@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import Snapshot from 'ember-data/system/snapshot';
 import FragmentTransform from './fragment';
 
 /**

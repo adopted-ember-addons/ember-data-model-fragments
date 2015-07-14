@@ -100,7 +100,7 @@ var FragmentArray = StatefulArray.extend({
     // so it can transition to a clean state
     if (!data) {
       // Notify all records of commit
-      this.forEach(function(fragment, index) {
+      this.forEach(function(fragment) {
         fragment._adapterDidCommit();
       });
     }

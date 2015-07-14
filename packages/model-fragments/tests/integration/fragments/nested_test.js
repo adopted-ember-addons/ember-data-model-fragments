@@ -84,7 +84,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     attributes: Ember.copy(data, true)
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     var payload = Ember.copy(data, true);
 
     payload.id = 1;

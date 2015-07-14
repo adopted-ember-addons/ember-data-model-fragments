@@ -8,7 +8,6 @@ import { fragmentDidDirty, fragmentDidReset } from '../states';
 var get = Ember.get;
 var set = Ember.set;
 var computed = Ember.computed;
-var splice = Array.prototype.splice;
 
 /**
   A state-aware array that is tied to an attribute of a `DS.Model` instance.

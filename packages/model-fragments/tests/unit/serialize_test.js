@@ -1,5 +1,4 @@
 var env, store, Person, Name, House;
-var all = Ember.RSVP.all;
 
 module("unit/fragments - Serialization", {
   setup: function() {
@@ -119,8 +118,6 @@ test("fragment properties are serialized as normal attributes using their own se
   }));
 
   return store.find('person', 1).then(function(person) {
-    var name = person.get('name');
-
     var serialized = person.serialize();
 
     equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");

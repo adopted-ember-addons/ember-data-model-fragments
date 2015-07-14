@@ -1,8 +1,6 @@
 import Ember from 'ember';
-import Snapshot from 'ember-data/system/snapshot';
 import Transform from 'ember-data/system/transform';
 import JSONAPISerializer from 'ember-data/serializers/json-api-serializer';
-import { getActualFragmentType } from '../model';
 
 /**
   @module ember-data.model-fragments
