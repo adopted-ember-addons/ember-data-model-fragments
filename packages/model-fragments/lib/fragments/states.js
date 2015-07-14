@@ -6,7 +6,7 @@ import RootState from 'ember-data/system/model/states';
 */
 
 var get = Ember.get;
-var create = Ember.create;
+var create = Object.create || Ember.create;
 
 var didSetProperty = RootState.loaded.saved.didSetProperty;
 var propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;

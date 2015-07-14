@@ -7,7 +7,7 @@ import { Model } from './ext';
 */
 
 var get = Ember.get;
-var create = Ember.create;
+var create = Object.create || Ember.create;
 var merge = Ember.merge;
 
 /**

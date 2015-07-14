@@ -12,6 +12,8 @@ import {
   @module ember-data.model-fragments
 */
 
+var keys = Object.keys || Ember.keys;
+
 /**
   @class Store
   @namespace DS
@@ -100,7 +102,7 @@ Model.reopen({
     var diffData = this._super();
     var internalModel = internalModelFor(this);
 
-    Ember.keys(internalModel._fragments).forEach(function(name) {
+    keys(internalModel._fragments).forEach(function(name) {
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
       if (name in internalModel._attributes) {
@@ -136,7 +138,7 @@ var InternalModelPrototype = InternalModel.prototype;
 decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
   var attrs = snapshot._attributes;
 
-  Ember.keys(attrs).forEach(function(key) {
+  keys(attrs).forEach(function(key) {
     var attr = attrs[key];
 
     // If the attribute has a `_createSnapshot` method, invoke it before the

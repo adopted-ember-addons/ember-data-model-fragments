@@ -21,20 +21,22 @@ window.setupEnv = function(options) {
     registry = env.registry = container;
   }
 
-  var adapter = env.adapter = (options.adapter || '-default');
-  delete options.adapter;
+  // Silence ED 2.0 behavior change warning
+  var adapterOptions = {
+    shouldBackgroundReloadRecord: function() { return false; }
+  };
 
   for (var prop in options) {
     registry.register('model:' + Ember.String.dasherize(prop), options[prop]);
   }
 
   registry.register('store:main', DS.Store.extend({
-    adapter: adapter
+    adapter: '-default'
   }));
 
   registry.optionsForType('serializer', { singleton: false });
   registry.optionsForType('adapter', { singleton: false });
-  registry.register('adapter:-default', DS.Adapter);
+  registry.register('adapter:-default', DS.Adapter.extend(adapterOptions));
   registry.register('serializer:-default', DS.JSONSerializer);
   registry.register('transform:boolean', DS.BooleanTransform);
   registry.register('transform:date', DS.DateTransform);
