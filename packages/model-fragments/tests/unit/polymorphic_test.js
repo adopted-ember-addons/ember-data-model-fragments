@@ -1,6 +1,6 @@
 var env, store, zoo, Zoo, Animal, Elephant, Lion;
 
-module("unit/fragments - Polymorphism", {
+QUnit.module("unit/fragments - Polymorphism", {
   setup: function() {
     Zoo = DS.Model.extend({
       name: DS.attr("string"),
@@ -29,6 +29,8 @@ module("unit/fragments - Polymorphism", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
 
     zoo = {
       name: 'Chilly Zoo',
@@ -108,7 +110,8 @@ test("hasManyFragments supports polymorphism", function() {
 });
 
 test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
-  expect(1);
+  // The extra assertion comes from deprecation checking
+  expect(2);
 
   store.push({
     type: 'zoo',
@@ -134,7 +137,8 @@ test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_IN
 });
 
 test("rolling back a `DS.hasOneFragment` fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
-  expect(1);
+  // The extra assertion comes from deprecation checking
+  expect(2);
 
   store.push({
     type: 'zoo',
@@ -149,7 +153,7 @@ test("rolling back a `DS.hasOneFragment` fragment property that was set to null 
     var animal = zoo.get('star');
 
     zoo.set('star', null);
-    zoo.rollback();
+    zoo.rollbackAttributes();
 
     equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
   }).finally(function() {
@@ -158,7 +162,8 @@ test("rolling back a `DS.hasOneFragment` fragment property that was set to null 
 });
 
 test("`DS.hasManyFragments` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
-  expect(1);
+  // The extra assertion comes from deprecation checking
+  expect(2);
 
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;

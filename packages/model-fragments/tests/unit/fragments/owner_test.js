@@ -1,7 +1,7 @@
 var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
-module("unit/fragments - DS.fragmentOwner", {
+QUnit.module("unit/fragments - DS.fragmentOwner", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.hasOneFragment("name"),
@@ -19,6 +19,8 @@ module("unit/fragments - DS.fragmentOwner", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {

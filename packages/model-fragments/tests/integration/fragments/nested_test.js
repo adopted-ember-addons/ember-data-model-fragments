@@ -1,6 +1,6 @@
 var env, store, User, Info, Order, Product;
 
-module("integration/fragments - Nested fragments", {
+QUnit.module("integration/fragments - Nested fragments", {
   setup: function() {
     User = DS.Model.extend({
       info   : DS.hasOneFragment("info"),
@@ -31,6 +31,8 @@ module("integration/fragments - Nested fragments", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -99,18 +101,18 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     var product = user.get('orders.firstObject.products.firstObject');
 
     product.set('price', '1.99');
-    ok(user.get('isDirty'), "dirty state propagates to owner");
+    ok(user.get('hasDirtyAttributes'), "dirty state propagates to owner");
 
-    user.rollback();
-    equal(product.get('price'), '499.99', "rollback cascades to nested fragments");
-    ok(!user.get('isDirty'), "dirty state is reset");
+    user.rollbackAttributes();
+    equal(product.get('price'), '499.99', "rollbackAttributes cascades to nested fragments");
+    ok(!user.get('hasDirtyAttributes'), "dirty state is reset");
 
     user.get('orders.firstObject.products').removeAt(0);
-    ok(user.get('isDirty'), "dirty state propagates to owner");
+    ok(user.get('hasDirtyAttributes'), "dirty state propagates to owner");
 
     return user.save();
   }).then(function(user) {
-    ok(!user.get('isDirty'), "owner record is clean");
+    ok(!user.get('hasDirtyAttributes'), "owner record is clean");
     equal(user.get('orders.firstObject.products.length'), 1, "fragment array length is correct");
   });
 });

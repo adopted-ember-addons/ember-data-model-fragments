@@ -1,7 +1,7 @@
 var env, store, Person, Name, House;
 var all = Ember.RSVP.all;
 
-module("unit/fragments - DS.ModelFragment", {
+QUnit.module("unit/fragments - DS.ModelFragment", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.hasOneFragment("name")
@@ -25,6 +25,8 @@ module("unit/fragments - DS.ModelFragment", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -147,9 +149,9 @@ test("changes to attributes can be rolled back", function() {
     var name = person.get('name');
 
     name.set('last', 'Bolton');
-    name.rollback();
+    name.rollbackAttributes();
 
     ok(name.get('last', 'Snow'), "fragment properties are restored");
-    ok(!name.get('isDirty'), "fragment is in clean state");
+    ok(!name.get('hasDirtyAttributes'), "fragment is in clean state");
   });
 });

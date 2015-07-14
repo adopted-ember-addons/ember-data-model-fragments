@@ -1,6 +1,6 @@
 var env, store, Person, Name, House;
 
-module("unit/fragments - Serialization", {
+QUnit.module("unit/fragments - Serialization", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.hasOneFragment("name")
@@ -25,6 +25,8 @@ module("unit/fragments - Serialization", {
 
     store = env.store;
 
+    expectNoDeprecation();
+
     // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
     store.modelFor('person');
   },
@@ -38,7 +40,8 @@ module("unit/fragments - Serialization", {
 });
 
 test("fragment properties are snapshotted as normal attributes on the owner record snapshot", function() {
-  expect(7);
+  // The extra assertion comes from deprecation checking
+  expect(8);
 
   Person.reopen({
     houses   : DS.hasManyFragments('house'),

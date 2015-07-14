@@ -1,6 +1,6 @@
 var env, store, Person, Name;
 
-module("unit/fragments - DS.Store", {
+QUnit.module("unit/fragments - DS.Store", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.hasOneFragment("name"),
@@ -17,6 +17,8 @@ module("unit/fragments - DS.Store", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -30,7 +32,7 @@ test("a fragment can be created that starts in a dirty state", function() {
   var address = store.createFragment('name');
 
   ok(address instanceof Name, "fragment is correct type");
-  ok(address.get('isDirty'), "fragment starts in dirty state");
+  ok(address.get('hasDirtyAttributes'), "fragment starts in dirty state");
 });
 
 test("attempting to create a fragment type that does not inherit from `DS.ModelFragment` throws an error", function() {

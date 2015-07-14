@@ -1,6 +1,6 @@
 var env, store, Person, Name;
 
-module("unit/fragments - DS.FragmentArray", {
+QUnit.module("unit/fragments - DS.FragmentArray", {
   setup: function() {
     Person = DS.Model.extend({
       names: DS.hasManyFragments("name")
@@ -17,6 +17,8 @@ module("unit/fragments - DS.FragmentArray", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -110,7 +112,7 @@ test("fragments can be removed from the fragment array", function() {
   });
 });
 
-test("changes to array contents change the fragment array 'isDirty' property", function() {
+test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -136,37 +138,37 @@ test("changes to array contents change the fragment array 'isDirty' property", f
       last: 'Targaryen'
     });
 
-    ok(!fragments.get('isDirty'), "fragment array is initially in a clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
 
     fragments.removeFragment(fragment);
 
-    ok(fragments.get('isDirty'), "fragment array is in dirty state after removal");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after removal");
 
     fragments.unshiftObject(fragment);
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
 
     fragments.addFragment(newFragment);
 
-    ok(fragments.get('isDirty'), "fragment array is in dirty state after addition");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after addition");
 
     fragments.removeFragment(newFragment);
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
 
     fragments.removeFragment(fragment);
     fragments.addFragment(fragment);
 
-    ok(fragments.get('isDirty'), "fragment array is in dirty state after reordering");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after reordering");
 
     fragments.removeFragment(fragment);
     fragments.unshiftObject(fragment);
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
   });
 });
 
-test("changes to array contents change the fragment array 'isDirty' property", function() {
+test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -184,15 +186,15 @@ test("changes to array contents change the fragment array 'isDirty' property", f
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
 
-    ok(!fragments.get('isDirty'), "fragment array is initially in a clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
 
     fragment.set('last', 'Stark');
 
-    ok(fragments.get('isDirty'), "fragment array in dirty state after change to a fragment");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array in dirty state after change to a fragment");
 
     fragment.set('last', 'Snow');
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
   });
 });
 
@@ -227,10 +229,10 @@ test("changes to array contents and fragments can be rolled back", function() {
       last: 'Stonehart'
     });
 
-    fragments.rollback();
+    fragments.rollbackAttributes();
 
-    ok(!fragments.get('isDirty'), "fragment array is not dirty");
-    ok(!fragments.isAny('isDirty'), "all fragments are in clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is not dirty");
+    ok(!fragments.isAny('hasDirtyAttributes'), "all fragments are in clean state");
     deepEqual(fragments.toArray(), originalState, "original array contents is restored");
   });
 });
