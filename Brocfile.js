@@ -1,6 +1,7 @@
 /* jshint node: true */
 
 var env             = process.env.EMBER_ENV;
+var babel           = require('broccoli-babel-transpiler');
 var defeatureify    = require('broccoli-defeatureify');
 var es3SafeRecast   = require('broccoli-es3-safe-recast');
 var compileModules  = require('broccoli-es6-module-transpiler');
@@ -53,7 +54,9 @@ function mainTree(packages, outputName) {
 
 function testTree(packages, outputName) {
   var testFiles = packageSubdirTree(packages, 'tests');
-  var compiled = compileModules(testFiles, {
+  var helperFiles = addonTree('ember-dev', 'bower_components/');
+
+  var compiled = compileModules(merge([ testFiles, helperFiles ]), {
     output: '/test-output',
     resolvers: [ PackageResolver ],
     formatter: new AMDFormatter(),
@@ -99,6 +102,20 @@ function packageTree(packagePath, vendorPath) {
 function packageSubdirTree(tree, path) {
   return funnel(tree, {
     include: [ '**/*/' + path + '/**/*.{js,map}' ]
+  });
+}
+
+function addonTree(packagePath, vendorPath) {
+  var addonFiles = funnel(path.join(vendorPath, packagePath), {
+    include: [ '**/*.js' ],
+    srcDir: 'addon',
+    destDir: '/' + packagePath
+  });
+
+  addonFiles = moveFile(addonFiles, 'index.js', 'main.js');
+
+  return babel(addonFiles, {
+    blacklist: [ 'es6.modules' ]
   });
 }
 
