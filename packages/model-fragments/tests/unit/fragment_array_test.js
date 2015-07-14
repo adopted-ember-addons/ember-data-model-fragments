@@ -234,39 +234,3 @@ test("changes to array contents and fragments can be rolled back", function() {
     deepEqual(fragments.toArray(), originalState, "original array contents is restored");
   });
 });
-
-test("serializing creates a new Array with contents the result of serializing each fragment", function() {
-  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  store.modelFor('person');
-
-  var names = [
-    {
-      first: "Rhaegar",
-      last: "Targaryen"
-    },
-    {
-      first: "Viserys",
-      last: "Targaryen"
-    },
-    {
-      first: "Daenerys",
-      last: "Targaryen"
-    }
-  ];
-
-  store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: names
-    }
-  });
-
-  env.registry.register('serializer:name', env.serializer);
-
-  return store.find('person', 1).then(function(person) {
-    var serialized = person.serialize();
-
-    deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
-  });
-});

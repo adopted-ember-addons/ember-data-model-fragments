@@ -16,7 +16,7 @@ var makeArray = Ember.makeArray;
 */
 var ArrayTransform = Transform.extend({
   deserialize: function deserializeArray(data) {
-    return Ember.makeArray(data);
+    return data == null ? null : makeArray(data);
   },
 
   serialize: function serializeArray(array) {

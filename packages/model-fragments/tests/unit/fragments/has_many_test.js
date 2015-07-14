@@ -90,7 +90,7 @@ test("properties are instances of `DS.FragmentArray`", function() {
   });
 });
 
-test("arrays of object literals are deserialized into instances of `DS.ModelFragment`", function() {
+test("arrays of object literals are converted into instances of `DS.ModelFragment`", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {

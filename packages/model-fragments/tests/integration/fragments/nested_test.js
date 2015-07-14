@@ -94,7 +94,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
   };
 
   return store.find('user', 1).then(function(user) {
-    equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are deserialized properly");
+    equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are converted properly");
 
     var product = user.get('orders.firstObject.products.firstObject');
 

@@ -1,6 +1,6 @@
 var env, store, zoo, Zoo, Animal, Elephant, Lion;
 
-module("unit/fragments - polymorphism", {
+module("unit/fragments - Polymorphism", {
   setup: function() {
     Zoo = DS.Model.extend({
       name: DS.attr("string"),
