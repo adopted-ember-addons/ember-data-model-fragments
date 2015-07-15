@@ -27,14 +27,16 @@ var packages = merge([
 ]);
 
 var main = mainTree(packages, outputName);
-var tests = testTree(packages, outputName);
 
 if (env === 'production') {
   var prod = prodTree(main, outputName);
   main = merge([ main, prod ], { overwrite: true });
+} else {
+  var tests = testTree(packages, outputName);
+  main = merge([ main, tests ]);
 }
 
-module.exports = merge([ main, tests ]);
+module.exports = main;
 
 ////////////////////////////////////////////////////////////////////////////////
 

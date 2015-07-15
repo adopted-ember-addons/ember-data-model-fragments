@@ -12,7 +12,7 @@
     "build": "ember build",
     "build:production": "ember build --environment=production",
     "start": "ember serve",
-    "test": "npm run build:production && ./node_modules/testem/testem.js ci"
+    "test": "npm run build && ./node_modules/testem/testem.js ci"
   },
   "keywords": [
     "ember-addon",
