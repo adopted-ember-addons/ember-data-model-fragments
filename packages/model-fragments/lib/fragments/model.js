@@ -170,13 +170,10 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
   copy: function() {
     var store = get(this, 'store');
     var type = store.modelFor(this.constructor);
-    var data = {};
-
-    // TODO: handle copying sub-fragments
-    Ember.merge(data, this._data);
-    Ember.merge(data, this._attributes);
-
-    return this.store.createFragment(type, data);
+    var data = this.serialize();
+    var result = this.store.createFragment(type);
+    result.setupData(data);
+    return result;
   },
 
   /**
