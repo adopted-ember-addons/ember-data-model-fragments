@@ -76,7 +76,7 @@ function hasOneFragment(declaredModelName, options) {
     // may not be initialized yet, in which case the data will contain a
     // raw response or a stashed away fragment
 
-    // If we already have a processed fragment in _data and our current fragmet is
+    // If we already have a processed fragment in _data and our current fragment is
     // null simply reuse the one from data. We can be in this state after a rollback
     // for example
     if (!fragment && isInstanceOfType(store.modelFor(actualTypeName), data)) {
@@ -234,7 +234,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
     var data = internalModel._data[key] || getDefaultValue(internalModel, options, 'array');
     var fragments = internalModel._fragments[key] || null;
 
-    // If we already have a processed fragment in _data and our current fragmet is
+    // If we already have a processed fragment in _data and our current fragment is
     // null simply reuse the one from data. We can be in this state after a rollback
     // for example
     if (data instanceof StatefulArray && !fragments) {
