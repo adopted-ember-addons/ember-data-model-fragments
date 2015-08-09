@@ -170,13 +170,21 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
   copy: function() {
     var store = get(this, 'store');
     var type = store.modelFor(this.constructor);
-    var data = {};
-
-    // TODO: handle copying sub-fragments
-    Ember.merge(data, this._data);
-    Ember.merge(data, this._attributes);
-
-    return this.store.createFragment(type, data);
+    
+    var newFragment = store.createFragment(type);
+    Ember.get(this.constructor, 'attributes').forEach(function(attribute) {
+      if( attribute.type === 'fragment' ) {
+        if( attribute.kind === 'hasMany' ) {
+          newFragment.set(attribute.name, this.get(attribute.name).map(copyFragment));
+        } else {
+          newFragment.set(attribute.name, copyFragment( this.get(attribute.name) ));
+        }
+      } else {
+        newFragment.set(attribute.name, this.get(attribute.name));
+      }
+    }.bind(this));
+  
+    return newFragment;
   },
 
   /**
