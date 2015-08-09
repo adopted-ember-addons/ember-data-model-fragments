@@ -175,9 +175,9 @@ var ModelFragment = CoreModel.extend(Ember.Comparable, Ember.Copyable, {
     get(this.constructor, 'attributes').forEach(function(attribute) {
       if( attribute.type === 'fragment' ) {
         if( attribute.kind === 'hasMany' ) {
-          newFragment.set(attribute.name, this.get(attribute.name).map(copyFragment));
+          newFragment.set(attribute.name, this.get(attribute.name).map(Ember.copy));
         } else {
-          newFragment.set(attribute.name, copyFragment( this.get(attribute.name) ));
+          newFragment.set(attribute.name, Ember.copy( this.get(attribute.name) ));
         }
       } else {
         newFragment.set(attribute.name, this.get(attribute.name));
