@@ -1,6 +1,6 @@
 var env, store, Person, Name, Address;
 
-module("integration/fragments - Persisting Records With Fragments", {
+QUnit.module("integration/fragments - Persisting Records With Fragments", {
   setup: function() {
     Person = DS.Model.extend({
       name      : DS.hasOneFragment("name"),
@@ -26,6 +26,8 @@ module("integration/fragments - Persisting Records With Fragments", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -38,23 +40,26 @@ module("integration/fragments - Persisting Records With Fragments", {
 });
 
 test("persisting the owner record in a clean state maintains clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Tyrion",
-      last: "Lannister"
-    },
-    addresses: [
-      {
-        street: "1 Sky Cell",
-        city: "Eyre",
-        region: "Vale of Arryn",
-        country: "Westeros"
-      }
-    ]
+    attributes: {
+      name: {
+        first: "Tyrion",
+        last: "Lannister"
+      },
+      addresses: [
+        {
+          street: "1 Sky Cell",
+          city: "Eyre",
+          region: "Vale of Arryn",
+          country: "Westeros"
+        }
+      ]
+    }
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     return Ember.RSVP.resolve();
   };
 
@@ -64,31 +69,34 @@ test("persisting the owner record in a clean state maintains clean state", funct
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    ok(!name.get('isDirty'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('isDirty'), "all `DS.hasManyFragments` fragments are clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Eddard",
-      last: "Stark"
-    },
-    addresses: [
-      {
-        street: "1 Great Keep",
-        city: "Winterfell",
-        region: "North",
-        country: "Westeros"
-      }
-    ]
+    attributes: {
+      name: {
+        first: "Eddard",
+        last: "Stark"
+      },
+      addresses: [
+        {
+          street: "1 Great Keep",
+          city: "Winterfell",
+          region: "North",
+          country: "Westeros"
+        }
+      ]
+    }
   });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     return Ember.RSVP.resolve();
   };
 
@@ -107,16 +115,15 @@ test("persisting the owner record when a fragment is dirty moves owner record, f
 
     equal(name.get('first'), 'Arya', "`DS.hasOneFragment` change is persisted");
     equal(address.get('street'), '1 Godswood', "`DS.hasManyFragments` change is persisted");
-    ok(!name.get('isDirty'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('isDirty'), "all `DS.hasManyFragments` fragments are clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("persisting a new owner record moves the owner record, fragment array, and all fragments into clean state", function() {
-  var payload = {
-    id: 3,
+  var data = {
     name: {
       first: "Daenerys",
       last: "Targaryen"
@@ -132,10 +139,14 @@ test("persisting a new owner record moves the owner record, fragment array, and 
   };
 
   var person = store.createRecord('person');
-  person.set('name', store.createFragment('name', payload.name));
-  person.set('addresses', payload.addresses);
+  person.set('name', store.createFragment('name', data.name));
+  person.set('addresses', data.addresses);
 
-  env.adapter.createRecord = function(store, type, record) {
+  env.adapter.createRecord = function() {
+    var payload = Ember.copy(data, true);
+
+    payload.id = 3;
+
     return Ember.RSVP.resolve(payload);
   };
 
@@ -143,10 +154,10 @@ test("persisting a new owner record moves the owner record, fragment array, and 
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    ok(!name.get('isDirty'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('isDirty'), "all `DS.hasManyFragments` fragments are clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -156,20 +167,21 @@ test("a new record can be persisted with null fragments", function() {
   equal(person.get('name'), null, "`DS.hasOneFragment` property is null");
   equal(person.get('addresses'), null, "`DS.hasManyFragments` property is null");
 
-  env.adapter.createRecord = function(store, type, record) {
-    return Ember.RSVP.resolve({ id: 1 });
+  env.adapter.createRecord = function() {
+    var payload = { id: 1 };
+
+    return Ember.RSVP.resolve(payload);
   };
 
   return person.save().then(function(person) {
     equal(person.get('name'), null, "`DS.hasOneFragment` property is still null");
     equal(person.get('addresses'), null, "`DS.hasManyFragments` property is still null");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("the adapter can update fragments on save", function() {
   var data = {
-    id: 1,
     name: {
       first: "Eddard",
       last: "Stark"
@@ -184,11 +196,16 @@ test("the adapter can update fragments on save", function() {
     ]
   };
 
-  store.push('person', data);
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: data
+  });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     var payload = Ember.copy(data, true);
 
+    payload.id = 1;
     payload.name.first = 'Ned';
     payload.addresses[0].street = '1 Godswood';
 
@@ -201,18 +218,68 @@ test("the adapter can update fragments on save", function() {
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    ok(!name.get('isDirty'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('isDirty'), "all `DS.hasManyFragments` fragments are clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
     equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
     equal(addresses.get('firstObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
   });
 });
 
+test("existing fragments are updated on save", function() {
+  var data = {
+    name: {
+      first: "Eddard",
+      last: "Stark"
+    },
+    addresses: [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ]
+  };
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: data
+  });
+
+  env.adapter.updateRecord = function() {
+    var payload = Ember.copy(data, true);
+
+    payload.id = 1;
+    payload.name.first = 'Ned';
+    payload.addresses.unshift({
+      street: "1 Red Keep",
+      city: "Kings Landing",
+      region: "Crownlands",
+      country: "Westeros"
+    });
+
+    return Ember.RSVP.resolve(payload);
+  };
+
+  var name, addresses, address;
+
+  return store.find('person', 1).then(function(person) {
+    name = person.get('name');
+    addresses = person.get('addresses');
+    address = addresses.get('firstObject');
+    return person.save();
+  }).then(function() {
+    equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
+    equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
+    equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
+  });
+});
+
 test("the adapter can update fragments on reload", function() {
   var data = {
-    id: 1,
     name: {
       first: "Brandon",
       last: "Stark"
@@ -227,11 +294,16 @@ test("the adapter can update fragments on reload", function() {
     ]
   };
 
-  store.push('person', data);
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: data
+  });
 
-  env.adapter.find = function(store, type, id, record) {
+  env.adapter.findRecord = function() {
     var payload = Ember.copy(data, true);
 
+    payload.id = 1;
     payload.name.first = 'Bran';
     payload.addresses[0].street = '1 Broken Tower';
 
@@ -260,7 +332,6 @@ test("the adapter can update fragments on reload", function() {
 */
 test("the adapter can update fragments without infinite loops when CPs are eagerly consumed", function() {
   var data = {
-    id: 1,
     name: {
       first: "Brandon",
       last: "Stark"
@@ -275,7 +346,11 @@ test("the adapter can update fragments without infinite loops when CPs are eager
     ]
   };
 
-  store.push('person', data);
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: data
+  });
 
   return store.find('person', 1).then(function(person) {
     var personController = Ember.Controller.create({ content: person });
@@ -283,16 +358,25 @@ test("the adapter can update fragments without infinite loops when CPs are eager
     Ember.addObserver(personController, 'model.name.first', function() {});
     personController.get('model.name.first');
 
-    store.push('person', data);
+    store.push({
+      type: 'person',
+      id: 1,
+      attributes: data
+    });
+
     equal(person.get('name.first'), 'Brandon');
   });
 });
 
+// TODO: The data in the adapter response is not actually changing here, which
+// means that the property actually _shouldn't_ be notified. Doing so requires
+// value diffing of deserialized model data, which means either saving a copy of
+// the data before giving it to the fragment
 test("`DS.hasManyFragments` array properties are notified on save", function() {
+  // The extra assertion comes from deprecation checking
   expect(2);
 
   var data = {
-    id: 1,
     name: {
       first: "Eddard",
       last: "Stark"
@@ -307,25 +391,35 @@ test("`DS.hasManyFragments` array properties are notified on save", function() {
     ]
   };
 
-  var PersonProxy = Ember.ObjectProxy.extend({
-    observer: function() {
+  var PersonObserver = Ember.Object.extend({
+    person: null,
+    observer: Ember.observer('person.addresses.[]', function() {
       ok(true, "The array change was observed");
-    }.observes('addresses.[]')
+    })
   });
 
-  store.push('person', data);
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: data
+  });
 
-  env.adapter.updateRecord = function(store, type, record) {
-    return Ember.RSVP.resolve(data);
+  env.adapter.updateRecord = function() {
+    var payload = Ember.copy(data, true);
+
+    payload.id = 1;
+
+    return Ember.RSVP.resolve(payload);
   };
 
   return store.find('person', 1).then(function(person) {
-    var controller = PersonProxy.create({ content: person });
+    PersonObserver.create({ person: person });
     return person.save();
   });
 });
 
 test("`DS.hasManyFragments` properties are notifed on reload", function() {
+  // The extra assertion comes from deprecation checking
   expect(2);
 
   var Army = DS.Model.extend({
@@ -336,7 +430,6 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
   env.registry.register('model:army', Army);
 
   var data = {
-    id: 1,
     name: "Golden Company",
     soldiers: [
       "Aegor Rivers",
@@ -345,23 +438,30 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
     ]
   };
 
-  var ArmyProxy = Ember.ObjectProxy.extend({
-    observer: function() {
-      equal(this.get('soldiers.length'), 2, "The array change to was observed");
-    }.observes('soldiers.[]')
+  var ArmyObserver = Ember.Object.extend({
+    army: null,
+    observer: Ember.observer('army.soldiers.[]', function() {
+      equal(this.get('army.soldiers.length'), 2, "The array change to was observed");
+    })
   });
 
-  store.push('army', data);
+  store.push({
+    type: 'army',
+    id: 1,
+    attributes: data
+  });
 
-  env.adapter.find = function(store, type, record) {
-    var updated = Ember.copy(data, true);
-    updated.soldiers.shift();
+  env.adapter.findRecord = function() {
+    var payload = Ember.copy(data, true);
 
-    return Ember.RSVP.resolve(updated);
+    payload.id = 1;
+    payload.soldiers.shift();
+
+    return Ember.RSVP.resolve(payload);
   };
 
   return store.find('army', 1).then(function(army) {
-    var proxy = ArmyProxy.create({ content: army });
+    ArmyObserver.create({ army: army });
     return army.reload();
   });
 });

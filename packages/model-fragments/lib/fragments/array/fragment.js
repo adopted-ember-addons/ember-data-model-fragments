@@ -1,13 +1,14 @@
 import Ember from 'ember';
 import StatefulArray from './stateful';
-import { getActualFragmentType } from '../model';
+import { internalModelFor, setFragmentOwner, getActualFragmentType } from '../model';
+import map from '../../util/map';
 
 /**
   @module ember-data.model-fragments
 */
 
 var get = Ember.get;
-var map = Ember.EnumerableUtils.map;
+var computed = Ember.computed;
 
 /**
   A state-aware array of fragments that is tied to an attribute of a `DS.Model`
@@ -59,16 +60,15 @@ var FragmentArray = StatefulArray.extend({
       // Create a new fragment from the data array if needed
       if (!fragment) {
         var actualType = getActualFragmentType(declaredType, options, data);
-        fragment = store.buildFragment(actualType);
+        fragment = store.createFragment(actualType);
 
-        fragment.setProperties({
-          _owner : record,
-          _name  : key
-        });
+        setFragmentOwner(fragment, record, key);
       }
 
       // Initialize the fragment with the data
-      fragment.setupData(data);
+      internalModelFor(fragment).setupData({
+        attributes: data
+      });
 
       return fragment;
     });
@@ -84,19 +84,26 @@ var FragmentArray = StatefulArray.extend({
   */
   _createSnapshot: function() {
     // Snapshot each fragment
-    return map(this, function(fragment) {
+    return this.map(function(fragment) {
       return fragment._createSnapshot();
     });
   },
 
   /**
     @method adapterDidCommit
+    @private
   */
-  adapterDidCommit: function() {
-    this._super();
+  _adapterDidCommit: function(data) {
+    this._super(data);
 
-    // Notify all records of commit
-    this.invoke('adapterDidCommit');
+    // If the adapter update did not contain new data, just notify each fragment
+    // so it can transition to a clean state
+    if (!data) {
+      // Notify all records of commit
+      this.forEach(function(fragment) {
+        fragment._adapterDidCommit();
+      });
+    }
   },
 
   /**
@@ -107,38 +114,38 @@ var FragmentArray = StatefulArray.extend({
 
     ```javascript
     array.toArray(); // [ <Fragment:1>, <Fragment:2> ]
-    array.get('isDirty'); // false
+    array.get('hasDirtyAttributes'); // false
     array.get('firstObject').set('prop', 'newValue');
-    array.get('isDirty'); // true
+    array.get('hasDirtyAttributes'); // true
     ```
 
-    @property isDirty
+    @property hasDirtyAttributes
     @type {Boolean}
     @readOnly
   */
-  isDirty: function() {
-    return this._super() || this.isAny('isDirty');
-  }.property('@each.isDirty', '_originalState'),
+  hasDirtyAttributes: computed('@each.hasDirtyAttributes', '_originalState', function() {
+    return this._super() || this.isAny('hasDirtyAttributes');
+  }),
 
   /**
     This method reverts local changes of the array's contents to its original
-    state, and calls `rollback` on each fragment.
+    state, and calls `rollbackAttributes` on each fragment.
 
     Example
 
     ```javascript
-    array.get('firstObject').get('isDirty'); // true
-    array.get('isDirty'); // true
-    array.rollback();
-    array.get('firstObject').get('isDirty'); // false
-    array.get('isDirty'); // false
+    array.get('firstObject').get('hasDirtyAttributes'); // true
+    array.get('hasDirtyAttributes'); // true
+    array.rollbackAttributes();
+    array.get('firstObject').get('hasDirtyAttributes'); // false
+    array.get('hasDirtyAttributes'); // false
     ```
 
-    @method rollback
+    @method rollbackAttributes
   */
-  rollback: function() {
+  rollbackAttributes: function() {
     this._super();
-    this.invoke('rollback');
+    this.invoke('rollbackAttributes');
   },
 
   /**
@@ -161,7 +168,7 @@ var FragmentArray = StatefulArray.extend({
     // ensure that fragments are the correct type and have an owner and name
     if (fragments) {
       fragments.forEach(function(fragment) {
-        var owner = get(fragment, '_owner');
+        var owner = internalModelFor(fragment)._owner;
 
         Ember.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
         Ember.assert("You can only add '" + get(array, 'type') + "' fragments to this property", (function (type) {
@@ -175,10 +182,7 @@ var FragmentArray = StatefulArray.extend({
         })(get(record, 'store').modelFor(get(array, 'type'))));
 
         if (!owner) {
-          fragment.setProperties({
-            _owner : record,
-            _name  : key
-          });
+          setFragmentOwner(fragment, record, key);
         }
       });
     }

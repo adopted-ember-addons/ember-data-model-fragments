@@ -12,7 +12,7 @@
     "build": "ember build",
     "build:production": "ember build --environment=production",
     "start": "ember serve",
-    "test": "npm run build:production && ./node_modules/testem/testem.js ci"
+    "test": "npm run build && ./node_modules/testem/testem.js ci"
   },
   "keywords": [
     "ember-addon",
@@ -30,6 +30,7 @@
     "ember-addon"
   ],
   "devDependencies": {
+    "broccoli-babel-transpiler": "^5.2.3",
     "broccoli-defeatureify": "^1.0.0",
     "broccoli-es3-safe-recast": "^2.0.0",
     "broccoli-es6-module-transpiler": "^0.5.0",

@@ -1,6 +1,6 @@
 var env, store, User, Info, Order, Product;
 
-module("integration/fragments - Nested fragments", {
+QUnit.module("integration/fragments - Nested fragments", {
   setup: function() {
     User = DS.Model.extend({
       info   : DS.hasOneFragment("info"),
@@ -31,6 +31,8 @@ module("integration/fragments - Nested fragments", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -45,7 +47,6 @@ module("integration/fragments - Nested fragments", {
 
 test("`DS.hasManyFragment` properties can be nested", function() {
   var data = {
-    id: 1,
     info: {
       name: 'Tyrion Lannister',
       notes: [ 'smart', 'short' ]
@@ -79,34 +80,39 @@ test("`DS.hasManyFragment` properties can be nested", function() {
     ]
   };
 
-  store.push('user', Ember.copy(data, true));
+  store.push({
+    type: 'user',
+    id: 1,
+    attributes: Ember.copy(data, true)
+  });
 
-  env.adapter.updateRecord = function(store, type, record) {
+  env.adapter.updateRecord = function() {
     var payload = Ember.copy(data, true);
 
+    payload.id = 1;
     payload.orders[0].products.splice(0, 1);
 
     return Ember.RSVP.resolve(payload);
   };
 
   return store.find('user', 1).then(function(user) {
-    equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are deserialized properly");
+    equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are converted properly");
 
     var product = user.get('orders.firstObject.products.firstObject');
 
     product.set('price', '1.99');
-    ok(user.get('isDirty'), "dirty state propagates to owner");
+    ok(user.get('hasDirtyAttributes'), "dirty state propagates to owner");
 
-    user.rollback();
-    equal(product.get('price'), '499.99', "rollback cascades to nested fragments");
-    ok(!user.get('isDirty'), "dirty state is reset");
+    user.rollbackAttributes();
+    equal(product.get('price'), '499.99', "rollbackAttributes cascades to nested fragments");
+    ok(!user.get('hasDirtyAttributes'), "dirty state is reset");
 
     user.get('orders.firstObject.products').removeAt(0);
-    ok(user.get('isDirty'), "dirty state propagates to owner");
+    ok(user.get('hasDirtyAttributes'), "dirty state propagates to owner");
 
     return user.save();
   }).then(function(user) {
-    ok(!user.get('isDirty'), "owner record is clean");
+    ok(!user.get('hasDirtyAttributes'), "owner record is clean");
     equal(user.get('orders.firstObject.products.length'), 1, "fragment array length is correct");
   });
 });

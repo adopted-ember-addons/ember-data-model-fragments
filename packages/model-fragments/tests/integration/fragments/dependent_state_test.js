@@ -1,6 +1,6 @@
-var store, Person, Name, Address, people;
+var env, store, Person, Name, Address, people;
 
-module("integration/fragments - Dependent State", {
+QUnit.module("integration/fragments - Dependent State", {
   setup: function() {
     Person = DS.Model.extend({
       title     : DS.attr("string"),
@@ -21,11 +21,15 @@ module("integration/fragments - Dependent State", {
       country : DS.attr("string")
     });
 
-    store = createStore({
+    env = setupEnv({
       person: Person,
-      address: Address,
-      name: Name
+      name: Name,
+      address: Address
     });
+
+    store = env.store;
+
+    expectNoDeprecation();
 
     people = [
       {
@@ -57,6 +61,7 @@ module("integration/fragments - Dependent State", {
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Person = null;
     Address = null;
@@ -66,15 +71,22 @@ module("integration/fragments - Dependent State", {
 });
 
 function pushPerson(id) {
-  store.push('person', Ember.copy(Ember.A(people).findBy('id', id), true));
+  store.push({
+    type: 'person',
+    id: id,
+    attributes: Ember.A(people).findBy('id', id)
+  });
 }
 
 test("changing a `DS.hasOneFragment` fragment property dirties the fragment and owner record", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Jamie",
-      last: "Lannister"
+    attributes: {
+      name: {
+        first: "Jamie",
+        last: "Lannister"
+      }
     }
   });
 
@@ -83,17 +95,20 @@ test("changing a `DS.hasOneFragment` fragment property dirties the fragment and 
 
     name.set('first', 'Cercei');
 
-    ok(name.get('isDirty'), "fragment is dirty");
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(name.get('hasDirtyAttributes'), "fragment is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
   });
 });
 
 test("restoring a `DS.hasOneFragment` fragment to its original state returns the fragment and owner record to a clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Hoster",
-      last: "Tully"
+    attributes: {
+      name: {
+        first: "Hoster",
+        last: "Tully"
+      }
     }
   });
 
@@ -103,17 +118,20 @@ test("restoring a `DS.hasOneFragment` fragment to its original state returns the
     name.set('first', 'Brynden');
     name.set('first', 'Hoster');
 
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("restoring a `DS.hasOneFragment` fragment to its original state when the owner record was dirty returns the fragment to a clean state maintains the owner record's dirty state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Jorah",
-      last: "Mormont"
+    attributes: {
+      name: {
+        first: "Jorah",
+        last: "Mormont"
+      }
     }
   });
 
@@ -126,17 +144,20 @@ test("restoring a `DS.hasOneFragment` fragment to its original state when the ow
     name.set('first', 'Jeor');
     name.set('first', 'Jorah');
 
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
 test("rolling back the owner record returns a `DS.hasOneFragment` fragment and owner record to a clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Catelyn",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Catelyn",
+        last: "Stark"
+      }
     }
   });
 
@@ -145,19 +166,22 @@ test("rolling back the owner record returns a `DS.hasOneFragment` fragment and o
 
     name.set('last', 'Tully');
 
-    person.rollback();
+    person.rollbackAttributes();
 
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("a record can be rolled back multiple times", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Arya",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Arya",
+        last: "Stark"
+      }
     }
   });
 
@@ -165,27 +189,30 @@ test("a record can be rolled back multiple times", function() {
     var name = person.get('name');
 
     name.set('last', '');
-    person.rollback();
+    person.rollbackAttributes();
 
     equal(name.get('last'), 'Stark', "fragment has correct values");
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
 
     name.set('last', '');
-    person.rollback();
+    person.rollbackAttributes();
 
     equal(name.get('last'), 'Stark', "fragment has correct values");
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the owner record to a clean state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Sansa",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Sansa",
+        last: "Stark"
+      }
     }
   });
 
@@ -195,19 +222,22 @@ test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the o
     // Dirty the fragment
     name.set('last', 'Lannister');
 
-    name.rollback();
+    name.rollbackAttributes();
 
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("rolling back a `DS.hasOneFragment` fragment when the owner record is dirty returns the fragment to a clean state and maintains the owner record's dirty state", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Sansa",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Sansa",
+        last: "Stark"
+      }
     }
   });
 
@@ -218,10 +248,10 @@ test("rolling back a `DS.hasOneFragment` fragment when the owner record is dirty
     person.set('title', 'Heir to Winterfell');
     name.set('last', 'Lannister');
 
-    name.rollback();
+    name.rollbackAttributes();
 
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
@@ -233,18 +263,22 @@ test("a `DS.hasOneFragment` fragment property that is set to null can be rolled 
 
     person.set('name', null);
 
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
 
-    person.rollback();
+    person.rollbackAttributes();
 
     deepEqual(person.get('name'), name, "property is restored");
-    ok(!name.get('isDirty'), "fragment is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("a `DS.hasOneFragment` fragment property that is null can be rolled back", function() {
-  store.push('person', { id: 1, });
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
 
   return store.find('person', 1).then(function(person) {
     var name = person.get('name');
@@ -253,12 +287,12 @@ test("a `DS.hasOneFragment` fragment property that is null can be rolled back", 
 
     person.set('name', store.createFragment('name', { first: 'Rob', last: 'Stark' }));
 
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
 
-    person.rollback();
+    person.rollbackAttributes();
 
     equal(person.get('name'), null, "property is null again");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -275,8 +309,8 @@ test("adding a fragment to a fragment array dirties the fragment array and owner
       country: "Westeros"
     });
 
-    ok(addresses.get('isDirty'), "fragment array is dirty");
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
   });
 });
 
@@ -288,8 +322,8 @@ test("removing a fragment from a fragment array dirties the fragment array and o
 
     addresses.removeObject(addresses.get('firstObject'));
 
-    ok(addresses.get('isDirty'), "fragment array is dirty");
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
   });
 });
 
@@ -304,8 +338,8 @@ test("reordering a fragment array dirties the fragment array and owner record", 
     addresses.unshiftObject(address);
 
     equal(addresses.get('length'), length, "fragment array length is maintained");
-    ok(addresses.get('isDirty'), "fragment array is dirty");
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
   });
 });
 
@@ -318,8 +352,8 @@ test("restoring a fragment array to its original order returns the fragment arra
     var address = addresses.popObject();
     addresses.pushObject(address);
 
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -335,8 +369,8 @@ test("restoring a fragment array to its original order when the owner record was
     var address = addresses.popObject();
     addresses.pushObject(address);
 
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
@@ -349,9 +383,9 @@ test("changing a `DS.hasManyFragments` fragment property dirties the fragment, f
 
     address.set('street', '2 Sky Cell');
 
-    ok(address.get('isDirty'), "fragment is dirty");
-    ok(addresses.get('isDirty'), "fragment array is dirty");
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(address.get('hasDirtyAttributes'), "fragment is dirty");
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
   });
 });
 
@@ -365,9 +399,9 @@ test("restoring a `DS.hasManyFragments` fragment to its original state returns t
     address.set('street', '2 Sky Cell');
     address.set('street', '1 Sky Cell');
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -384,9 +418,9 @@ test("restoring a `DS.hasManyFragments` fragment to its original state when the 
     address.set('street', '2 Sky Cell');
     address.set('street', '1 Sky Cell');
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(addresses.get('isDirty'), "fragment array is still dirty");
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is still dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
   });
 });
 
@@ -403,9 +437,9 @@ test("restoring a `DS.hasManyFragments` fragment to its original state when the 
     // Dirty the owner record
     person.set('title', 'Master of Coin');
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
@@ -421,11 +455,11 @@ test("rolling back the owner record returns all `DS.hasManyFragments` fragments,
     addresses.popObject();
     address.set('street', '2 Sky Cell');
 
-    person.rollback();
+    person.rollbackAttributes();
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -440,11 +474,11 @@ test("rolling back the owner record returns all `DS.hasManyFragments` primitive 
     titles.popObject();
     titles.unshiftObject('Giant of Lannister');
 
-    person.rollback();
+    person.rollbackAttributes();
 
     deepEqual(values, person.get('titles').toArray(), "primitive values are reset");
-    ok(!titles.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!titles.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -460,11 +494,11 @@ test("rolling back a `DS.hasManyFragments` fragment array returns all fragments,
     addresses.popObject();
     address.set('street', '2 Sky Cell');
 
-    addresses.rollback();
+    addresses.rollbackAttributes();
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -480,11 +514,11 @@ test("rolling back a `DS.hasManyFragments` fragment array when the owner record 
     addresses.popObject();
     address.set('street', '2 Sky Cell');
 
-    addresses.rollback();
+    addresses.rollbackAttributes();
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
@@ -498,11 +532,11 @@ test("rolling back a `DS.hasManyFragments` fragment returns the fragment, fragme
     // Dirty a fragment
     address.set('street', '2 Sky Cell');
 
-    address.rollback();
+    address.rollbackAttributes();
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
@@ -517,11 +551,11 @@ test("rolling back a `DS.hasManyFragments` fragment when the fragment array is d
     addresses.popObject();
     address.set('street', '2 Sky Cell');
 
-    address.rollback();
+    address.rollbackAttributes();
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(addresses.get('isDirty'), "fragment array is still dirty");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is still dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
@@ -536,11 +570,11 @@ test("rolling back a `DS.hasManyFragments` fragment when the owner record is dir
     person.set('title', 'Lord of Casterly Rock');
     address.set('street', '2 Sky Cell');
 
-    address.rollback();
+    address.rollbackAttributes();
 
-    ok(!address.get('isDirty'), "fragment is clean");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(person.get('isDirty'), "owner record is still dirty");
+    ok(!address.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(person.get('hasDirtyAttributes'), "owner record is still dirty");
   });
 });
 
@@ -552,18 +586,22 @@ test("a `DS.hasManyFragments` fragment property that is set to null can be rolle
 
     person.set('addresses', null);
 
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
 
-    person.rollback();
+    person.rollbackAttributes();
 
     equal(person.get('addresses'), addresses, "property is restored");
-    ok(!addresses.get('isDirty'), "fragment array is clean");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
 
 test("a `DS.hasManyFragments` fragment property that is null can be rolled back", function() {
-  store.push('person', { id: 1, });
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
 
   return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
@@ -579,11 +617,11 @@ test("a `DS.hasManyFragments` fragment property that is null can be rolled back"
       })
     ]);
 
-    ok(person.get('isDirty'), "owner record is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
 
-    person.rollback();
+    person.rollbackAttributes();
 
     equal(person.get('addresses'), null, "property is null again");
-    ok(!person.get('isDirty'), "owner record is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
