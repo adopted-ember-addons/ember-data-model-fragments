@@ -48,6 +48,7 @@
     "es6-module-transpiler-package-resolver": "^1.0.1",
     "git-repo-version": "^0.3.0",
     "publish": "^0.5.0",
+    "rsvp": "^3.0.21",
     "testem": "0.8.3"
   }
 }
