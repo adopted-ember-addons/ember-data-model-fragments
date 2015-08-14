@@ -20,23 +20,25 @@ var path            = require('path');
 
 var outputName = 'ember-data.model-fragments';
 
-var packages = merge([
-  packageTree('ember'),
-  packageTree('ember-data'),
-  packageTree('model-fragments')
-]);
+module.exports = function() {
+  var packages = merge([
+    packageTree('ember'),
+    packageTree('ember-data'),
+    packageTree('model-fragments')
+  ]);
 
-var main = mainTree(packages, outputName);
+  var main = mainTree(packages, outputName);
 
-if (env === 'production') {
-  var prod = prodTree(main, outputName);
-  main = merge([ main, prod ], { overwrite: true });
-} else {
-  var tests = testTree(packages, outputName);
-  main = merge([ main, tests ]);
-}
+  if (env === 'production') {
+    var prod = prodTree(main, outputName);
+    main = merge([ main, prod ], { overwrite: true });
+  } else {
+    var tests = testTree(packages, outputName);
+    main = merge([ main, tests ]);
+  }
 
-module.exports = main;
+  return main;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
