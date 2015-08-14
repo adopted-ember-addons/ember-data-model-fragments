@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.4.0 (August 14, 2015)
+
+* Updated to support Ember Data v1.13
+
 ### v0.3.3 (May 20, 2015)
 
 * Removed deprecations in test suite
