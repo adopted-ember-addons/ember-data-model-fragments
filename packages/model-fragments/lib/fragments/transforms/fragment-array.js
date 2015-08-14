@@ -1,11 +1,9 @@
-import Ember from 'ember';
 import FragmentTransform from './fragment';
+import map from '../../util/map';
 
 /**
   @module ember-data.model-fragments
 */
-
-var map = Ember.EnumerableUtils.map;
 
 /**
   Transform for `DS.hasManyFragments` fragment attribute which delegates work to

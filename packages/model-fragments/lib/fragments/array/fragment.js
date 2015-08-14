@@ -1,13 +1,13 @@
 import Ember from 'ember';
 import StatefulArray from './stateful';
 import { internalModelFor, setFragmentOwner, getActualFragmentType } from '../model';
+import map from '../../util/map';
 
 /**
   @module ember-data.model-fragments
 */
 
 var get = Ember.get;
-var map = Ember.EnumerableUtils.map;
 var computed = Ember.computed;
 
 /**
@@ -84,7 +84,7 @@ var FragmentArray = StatefulArray.extend({
   */
   _createSnapshot: function() {
     // Snapshot each fragment
-    return map(this, function(fragment) {
+    return this.map(function(fragment) {
       return fragment._createSnapshot();
     });
   },
