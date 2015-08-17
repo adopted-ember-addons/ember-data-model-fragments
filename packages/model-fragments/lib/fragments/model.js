@@ -91,10 +91,11 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   */
   copy: function() {
     var data = {};
+    var internalModel = internalModelFor(this);
 
     // TODO: handle copying sub-fragments
-    merge(data, this._data);
-    merge(data, this._attributes);
+    merge(data, internalModel._data);
+    merge(data, internalModel._attributes);
 
     return this.store.createFragment(this.constructor.modelName, data);
   },
