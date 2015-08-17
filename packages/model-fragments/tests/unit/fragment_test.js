@@ -73,6 +73,26 @@ test("copied fragments can be added to any record", function() {
   });
 });
 
+test("copying a fragment copies the fragment's properties", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: "Jon",
+        last: "Snow"
+      }
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var copy = person.get('name').copy();
+
+    ok(copy.get('first'), "Jon"); 
+    ok(copy.get('last'), "Snow"); 
+  });
+});
+
 test("fragments are `Ember.Comparable`", function() {
   var fragment = store.createFragment('name');
 
