@@ -13,7 +13,7 @@ var concat          = require('broccoli-sourcemap-concat');
 var uglify          = require('broccoli-uglify-js');
 var AMDFormatter    = require('es6-module-transpiler-amd-formatter');
 var PackageResolver = require('es6-module-transpiler-package-resolver');
-var version         = require('git-repo-version')();
+var version         = require('./package.json').version;
 var path            = require('path');
 
 ////////////////////////////////////////////////////////////////////////////////
