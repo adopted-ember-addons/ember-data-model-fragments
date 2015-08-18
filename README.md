@@ -6,7 +6,6 @@
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
-:warning: This project is not compatible with Ember Data past v1.0.0-beta.18 yet.
 
 :warning: This project is not compatible with Ember Data v1.0.0-beta.12, due to a bug in that version. Use the following table to decide which version of this project to use with your app:
 
@@ -17,6 +16,7 @@ This package provides support for sub-models that can be treated much like `belo
 | > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
 | v1.0.0-beta.14 | v0.2.8 |
 | >= v1.0.0-beta.15 <= v1.0.0-beta.18 | >= v0.3.0 |
+| >= v1.13.x | >= v0.4.0 |
 
 ## Installation
 
