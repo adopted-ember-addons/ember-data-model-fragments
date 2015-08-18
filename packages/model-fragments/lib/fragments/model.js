@@ -7,6 +7,7 @@ import { Model } from './ext';
 */
 
 var get = Ember.get;
+var set = Ember.set;
 var create = Object.create || Ember.create;
 var merge = Ember.merge;
 
@@ -95,16 +96,16 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     
     var newFragment = store.createFragment(type);
     get(this.constructor, 'attributes').forEach(function(attribute) {
-      if( attribute.type === 'fragment' ) {
-        if( attribute.kind === 'hasMany' ) {
-          newFragment.set(attribute.name, this.get(attribute.name).map(Ember.copy));
+      if (attribute.type === 'fragment') {
+        if (attribute.kind === 'hasMany') {
+          set(newFragment, attribute.name, get(this, attribute.name).map(Ember.copy));
         } else {
-          newFragment.set(attribute.name, Ember.copy( this.get(attribute.name) ));
+          set(newFragment, attribute.name, Ember.copy( get(this, attribute.name) ));
         }
       } else {
-        newFragment.set(attribute.name, this.get(attribute.name));
+        set(newFragment, attribute.name, get(this, attribute.name));
       }
-    }.bind(this));
+    }, this);
   
     return newFragment;
   },
