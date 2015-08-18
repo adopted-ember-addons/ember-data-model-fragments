@@ -21,42 +21,40 @@ window.setupEnv = function(options) {
     registry = env.registry = container;
   }
 
-  var adapter = env.adapter = (options.adapter || '-default');
-  delete options.adapter;
+  // Silence ED 2.0 behavior change warning
+  var adapterOptions = {
+    shouldBackgroundReloadRecord: function() { return false; }
+  };
+  var serializerOptions = {
+    isNewSerializerAPI: true
+  };
 
   for (var prop in options) {
     registry.register('model:' + Ember.String.dasherize(prop), options[prop]);
   }
 
   registry.register('store:main', DS.Store.extend({
-    adapter: adapter
+    adapter: '-default'
   }));
 
   registry.optionsForType('serializer', { singleton: false });
   registry.optionsForType('adapter', { singleton: false });
-  registry.register('adapter:-default', DS.Adapter);
-
-  registry.register('serializer:-default', DS.JSONSerializer);
-  registry.register('serializer:-rest', DS.RESTSerializer);
-  registry.register('adapter:-rest', DS.RESTAdapter);
-
+  registry.register('adapter:-default', DS.Adapter.extend(adapterOptions));
+  registry.register('serializer:-default', DS.JSONSerializer.extend(serializerOptions));
   registry.register('transform:boolean', DS.BooleanTransform);
   registry.register('transform:date', DS.DateTransform);
   registry.register('transform:number', DS.NumberTransform);
   registry.register('transform:string', DS.StringTransform);
   registry.register('transform:fragment', DS.FragmentTransform);
+  registry.register('transform:fragment-array', DS.FragmentArrayTransform);
+  registry.register('transform:array', DS.ArrayTransform);
 
   registry.injection('serializer', 'store', 'store:main');
 
-  env.serializer = container.lookup('serializer:-default');
-  env.restSerializer = container.lookup('serializer:-rest');
+  env.serializer = container.lookupFactory('serializer:-default');
   env.store = container.lookup('store:main');
   env.adapter = env.store.get('defaultAdapter');
 
   return env;
-};
-
-window.createStore = function(options) {
-  return setupEnv(options).store;
 };
 

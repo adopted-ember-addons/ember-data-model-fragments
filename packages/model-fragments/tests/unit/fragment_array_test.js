@@ -1,6 +1,6 @@
 var env, store, Person, Name;
 
-module("unit/fragments - DS.FragmentArray", {
+QUnit.module("unit/fragments - DS.FragmentArray", {
   setup: function() {
     Person = DS.Model.extend({
       names: DS.hasManyFragments("name")
@@ -17,6 +17,8 @@ module("unit/fragments - DS.FragmentArray", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -28,14 +30,17 @@ module("unit/fragments - DS.FragmentArray", {
 });
 
 test("fragments can be created and added through the fragment array", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Tyrion",
-        last: "Lannister"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Tyrion",
+          last: "Lannister"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -53,14 +58,17 @@ test("fragments can be created and added through the fragment array", function()
 });
 
 test("fragments can be added to the fragment array", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Tyrion",
-        last: "Lannister"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Tyrion",
+          last: "Lannister"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -79,14 +87,17 @@ test("fragments can be added to the fragment array", function() {
 });
 
 test("fragments can be removed from the fragment array", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Arya",
-        last: "Stark"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Arya",
+          last: "Stark"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -101,19 +112,22 @@ test("fragments can be removed from the fragment array", function() {
   });
 });
 
-test("changes to array contents change the fragment array 'isDirty' property", function() {
-  store.push('person', {
+test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function() {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Aegon",
-        last: "Targaryen"
-      },
-      {
-        first: "Visenya",
-        last: "Targaryen"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Aegon",
+          last: "Targaryen"
+        },
+        {
+          first: "Visenya",
+          last: "Targaryen"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -124,76 +138,82 @@ test("changes to array contents change the fragment array 'isDirty' property", f
       last: 'Targaryen'
     });
 
-    ok(!fragments.get('isDirty'), "fragment array is initially in a clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
 
     fragments.removeFragment(fragment);
 
-    ok(fragments.get('isDirty'), "fragment array is in dirty state after removal");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after removal");
 
     fragments.unshiftObject(fragment);
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
 
     fragments.addFragment(newFragment);
 
-    ok(fragments.get('isDirty'), "fragment array is in dirty state after addition");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after addition");
 
     fragments.removeFragment(newFragment);
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
 
     fragments.removeFragment(fragment);
     fragments.addFragment(fragment);
 
-    ok(fragments.get('isDirty'), "fragment array is in dirty state after reordering");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after reordering");
 
     fragments.removeFragment(fragment);
     fragments.unshiftObject(fragment);
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
   });
 });
 
-test("changes to array contents change the fragment array 'isDirty' property", function() {
-  store.push('person', {
+test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function() {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Jon",
-        last: "Snow"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Jon",
+          last: "Snow"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
     var fragments = person.get('names');
     var fragment = fragments.get('firstObject');
 
-    ok(!fragments.get('isDirty'), "fragment array is initially in a clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
 
     fragment.set('last', 'Stark');
 
-    ok(fragments.get('isDirty'), "fragment array in dirty state after change to a fragment");
+    ok(fragments.get('hasDirtyAttributes'), "fragment array in dirty state after change to a fragment");
 
     fragment.set('last', 'Snow');
 
-    ok(!fragments.get('isDirty'), "fragment array is returned to clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
   });
 });
 
 test("changes to array contents and fragments can be rolled back", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    names: [
-      {
-        first: "Catelyn",
-        last: "Tully"
-      },
-      {
-        first: "Catelyn",
-        last: "Stark"
-      }
-    ]
+    attributes: {
+      names: [
+        {
+          first: "Catelyn",
+          last: "Tully"
+        },
+        {
+          first: "Catelyn",
+          last: "Stark"
+        }
+      ]
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -209,43 +229,10 @@ test("changes to array contents and fragments can be rolled back", function() {
       last: 'Stonehart'
     });
 
-    fragments.rollback();
+    fragments.rollbackAttributes();
 
-    ok(!fragments.get('isDirty'), "fragment array is not dirty");
-    ok(!fragments.isAny('isDirty'), "all fragments are in clean state");
+    ok(!fragments.get('hasDirtyAttributes'), "fragment array is not dirty");
+    ok(!fragments.isAny('hasDirtyAttributes'), "all fragments are in clean state");
     deepEqual(fragments.toArray(), originalState, "original array contents is restored");
-  });
-});
-
-test("serializing creates a new Array with contents the result of serializing each fragment", function() {
-  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  store.modelFor('person');
-
-  var names = [
-    {
-      first: "Rhaegar",
-      last: "Targaryen"
-    },
-    {
-      first: "Viserys",
-      last: "Targaryen"
-    },
-    {
-      first: "Daenerys",
-      last: "Targaryen"
-    }
-  ];
-
-  store.push('person', {
-    id: 1,
-    names: names
-  });
-
-  env.registry.register('serializer:name', DS.JSONSerializer);
-
-  return store.find('person', 1).then(function(person) {
-    var serialized = person.serialize();
-
-    deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
   });
 });

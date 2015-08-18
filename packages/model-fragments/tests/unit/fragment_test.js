@@ -1,7 +1,7 @@
 var env, store, Person, Name, House;
 var all = Ember.RSVP.all;
 
-module("unit/fragments - DS.ModelFragment", {
+QUnit.module("unit/fragments - DS.ModelFragment", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.hasOneFragment("name")
@@ -25,6 +25,8 @@ module("unit/fragments - DS.ModelFragment", {
     });
 
     store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
@@ -42,15 +44,22 @@ test("fragments are `Ember.Copyable`", function() {
 });
 
 test("copied fragments can be added to any record", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Jon",
-      last: "Snow"
+    attributes: {
+      name: {
+        first: "Jon",
+        last: "Snow"
+      }
     }
   });
 
-  store.push('person', { id: 2 });
+  store.push({
+    type: 'person',
+    id: 2,
+    attributes: {}
+  });
 
   return all([
     store.find('person', 1),
@@ -61,6 +70,26 @@ test("copied fragments can be added to any record", function() {
     people[1].set('name', copy);
 
     ok(true, "fragment copies can be assigned to other records");
+  });
+});
+
+test("copying a fragment copies the fragment's properties", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: "Jon",
+        last: "Snow"
+      }
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var copy = person.get('name').copy();
+
+    ok(copy.get('first'), "Jon"); 
+    ok(copy.get('last'), "Snow"); 
   });
 });
 
@@ -85,11 +114,14 @@ test("fragments are compared by reference", function() {
 });
 
 test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Loras",
-      last: "Tyrell"
+    attributes: {
+      name: {
+        first: "Loras",
+        last: "Tyrell"
+      }
     }
   });
 
@@ -103,11 +135,14 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
 });
 
 test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Rob",
-      last: "Stark"
+    attributes: {
+      name: {
+        first: "Rob",
+        last: "Stark"
+      }
     }
   });
 
@@ -119,11 +154,14 @@ test("fragment properties that are set to null are indicated in the owner record
 });
 
 test("changes to attributes can be rolled back", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Ramsay",
-      last: "Snow"
+    attributes: {
+      name: {
+        first: "Ramsay",
+        last: "Snow"
+      }
     }
   });
 
@@ -131,98 +169,9 @@ test("changes to attributes can be rolled back", function() {
     var name = person.get('name');
 
     name.set('last', 'Bolton');
-    name.rollback();
+    name.rollbackAttributes();
 
     ok(name.get('last', 'Snow'), "fragment properties are restored");
-    ok(!name.get('isDirty'), "fragment is in clean state");
-  });
-});
-
-test("fragment properties are serialized as normal attributes using their own serializers", function() {
-  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  store.modelFor('person');
-
-  store.push('person', {
-    id: 1,
-    name: {
-      first: "Aerys",
-      last: "Targaryen"
-    }
-  });
-
-  env.registry.register('serializer:name', DS.JSONSerializer.extend({
-    serialize: function() {
-      return 'Mad King';
-    }
-  }));
-
-  return store.find('person', 1).then(function(person) {
-    var name = person.get('name');
-
-    var serialized = person.serialize();
-
-    equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");
-  });
-});
-
-test("fragment properties are snapshotted as normal attributes on the owner record snapshot", function() {
-  expect(7);
-
-  // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
-  store.modelFor('person');
-
-  Person.reopen({
-    houses   : DS.hasManyFragments('house'),
-    children : DS.hasManyFragments()
-  });
-
-  var person = {
-    id: 1,
-    name: {
-      first : "Catelyn",
-      last  : "Stark"
-    },
-    houses: [
-      {
-        name   : "Tully",
-        region : "Riverlands",
-        exiled : true
-      },
-      {
-        name   : "Stark",
-        region : "North",
-        exiled : true
-      }
-    ],
-    children: [
-      'Robb',
-      'Sansa',
-      'Arya',
-      'Brandon',
-      'Rickon'
-    ]
-  };
-
-  store.push('person', person);
-
-  env.registry.register('serializer:person', DS.JSONSerializer.extend({
-    serialize: function(snapshot) {
-      var name = snapshot.attr('name');
-      ok(name instanceof DS.Snapshot, "`hasOneFragment` snapshot attribute is a snapshot");
-      equal(name.attr('first'), person.name.first, "`hasOneFragment` attributes are snapshoted correctly");
-
-      var houses = snapshot.attr('houses');
-      ok(Array.isArray(houses), "`hasManyFragments` attribute is an array");
-      ok(houses[0] instanceof DS.Snapshot, "`hasManyFragments` attribute is an array of snapshots");
-      equal(houses[0].attr('name'), person.houses[0].name, "`hasManyFragments` attributes are snapshotted correctly");
-
-      var children = snapshot.attr('children');
-      ok(Array.isArray(children), "primitive `hasManyFragments` attribute is an array");
-      deepEqual(children, person.children, "primitive `hasManyFragments` attribute is snapshotted correctly");
-    }
-  }));
-
-  return store.find('person', 1).then(function(person) {
-    person.serialize();
+    ok(!name.get('hasDirtyAttributes'), "fragment is in clean state");
   });
 });

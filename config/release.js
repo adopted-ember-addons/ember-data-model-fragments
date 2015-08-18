@@ -1,12 +1,32 @@
 /* jshint node:true */
 
-// For details on each option run `ember help release`
+var BuildTask = require('ember-cli/lib/tasks/build');
+var RSVP = require('rsvp');
+var publisher = require('publish');
+
+// Create promise friendly versions of the methods we want to use
+var start = RSVP.denodeify(publisher.start);
+var publish = RSVP.denodeify(publisher.publish);
+
 module.exports = {
-  // local: true,
-  // remote: 'some_remote',
-  // annotation: "Release %@",
-  // message: "Bumped version to %@",
-  // strategy: 'date',
-  // format: 'YYYY-MM-DD',
-  // timezone: 'America/Los_Angeles',
+  // Build the project in the production environment, outputting to dist/
+  beforeCommit: function(project) {
+    var task = new BuildTask({
+      project: project,
+      ui: project.ui,
+      analytics: project.cli.analytics
+    });
+
+    return task.run({
+      environment: 'production',
+      outputPath: 'dist/'
+    });
+  },
+
+  // Publish the new release to NPM after a successful push
+  afterPush: function() {
+    return start().then(function() {
+      return publish();
+    });
+  }
 };

@@ -1,7 +1,7 @@
-var store, Person, Name;
+var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
-module("unit/fragments - DS.fragmentOwner", {
+QUnit.module("unit/fragments - DS.fragmentOwner", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.hasOneFragment("name"),
@@ -13,13 +13,18 @@ module("unit/fragments - DS.fragmentOwner", {
       person: DS.fragmentOwner()
     });
 
-    store = createStore({
+    env = setupEnv({
       person: Person,
       name: Name
     });
+
+    store = env.store;
+
+    expectNoDeprecation();
   },
 
   teardown: function() {
+    env = null;
     store = null;
     Person = null;
     Name = null;
@@ -27,11 +32,14 @@ module("unit/fragments - DS.fragmentOwner", {
 });
 
 test("fragments can reference their owner record", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Samwell",
-      last: "Tarly"
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
     }
   });
 
@@ -43,19 +51,25 @@ test("fragments can reference their owner record", function() {
 });
 
 test("attempting to change a fragment's owner record throws an error", function() {
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 1,
-    name: {
-      first: "Samwell",
-      last: "Tarly"
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
     }
   });
 
-  store.push('person', {
+  store.push({
+    type: 'person',
     id: 2,
-    name: {
-      first: "Samwell",
-      last: "Tarly"
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
     }
   });
 
