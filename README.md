@@ -15,7 +15,7 @@ This package provides support for sub-models that can be treated much like `belo
 |------------|-----------------|
 | > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
 | v1.0.0-beta.14 | v0.2.8 |
-| >= v1.0.0-beta.15 <= v1.0.0-beta.18 | >= v0.3.0 |
+| >= v1.0.0-beta.15 <= v1.0.0-beta.18 | >= v0.3.3 |
 | >= v1.13.x | >= v0.4.0 |
 
 ## Installation
