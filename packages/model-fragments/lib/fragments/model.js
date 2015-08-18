@@ -7,7 +7,6 @@ import { Model } from './ext';
 */
 
 var get = Ember.get;
-var set = Ember.set;
 var create = Object.create || Ember.create;
 var copy = Ember.copy;
 
@@ -91,23 +90,16 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     @return {DS.ModelFragment} the newly created fragment
   */
   copy: function() {
-    var store = get(this, 'store');
-    var type = store.modelFor(this.constructor);
-    var newFragment = store.createFragment(type);
+    var type = this.constructor;
+    var props = {};
 
-    get(this.constructor, 'attributes').forEach(function(attribute) {
-      if (attribute.type === 'fragment') {
-        if (attribute.kind === 'hasMany') {
-          set(newFragment, attribute.name, get(this, attribute.name).map(copy));
-        } else {
-          set(newFragment, attribute.name, copy(get(this, attribute.name)));
-        }
-      } else {
-        newFragment.set(attribute.name, get(this, attribute.name));
-      }
+    // Loop over each attribute and copy individually to ensure nested fragments
+    // are also copied
+    type.eachAttribute(function(name) {
+      props[name] = copy(get(this, name));
     }, this);
 
-    return newFragment;
+    return this.store.createFragment(type.modelName, props);
   },
 
   /**
