@@ -8,7 +8,7 @@ import { Model } from './ext';
 
 var get = Ember.get;
 var create = Object.create || Ember.create;
-var merge = Ember.merge;
+var copy = Ember.copy;
 
 /**
   The class that all nested object structures, or 'fragments', descend from.
@@ -90,14 +90,16 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     @return {DS.ModelFragment} the newly created fragment
   */
   copy: function() {
-    var data = {};
-    var internalModel = internalModelFor(this);
+    var type = this.constructor;
+    var props = {};
 
-    // TODO: handle copying sub-fragments
-    merge(data, internalModel._data);
-    merge(data, internalModel._attributes);
+    // Loop over each attribute and copy individually to ensure nested fragments
+    // are also copied
+    type.eachAttribute(function(name) {
+      props[name] = copy(get(this, name));
+    }, this);
 
-    return this.store.createFragment(this.constructor.modelName, data);
+    return this.store.createFragment(type.modelName, props);
   },
 
   /**

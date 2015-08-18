@@ -29,6 +29,31 @@ QUnit.module("unit/fragments - DS.FragmentArray", {
   }
 });
 
+test("fragment arrays can be copied", function() {
+  var data = {
+    names: [
+      {
+        first: "Meryn",
+        last: "Trant"
+      }
+    ]
+  };
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: data
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var copy = person.get('names').copy();
+
+    equal(copy.length, person.get('names.length'), "copy's size is correct");
+    equal(copy[0].get('first'), data.names[0].first, "child fragments are copied");
+    ok(copy[0] !== person.get('names.firstObject'), "copied fragments are new fragments");
+  });
+});
+
 test("fragments can be created and added through the fragment array", function() {
   store.push({
     type: 'person',

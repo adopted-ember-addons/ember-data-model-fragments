@@ -8,6 +8,7 @@ import { fragmentDidDirty, fragmentDidReset } from '../states';
 var get = Ember.get;
 var set = Ember.set;
 var computed = Ember.computed;
+var copy = Ember.copy;
 
 /**
   A state-aware array that is tied to an attribute of a `DS.Model` instance.
@@ -16,7 +17,7 @@ var computed = Ember.computed;
   @namespace DS
   @extends Ember.ArrayProxy
 */
-var StatefulArray = Ember.ArrayProxy.extend({
+var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   /**
     A reference to the array's owner record.
 
@@ -43,6 +44,16 @@ var StatefulArray = Ember.ArrayProxy.extend({
   content: computed(function() {
     return Ember.A();
   }),
+
+  /**
+    Copies the array by calling copy on each of its members.
+
+    @method copy
+    @return {array} a new array
+  */
+  copy: function() {
+    return this.map(copy);
+  },
 
   /**
     @method setupData
