@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.4.1 (August 19, 2015)
+
+* Added warning about changing default value for array fragment properties
+* Added support for copying nested fragments (louy)
+* Fixed broken fragment copying (jakesjews)
+
 ### v0.4.0 (August 14, 2015)
 
 * Updated to support Ember Data v1.13

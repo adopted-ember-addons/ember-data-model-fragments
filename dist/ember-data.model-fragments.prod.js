@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.3.3+8b1fcdd5
+ * @version   0.4.1
  */
 
 (function() {
@@ -209,6 +209,7 @@
     var model$fragments$lib$fragments$array$stateful$$get = ember$lib$main$$default.get;
     var model$fragments$lib$fragments$array$stateful$$set = ember$lib$main$$default.set;
     var model$fragments$lib$fragments$array$stateful$$computed = ember$lib$main$$default.computed;
+    var model$fragments$lib$fragments$array$stateful$$copy = ember$lib$main$$default.copy;
 
     /**
       A state-aware array that is tied to an attribute of a `DS.Model` instance.
@@ -217,7 +218,7 @@
       @namespace DS
       @extends Ember.ArrayProxy
     */
-    var model$fragments$lib$fragments$array$stateful$$StatefulArray = ember$lib$main$$default.ArrayProxy.extend({
+    var model$fragments$lib$fragments$array$stateful$$StatefulArray = ember$lib$main$$default.ArrayProxy.extend(ember$lib$main$$default.Copyable, {
       /**
         A reference to the array's owner record.
 
@@ -244,6 +245,16 @@
       content: model$fragments$lib$fragments$array$stateful$$computed(function() {
         return ember$lib$main$$default.A();
       }),
+
+      /**
+        Copies the array by calling copy on each of its members.
+
+        @method copy
+        @return {array} a new array
+      */
+      copy: function() {
+        return this.map(model$fragments$lib$fragments$array$stateful$$copy);
+      },
 
       /**
         @method setupData
@@ -627,7 +638,7 @@
 
     var model$fragments$lib$fragments$model$$get = ember$lib$main$$default.get;
     var model$fragments$lib$fragments$model$$create = Object.create || ember$lib$main$$default.create;
-    var model$fragments$lib$fragments$model$$merge = ember$lib$main$$default.merge;
+    var model$fragments$lib$fragments$model$$copy = ember$lib$main$$default.copy;
 
     /**
       The class that all nested object structures, or 'fragments', descend from.
@@ -709,13 +720,16 @@
         @return {DS.ModelFragment} the newly created fragment
       */
       copy: function() {
-        var data = {};
+        var type = this.constructor;
+        var props = {};
 
-        // TODO: handle copying sub-fragments
-        model$fragments$lib$fragments$model$$merge(data, this._data);
-        model$fragments$lib$fragments$model$$merge(data, this._attributes);
+        // Loop over each attribute and copy individually to ensure nested fragments
+        // are also copied
+        type.eachAttribute(function(name) {
+          props[name] = model$fragments$lib$fragments$model$$copy(model$fragments$lib$fragments$model$$get(this, name));
+        }, this);
 
-        return this.store.createFragment(this.constructor.modelName, data);
+        return this.store.createFragment(type.modelName, props);
       },
 
       /**
@@ -1127,7 +1141,7 @@
         // may not be initialized yet, in which case the data will contain a
         // raw response or a stashed away fragment
 
-        // If we already have a processed fragment in _data and our current fragmet is
+        // If we already have a processed fragment in _data and our current fragment is
         // null simply reuse the one from data. We can be in this state after a rollback
         // for example
         if (!fragment && model$fragments$lib$fragments$attributes$$isInstanceOfType(store.modelFor(actualTypeName), data)) {
@@ -1284,7 +1298,7 @@
         var data = internalModel._data[key] || model$fragments$lib$fragments$attributes$$getDefaultValue(internalModel, options, 'array');
         var fragments = internalModel._fragments[key] || null;
 
-        // If we already have a processed fragment in _data and our current fragmet is
+        // If we already have a processed fragment in _data and our current fragment is
         // null simply reuse the one from data. We can be in this state after a rollback
         // for example
         if (data instanceof model$fragments$lib$fragments$array$stateful$$default && !fragments) {
@@ -1362,6 +1376,9 @@
     // which should automatically get deep copied
     function model$fragments$lib$fragments$attributes$$getDefaultValue(record, options, type) {
       var value;
+
+      ember$lib$main$$default.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
+        "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || options.defaultValue !== undefined);
 
       if (typeof options.defaultValue === "function") {
         value = options.defaultValue();
@@ -1545,7 +1562,7 @@
       @main ember-data.model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '0.3.3+8b1fcdd5'
+      VERSION: '0.4.1'
     });
 
     model$fragments$lib$main$$exportMethods(model$fragments$lib$main$$MF);
