@@ -314,6 +314,9 @@ function fragmentOwner() {
 function getDefaultValue(record, options, type) {
   var value;
 
+  Ember.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
+    "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || options.defaultValue !== undefined);
+
   if (typeof options.defaultValue === "function") {
     value = options.defaultValue();
   } else if (options.defaultValue) {
