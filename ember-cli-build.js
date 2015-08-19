@@ -13,7 +13,7 @@ var concat          = require('broccoli-sourcemap-concat');
 var uglify          = require('broccoli-uglify-js');
 var AMDFormatter    = require('es6-module-transpiler-amd-formatter');
 var PackageResolver = require('es6-module-transpiler-package-resolver');
-var version         = require('./package.json').version;
+var fs              = require('fs');
 var path            = require('path');
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,6 +132,10 @@ function moveFile(tree, srcPath, destPath) {
 }
 
 function versionStamp(tree) {
+  // The version in package.json can be changed, so this can't be `required()`
+  // directly, and the git repo version is similarly unreliable
+  var version = JSON.parse(fs.readFileSync('./package.json')).version;
+
   return replace(tree, {
     files: ['**/*'],
     patterns: [{
