@@ -4,7 +4,7 @@ QUnit.module("integration/fragments - Persisting Records With Fragments", {
   setup: function() {
     Person = DS.Model.extend({
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address"),
+      addresses : DS.hasManyFragments("address", { defaultValue: null }),
     });
 
     Name = DS.ModelFragment.extend({
@@ -424,7 +424,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
 
   var Army = DS.Model.extend({
     name     : DS.attr('string'),
-    soldiers : DS.hasManyFragments()
+    soldiers : DS.hasManyFragments(null, { defaultValue: [] })
   });
 
   env.registry.register('model:army', Army);

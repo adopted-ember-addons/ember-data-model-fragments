@@ -3,7 +3,7 @@ var env, store, Person, Name;
 QUnit.module("unit/fragments - DS.FragmentArray", {
   setup: function() {
     Person = DS.Model.extend({
-      names: DS.hasManyFragments("name")
+      names: DS.hasManyFragments("name", { defaultValue: [] })
     });
 
     Name = DS.ModelFragment.extend({
