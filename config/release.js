@@ -24,13 +24,9 @@ module.exports = {
   },
 
   // Publish the new release to NPM after a successful push
-  afterPush: function(project) {
-    project.ui.writeLine('Publishing to NPM...');
-
+  afterPush: function() {
     return start().then(function() {
       return publish({});
-    }).then(function() {
-      project.ui.writeLine('Publish successful');
     });
   }
 };
