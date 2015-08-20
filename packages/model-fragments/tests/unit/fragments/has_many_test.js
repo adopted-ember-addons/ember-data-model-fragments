@@ -6,7 +6,8 @@ QUnit.module("unit/fragments - DS.hasManyFragments", {
     Person = DS.Model.extend({
       name      : DS.attr("string"),
       addresses : DS.hasManyFragments("address", { defaultValue: null }),
-      titles    : DS.hasManyFragments(null, { defaultValue: null })
+      titles    : DS.hasManyFragments(null, { defaultValue: null }),
+      children  : DS.hasManyFragments(null, { defaultValue: []})
     });
 
     Address = DS.ModelFragment.extend({
@@ -217,21 +218,20 @@ test("defaults to an empty array", function() {
   });
 
   return store.find('person', 1).then(function(person) {
-    ok(Ember.isArray(person.get('addresses')), "defaults to an array");
-    ok(Ember.isEmpty(person.get('addresses')), "default array is empty");
+    ok(Ember.isArray(person.get('children')), "defaults to an array");
+    ok(Ember.isEmpty(person.get('children')), "default array is empty");
 
     store.find('person', 2).then(function(person2) {
-      ok(person.get('addresses') !== person2.get('addresses'), "default array is unique");
+      ok(person.get('children') !== person2.get('children'), "default array is unique");
     });
   });
 });
 
-test("null values on init will default to an empty array", function() {
+test("null values are allowed", function() {
   pushPerson(3);
 
   return store.find('person', 3).then(function(person) {
-    ok(Ember.isArray(person.get('addresses')), "property is an array");
-    ok(Ember.isEmpty(person.get('addresses')), "array is empty");
+    equal(person.get('addresses'), null, "property is null");
   });
 });
 

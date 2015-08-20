@@ -4,7 +4,7 @@ QUnit.module("integration/fragments - Persisting Records With Fragments", {
   setup: function() {
     Person = DS.Model.extend({
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address", { defaultValue: null }),
+      addresses : DS.hasManyFragments("address", { defaultValue: [] }),
     });
 
     Name = DS.ModelFragment.extend({

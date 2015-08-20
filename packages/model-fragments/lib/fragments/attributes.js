@@ -327,7 +327,7 @@ function getDefaultValue(record, options, type) {
     return null;
   }
 
-  Ember.assert("The fragment's default value must be an " + type, Ember.typeOf(value) == type);
+  Ember.assert("The fragment's default value must be an " + type, (Ember.typeOf(value) == type) || (value === null));
 
   // Create a deep copy of the resulting value to avoid shared reference errors
   return Ember.copy(value, true);
