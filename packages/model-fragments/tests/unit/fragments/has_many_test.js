@@ -203,11 +203,35 @@ test("setting to an array of fragments is allowed", function() {
   });
 });
 
-test("null values are allowed", function() {
+test("defaults to an empty array", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
+
+  store.push({
+    type: 'person',
+    id: 2,
+    attributes: {}
+  });
+
+  return store.find('person', 1).then(function(person) {
+    ok(Ember.isArray(person.get('addresses')), "defaults to an array");
+    ok(Ember.isEmpty(person.get('addresses')), "default array is empty");
+
+    store.find('person', 2).then(function(person2) {
+      ok(person.get('addresses') !== person2.get('addresses'), "default array is unique");
+    });
+  });
+});
+
+test("null values on init will default to an empty array", function() {
   pushPerson(3);
 
   return store.find('person', 3).then(function(person) {
-    equal(person.get('addresses'), null, "property is null");
+    ok(Ember.isArray(person.get('addresses')), "property is an array");
+    ok(Ember.isEmpty(person.get('addresses')), "array is empty");
   });
 });
 

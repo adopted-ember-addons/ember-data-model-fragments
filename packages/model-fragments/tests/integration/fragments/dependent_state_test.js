@@ -596,7 +596,7 @@ test("a `DS.hasManyFragments` fragment property that is set to null can be rolle
   });
 });
 
-test("a `DS.hasManyFragments` fragment property that is null can be rolled back", function() {
+test("a `DS.hasManyFragments` fragment property that is empty can be rolled back", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -606,7 +606,7 @@ test("a `DS.hasManyFragments` fragment property that is null can be rolled back"
   return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
-    equal(addresses, null, "property is null");
+    ok(Ember.isArray(addresses) && Ember.isEmpty(addresses), "property is an empty array");
 
     person.set('addresses', [
       store.createFragment('address', {
@@ -621,7 +621,7 @@ test("a `DS.hasManyFragments` fragment property that is null can be rolled back"
 
     person.rollbackAttributes();
 
-    equal(person.get('addresses'), null, "property is null again");
+    ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), "property is an empty array again");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });

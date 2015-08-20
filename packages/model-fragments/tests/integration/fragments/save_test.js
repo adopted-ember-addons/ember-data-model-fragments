@@ -165,7 +165,7 @@ test("a new record can be persisted with null fragments", function() {
   var person = store.createRecord('person');
 
   equal(person.get('name'), null, "`DS.hasOneFragment` property is null");
-  equal(person.get('addresses'), null, "`DS.hasManyFragments` property is null");
+  ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), "`DS.hasManyFragments` property is empty");
 
   env.adapter.createRecord = function() {
     var payload = { id: 1 };
@@ -175,7 +175,7 @@ test("a new record can be persisted with null fragments", function() {
 
   return person.save().then(function(person) {
     equal(person.get('name'), null, "`DS.hasOneFragment` property is still null");
-    equal(person.get('addresses'), null, "`DS.hasManyFragments` property is still null");
+    ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), "`DS.hasManyFragments` property is still empty");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });

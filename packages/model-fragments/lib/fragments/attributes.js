@@ -316,8 +316,10 @@ function getDefaultValue(record, options, type) {
 
   if (typeof options.defaultValue === "function") {
     value = options.defaultValue();
-  } else if (options.defaultValue) {
+  } else if ("defaultValue" in options) {
     value = options.defaultValue;
+  } else if (type === "array") {
+    value = [];
   } else {
     return null;
   }

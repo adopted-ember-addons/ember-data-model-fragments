@@ -184,7 +184,7 @@ test("normalizing data can handle `null` fragment values", function() {
 
   return store.find('person', 1).then(function(person) {
     equal(person.get('name'), null, '`DS.hasOneFragment` values can be null');
-    equal(person.get('houses'), null, '`DS.hasManyFragments` values can be null');
-    equal(person.get('children'), null, '`typeless DS.hasManyFragments` values can be null');
+    ok(Ember.isArray(person.get('houses')) && Ember.isEmpty(person.get('houses')), '`DS.hasManyFragments` values can be null');
+    ok(Ember.isArray(person.get('children')) && Ember.isEmpty(person.get('children')), '`typeless DS.hasManyFragments` values can be null');
   });
 });
