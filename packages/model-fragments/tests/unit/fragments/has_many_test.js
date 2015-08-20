@@ -5,8 +5,8 @@ QUnit.module("unit/fragments - DS.hasManyFragments", {
   setup: function() {
     Person = DS.Model.extend({
       name      : DS.attr("string"),
-      addresses : DS.hasManyFragments("address"),
-      titles    : DS.hasManyFragments()
+      addresses : DS.hasManyFragments("address", { defaultValue: null }),
+      titles    : DS.hasManyFragments(null, { defaultValue: null })
     });
 
     Address = DS.ModelFragment.extend({

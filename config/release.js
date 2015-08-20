@@ -26,7 +26,7 @@ module.exports = {
   // Publish the new release to NPM after a successful push
   afterPush: function() {
     return start().then(function() {
-      return publish();
+      return publish({});
     });
   }
 };

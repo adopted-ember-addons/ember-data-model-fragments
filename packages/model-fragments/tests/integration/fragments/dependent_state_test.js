@@ -5,8 +5,8 @@ QUnit.module("integration/fragments - Dependent State", {
     Person = DS.Model.extend({
       title     : DS.attr("string"),
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address"),
-      titles    : DS.hasManyFragments()
+      addresses : DS.hasManyFragments("address", { defaultValue: null }),
+      titles    : DS.hasManyFragments(null, { defaultValue: null })
     });
 
     Name = DS.ModelFragment.extend({
