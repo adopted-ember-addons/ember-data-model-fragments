@@ -148,7 +148,7 @@ function isInstanceOfType(type, fragment) {
 
   ```javascript
   App.Person = DS.Model.extend({
-    addresses: DS.hasManyFragments('address', { defaultValue: [] })
+    addresses: DS.hasManyFragments('address')
   });
 
   App.Address = DS.ModelFragment.extend({
@@ -231,7 +231,10 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
 function fragmentArrayProperty(metaType, options, createArray) {
   function setupFragmentArray(store, record, key) {
     var internalModel = internalModelFor(record);
-    var data = internalModel._data[key] || getDefaultValue(internalModel, options, 'array');
+    var data = internalModel._data[key];
+    if (data === undefined) {
+      data = getDefaultValue(internalModel, options, 'array');
+    }
     var fragments = internalModel._fragments[key] || null;
 
     // If we already have a processed fragment in _data and our current fragment is
@@ -314,12 +317,9 @@ function fragmentOwner() {
 function getDefaultValue(record, options, type) {
   var value;
 
-  Ember.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
-    "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || options.defaultValue !== undefined);
-
   if (typeof options.defaultValue === "function") {
     value = options.defaultValue();
-  } else if ("defaultValue" in options) {
+  } else if (options.defaultValue !== undefined) {
     value = options.defaultValue;
   } else if (type === "array") {
     value = [];

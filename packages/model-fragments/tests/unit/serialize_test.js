@@ -44,8 +44,8 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   expect(8);
 
   Person.reopen({
-    houses   : DS.hasManyFragments('house', { defaultValue: [] }),
-    children : DS.hasManyFragments(null, { defaultValue: [] })
+    houses   : DS.hasManyFragments('house'),
+    children : DS.hasManyFragments()
   });
 
   var person = {
@@ -129,7 +129,7 @@ test("fragment properties are serialized as normal attributes using their own se
 
 test("serializing a fragment array creates a new array with contents the result of serializing each fragment", function() {
   Person.reopen({
-    names: DS.hasManyFragments('name', { defaultValue: [] }),
+    names: DS.hasManyFragments('name'),
   });
 
   var names = [

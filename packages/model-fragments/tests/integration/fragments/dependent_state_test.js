@@ -1,12 +1,13 @@
-var env, store, Person, Name, Address, people;
+var env, store, Person, Name, Address, Hobby, people;
 
 QUnit.module("integration/fragments - Dependent State", {
   setup: function() {
     Person = DS.Model.extend({
       title     : DS.attr("string"),
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address", { defaultValue: [] }),
-      titles    : DS.hasManyFragments(null, { defaultValue: [] })
+      addresses : DS.hasManyFragments("address"),
+      titles    : DS.hasManyFragments(),
+      hobbies   : DS.hasManyFragments("hobby", { defaultValue: null })
     });
 
     Name = DS.ModelFragment.extend({
@@ -21,10 +22,15 @@ QUnit.module("integration/fragments - Dependent State", {
       country : DS.attr("string")
     });
 
+    Hobby = DS.ModelFragment.extend({
+      name    : DS.attr("string")
+    });
+
     env = setupEnv({
       person: Person,
       name: Name,
-      address: Address
+      address: Address,
+      hobby: Hobby
     });
 
     store = env.store;
@@ -66,6 +72,7 @@ QUnit.module("integration/fragments - Dependent State", {
     Person = null;
     Address = null;
     Name = null;
+    Hobby = null;
     people = null;
   }
 });
@@ -592,6 +599,29 @@ test("a `DS.hasManyFragments` fragment property that is set to null can be rolle
 
     equal(person.get('addresses'), addresses, "property is restored");
     ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
+  });
+});
+
+test("a `DS.hasManyFragments` fragment property that is null can be rolled back", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var hobbies = person.get('hobbies');
+
+    equal(hobbies, null, "property is null");
+
+    person.set('hobbies', [
+      store.createFragment('hobby', {
+        name: 'guitar'
+      })
+    ]);
+
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
+
+    person.rollbackAttributes();
+
+    equal(person.get('hobbies'), null, "property is null again");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });

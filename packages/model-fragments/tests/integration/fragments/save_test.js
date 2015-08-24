@@ -1,10 +1,11 @@
-var env, store, Person, Name, Address;
+var env, store, Person, Name, Address, Hobby;
 
 QUnit.module("integration/fragments - Persisting Records With Fragments", {
   setup: function() {
     Person = DS.Model.extend({
       name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address", { defaultValue: [] }),
+      addresses : DS.hasManyFragments("address"),
+      hobbies   : DS.hasManyFragments("hobby", { defaultValue: null })
     });
 
     Name = DS.ModelFragment.extend({
@@ -19,10 +20,15 @@ QUnit.module("integration/fragments - Persisting Records With Fragments", {
       country : DS.attr("string")
     });
 
+    Hobby = DS.ModelFragment.extend({
+      name    : DS.attr("string")
+    });
+
     env = setupEnv({
       person  : Person,
       name    : Name,
-      address : Address
+      address : Address,
+      hobby   : Hobby
     });
 
     store = env.store;
@@ -36,6 +42,7 @@ QUnit.module("integration/fragments - Persisting Records With Fragments", {
     Name = null;
     Person = null;
     Address = null;
+    Hobby = null;
   }
 });
 
@@ -165,7 +172,7 @@ test("a new record can be persisted with null fragments", function() {
   var person = store.createRecord('person');
 
   equal(person.get('name'), null, "`DS.hasOneFragment` property is null");
-  ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), "`DS.hasManyFragments` property is empty");
+  equal(person.get('hobbies'), null, "`DS.hasManyFragments` property is empty");
 
   env.adapter.createRecord = function() {
     var payload = { id: 1 };
@@ -175,7 +182,7 @@ test("a new record can be persisted with null fragments", function() {
 
   return person.save().then(function(person) {
     equal(person.get('name'), null, "`DS.hasOneFragment` property is still null");
-    ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), "`DS.hasManyFragments` property is still empty");
+    equal(person.get('hobbies'), null, "`DS.hasManyFragments` property is still null");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
@@ -424,7 +431,7 @@ test("`DS.hasManyFragments` properties are notifed on reload", function() {
 
   var Army = DS.Model.extend({
     name     : DS.attr('string'),
-    soldiers : DS.hasManyFragments(null, { defaultValue: [] })
+    soldiers : DS.hasManyFragments()
   });
 
   env.registry.register('model:army', Army);

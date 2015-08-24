@@ -162,8 +162,8 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 ```javascript
 App.Person = DS.Model.extend({
   name      : DS.hasOneFragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : DS.hasManyFragments('address', { defaultValue: [] }),
-  titles    : DS.hasManyFragments(null, { defaultValue: [] })
+  addresses : DS.hasManyFragments('address'),
+  titles    : DS.hasManyFragments()
 });
 ```
 
