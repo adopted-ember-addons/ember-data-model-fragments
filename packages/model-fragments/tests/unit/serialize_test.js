@@ -188,3 +188,32 @@ test("normalizing data can handle `null` fragment values", function() {
     equal(person.get('children'), null, '`typeless DS.hasManyFragments` values can be null');
   });
 });
+
+test("fragments can be deserialized when using `DS.RESTSerializer` and old API (`isNewSerializerAPI: false`)", function() {
+  var data = {
+    id: 1,
+    name: {
+      given: "Brynden",
+      family: "Rivers"
+    }
+  };
+
+  env.registry.register('serializer:name', DS.RESTSerializer.extend({
+    isNewSerializerAPI: false,
+
+    attrs: {
+      first: 'given',
+      last: 'family'
+    }
+  }));
+
+  env.adapter.findRecord = function() {
+    var payload = Ember.copy(data, true);
+
+    return Ember.RSVP.resolve(payload);
+  };
+
+  return store.find('person', 1).then(function(person) {
+    equal(person.get('name.first'), data.name.given, "fragments are deserialized using old serializer API");
+  });
+});
