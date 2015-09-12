@@ -69,7 +69,7 @@ test("a fragment can be created through the store and set", function() {
   });
 });
 
-test("setting to a non-fragment model throws an error", function() {
+test("setting to a non-fragment or object literal throws an error", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -140,6 +140,69 @@ test("setting to null is allowed", function() {
   return store.find('person', 1).then(function(person) {
     person.set('name', null);
     equal(person.get('name'), null, "property is null");
+  });
+});
+
+test("fragments are created from object literals when creating a record", function() {
+  var name = {
+    first: 'Balon',
+    last: 'Greyjoy'
+  };
+
+  var person = store.createRecord('person', {
+    name: name
+  });
+
+  ok(person.get('name') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+  equal(person.get('name.first'), name.first, "fragment has correct values");
+});
+
+test("setting a fragment to an object literal creates a new fragment", function() {
+  var name = {
+    first: 'Asha',
+    last: 'Greyjoy'
+  };
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: null
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    person.set('name', name);
+
+    ok(person.get('name') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+    equal(person.get('name.first'), name.first, "fragment has correct values");
+  });
+});
+
+test("setting a fragment to an object literal reuses an existing fragment", function() {
+  var newName = {
+    first: 'Reek',
+    last: null
+  };
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: 'Theon',
+        last: 'Greyjoy'
+      }
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var name = person.get('name');
+
+    person.set('name', newName);
+
+    equal(name, person.get('name'), "fragment instances are reused");
+    equal(person.get('name.first'), newName.first, "fragment has correct values");
   });
 });
 
