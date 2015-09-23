@@ -278,6 +278,53 @@ test("existing fragments are updated on save", function() {
   });
 });
 
+test("newly created fragments are updated on save", function() {
+  var data = {
+    name: {
+      first: "Eddard",
+      last: "Stark"
+    },
+    addresses: [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ]
+  };
+
+  env.adapter.createRecord = function() {
+    var payload = Ember.copy(data, true);
+
+    payload.id = 1;
+    payload.name.first = 'Ned';
+    payload.addresses.unshift({
+      street: "1 Red Keep",
+      city: "Kings Landing",
+      region: "Crownlands",
+      country: "Westeros"
+    });
+
+    return Ember.RSVP.resolve(payload);
+  };
+
+  var person = store.createRecord('person');
+  var name = store.createFragment('name', data.name);
+  var address = store.createFragment('address', address);
+
+  person.set('name', name);
+  person.set('addresses', [ address ]);
+
+  var addresses = person.get('addresses');
+
+  return person.save().then(function() {
+    equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
+    equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
+    equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
+  });
+});
+
 test("the adapter can update fragments on reload", function() {
   var data = {
     name: {
