@@ -103,10 +103,17 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   },
 
   /**
-    @method adapterDidCommit
+    @method _flushChangedAttributes
+  */
+  _flushChangedAttributes: function() {
+    internalModelFor(this).flushChangedAttributes();
+  },
+
+  /**
+    @method _adapterDidCommit
   */
   _adapterDidCommit: function(data) {
-    internalModelFor(this).setupData({
+    internalModelFor(this).adapterDidCommit({
       attributes: data || {}
     });
   },

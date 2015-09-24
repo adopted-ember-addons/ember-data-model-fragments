@@ -176,13 +176,30 @@ decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFr
 });
 
 /**
+  Before saving a record, its attributes must be moved to in-flight, which must
+  happen for all fragments as well
+
+  @method flushChangedAttributes
+*/
+decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushChangedAttributesFragments() {
+  var fragment;
+
+  // Notify fragments that the record was committed
+  for (var key in this._fragments) {
+    if (fragment = this._fragments[key]) {
+      fragment._flushChangedAttributes();
+    }
+  }
+});
+
+/**
   If the adapter did not return a hash in response to a commit,
   merge the changed attributes and relationships into the existing
   saved data and notify all fragments of the commit.
 
   @method adapterDidCommit
 */
-decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommit(returnValue, args) {
+decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
   var attributes = (args[0] && args[0].attributes) || {};
   var fragment;
 
