@@ -90,7 +90,16 @@ var FragmentArray = StatefulArray.extend({
   },
 
   /**
-    @method adapterDidCommit
+    @method _flushChangedAttributes
+  */
+  _flushChangedAttributes: function() {
+    this.map(function(fragment) {
+      fragment._flushChangedAttributes();
+    });
+  },
+
+  /**
+    @method _adapterDidCommit
     @private
   */
   _adapterDidCommit: function(data) {

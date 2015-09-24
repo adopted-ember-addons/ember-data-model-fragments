@@ -101,7 +101,12 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   },
 
   /**
-    @method adapterDidCommit
+    @method _flushChangedAttributes
+  */
+  _flushChangedAttributes: function() {},
+
+  /**
+    @method _adapterDidCommit
     @private
   */
   _adapterDidCommit: function(data) {
