@@ -5,6 +5,7 @@ import FragmentArray from './array/fragment';
 import { fragmentDidDirty, fragmentDidReset } from './states';
 import { setFragmentOwner, getActualFragmentType } from './model';
 import { internalModelFor } from './model';
+import isInstanceOfType from '../util/instance-of-type';
 
 /**
   @module ember-data.model-fragments
@@ -134,18 +135,6 @@ function hasOneFragment(declaredModelName, options) {
   }
 
   return fragmentProperty(metaType, options, setupFragment, setFragmentValue);
-}
-
-// Check whether a fragment is an instance of the given type, respecting model
-// factory injections
-function isInstanceOfType(type, fragment) {
-  if (fragment instanceof type) {
-    return true;
-  } else if (Ember.MODEL_FACTORY_INJECTIONS) {
-    return fragment instanceof type.superclass;
-  }
-
-  return false;
 }
 
 /**
