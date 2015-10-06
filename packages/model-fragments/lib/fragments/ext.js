@@ -237,7 +237,7 @@ JSONSerializer.reopen({
 
 // Retrieve or create a transform for the specific fragment type
 function getFragmentTransform(container, store, attributeType) {
-  var registry = container._registry || container;
+  var registry = container._registry || container.registry || container;
   var containerKey = 'transform:' + attributeType;
   var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
   var transformType = match[1];
