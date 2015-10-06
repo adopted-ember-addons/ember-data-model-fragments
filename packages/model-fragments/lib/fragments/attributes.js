@@ -313,8 +313,9 @@ function fragmentArrayProperty(metaType, options, createArray) {
   @return {Attribute}
 */
 function fragmentOwner() {
-  // TODO: add a warning when this is used on a non-fragment
   return Ember.computed(function() {
+    Ember.assert("Fragment owner properties can only be used on fragments.", this._isFragment);
+
     return internalModelFor(this)._owner;
   }).meta({
     isFragmentOwner: true
