@@ -117,6 +117,52 @@ test("`DS.hasManyFragment` properties can be nested", function() {
   });
 });
 
+test("Fragments can be created with nested object literals", function() {
+  var data = {
+    info: {
+      name: 'Tyrion Lannister',
+      notes: [ 'smart', 'short' ]
+    },
+    orders: [
+      {
+        amount   : '799.98',
+        products : [
+          {
+            name   : 'Tears of Lys',
+            sku    : 'poison-bd-32',
+            price  : '499.99'
+          },
+          {
+            name   : 'The Strangler',
+            sku    : 'poison-md-24',
+            price  : '299.99'
+          }
+        ]
+      },
+      {
+        amount: '10999.99',
+        products: [
+          {
+            name  : 'Lives of Four Kings',
+            sku   : 'old-book-32',
+            price : '10999.99'
+          }
+        ]
+      }
+    ]
+  };
+
+  var user = store.createRecord('user', data);
+  var orders = user.get('orders');
+
+  equal(orders.get('length'), 2, "fragment array length is correct");
+  ok(orders.get('firstObject') instanceof Order, "fragment instances are created");
+  equal(orders.get('firstObject.amount'), data.orders[0].amount, "fragment properties are correct");
+  equal(orders.get('firstObject.products.length'), 2, "nested fragment array length is correct");
+  ok(orders.get('firstObject.products.firstObject') instanceof Product, "nested fragment instances are created");
+  equal(orders.get('firstObject.products.firstObject.name'), data.orders[0].products[0].name, "nested fragment properties are correct");
+});
+
 test("Nested fragments can have default values", function() {
   var defaultInfo = {
     notes: [ 'dangerous', 'sorry' ]

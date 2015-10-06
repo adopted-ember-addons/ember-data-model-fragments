@@ -5,12 +5,14 @@ import FragmentArray from './array/fragment';
 import { fragmentDidDirty, fragmentDidReset } from './states';
 import { setFragmentOwner, getActualFragmentType } from './model';
 import { internalModelFor } from './model';
+import isInstanceOfType from '../util/instance-of-type';
 
 /**
   @module ember-data.model-fragments
 */
 
 var get = Ember.get;
+var typeOf = Ember.typeOf;
 
 // Create a unique type string for the combination of fragment property type,
 // fragment model name, and polymorphic type key
@@ -83,7 +85,7 @@ function hasOneFragment(declaredModelName, options) {
       fragment = data;
     // Else initialize the fragment
     } else if (data && data !== fragment) {
-      fragment || (fragment = setFragmentOwner(store.createFragment(actualTypeName), record, key));
+      fragment || (fragment = createFragment(store, actualTypeName, record, key));
       // Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
       // again we have it cached already
       internalModel._data[key] = fragment;
@@ -99,10 +101,29 @@ function hasOneFragment(declaredModelName, options) {
   }
 
   function setFragmentValue(record, key, fragment, value) {
-    Ember.assert("You can only assign a '" + declaredModelName + "' fragment to this property", value === null || isInstanceOfType(record.store.modelFor(declaredModelName), value));
-
+    var store = record.store;
     var internalModel = internalModelFor(record);
-    fragment = value ? setFragmentOwner(value, record, key) : null;
+
+    Ember.assert("You can only assign `null`, an object literal or a '" + declaredModelName + "' fragment instance to this property", value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
+
+    if (fragment) {
+      // unset fragment owner
+    }
+
+    if (value) {
+      if (typeOf(value) === 'object') {
+        if (!fragment) {
+          var actualTypeName = getActualFragmentType(declaredModelName, options, value);
+          fragment = createFragment(store, actualTypeName, record, key);
+        }
+
+        fragment.setProperties(value);
+      } else {
+        fragment = setFragmentOwner(value, record, key);
+      }
+    } else {
+      fragment = null;
+    }
 
     if (internalModel._data[key] !== fragment) {
       fragmentDidDirty(record, key, fragment);
@@ -114,18 +135,6 @@ function hasOneFragment(declaredModelName, options) {
   }
 
   return fragmentProperty(metaType, options, setupFragment, setFragmentValue);
-}
-
-// Check whether a fragment is an instance of the given type, respecting model
-// factory injections
-function isInstanceOfType(type, fragment) {
-  if (fragment instanceof type) {
-    return true;
-  } else if (Ember.MODEL_FACTORY_INJECTIONS) {
-    return fragment instanceof type.superclass;
-  }
-
-  return false;
 }
 
 /**
@@ -170,7 +179,7 @@ function hasManyFragments(modelName, options) {
   options || (options = {});
 
   // If a modelName is not given, it implies an array of primitives
-  if (Ember.typeOf(modelName) !== 'string') {
+  if (typeOf(modelName) !== 'string') {
     return arrayProperty(options);
   }
 
@@ -329,6 +338,11 @@ function getDefaultValue(record, options, type) {
 
   // Create a deep copy of the resulting value to avoid shared reference errors
   return Ember.copy(value, true);
+}
+
+// Creates a fragment and sets its owner to the given record
+function createFragment(store, type, record, key) {
+  return setFragmentOwner(store.createFragment(type), record, key);
 }
 
 export { hasOneFragment, hasManyFragments, fragmentOwner };

@@ -1,6 +1,11 @@
 import Ember from 'ember';
 import StatefulArray from './stateful';
-import { internalModelFor, setFragmentOwner, getActualFragmentType } from '../model';
+import {
+  internalModelFor,
+  setFragmentOwner,
+  getActualFragmentType
+} from '../model';
+import isInstanceOfType from '../../util/instance-of-type';
 import map from '../../util/map';
 
 /**
@@ -9,6 +14,53 @@ import map from '../../util/map';
 
 var get = Ember.get;
 var computed = Ember.computed;
+var typeOf = Ember.typeOf;
+var makeArray = Ember.makeArray;
+
+// Normalizes an array of object literals or fragments into fragment instances,
+// reusing fragments from a source content array when possible
+function normalizeFragmentArray(array, content, objs) {
+  var record = get(array, 'owner');
+  var store = get(record, 'store');
+  var declaredType = get(array, 'type');
+  var options = get(array, 'options');
+  var key = get(array, 'name');
+  var fragment;
+
+  return map(makeArray(objs), function(data, index) {
+    Ember.assert("You can only add '" + get(array, 'type') + "' fragments or object literals to this property", typeOf(data) === 'object' || isInstanceOfType(store.modelFor(get(array, 'type')), data));
+
+    if (data._isFragment) {
+      fragment = data;
+
+      var owner = internalModelFor(fragment)._owner;
+
+      Ember.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
+
+      if (!owner) {
+        setFragmentOwner(fragment, record, key);
+      }
+    } else {
+      fragment = content[index];
+
+      if (!fragment) {
+        // Create a new fragment from the data if needed
+        var actualType = getActualFragmentType(declaredType, options, data);
+
+        fragment = store.createFragment(actualType);
+
+        setFragmentOwner(fragment, record, key);
+      }
+
+      // Initialize the fragment with the data
+      internalModelFor(fragment).setupData({
+        attributes: data
+      });
+    }
+
+    return fragment;
+  });
+}
 
 /**
   A state-aware array of fragments that is tied to an attribute of a `DS.Model`
@@ -42,36 +94,12 @@ var FragmentArray = StatefulArray.extend({
     @param {Object} data
   */
   _processData: function(data) {
-    var record = get(this, 'owner');
-    var store = get(record, 'store');
-    var declaredType = get(this, 'type');
-    var options = get(this, 'options');
-    var key = get(this, 'name');
-    var content = get(this, 'content');
-
     // Mark the fragment array as initializing so that state changes are ignored
     // until after all fragments' data is setup
     this._isInitializing = true;
 
-    // Map data to existing fragments and create new ones where necessary
-    var processedData = map(Ember.makeArray(data), function(data, i) {
-      var fragment = content[i];
-
-      // Create a new fragment from the data array if needed
-      if (!fragment) {
-        var actualType = getActualFragmentType(declaredType, options, data);
-        fragment = store.createFragment(actualType);
-
-        setFragmentOwner(fragment, record, key);
-      }
-
-      // Initialize the fragment with the data
-      internalModelFor(fragment).setupData({
-        attributes: data
-      });
-
-      return fragment;
-    });
+    var content = get(this, 'content');
+    var processedData = normalizeFragmentArray(this, content, data);
 
     this._isInitializing = false;
 
@@ -168,35 +196,18 @@ var FragmentArray = StatefulArray.extend({
     return this.invoke('serialize');
   },
 
-  replaceContent: function(idx, amt, fragments) {
-    var array = this;
-    var record = get(this, 'owner');
-    var key = get(this, 'name');
+  /**
+    Used to normalize data since all array manipulation methods use this method.
 
-    // Since all array manipulation methods end up using this method, ensure
-    // ensure that fragments are the correct type and have an owner and name
-    if (fragments) {
-      fragments.forEach(function(fragment) {
-        var owner = internalModelFor(fragment)._owner;
+    @method replaceContent
+    @private
+  */
+  replaceContent: function(index, amount, objs) {
+    var content = get(this, 'content');
+    var replacedContent = content.slice(index, index + amount);
+    var fragments = normalizeFragmentArray(this, replacedContent, objs);
 
-        Ember.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
-        Ember.assert("You can only add '" + get(array, 'type') + "' fragments to this property", (function (type) {
-          if (fragment instanceof type) {
-            return true;
-          } else if (Ember.MODEL_FACTORY_INJECTIONS) {
-            return fragment instanceof type.superclass;
-          }
-
-          return false;
-        })(get(record, 'store').modelFor(get(array, 'type'))));
-
-        if (!owner) {
-          setFragmentOwner(fragment, record, key);
-        }
-      });
-    }
-
-    return get(this, 'content').replace(idx, amt, fragments);
+    return content.replace(index, amount, fragments);
   },
 
   /**
