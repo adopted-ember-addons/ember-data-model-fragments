@@ -60,6 +60,9 @@ Store.reopen({
       fragment.setProperties(props);
     }
 
+    // Add brand to reduce usages of `instanceof`
+    fragment._isFragment = true;
+
     return fragment;
   }
 });

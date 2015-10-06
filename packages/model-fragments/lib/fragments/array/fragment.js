@@ -1,7 +1,6 @@
 import Ember from 'ember';
 import StatefulArray from './stateful';
 import {
-  default as ModelFragment,
   internalModelFor,
   setFragmentOwner,
   getActualFragmentType
@@ -31,7 +30,7 @@ function normalizeFragmentArray(array, content, objs) {
   return map(makeArray(objs), function(data, index) {
     Ember.assert("You can only add '" + get(array, 'type') + "' fragments or object literals to this property", typeOf(data) === 'object' || isInstanceOfType(store.modelFor(get(array, 'type')), data));
 
-    if (data instanceof ModelFragment) {
+    if (data._isFragment) {
       fragment = data;
 
       var owner = internalModelFor(fragment)._owner;
