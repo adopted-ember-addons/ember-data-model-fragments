@@ -106,8 +106,9 @@ function hasOneFragment(declaredModelName, options) {
 
     Ember.assert("You can only assign `null`, an object literal or a '" + declaredModelName + "' fragment instance to this property", value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
 
-    if (fragment) {
-      // unset fragment owner
+    if (fragment && fragment !== value) {
+      // Since the fragment no longer belongs to the record, free its owner
+      setFragmentOwner(fragment, null, null);
     }
 
     if (value) {
@@ -315,6 +316,8 @@ function fragmentOwner() {
   // TODO: add a warning when this is used on a non-fragment
   return Ember.computed(function() {
     return internalModelFor(this)._owner;
+  }).meta({
+    isFragmentOwner: true
   }).readOnly();
 }
 

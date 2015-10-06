@@ -121,6 +121,18 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   toStringExtension: function() {
     return 'owner(' + get(internalModelFor(this)._owner, 'id') + ')';
   }
+}).reopenClass({
+  fragmentOwnerProperties: Ember.computed(function() {
+    var props = [];
+
+    this.eachComputedProperty(function(name, meta) {
+      if (meta.isFragmentOwner) {
+        props.push(name);
+      }
+    });
+
+    return props;
+  }).readOnly()
 });
 
 /**
@@ -161,10 +173,15 @@ export function internalModelFor(record) {
 export function setFragmentOwner(fragment, record, key) {
   var internalModel = internalModelFor(fragment);
 
-  Ember.assert("Fragments can only belong to one owner, try copying instead", !internalModel._owner || internalModel._owner === record);
+  Ember.assert("Fragments can only belong to one owner, try copying instead", !record || !internalModel._owner || internalModel._owner === record);
 
   internalModel._owner = record;
   internalModel._name = key;
+
+  // Notify any observers of `fragmentOwner` properties
+  get(fragment.constructor, 'fragmentOwnerProperties').forEach(function(name) {
+    fragment.notifyPropertyChange(name);
+  });
 
   return fragment;
 }

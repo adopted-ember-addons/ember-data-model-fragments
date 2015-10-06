@@ -207,6 +207,13 @@ var FragmentArray = StatefulArray.extend({
     var replacedContent = content.slice(index, index + amount);
     var fragments = normalizeFragmentArray(this, replacedContent, objs);
 
+    // If fragments get removed from the array, clear their owners
+    if (fragments.length < replacedContent.length) {
+      replacedContent.slice(fragments.length).forEach(function(fragment) {
+        setFragmentOwner(fragment, null, null);
+      });
+    }
+
     return content.replace(index, amount, fragments);
   },
 
