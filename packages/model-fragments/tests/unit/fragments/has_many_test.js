@@ -152,7 +152,7 @@ test("fragments created through the store can be added to the fragment array", f
   });
 });
 
-test("adding a non-fragment model throws an error", function() {
+test("adding a non-fragment model or object literal throws an error", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -220,6 +220,92 @@ test("setting to null is allowed", function() {
     equal(person.get('addresses'), null, "property is null");
   });
 });
+
+test("fragments are created from an array of object literals when creating a record", function() {
+  var address = {
+    street: '1 Sea Tower',
+    city: 'Pyke',
+    region: 'Iron Islands',
+    country: 'Westeros'
+  };
+
+  var person = store.createRecord('person', {
+    name: {
+      first: 'Balon',
+      last: 'Greyjoy'
+    },
+    addresses: [ address ]
+  });
+
+  ok(person.get('addresses.firstObject') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+  equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
+});
+
+test("setting a fragment array to an array of to an object literals creates new fragments", function() {
+  var address = {
+    street: '1 Great Keep',
+    city: 'Pyke',
+    region: 'Iron Islands',
+    country: 'Westeros'
+  };
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: 'Asha',
+        last: 'Greyjoy'
+      },
+      addresses: null
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    person.set('addresses', [ address ]);
+
+    ok(person.get('addresses.firstObject') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+    equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
+  });
+});
+
+test("setting a fragment array to an array of object literals reuses an existing fragments", function() {
+  var newAddress = {
+    street: '1 Great Keep',
+    city: 'Winterfell',
+    region: 'North',
+    country: 'Westeros'
+  };
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: 'Theon',
+        last: 'Greyjoy'
+      },
+      addresses: [
+        {
+          street: '1 Great Keep',
+          city: 'Pyke',
+          region: 'Iron Islands',
+          country: 'Westeros'
+        }
+      ]
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var address = person.get('addresses.firstObject');
+
+    person.set('addresses', [ newAddress ]);
+
+    equal(address, person.get('addresses.firstObject'), "fragment instances are reused");
+    equal(person.get('addresses.firstObject.street'), newAddress.street, "fragment has correct values");
+  });
+});
+
 
 test("setting to an array of non-fragments throws an error", function() {
   pushPerson(1);
