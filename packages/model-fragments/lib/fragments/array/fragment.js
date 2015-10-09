@@ -133,14 +133,11 @@ var FragmentArray = StatefulArray.extend({
   _adapterDidCommit: function(data) {
     this._super(data);
 
-    // If the adapter update did not contain new data, just notify each fragment
-    // so it can transition to a clean state
-    if (!data) {
-      // Notify all records of commit
-      this.forEach(function(fragment) {
-        fragment._adapterDidCommit();
-      });
-    }
+    // Notify all records of commit; if the adapter update did not contain new
+    // data, just notify each fragment so it can transition to a clean state
+    this.forEach(function(fragment, index) {
+      fragment._adapterDidCommit(data && data[index]);
+    });
   },
 
   /**
