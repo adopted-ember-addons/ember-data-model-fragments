@@ -70,7 +70,7 @@ function hasOneFragment(declaredModelName, options) {
 
   function setupFragment(store, record, key) {
     var internalModel = internalModelFor(record);
-    var data = internalModel._data[key] || getDefaultValue(internalModel, options, 'object');
+    var data = getWithDefault(internalModel, key, options, 'object');
     var fragment = internalModel._fragments[key];
     var actualTypeName = getActualFragmentType(declaredModelName, options, data);
 
@@ -241,7 +241,7 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
 function fragmentArrayProperty(metaType, options, createArray) {
   function setupFragmentArray(store, record, key) {
     var internalModel = internalModelFor(record);
-    var data = internalModel._data[key] || getDefaultValue(internalModel, options, 'array');
+    var data = getWithDefault(internalModel, key, options, 'array');
     var fragments = internalModel._fragments[key] || null;
 
     // If we already have a processed fragment in _data and our current fragment is
@@ -328,17 +328,17 @@ function getDefaultValue(record, options, type) {
   var value;
 
   Ember.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
-    "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || options.defaultValue !== undefined);
+    "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || 'defaultValue' in options);
 
   if (typeof options.defaultValue === "function") {
     value = options.defaultValue();
-  } else if (options.defaultValue) {
+  } else if ('defaultValue' in options) {
     value = options.defaultValue;
   } else {
     return null;
   }
 
-  Ember.assert("The fragment's default value must be an " + type, Ember.typeOf(value) == type);
+  Ember.assert("The fragment's default value must be an " + type, (Ember.typeOf(value) == type) || (value === null));
 
   // Create a deep copy of the resulting value to avoid shared reference errors
   return Ember.copy(value, true);
@@ -347,6 +347,15 @@ function getDefaultValue(record, options, type) {
 // Creates a fragment and sets its owner to the given record
 function createFragment(store, type, record, key) {
   return setFragmentOwner(store.createFragment(type), record, key);
+}
+
+// Returns the value of the property or the default propery
+function getWithDefault(internalModel, key, options, type) {
+  if (key in internalModel._data) {
+    return internalModel._data[key];
+  } else {
+    return getDefaultValue(internalModel, options, type);
+  }
 }
 
 export { hasOneFragment, hasManyFragments, fragmentOwner };

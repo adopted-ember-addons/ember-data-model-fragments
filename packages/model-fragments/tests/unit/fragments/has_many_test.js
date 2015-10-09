@@ -336,7 +336,13 @@ test("fragments can have default values", function() {
 
   var throne = store.createRecord('throne', { name: 'Iron' });
 
-  equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
+  equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is used when the value has not been specified");
+
+  throne.set('addresses', null);
+  equal(throne.get('addresses'), null, "the default value is not used when the value is set to null");
+
+  throne = store.createRecord('throne', { name: 'Iron', addresses: null });
+  equal(throne.get('addresses'), null, "the default value is not used when the value is initialized to null");
 });
 
 test("fragment default values can be functions", function() {

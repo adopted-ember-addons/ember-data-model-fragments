@@ -220,7 +220,13 @@ test("fragments can have default values", function() {
 
   var ship = store.createRecord('ship');
 
-  equal(ship.get('name.first'), defaultValue.first, "the default value is correct");
+  equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
+
+  ship.set('name', null);
+  equal(ship.get('name'), null, "the default value is not used when the value is set to null");
+
+  ship = store.createRecord('ship', { name: null });
+  equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
 });
 
 test("fragment default values can be functions", function() {
