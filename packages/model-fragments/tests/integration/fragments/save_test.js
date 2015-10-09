@@ -254,6 +254,7 @@ test("existing fragments are updated on save", function() {
 
     payload.id = 1;
     payload.name.first = 'Ned';
+    payload.addresses[0].street = '1 Godswood';
     payload.addresses.unshift({
       street: "1 Red Keep",
       city: "Kings Landing",
@@ -274,6 +275,7 @@ test("existing fragments are updated on save", function() {
   }).then(function() {
     equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
     equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
+    equal(addresses.get('lastObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
     equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
   });
 });
@@ -299,6 +301,7 @@ test("newly created fragments are updated on save", function() {
 
     payload.id = 1;
     payload.name.first = 'Ned';
+    payload.addresses[0].street = '1 Godswood';
     payload.addresses.unshift({
       street: "1 Red Keep",
       city: "Kings Landing",
@@ -310,8 +313,8 @@ test("newly created fragments are updated on save", function() {
   };
 
   var person = store.createRecord('person');
-  var name = store.createFragment('name', data.name);
-  var address = store.createFragment('address', address);
+  var name = store.createFragment('name', Ember.copy(data.name));
+  var address = store.createFragment('address', Ember.copy(data.addresses[0]));
 
   person.set('name', name);
   person.set('addresses', [ address ]);
@@ -321,6 +324,7 @@ test("newly created fragments are updated on save", function() {
   return person.save().then(function() {
     equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
     equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
+    equal(addresses.get('lastObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
     equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
   });
 });
