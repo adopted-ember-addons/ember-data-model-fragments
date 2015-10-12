@@ -15,7 +15,6 @@ import map from '../../util/map';
 var get = Ember.get;
 var computed = Ember.computed;
 var typeOf = Ember.typeOf;
-var makeArray = Ember.makeArray;
 
 // Normalizes an array of object literals or fragments into fragment instances,
 // reusing fragments from a source content array when possible
@@ -27,7 +26,7 @@ function normalizeFragmentArray(array, content, objs) {
   var key = get(array, 'name');
   var fragment;
 
-  return map(makeArray(objs), function(data, index) {
+  return map(objs, function(data, index) {
     Ember.assert("You can only add '" + get(array, 'type') + "' fragments or object literals to this property", typeOf(data) === 'object' || isInstanceOfType(store.modelFor(get(array, 'type')), data));
 
     if (data._isFragment) {
@@ -83,27 +82,15 @@ var FragmentArray = StatefulArray.extend({
 
   options: null,
 
-  init: function() {
-    this._super();
-    this._isInitializing = false;
-  },
-
   /**
-    @method _processData
+    @method _normalizeData
     @private
     @param {Object} data
   */
-  _processData: function(data) {
-    // Mark the fragment array as initializing so that state changes are ignored
-    // until after all fragments' data is setup
-    this._isInitializing = true;
-
+  _normalizeData: function(data) {
     var content = get(this, 'content');
-    var processedData = normalizeFragmentArray(this, content, data);
 
-    this._isInitializing = false;
-
-    return processedData;
+    return normalizeFragmentArray(this, content, data);
   },
 
   /**
