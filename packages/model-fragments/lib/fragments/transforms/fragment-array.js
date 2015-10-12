@@ -6,11 +6,11 @@ import map from '../../util/map';
 */
 
 /**
-  Transform for `DS.hasManyFragments` fragment attribute which delegates work to
+  Transform for `MF.fragmentArray` fragment attribute which delegates work to
   the fragment type's serializer
 
   @class FragmentArrayTransform
-  @namespace DS
+  @namespace MF
   @extends DS.Transform
 */
 var FragmentArrayTransform = FragmentTransform.extend({

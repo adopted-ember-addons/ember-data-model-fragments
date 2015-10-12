@@ -15,7 +15,7 @@ var makeArray = Ember.makeArray;
   A state-aware array that is tied to an attribute of a `DS.Model` instance.
 
   @class StatefulArray
-  @namespace DS
+  @namespace MF
   @extends Ember.ArrayProxy
 */
 var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {

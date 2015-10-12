@@ -1,20 +1,20 @@
 var env, store, Person, Name, House;
 
-QUnit.module("unit/fragments - Serialization", {
+QUnit.module("unit - Serialization", {
   setup: function() {
     Person = DS.Model.extend({
-      name: DS.hasOneFragment("name")
+      name: MF.fragment('name')
     });
 
-    Name = DS.ModelFragment.extend({
-      first : DS.attr("string"),
-      last  : DS.attr("string")
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string')
     });
 
-    House = DS.ModelFragment.extend({
-      name   : DS.attr("string"),
-      region : DS.attr("string"),
-      exiled : DS.attr("boolean")
+    House = MF.Fragment.extend({
+      name: DS.attr('string'),
+      region: DS.attr('string'),
+      exiled: DS.attr('boolean')
     });
 
     env = setupEnv({
@@ -44,8 +44,8 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   expect(8);
 
   Person.reopen({
-    houses   : DS.hasManyFragments('house', { defaultValue: [] }),
-    children : DS.hasManyFragments(null, { defaultValue: [] })
+    houses   : MF.fragmentArray('house', { defaultValue: [] }),
+    children : MF.array({ defaultValue: [] })
   });
 
   var person = {
@@ -83,17 +83,17 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   env.registry.register('serializer:person', env.serializer.extend({
     serialize: function(snapshot) {
       var name = snapshot.attr('name');
-      ok(name instanceof DS.Snapshot, "`hasOneFragment` snapshot attribute is a snapshot");
-      equal(name.attr('first'), person.name.first, "`hasOneFragment` attributes are snapshoted correctly");
+      ok(name instanceof DS.Snapshot, "fragment snapshot attribute is a snapshot");
+      equal(name.attr('first'), person.name.first, "fragment attributes are snapshoted correctly");
 
       var houses = snapshot.attr('houses');
-      ok(Array.isArray(houses), "`hasManyFragments` attribute is an array");
-      ok(houses[0] instanceof DS.Snapshot, "`hasManyFragments` attribute is an array of snapshots");
-      equal(houses[0].attr('name'), person.houses[0].name, "`hasManyFragments` attributes are snapshotted correctly");
+      ok(Array.isArray(houses), "fragment array attribute is an array");
+      ok(houses[0] instanceof DS.Snapshot, "fragment array attribute is an array of snapshots");
+      equal(houses[0].attr('name'), person.houses[0].name, "fragment array attributes are snapshotted correctly");
 
       var children = snapshot.attr('children');
-      ok(Array.isArray(children), "primitive `hasManyFragments` attribute is an array");
-      deepEqual(children, person.children, "primitive `hasManyFragments` attribute is snapshotted correctly");
+      ok(Array.isArray(children), "array attribute is an array");
+      deepEqual(children, person.children, "array attribute is snapshotted correctly");
     }
   }));
 
@@ -129,7 +129,7 @@ test("fragment properties are serialized as normal attributes using their own se
 
 test("serializing a fragment array creates a new array with contents the result of serializing each fragment", function() {
   Person.reopen({
-    names: DS.hasManyFragments('name', { defaultValue: [] }),
+    names: MF.fragmentArray('name', { defaultValue: [] }),
   });
 
   var names = [
@@ -166,8 +166,8 @@ test("serializing a fragment array creates a new array with contents the result 
 
 test("normalizing data can handle `null` fragment values", function() {
   Person.reopen({
-    houses   : DS.hasManyFragments('house', { defaultValue: null }),
-    children : DS.hasManyFragments(null, { defaultValue: null })
+    houses: MF.fragmentArray('house', { defaultValue: null }),
+    children: MF.array({ defaultValue: null })
   });
 
   var normalized = store.normalize('person', {
@@ -183,8 +183,8 @@ test("normalizing data can handle `null` fragment values", function() {
   });
 
   return store.find('person', 1).then(function(person) {
-    equal(person.get('name'), null, '`DS.hasOneFragment` values can be null');
-    equal(person.get('houses'), null, '`DS.hasManyFragments` values can be null');
-    equal(person.get('children'), null, '`typeless DS.hasManyFragments` values can be null');
+    equal(person.get('name'), null, 'fragment property values can be null');
+    equal(person.get('houses'), null, 'fragment array property values can be null');
+    equal(person.get('children'), null, '`array property values can be null');
   });
 });

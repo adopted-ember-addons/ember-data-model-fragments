@@ -1,33 +1,33 @@
 var env, store, User, Info, Order, Product;
 
-QUnit.module("integration/fragments - Nested fragments", {
+QUnit.module("integration - Nested fragments", {
   setup: function() {
     User = DS.Model.extend({
-      info   : DS.hasOneFragment("info"),
-      orders : DS.hasManyFragments("order", { defaultValue: [] })
+      info: MF.fragment('info'),
+      orders: MF.fragmentArray('order', { defaultValue: [] })
     });
 
-    Info = DS.ModelFragment.extend({
-      name  : DS.attr("string"),
-      notes : DS.hasManyFragments(null, { defaultValue: [] })
+    Info = MF.Fragment.extend({
+      name: DS.attr('string'),
+      notes: MF.array({ defaultValue: [] })
     });
 
-    Order = DS.ModelFragment.extend({
-      amount   : DS.attr("string"),
-      products : DS.hasManyFragments("product", { defaultValue: [] })
+    Order = MF.Fragment.extend({
+      amount: DS.attr('string'),
+      products: MF.fragmentArray('product', { defaultValue: [] })
     });
 
-    Product = DS.ModelFragment.extend({
-      name  : DS.attr("string"),
-      sku   : DS.attr("string"),
-      price : DS.attr("string"),
+    Product = MF.Fragment.extend({
+      name: DS.attr('string'),
+      sku: DS.attr('string'),
+      price: DS.attr('string'),
     });
 
     env = setupEnv({
-      user    : User,
-      info    : Info,
-      order   : Order,
-      product : Product
+      user: User,
+      info: Info,
+      order: Order,
+      product: Product
     });
 
     store = env.store;
@@ -96,7 +96,7 @@ test("`DS.hasManyFragment` properties can be nested", function() {
   };
 
   return store.find('user', 1).then(function(user) {
-    equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested `DS.hasManyFragments` properties are converted properly");
+    equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested fragment array properties are converted properly");
 
     var product = user.get('orders.firstObject.products.firstObject');
 
@@ -181,8 +181,8 @@ test("Nested fragments can have default values", function() {
   ];
 
   var Assassin = DS.Model.extend({
-    info   : DS.hasOneFragment("info", { defaultValue: defaultInfo }),
-    orders : DS.hasManyFragments("order", { defaultValue: defaultOrders })
+    info   : MF.fragment("info", { defaultValue: defaultInfo }),
+    orders : MF.fragmentArray("order", { defaultValue: defaultOrders })
   });
 
   env.registry.register('model:assassin', Assassin);
@@ -216,7 +216,7 @@ test("Nested fragments can be copied", function() {
 
   Order.reopen({
     recurring : DS.attr('boolean'),
-    product   : DS.hasOneFragment('product')
+    product   : MF.fragment('product')
   });
 
   store.push({

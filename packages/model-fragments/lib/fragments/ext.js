@@ -5,7 +5,7 @@ import JSONSerializer from 'ember-data/serializers/json-serializer';
 import FragmentRootState from './states';
 import {
   internalModelFor,
-  default as ModelFragment
+  default as Fragment
 } from './model';
 
 /**
@@ -37,12 +37,12 @@ Store.reopen({
     @param {String} type
     @param {Object} properties a hash of properties to set on the
       newly created fragment.
-    @return {DS.ModelFragment} fragment
+    @return {MF.Fragment} fragment
   */
   createFragment: function(modelName, props) {
     var type = this.modelFor(modelName);
 
-    Ember.assert("The '" + type + "' model must be a subclass of DS.ModelFragment", ModelFragment.detect(type));
+    Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", Fragment.detect(type));
 
     var internalModel = new InternalModel(type, null, this, this.container);
 
@@ -82,7 +82,7 @@ Model.reopen({
     ```javascript
     App.Mascot = DS.Model.extend({
       type: DS.attr('string'),
-      name: DS.hasOneFragment('name')
+      name: MF.fragment('name')
     });
 
     App.Name = DS.Model.extend({

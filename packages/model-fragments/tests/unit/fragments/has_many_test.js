@@ -1,19 +1,19 @@
 var env, store, Person, Address, people;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit/fragments - DS.hasManyFragments", {
+QUnit.module("unit - `MF.fragmentArray`", {
   setup: function() {
     Person = DS.Model.extend({
-      name      : DS.attr("string"),
-      addresses : DS.hasManyFragments("address", { defaultValue: null }),
-      titles    : DS.hasManyFragments(null, { defaultValue: null })
+      name: DS.attr('string'),
+      addresses: MF.fragmentArray('address', { defaultValue: null }),
+      titles: MF.array({ defaultValue: null })
     });
 
-    Address = DS.ModelFragment.extend({
-      street  : DS.attr("string"),
-      city    : DS.attr("string"),
-      region  : DS.attr("string"),
-      country : DS.attr("string")
+    Address = MF.Fragment.extend({
+      street: DS.attr('string'),
+      city: DS.attr('string'),
+      region: DS.attr('string'),
+      country: DS.attr('string')
     });
 
     env = setupEnv({
@@ -92,7 +92,7 @@ test("properties are instances of `DS.FragmentArray`", function() {
   });
 });
 
-test("arrays of object literals are converted into instances of `DS.ModelFragment`", function() {
+test("arrays of object literals are converted into instances of `MF.Fragment`", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -100,7 +100,7 @@ test("arrays of object literals are converted into instances of `DS.ModelFragmen
 
     ok(addresses.every(function(address) {
       return address instanceof Address;
-    }), "each fragment is a `DS.ModelFragment` instance");
+    }), "each fragment is a `MF.Fragment` instance");
   });
 });
 
@@ -237,7 +237,7 @@ test("fragments are created from an array of object literals when creating a rec
     addresses: [ address ]
   });
 
-  ok(person.get('addresses.firstObject') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+  ok(person.get('addresses.firstObject') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
   equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
 });
 
@@ -264,7 +264,7 @@ test("setting a fragment array to an array of to an object literals creates new 
   return store.find('person', 1).then(function(person) {
     person.set('addresses', [ address ]);
 
-    ok(person.get('addresses.firstObject') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+    ok(person.get('addresses.firstObject') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
     equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
   });
 });
@@ -329,7 +329,7 @@ test("fragments can have default values", function() {
 
   var Throne = DS.Model.extend({
     name: DS.attr('string'),
-    addresses: DS.hasManyFragments('address', { defaultValue: defaultValue })
+    addresses: MF.fragmentArray('address', { defaultValue: defaultValue })
   });
 
   env.registry.register('model:throne', Throne);
@@ -357,7 +357,7 @@ test("fragment default values can be functions", function() {
 
   var Sword = DS.Model.extend({
     name: DS.attr('string'),
-    addresses: DS.hasManyFragments('address', { defaultValue: function() { return defaultValue; } })
+    addresses: MF.fragmentArray('address', { defaultValue: function() { return defaultValue; } })
   });
 
   env.registry.register('model:sword', Sword);

@@ -1,21 +1,21 @@
 var env, store, Person, Name, House;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit/fragments - DS.ModelFragment", {
+QUnit.module("unit - `MF.Fragment`", {
   setup: function() {
     Person = DS.Model.extend({
-      name: DS.hasOneFragment("name")
+      name: MF.fragment('name')
     });
 
-    Name = DS.ModelFragment.extend({
-      first : DS.attr("string"),
-      last  : DS.attr("string")
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string')
     });
 
-    House = DS.ModelFragment.extend({
-      name   : DS.attr("string"),
-      region : DS.attr("string"),
-      exiled : DS.attr("boolean")
+    House = MF.Fragment.extend({
+      name: DS.attr('string'),
+      region: DS.attr('string'),
+      exiled: DS.attr('boolean')
     });
 
     env = setupEnv({
@@ -88,8 +88,8 @@ test("copying a fragment copies the fragment's properties", function() {
   return store.find('person', 1).then(function(person) {
     var copy = person.get('name').copy();
 
-    ok(copy.get('first'), "Jon"); 
-    ok(copy.get('last'), "Snow"); 
+    ok(copy.get('first'), "Jon");
+    ok(copy.get('last'), "Snow");
   });
 });
 

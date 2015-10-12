@@ -1,24 +1,24 @@
 var env, store, zoo, Zoo, Animal, Elephant, Lion;
 
-QUnit.module("unit/fragments - Polymorphism", {
+QUnit.module("unit - Polymorphism", {
   setup: function() {
     Zoo = DS.Model.extend({
-      name: DS.attr("string"),
-      city: DS.attr("string"),
-      star: DS.hasOneFragment("animal", { polymorphic: true, typeKey: '$type' }),
-      animals: DS.hasManyFragments("animal", { polymorphic: true, typeKey: '$type', defaultValue: [] }),
+      name: DS.attr('string'),
+      city: DS.attr('string'),
+      star: MF.fragment('animal', { polymorphic: true, typeKey: '$type' }),
+      animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type', defaultValue: [] }),
     });
 
-    Animal = DS.ModelFragment.extend({
-      name: DS.attr("string"),
+    Animal = MF.Fragment.extend({
+      name: DS.attr('string'),
     });
 
     Elephant = Animal.extend({
-      trunkLength: DS.attr("number"),
+      trunkLength: DS.attr('number'),
     });
 
     Lion = Animal.extend({
-      hasManes: DS.attr("boolean"),
+      hasManes: DS.attr('boolean'),
     });
 
     env = setupEnv({
@@ -65,7 +65,7 @@ QUnit.module("unit/fragments - Polymorphism", {
   }
 });
 
-test("hasOneFragment supports polymorphism", function() {
+test("fragment properties support polymorphism", function() {
   store.push({
     type: 'zoo',
     id: 1,
@@ -84,7 +84,7 @@ test("hasOneFragment supports polymorphism", function() {
   });
 });
 
-test("hasManyFragments supports polymorphism", function() {
+test("fragment array properties support polymorphism", function() {
   store.push({
     type: 'zoo',
     id: 1,
@@ -109,7 +109,7 @@ test("hasManyFragments supports polymorphism", function() {
   });
 });
 
-test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
+test("fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
   // The extra assertion comes from deprecation checking
   expect(2);
 
@@ -136,7 +136,7 @@ test("`DS.hasOneFragment` type-checks check the superclass when MODEL_FACTORY_IN
   }
 });
 
-test("rolling back a `DS.hasOneFragment` fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
+test("rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
   // The extra assertion comes from deprecation checking
   expect(2);
 
@@ -161,7 +161,7 @@ test("rolling back a `DS.hasOneFragment` fragment property that was set to null 
   });
 });
 
-test("`DS.hasManyFragments` type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
+test("fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
   // The extra assertion comes from deprecation checking
   expect(2);
 

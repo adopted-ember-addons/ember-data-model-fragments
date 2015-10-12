@@ -12,7 +12,10 @@ import isInstanceOfType from '../util/instance-of-type';
 */
 
 var get = Ember.get;
+var isArray = Ember.isArray;
 var typeOf = Ember.typeOf;
+var copy = Ember.copy;
+var computed = Ember.computed;
 
 // Create a unique type string for the combination of fragment property type,
 // fragment model name, and polymorphic type key
@@ -31,39 +34,42 @@ function metaTypeFor(type, modelName, options) {
 }
 
 /**
-  `DS.hasOneFragment` defines an attribute on a `DS.Model` or `DS.ModelFragment`
-  instance. Much like `DS.belongsTo`, it creates a property that returns a
-  single fragment of the given type.
+  `MF.fragment` defines an attribute on a `DS.Model` or `MF.Fragment`. Much
+  like `DS.belongsTo`, it creates a property that returns a single fragment of
+  the given type.
 
-  `DS.hasOneFragment` takes an optional hash as a second parameter, currently
-  supported options are:
+  It takes an optional hash as a second parameter, currently supported options
+  are:
 
   - `defaultValue`: An object literal or a function to be called to set the
     attribute to a default value if none is supplied. Values are deep copied
     before being used. Note that default values will be passed through the
-    fragment's serializer when creating the fragment.
+    fragment's serializer when creating the fragment. Defaults to `null`.
+  - `polymorphic`: Whether or not the fragments in the array can be child
+    classes of the given type.
+  - `typeKey`: If `polymorphic` is true, the property to use as the fragment
+    type in the normalized data. Defaults to `type`.
 
   Example
 
   ```javascript
   App.Person = DS.Model.extend({
-    name: DS.hasOneFragment('name', { defaultValue: {} })
+    name: MF.fragment('name', { defaultValue: {} })
   });
 
-  App.Name = DS.ModelFragment.extend({
-    first  : DS.attr('string'),
-    last   : DS.attr('string')
+  App.Name = MF.Fragment.extend({
+    first: DS.attr('string'),
+    last: DS.attr('string')
   });
   ```
 
-  @namespace
-  @method hasOneFragment
-  @for DS
+  @namespace MF
+  @method fragment
   @param {String} type the fragment type
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasOneFragment(declaredModelName, options) {
+function fragment(declaredModelName, options) {
   options = options || {};
 
   var metaType = metaTypeFor('fragment', declaredModelName, options);
@@ -139,50 +145,47 @@ function hasOneFragment(declaredModelName, options) {
 }
 
 /**
-  `DS.hasManyFragments` defines an attribute on a `DS.Model` or
-  `DS.ModelFragment` instance. Much like `DS.hasMany`, it creates a property
-  that returns an array of fragments of the given type. The array is aware of
-  its original state and so has a `hasDirtyAttributes` property and a `rollback` method.
-  If a fragment type is not given, values are not converted to fragments, but
-  passed straight through.
+  `MF.fragmentArray` defines an attribute on a `DS.Model` or `MF.Fragment`.
+  Much like `DS.hasMany`, it creates a property that returns an array of
+  fragments of the given type. The array is aware of its original state and so
+  has a `hasDirtyAttributes` property and a `rollback` method.
 
-  `DS.hasOneFragment` takes an optional hash as a second parameter, currently
-  supported options are:
+  It takes an optional hash as a second parameter, currently supported options
+  are:
 
   - `defaultValue`: An array literal or a function to be called to set the
     attribute to a default value if none is supplied. Values are deep copied
     before being used. Note that default values will be passed through the
-    fragment's serializer when creating the fragment.
+    fragment's serializer when creating the fragment. Defaults to an empty
+    array.
+  - `polymorphic`: Whether or not the fragments in the array can be child
+    classes of the given type.
+  - `typeKey`: If `polymorphic` is true, the property to use as the fragment
+    type in the normalized data. Defaults to `type`.
 
   Example
 
   ```javascript
   App.Person = DS.Model.extend({
-    addresses: DS.hasManyFragments('address', { defaultValue: [] })
+    addresses: MF.fragmentArray('address', { defaultValue: null })
   });
 
-  App.Address = DS.ModelFragment.extend({
-    street  : DS.attr('string'),
-    city    : DS.attr('string'),
-    region  : DS.attr('string'),
-    country : DS.attr('string')
+  App.Address = MF.Fragment.extend({
+    street: DS.attr('string'),
+    city: DS.attr('string'),
+    region: DS.attr('string'),
+    country: DS.attr('string')
   });
   ```
 
-  @namespace
-  @method hasManyFragments
-  @for DS
+  @namespace MF
+  @method fragmentArray
   @param {String} type the fragment type (optional)
   @param {Object} options a hash of options
   @return {Attribute}
 */
-function hasManyFragments(modelName, options) {
+function fragmentArray(modelName, options) {
   options || (options = {});
-
-  // If a modelName is not given, it implies an array of primitives
-  if (typeOf(modelName) !== 'string') {
-    return arrayProperty(options);
-  }
 
   var metaType = metaTypeFor('fragment-array', modelName, options);
 
@@ -196,14 +199,48 @@ function hasManyFragments(modelName, options) {
   });
 }
 
-function arrayProperty(options) {
-  options || (options = {});
+/**
+  `MF.array` defines an attribute on a `DS.Model` or `MF.Fragment`. It creates a
+  property that returns an array of values of the given primitive type. The
+  array is aware of its original state and so has a `hasDirtyAttributes`
+  property and a `rollback` method.
+
+  It takes an optional hash as a second parameter, currently supported options
+  are:
+
+  - `defaultValue`: An array literal or a function to be called to set the
+    attribute to a default value if none is supplied. Values are deep copied
+    before being used. Note that default values will be passed through the
+    fragment's serializer when creating the fragment.
+
+  Example
+
+  ```javascript
+  App.Person = DS.Model.extend({
+    aliases: MF.array('string')
+  });
+  ```
+
+  @namespace MF
+  @method array
+  @param {String} type the type of value contained in the array
+  @param {Object} options a hash of options
+  @return {Attribute}
+*/
+function array(type, options) {
+  if (typeof type === 'object') {
+    options = type;
+    type = undefined;
+  } else {
+    options || (options = {});
+  }
 
   var metaType = metaTypeFor('array');
 
   return fragmentArrayProperty(metaType, options, function createStatefulArray(record, key) {
     return StatefulArray.create({
       options: options,
+      type: type,
       name: key,
       owner: record
     });
@@ -265,7 +302,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
   function setFragmentValue(record, key, fragments, value) {
     var internalModel = internalModelFor(record);
 
-    if (Ember.isArray(value)) {
+    if (isArray(value)) {
       fragments || (fragments = createArray(record, key));
       fragments.setObjects(value);
     } else if (value === null) {
@@ -286,10 +323,8 @@ function fragmentArrayProperty(metaType, options, createArray) {
   return fragmentProperty(metaType, options, setupFragmentArray, setFragmentValue);
 }
 
-// Like `DS.belongsTo`, when used within a model fragment is a reference
-// to the owner record
 /**
-  `DS.fragmentOwner` defines a read-only attribute on a `DS.ModelFragment`
+  `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`
   instance. The attribute returns a reference to the fragment's owner
   record.
 
@@ -297,23 +332,22 @@ function fragmentArrayProperty(metaType, options, createArray) {
 
   ```javascript
   App.Person = DS.Model.extend({
-    name: DS.hasOneFragment('name')
+    name: MF.fragment('name')
   });
 
-  App.Name = DS.ModelFragment.extend({
-    first  : DS.attr('string'),
-    last   : DS.attr('string'),
-    person : DS.fragmentOwner()
+  App.Name = MF.Fragment.extend({
+    first: DS.attr('string'),
+    last: DS.attr('string'),
+    person: MF.fragmentOwner()
   });
   ```
 
-  @namespace
+  @namespace MF
   @method fragmentOwner
-  @for DS
   @return {Attribute}
 */
 function fragmentOwner() {
-  return Ember.computed(function() {
+  return computed(function() {
     Ember.assert("Fragment owner properties can only be used on fragments.", this._isFragment);
 
     return internalModelFor(this)._owner;
@@ -338,10 +372,10 @@ function getDefaultValue(record, options, type) {
     return null;
   }
 
-  Ember.assert("The fragment's default value must be an " + type, (Ember.typeOf(value) == type) || (value === null));
+  Ember.assert("The fragment's default value must be an " + type, (typeOf(value) == type) || (value === null));
 
   // Create a deep copy of the resulting value to avoid shared reference errors
-  return Ember.copy(value, true);
+  return copy(value, true);
 }
 
 // Creates a fragment and sets its owner to the given record
@@ -358,4 +392,9 @@ function getWithDefault(internalModel, key, options, type) {
   }
 }
 
-export { hasOneFragment, hasManyFragments, fragmentOwner };
+export {
+  fragment,
+  fragmentArray,
+  array,
+  fragmentOwner
+};

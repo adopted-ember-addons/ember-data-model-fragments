@@ -11,7 +11,7 @@ var makeArray = Ember.makeArray;
   Transform for array-like attributes fragment attribute with no model
 
   @class ArrayTransform
-  @namespace DS
+  @namespace MF
   @extends DS.Transform
 */
 var ArrayTransform = Transform.extend({
