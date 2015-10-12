@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.4.1
+ * @version   0.4.2
  */
 
 (function() {
@@ -104,7 +104,7 @@
             var key = internalModel._name;
 
             // Abort if fragment is still initializing
-            if (!record._internalModel._fragments[key] || internalModel._isInitializing) { return; }
+            if (!record._internalModel._fragments[key]) { return; }
 
             // Reset the property on the owner record if no other siblings
             // are dirty (or there are no siblings)
@@ -210,6 +210,7 @@
     var model$fragments$lib$fragments$array$stateful$$set = ember$lib$main$$default.set;
     var model$fragments$lib$fragments$array$stateful$$computed = ember$lib$main$$default.computed;
     var model$fragments$lib$fragments$array$stateful$$copy = ember$lib$main$$default.copy;
+    var model$fragments$lib$fragments$array$stateful$$makeArray = ember$lib$main$$default.makeArray;
 
     /**
       A state-aware array that is tied to an attribute of a `DS.Model` instance.
@@ -271,25 +272,25 @@
 
         this._pendingData = data;
 
-        var processedData = this._processData(data);
+        var processedData = this._normalizeData(model$fragments$lib$fragments$array$stateful$$makeArray(data));
+        var content = model$fragments$lib$fragments$array$stateful$$get(this, 'content');
 
         // This data is canonical, so create rollback point
         model$fragments$lib$fragments$array$stateful$$set(this, '_originalState', processedData);
 
         // Completely replace the contents with the new data
-        this.replaceContent(0, model$fragments$lib$fragments$array$stateful$$get(this, 'content.length'), processedData);
+        content.replace(0, model$fragments$lib$fragments$array$stateful$$get(content, 'length'), processedData);
 
         this._pendingData = undefined;
       },
 
       /**
-        @method _processData
+        @method _normalizeData
         @private
         @param {Object} data
       */
-      _processData: function(data) {
-        // Simply ensure that the data is an actual array
-        return ember$lib$main$$default.makeArray(data);
+      _normalizeData: function(data) {
+        return data;
       },
 
       /**
@@ -302,7 +303,12 @@
       },
 
       /**
-        @method adapterDidCommit
+        @method _flushChangedAttributes
+      */
+      _flushChangedAttributes: function() {},
+
+      /**
+        @method _adapterDidCommit
         @private
       */
       _adapterDidCommit: function(data) {
@@ -455,6 +461,9 @@
           fragment.setProperties(props);
         }
 
+        // Add brand to reduce usages of `instanceof`
+        fragment._isFragment = true;
+
         return fragment;
       }
     });
@@ -571,13 +580,30 @@
     });
 
     /**
+      Before saving a record, its attributes must be moved to in-flight, which must
+      happen for all fragments as well
+
+      @method flushChangedAttributes
+    */
+    model$fragments$lib$fragments$ext$$decorateMethod(model$fragments$lib$fragments$ext$$InternalModelPrototype, 'flushChangedAttributes', function flushChangedAttributesFragments() {
+      var fragment;
+
+      // Notify fragments that the record was committed
+      for (var key in this._fragments) {
+        if (fragment = this._fragments[key]) {
+          fragment._flushChangedAttributes();
+        }
+      }
+    });
+
+    /**
       If the adapter did not return a hash in response to a commit,
       merge the changed attributes and relationships into the existing
       saved data and notify all fragments of the commit.
 
       @method adapterDidCommit
     */
-    model$fragments$lib$fragments$ext$$decorateMethod(model$fragments$lib$fragments$ext$$InternalModelPrototype, 'adapterDidCommit', function adapterDidCommit(returnValue, args) {
+    model$fragments$lib$fragments$ext$$decorateMethod(model$fragments$lib$fragments$ext$$InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
       var attributes = (args[0] && args[0].attributes) || {};
       var fragment;
 
@@ -612,7 +638,7 @@
 
     // Retrieve or create a transform for the specific fragment type
     function model$fragments$lib$fragments$ext$$getFragmentTransform(container, store, attributeType) {
-      var registry = container._registry || container;
+      var registry = container._registry || container.registry || container;
       var containerKey = 'transform:' + attributeType;
       var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
       var transformType = match[1];
@@ -733,10 +759,17 @@
       },
 
       /**
-        @method adapterDidCommit
+        @method _flushChangedAttributes
+      */
+      _flushChangedAttributes: function() {
+        model$fragments$lib$fragments$model$$internalModelFor(this).flushChangedAttributes();
+      },
+
+      /**
+        @method _adapterDidCommit
       */
       _adapterDidCommit: function(data) {
-        model$fragments$lib$fragments$model$$internalModelFor(this).setupData({
+        model$fragments$lib$fragments$model$$internalModelFor(this).adapterDidCommit({
           attributes: data || {}
         });
       },
@@ -744,6 +777,18 @@
       toStringExtension: function() {
         return 'owner(' + model$fragments$lib$fragments$model$$get(model$fragments$lib$fragments$model$$internalModelFor(this)._owner, 'id') + ')';
       }
+    }).reopenClass({
+      fragmentOwnerProperties: ember$lib$main$$default.computed(function() {
+        var props = [];
+
+        this.eachComputedProperty(function(name, meta) {
+          if (meta.isFragmentOwner) {
+            props.push(name);
+          }
+        });
+
+        return props;
+      }).readOnly()
     });
 
     function model$fragments$lib$fragments$model$$getActualFragmentType(declaredType, options, data) {
@@ -776,10 +821,25 @@
       internalModel._owner = record;
       internalModel._name = key;
 
+      // Notify any observers of `fragmentOwner` properties
+      model$fragments$lib$fragments$model$$get(fragment.constructor, 'fragmentOwnerProperties').forEach(function(name) {
+        fragment.notifyPropertyChange(name);
+      });
+
       return fragment;
     }
 
     var model$fragments$lib$fragments$model$$default = model$fragments$lib$fragments$model$$ModelFragment;
+    function model$fragments$lib$util$instance$of$type$$isInstanceOfType(type, obj) {
+      if (obj instanceof type) {
+        return true;
+      } else if (Ember.MODEL_FACTORY_INJECTIONS) {
+        return obj instanceof type.superclass;
+      }
+
+      return false;
+    }
+    var model$fragments$lib$util$instance$of$type$$default = model$fragments$lib$util$instance$of$type$$isInstanceOfType;
     function model$fragments$lib$util$map$$map(obj, callback, thisArg) {
       return obj.map ? obj.map(callback, thisArg) : model$fragments$lib$util$map$$mapPolyfill.call(obj, callback, thisArg);
     }
@@ -812,6 +872,50 @@
 
     var model$fragments$lib$fragments$array$fragment$$get = ember$lib$main$$default.get;
     var model$fragments$lib$fragments$array$fragment$$computed = ember$lib$main$$default.computed;
+    var model$fragments$lib$fragments$array$fragment$$typeOf = ember$lib$main$$default.typeOf;
+
+    // Normalizes an array of object literals or fragments into fragment instances,
+    // reusing fragments from a source content array when possible
+    function model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(array, content, objs) {
+      var record = model$fragments$lib$fragments$array$fragment$$get(array, 'owner');
+      var store = model$fragments$lib$fragments$array$fragment$$get(record, 'store');
+      var declaredType = model$fragments$lib$fragments$array$fragment$$get(array, 'type');
+      var options = model$fragments$lib$fragments$array$fragment$$get(array, 'options');
+      var key = model$fragments$lib$fragments$array$fragment$$get(array, 'name');
+      var fragment;
+
+      return model$fragments$lib$util$map$$default(objs, function(data, index) {
+        
+        if (data._isFragment) {
+          fragment = data;
+
+          var owner = model$fragments$lib$fragments$model$$internalModelFor(fragment)._owner;
+
+          
+          if (!owner) {
+            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key);
+          }
+        } else {
+          fragment = content[index];
+
+          if (!fragment) {
+            // Create a new fragment from the data if needed
+            var actualType = model$fragments$lib$fragments$model$$getActualFragmentType(declaredType, options, data);
+
+            fragment = store.createFragment(actualType);
+
+            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key);
+          }
+
+          // Initialize the fragment with the data
+          model$fragments$lib$fragments$model$$internalModelFor(fragment).setupData({
+            attributes: data
+          });
+        }
+
+        return fragment;
+      });
+    }
 
     /**
       A state-aware array of fragments that is tied to an attribute of a `DS.Model`
@@ -834,51 +938,15 @@
 
       options: null,
 
-      init: function() {
-        this._super();
-        this._isInitializing = false;
-      },
-
       /**
-        @method _processData
+        @method _normalizeData
         @private
         @param {Object} data
       */
-      _processData: function(data) {
-        var record = model$fragments$lib$fragments$array$fragment$$get(this, 'owner');
-        var store = model$fragments$lib$fragments$array$fragment$$get(record, 'store');
-        var declaredType = model$fragments$lib$fragments$array$fragment$$get(this, 'type');
-        var options = model$fragments$lib$fragments$array$fragment$$get(this, 'options');
-        var key = model$fragments$lib$fragments$array$fragment$$get(this, 'name');
+      _normalizeData: function(data) {
         var content = model$fragments$lib$fragments$array$fragment$$get(this, 'content');
 
-        // Mark the fragment array as initializing so that state changes are ignored
-        // until after all fragments' data is setup
-        this._isInitializing = true;
-
-        // Map data to existing fragments and create new ones where necessary
-        var processedData = model$fragments$lib$util$map$$default(ember$lib$main$$default.makeArray(data), function(data, i) {
-          var fragment = content[i];
-
-          // Create a new fragment from the data array if needed
-          if (!fragment) {
-            var actualType = model$fragments$lib$fragments$model$$getActualFragmentType(declaredType, options, data);
-            fragment = store.createFragment(actualType);
-
-            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key);
-          }
-
-          // Initialize the fragment with the data
-          model$fragments$lib$fragments$model$$internalModelFor(fragment).setupData({
-            attributes: data
-          });
-
-          return fragment;
-        });
-
-        this._isInitializing = false;
-
-        return processedData;
+        return model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(this, content, data);
       },
 
       /**
@@ -893,20 +961,26 @@
       },
 
       /**
-        @method adapterDidCommit
+        @method _flushChangedAttributes
+      */
+      _flushChangedAttributes: function() {
+        this.map(function(fragment) {
+          fragment._flushChangedAttributes();
+        });
+      },
+
+      /**
+        @method _adapterDidCommit
         @private
       */
       _adapterDidCommit: function(data) {
         this._super(data);
 
-        // If the adapter update did not contain new data, just notify each fragment
-        // so it can transition to a clean state
-        if (!data) {
-          // Notify all records of commit
-          this.forEach(function(fragment) {
-            fragment._adapterDidCommit();
-          });
-        }
+        // Notify all records of commit; if the adapter update did not contain new
+        // data, just notify each fragment so it can transition to a clean state
+        this.forEach(function(fragment, index) {
+          fragment._adapterDidCommit(data && data[index]);
+        });
       },
 
       /**
@@ -962,25 +1036,25 @@
         return this.invoke('serialize');
       },
 
-      replaceContent: function(idx, amt, fragments) {
-        var array = this;
-        var record = model$fragments$lib$fragments$array$fragment$$get(this, 'owner');
-        var key = model$fragments$lib$fragments$array$fragment$$get(this, 'name');
+      /**
+        Used to normalize data since all array manipulation methods use this method.
 
-        // Since all array manipulation methods end up using this method, ensure
-        // ensure that fragments are the correct type and have an owner and name
-        if (fragments) {
-          fragments.forEach(function(fragment) {
-            var owner = model$fragments$lib$fragments$model$$internalModelFor(fragment)._owner;
+        @method replaceContent
+        @private
+      */
+      replaceContent: function(index, amount, objs) {
+        var content = model$fragments$lib$fragments$array$fragment$$get(this, 'content');
+        var replacedContent = content.slice(index, index + amount);
+        var fragments = model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(this, replacedContent, objs);
 
-                        
-            if (!owner) {
-              model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key);
-            }
+        // If fragments get removed from the array, clear their owners
+        if (fragments.length < replacedContent.length) {
+          replacedContent.slice(fragments.length).forEach(function(fragment) {
+            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, null, null);
           });
         }
 
-        return model$fragments$lib$fragments$array$fragment$$get(this, 'content').replace(idx, amt, fragments);
+        return content.replace(index, amount, fragments);
       },
 
       /**
@@ -1076,6 +1150,7 @@
     */
 
     var model$fragments$lib$fragments$attributes$$get = ember$lib$main$$default.get;
+    var model$fragments$lib$fragments$attributes$$typeOf = ember$lib$main$$default.typeOf;
 
     // Create a unique type string for the combination of fragment property type,
     // fragment model name, and polymorphic type key
@@ -1133,7 +1208,7 @@
 
       function setupFragment(store, record, key) {
         var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
-        var data = internalModel._data[key] || model$fragments$lib$fragments$attributes$$getDefaultValue(internalModel, options, 'object');
+        var data = model$fragments$lib$fragments$attributes$$getWithDefault(internalModel, key, options, 'object');
         var fragment = internalModel._fragments[key];
         var actualTypeName = model$fragments$lib$fragments$model$$getActualFragmentType(declaredModelName, options, data);
 
@@ -1144,11 +1219,11 @@
         // If we already have a processed fragment in _data and our current fragment is
         // null simply reuse the one from data. We can be in this state after a rollback
         // for example
-        if (!fragment && model$fragments$lib$fragments$attributes$$isInstanceOfType(store.modelFor(actualTypeName), data)) {
+        if (!fragment && model$fragments$lib$util$instance$of$type$$default(store.modelFor(actualTypeName), data)) {
           fragment = data;
         // Else initialize the fragment
         } else if (data && data !== fragment) {
-          fragment || (fragment = model$fragments$lib$fragments$model$$setFragmentOwner(store.createFragment(actualTypeName), record, key));
+          fragment || (fragment = model$fragments$lib$fragments$attributes$$createFragment(store, actualTypeName, record, key));
           // Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
           // again we have it cached already
           internalModel._data[key] = fragment;
@@ -1164,9 +1239,29 @@
       }
 
       function setFragmentValue(record, key, fragment, value) {
-        
+        var store = record.store;
         var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
-        fragment = value ? model$fragments$lib$fragments$model$$setFragmentOwner(value, record, key) : null;
+
+        
+        if (fragment && fragment !== value) {
+          // Since the fragment no longer belongs to the record, free its owner
+          model$fragments$lib$fragments$model$$setFragmentOwner(fragment, null, null);
+        }
+
+        if (value) {
+          if (model$fragments$lib$fragments$attributes$$typeOf(value) === 'object') {
+            if (!fragment) {
+              var actualTypeName = model$fragments$lib$fragments$model$$getActualFragmentType(declaredModelName, options, value);
+              fragment = model$fragments$lib$fragments$attributes$$createFragment(store, actualTypeName, record, key);
+            }
+
+            fragment.setProperties(value);
+          } else {
+            fragment = model$fragments$lib$fragments$model$$setFragmentOwner(value, record, key);
+          }
+        } else {
+          fragment = null;
+        }
 
         if (internalModel._data[key] !== fragment) {
           model$fragments$lib$fragments$states$$fragmentDidDirty(record, key, fragment);
@@ -1178,18 +1273,6 @@
       }
 
       return model$fragments$lib$fragments$attributes$$fragmentProperty(metaType, options, setupFragment, setFragmentValue);
-    }
-
-    // Check whether a fragment is an instance of the given type, respecting model
-    // factory injections
-    function model$fragments$lib$fragments$attributes$$isInstanceOfType(type, fragment) {
-      if (fragment instanceof type) {
-        return true;
-      } else if (ember$lib$main$$default.MODEL_FACTORY_INJECTIONS) {
-        return fragment instanceof type.superclass;
-      }
-
-      return false;
     }
 
     /**
@@ -1234,7 +1317,7 @@
       options || (options = {});
 
       // If a modelName is not given, it implies an array of primitives
-      if (ember$lib$main$$default.typeOf(modelName) !== 'string') {
+      if (model$fragments$lib$fragments$attributes$$typeOf(modelName) !== 'string') {
         return model$fragments$lib$fragments$attributes$$arrayProperty(options);
       }
 
@@ -1295,7 +1378,7 @@
     function model$fragments$lib$fragments$attributes$$fragmentArrayProperty(metaType, options, createArray) {
       function setupFragmentArray(store, record, key) {
         var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
-        var data = internalModel._data[key] || model$fragments$lib$fragments$attributes$$getDefaultValue(internalModel, options, 'array');
+        var data = model$fragments$lib$fragments$attributes$$getWithDefault(internalModel, key, options, 'array');
         var fragments = internalModel._fragments[key] || null;
 
         // If we already have a processed fragment in _data and our current fragment is
@@ -1366,9 +1449,11 @@
       @return {Attribute}
     */
     function model$fragments$lib$fragments$attributes$$fragmentOwner() {
-      // TODO: add a warning when this is used on a non-fragment
       return ember$lib$main$$default.computed(function() {
+        
         return model$fragments$lib$fragments$model$$internalModelFor(this)._owner;
+      }).meta({
+        isFragmentOwner: true
       }).readOnly();
     }
 
@@ -1378,11 +1463,11 @@
       var value;
 
       ember$lib$main$$default.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
-        "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || options.defaultValue !== undefined);
+        "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || 'defaultValue' in options);
 
       if (typeof options.defaultValue === "function") {
         value = options.defaultValue();
-      } else if (options.defaultValue) {
+      } else if ('defaultValue' in options) {
         value = options.defaultValue;
       } else {
         return null;
@@ -1391,6 +1476,20 @@
       
       // Create a deep copy of the resulting value to avoid shared reference errors
       return ember$lib$main$$default.copy(value, true);
+    }
+
+    // Creates a fragment and sets its owner to the given record
+    function model$fragments$lib$fragments$attributes$$createFragment(store, type, record, key) {
+      return model$fragments$lib$fragments$model$$setFragmentOwner(store.createFragment(type), record, key);
+    }
+
+    // Returns the value of the property or the default propery
+    function model$fragments$lib$fragments$attributes$$getWithDefault(internalModel, key, options, type) {
+      if (key in internalModel._data) {
+        return internalModel._data[key];
+      } else {
+        return model$fragments$lib$fragments$attributes$$getDefaultValue(internalModel, options, type);
+      }
     }
 
     /**
@@ -1562,7 +1661,7 @@
       @main ember-data.model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '0.4.1'
+      VERSION: '0.4.2'
     });
 
     model$fragments$lib$main$$exportMethods(model$fragments$lib$main$$MF);

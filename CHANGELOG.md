@@ -1,5 +1,13 @@
 # Changelog
 
+### v0.4.2 (October 11, 2015)
+
+* Added support for setting fragment properties with object literals
+* Fixed issue with fragment properties not being notified on create
+* Fixed falsy default values being clobbered (@christophersansone)
+* Fixed bad registry property reference in Ember v2.1 (@abuiles)
+* Updated fragment properties to clear owner when releasing fragments
+
 ### v0.4.1 (August 19, 2015)
 
 * Added warning about changing default value for array fragment properties
