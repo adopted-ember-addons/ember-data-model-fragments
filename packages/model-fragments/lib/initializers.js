@@ -7,7 +7,8 @@ var initializers = [
     name: "fragmentTransform",
     before: "store",
 
-    initialize: function(container, application) {
+    initialize: function() {
+      var application = arguments[1] || arguments[0];
       application.register('transform:fragment', FragmentTransform);
       application.register('transform:fragment-array', FragmentArrayTransform);
       application.register('transform:array', ArrayTransform);
