@@ -7,8 +7,11 @@ var initializers = [
     name: "fragmentTransform",
     before: "store",
 
-    initialize: function() {
-      var application = arguments[1] || arguments[0];
+    initialize: function(container, application) {
+      // Needed for ember-2.1 deprecation
+      if (!application) {
+        application = container;
+      }
       application.register('transform:fragment', FragmentTransform);
       application.register('transform:fragment-array', FragmentArrayTransform);
       application.register('transform:array', ArrayTransform);
