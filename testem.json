@@ -1,6 +1,7 @@
 {
   "framework": "qunit",
   "src_files": [
+    "tests/env.js",
     "bower_components/jquery/dist/jquery.js",
     "bower_components/ember/ember.debug.js",
     "bower_components/ember-data/ember-data.js",
