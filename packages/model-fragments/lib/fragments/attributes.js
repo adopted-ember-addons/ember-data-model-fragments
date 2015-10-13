@@ -2,9 +2,15 @@ import Ember from 'ember';
 import computedPolyfill from '../util/ember-new-computed';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
-import { fragmentDidDirty, fragmentDidReset } from './states';
-import { setFragmentOwner, getActualFragmentType } from './model';
-import { internalModelFor } from './model';
+import {
+  fragmentDidDirty,
+  fragmentDidReset
+} from './states';
+import {
+  internalModelFor,
+  setFragmentOwner,
+  getActualFragmentType
+} from './fragment';
 import isInstanceOfType from '../util/instance-of-type';
 
 /**

@@ -4,7 +4,7 @@ import {
   internalModelFor,
   setFragmentOwner,
   getActualFragmentType
-} from '../model';
+} from '../fragment';
 import isInstanceOfType from '../../util/instance-of-type';
 import map from '../../util/map';
 

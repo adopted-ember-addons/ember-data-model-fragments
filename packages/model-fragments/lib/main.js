@@ -2,7 +2,7 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 import { Store, Model } from './fragments/ext';
-import Fragment from './fragments/model';
+import Fragment from './fragments/fragment';
 import FragmentArray from './fragments/array/fragment';
 import FragmentTransform from './fragments/transforms/fragment';
 import FragmentArrayTransform from './fragments/transforms/fragment-array';

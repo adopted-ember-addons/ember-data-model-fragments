@@ -6,7 +6,7 @@ import FragmentRootState from './states';
 import {
   internalModelFor,
   default as Fragment
-} from './model';
+} from './fragment';
 
 /**
   @module ember-data.model-fragments
