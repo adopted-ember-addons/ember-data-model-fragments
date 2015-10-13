@@ -176,15 +176,88 @@ test("normalizing data can handle `null` fragment values", function() {
     children: null
   });
 
+  var attributes = normalized.data.attributes;
+
+  strictEqual(attributes.name, null, "fragment property values can be null");
+  strictEqual(attributes.houses, null, "fragment array property values can be null");
+  strictEqual(attributes.children, null, "`array property values can be null");
+});
+
+test("normalizing data can handle `null` fragment values", function() {
+  Person.reopen({
+    houses: MF.fragmentArray('house', { defaultValue: null }),
+    children: MF.array({ defaultValue: null })
+  });
+
   store.push({
     type: 'person',
     id: 1,
-    attributes: normalized
+    attributes: {
+      name: null,
+      houses: null,
+      children: null
+    }
   });
 
   return store.find('person', 1).then(function(person) {
-    equal(person.get('name'), null, 'fragment property values can be null');
-    equal(person.get('houses'), null, 'fragment array property values can be null');
-    equal(person.get('children'), null, '`array property values can be null');
+    var serialized = person.serialize();
+
+    strictEqual(serialized.name, null, "fragment property values can be null");
+    strictEqual(serialized.houses, null, "fragment array property values can be null");
+    strictEqual(serialized.children, null, "`array property values can be null");
+  });
+});
+
+test("array properties use the specified transform to normalize data", function() {
+  var values = [ 1, 0, true, false, 'true', '' ];
+
+  Person.reopen({
+    strings: MF.array('string'),
+    numbers: MF.array('number'),
+    booleans: MF.array('boolean')
+  });
+
+  var normalized = store.normalize('person', {
+    strings: values,
+    numbers: values,
+    booleans: values
+  });
+
+  var attributes = normalized.data.attributes;
+
+  ok(values.every(function(value, index) {
+    return attributes.strings[index] === String(value) &&
+      attributes.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
+      attributes.booleans[index] === Boolean(value);
+  }), "fragment property values are normalized");
+});
+
+test("array properties use the specified transform to serialize data", function() {
+  var values = [ 1, 0, true, false, 'true', '' ];
+
+  Person.reopen({
+    strings: MF.array('string'),
+    numbers: MF.array('number'),
+    booleans: MF.array('boolean')
+  });
+
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      strings: values,
+      numbers: values,
+      booleans: values
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var serialized = person.serialize();
+
+    ok(values.every(function(value, index) {
+      return serialized.strings[index] === String(value) &&
+        serialized.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
+        serialized.booleans[index] === Boolean(value);
+    }), "fragment property values are normalized");
   });
 });

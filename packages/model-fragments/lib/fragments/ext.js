@@ -240,16 +240,16 @@ function getFragmentTransform(container, store, attributeType) {
   var registry = container._registry || container.registry || container;
   var containerKey = 'transform:' + attributeType;
   var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-  var transformType = match[1];
-  var modelName = match[2];
+  var transformName = match[1];
+  var transformType = match[2];
   var polymorphicTypeProp = match[3];
 
   if (!registry.has(containerKey)) {
-    var transformClass = container.lookupFactory('transform:' + transformType);
+    var transformClass = container.lookupFactory('transform:' + transformName);
 
     registry.register(containerKey, transformClass.extend({
       store: store,
-      modelName: modelName,
+      type: transformType,
       polymorphicTypeProp: polymorphicTypeProp
     }));
   }

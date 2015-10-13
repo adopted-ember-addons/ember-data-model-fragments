@@ -18,7 +18,7 @@ var get = Ember.get;
 */
 var FragmentTransform = Transform.extend({
   store: null,
-  modelName: null,
+  type: null,
   polymorphicTypeProp: null,
 
   deserialize: function deserializeFragment(data) {
@@ -41,7 +41,7 @@ var FragmentTransform = Transform.extend({
   },
 
   modelNameFor: function modelNameFor(data) {
-    var modelName = get(this, 'modelName');
+    var modelName = get(this, 'type');
     var polymorphicTypeProp = get(this, 'polymorphicTypeProp');
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {

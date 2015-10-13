@@ -5,8 +5,7 @@ QUnit.module("unit - `MF.fragmentArray`", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.attr('string'),
-      addresses: MF.fragmentArray('address', { defaultValue: null }),
-      titles: MF.array({ defaultValue: null })
+      addresses: MF.fragmentArray('address', { defaultValue: null })
     });
 
     Address = MF.Fragment.extend({
@@ -101,33 +100,6 @@ test("arrays of object literals are converted into instances of `MF.Fragment`", 
     ok(addresses.every(function(address) {
       return address instanceof Address;
     }), "each fragment is a `MF.Fragment` instance");
-  });
-});
-
-test("arrays of primitives are converted to an array-ish containing original values", function() {
-  var values = [ "Hand of the King", "Master of Coin" ];
-
-  store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Tyrion",
-        last: "Lannister"
-      },
-      titles: values
-    }
-  });
-
-  return store.find('person', 1).then(function(person) {
-    var titles = person.get('titles');
-
-    ok(Ember.isArray(titles), "titles property is array-like");
-
-    ok(titles.every(function(title, index) {
-      return title === values[index];
-    }), "each title matches the original value");
-
   });
 });
 

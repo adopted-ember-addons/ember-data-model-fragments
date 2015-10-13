@@ -24,12 +24,12 @@ var copy = Ember.copy;
 var computed = Ember.computed;
 
 // Create a unique type string for the combination of fragment property type,
-// fragment model name, and polymorphic type key
-function metaTypeFor(type, modelName, options) {
-  var metaType = '-mf-' + type;
+// transform type (or fragment model), and polymorphic type key
+function metaTypeFor(name, type, options) {
+  var metaType = '-mf-' + name;
 
-  if (modelName) {
-    metaType += '$' + modelName;
+  if (type) {
+    metaType += '$' + type;
   }
 
   if (options && options.polymorphic) {
@@ -241,12 +241,11 @@ function array(type, options) {
     options || (options = {});
   }
 
-  var metaType = metaTypeFor('array');
+  var metaType = metaTypeFor('array', type);
 
   return fragmentArrayProperty(metaType, options, function createStatefulArray(record, key) {
     return StatefulArray.create({
       options: options,
-      type: type,
       name: key,
       owner: record
     });
