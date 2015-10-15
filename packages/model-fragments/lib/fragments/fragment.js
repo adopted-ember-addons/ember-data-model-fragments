@@ -91,7 +91,7 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   */
   copy: function() {
     var type = this.constructor;
-    var props = {};
+    var props = create(null);
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
@@ -114,7 +114,7 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   */
   _adapterDidCommit: function(data) {
     internalModelFor(this).adapterDidCommit({
-      attributes: data || {}
+      attributes: data || create(null)
     });
   },
 
