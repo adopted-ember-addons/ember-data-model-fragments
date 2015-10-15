@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.4.3 (October 14, 2015)
+
+* Updated API and added deprecation warnings to all outdated APIs
+* Fixed issue with initializer arguments in Ember 2.1 (@jakesjews)
+
 ### v0.4.2 (October 11, 2015)
 
 * Added support for setting fragment properties with object literals
@@ -11,8 +16,8 @@
 ### v0.4.1 (August 19, 2015)
 
 * Added warning about changing default value for array fragment properties
-* Added support for copying nested fragments (louy)
-* Fixed broken fragment copying (jakesjews)
+* Added support for copying nested fragments (@louy)
+* Fixed broken fragment copying (@jakesjews)
 
 ### v0.4.0 (August 14, 2015)
 
@@ -21,8 +26,8 @@
 ### v0.3.3 (May 20, 2015)
 
 * Removed deprecations in test suite
-* Removed computed property deprecations (jakesjews)
-* Added fragment transform module for unit testing ember-cli apps (rwjblue)
+* Removed computed property deprecations (@jakesjews)
+* Added fragment transform module for unit testing ember-cli apps (@rwjblue)
 
 ### v0.3.2 (April 20, 2015)
 
@@ -40,7 +45,7 @@
 
 ### v0.2.8 (February 2, 2015)
 
-* Fixed infinite loops when reloading observed fragments (igort)
+* Fixed infinite loops when reloading observed fragments (@igort)
 
 ### v0.2.7 (January 16, 2015)
 
@@ -60,7 +65,7 @@
 
 ### v0.2.4 (January 5, 2015)
 
-* Updated to support Ember Data v1.0.0-beta.14 (igort)
+* Updated to support Ember Data v1.0.0-beta.14 (@igort)
 
 ### v0.2.3 (January 5, 2015)
 
@@ -69,7 +74,7 @@
 
 ### v0.2.2 (November 3, 2014)
 
-* Added support for polymorphic fragments (marcus-nl)
+* Added support for polymorphic fragments (@marcus-nl)
 
 ### v0.2.1 (October 2, 2014)
 

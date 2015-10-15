@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.4.2
+ * @version   0.4.3
  */
 
 (function() {
@@ -216,7 +216,7 @@
       A state-aware array that is tied to an attribute of a `DS.Model` instance.
 
       @class StatefulArray
-      @namespace DS
+      @namespace MF
       @extends Ember.ArrayProxy
     */
     var model$fragments$lib$fragments$array$stateful$$StatefulArray = ember$lib$main$$default.ArrayProxy.extend(ember$lib$main$$default.Copyable, {
@@ -416,6 +416,7 @@
     */
 
     var model$fragments$lib$fragments$ext$$keys = Object.keys || Ember.keys;
+    var model$fragments$lib$fragments$ext$$create = Object.create || Ember.create;
 
     /**
       @class Store
@@ -440,12 +441,12 @@
         @param {String} type
         @param {Object} properties a hash of properties to set on the
           newly created fragment.
-        @return {DS.ModelFragment} fragment
+        @return {MF.Fragment} fragment
       */
       createFragment: function(modelName, props) {
         var type = this.modelFor(modelName);
 
-        Ember.assert("The '" + type + "' model must be a subclass of DS.ModelFragment", model$fragments$lib$fragments$model$$default.detect(type));
+        Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", model$fragments$lib$fragments$fragment$$default.detect(type));
 
         var internalModel = new ember$data$lib$system$model$internal$model$$default(type, null, this, this.container);
 
@@ -485,7 +486,7 @@
         ```javascript
         App.Mascot = DS.Model.extend({
           type: DS.attr('string'),
-          name: DS.hasOneFragment('name')
+          name: MF.fragment('name')
         });
 
         App.Name = DS.Model.extend({
@@ -506,7 +507,7 @@
       */
       changedAttributes: function() {
         var diffData = this._super();
-        var internalModel = model$fragments$lib$fragments$model$$internalModelFor(this);
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(this);
 
         model$fragments$lib$fragments$ext$$keys(internalModel._fragments).forEach(function(name) {
           // An actual diff of the fragment or fragment array is outside the scope
@@ -606,7 +607,7 @@
       @method adapterDidCommit
     */
     model$fragments$lib$fragments$ext$$decorateMethod(model$fragments$lib$fragments$ext$$InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
-      var attributes = (args[0] && args[0].attributes) || {};
+      var attributes = (args[0] && args[0].attributes) || model$fragments$lib$fragments$ext$$create(null);
       var fragment;
 
       // Notify fragments that the record was committed
@@ -643,16 +644,16 @@
       var registry = container._registry || container.registry || container;
       var containerKey = 'transform:' + attributeType;
       var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-      var transformType = match[1];
-      var modelName = match[2];
+      var transformName = match[1];
+      var transformType = match[2];
       var polymorphicTypeProp = match[3];
 
       if (!registry.has(containerKey)) {
-        var transformClass = container.lookupFactory('transform:' + transformType);
+        var transformClass = container.lookupFactory('transform:' + transformName);
 
         registry.register(containerKey, transformClass.extend({
           store: store,
-          modelName: modelName,
+          type: transformType,
           polymorphicTypeProp: polymorphicTypeProp
         }));
       }
@@ -664,9 +665,9 @@
       @module ember-data.model-fragments
     */
 
-    var model$fragments$lib$fragments$model$$get = ember$lib$main$$default.get;
-    var model$fragments$lib$fragments$model$$create = Object.create || ember$lib$main$$default.create;
-    var model$fragments$lib$fragments$model$$copy = ember$lib$main$$default.copy;
+    var model$fragments$lib$fragments$fragment$$get = ember$lib$main$$default.get;
+    var model$fragments$lib$fragments$fragment$$create = Object.create || ember$lib$main$$default.create;
+    var model$fragments$lib$fragments$fragment$$copy = ember$lib$main$$default.copy;
 
     /**
       The class that all nested object structures, or 'fragments', descend from.
@@ -681,10 +682,10 @@
 
       ```javascript
       App.Person = DS.Model.extend({
-        name: DS.hasOneFragment('name')
+        name: MF.fragment('name')
       });
 
-      App.Name = DS.ModelFragment.extend({
+      App.Name = MF.Fragment.extend({
         first  : DS.attr('string'),
         last   : DS.attr('string')
       });
@@ -720,19 +721,19 @@
       person.get('hasDirtyAttributes'); // false
       ```
 
-      @class ModelFragment
-      @namespace DS
+      @class Fragment
+      @namespace MF
       @extends CoreModel
       @uses Ember.Comparable
       @uses Ember.Copyable
     */
-    var model$fragments$lib$fragments$model$$ModelFragment = ember$data$lib$system$model$$default.extend(ember$lib$main$$default.Comparable, ember$lib$main$$default.Copyable, {
+    var model$fragments$lib$fragments$fragment$$Fragment = ember$data$lib$system$model$$default.extend(ember$lib$main$$default.Comparable, ember$lib$main$$default.Copyable, {
       /**
         Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 
         @method compare
-        @param a {DS.ModelFragment} the first fragment to compare
-        @param b {DS.ModelFragment} the second fragment to compare
+        @param a {MF.Fragment} the first fragment to compare
+        @param b {MF.Fragment} the second fragment to compare
         @return {Integer} the result of the comparison
       */
       compare: function(f1, f2) {
@@ -745,16 +746,16 @@
         to other records safely.
 
         @method copy
-        @return {DS.ModelFragment} the newly created fragment
+        @return {MF.Fragment} the newly created fragment
       */
       copy: function() {
         var type = this.constructor;
-        var props = {};
+        var props = model$fragments$lib$fragments$fragment$$create(null);
 
         // Loop over each attribute and copy individually to ensure nested fragments
         // are also copied
         type.eachAttribute(function(name) {
-          props[name] = model$fragments$lib$fragments$model$$copy(model$fragments$lib$fragments$model$$get(this, name));
+          props[name] = model$fragments$lib$fragments$fragment$$copy(model$fragments$lib$fragments$fragment$$get(this, name));
         }, this);
 
         return this.store.createFragment(type.modelName, props);
@@ -764,20 +765,20 @@
         @method _flushChangedAttributes
       */
       _flushChangedAttributes: function() {
-        model$fragments$lib$fragments$model$$internalModelFor(this).flushChangedAttributes();
+        model$fragments$lib$fragments$fragment$$internalModelFor(this).flushChangedAttributes();
       },
 
       /**
         @method _adapterDidCommit
       */
       _adapterDidCommit: function(data) {
-        model$fragments$lib$fragments$model$$internalModelFor(this).adapterDidCommit({
-          attributes: data || {}
+        model$fragments$lib$fragments$fragment$$internalModelFor(this).adapterDidCommit({
+          attributes: data || model$fragments$lib$fragments$fragment$$create(null)
         });
       },
 
       toStringExtension: function() {
-        return 'owner(' + model$fragments$lib$fragments$model$$get(model$fragments$lib$fragments$model$$internalModelFor(this)._owner, 'id') + ')';
+        return 'owner(' + model$fragments$lib$fragments$fragment$$get(model$fragments$lib$fragments$fragment$$internalModelFor(this)._owner, 'id') + ')';
       }
     }).reopenClass({
       fragmentOwnerProperties: ember$lib$main$$default.computed(function() {
@@ -793,7 +794,7 @@
       }).readOnly()
     });
 
-    function model$fragments$lib$fragments$model$$getActualFragmentType(declaredType, options, data) {
+    function model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredType, options, data) {
       if (!options.polymorphic || !data) {
         return declaredType;
       }
@@ -804,20 +805,20 @@
       return actualType || declaredType;
     }
 
-    function model$fragments$lib$fragments$model$$internalModelFor(record) {
+    function model$fragments$lib$fragments$fragment$$internalModelFor(record) {
       var internalModel = record._internalModel;
 
       // Ensure the internal model has a fragments hash, since we can't override the
       // constructor function anymore
       if (!internalModel._fragments) {
-        internalModel._fragments = model$fragments$lib$fragments$model$$create(null);
+        internalModel._fragments = model$fragments$lib$fragments$fragment$$create(null);
       }
 
       return internalModel;
     }
 
-    function model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key) {
-      var internalModel = model$fragments$lib$fragments$model$$internalModelFor(fragment);
+    function model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, record, key) {
+      var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(fragment);
 
       ember$lib$main$$default.assert("Fragments can only belong to one owner, try copying instead", !record || !internalModel._owner || internalModel._owner === record);
 
@@ -825,14 +826,14 @@
       internalModel._name = key;
 
       // Notify any observers of `fragmentOwner` properties
-      model$fragments$lib$fragments$model$$get(fragment.constructor, 'fragmentOwnerProperties').forEach(function(name) {
+      model$fragments$lib$fragments$fragment$$get(fragment.constructor, 'fragmentOwnerProperties').forEach(function(name) {
         fragment.notifyPropertyChange(name);
       });
 
       return fragment;
     }
 
-    var model$fragments$lib$fragments$model$$default = model$fragments$lib$fragments$model$$ModelFragment;
+    var model$fragments$lib$fragments$fragment$$default = model$fragments$lib$fragments$fragment$$Fragment;
     function model$fragments$lib$util$instance$of$type$$isInstanceOfType(type, obj) {
       if (obj instanceof type) {
         return true;
@@ -893,27 +894,27 @@
         if (data._isFragment) {
           fragment = data;
 
-          var owner = model$fragments$lib$fragments$model$$internalModelFor(fragment)._owner;
+          var owner = model$fragments$lib$fragments$fragment$$internalModelFor(fragment)._owner;
 
           ember$lib$main$$default.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
 
           if (!owner) {
-            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key);
+            model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, record, key);
           }
         } else {
           fragment = content[index];
 
           if (!fragment) {
             // Create a new fragment from the data if needed
-            var actualType = model$fragments$lib$fragments$model$$getActualFragmentType(declaredType, options, data);
+            var actualType = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredType, options, data);
 
             fragment = store.createFragment(actualType);
 
-            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, record, key);
+            model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, record, key);
           }
 
           // Initialize the fragment with the data
-          model$fragments$lib$fragments$model$$internalModelFor(fragment).setupData({
+          model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
             attributes: data
           });
         }
@@ -925,10 +926,10 @@
     /**
       A state-aware array of fragments that is tied to an attribute of a `DS.Model`
       instance. `FragmentArray` instances should not be created directly, instead
-      use the `DS.hasManyFragments` attribute.
+      use `MF.fragmentArray` or `MF.array`.
 
       @class FragmentArray
-      @namespace DS
+      @namespace MF
       @extends StatefulArray
     */
     var model$fragments$lib$fragments$array$fragment$$FragmentArray = model$fragments$lib$fragments$array$stateful$$default.extend({
@@ -1055,7 +1056,7 @@
         // If fragments get removed from the array, clear their owners
         if (fragments.length < replacedContent.length) {
           replacedContent.slice(fragments.length).forEach(function(fragment) {
-            model$fragments$lib$fragments$model$$setFragmentOwner(fragment, null, null);
+            model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, null, null);
           });
         }
 
@@ -1067,8 +1068,8 @@
         `addObject`.
 
         @method addFragment
-        @param {DS.ModelFragment} fragment
-        @return {DS.ModelFragment} the newly added fragment
+        @param {MF.Fragment} fragment
+        @return {MF.Fragment} the newly added fragment
       */
       addFragment: function(fragment) {
         return this.addObject(fragment);
@@ -1078,8 +1079,8 @@
         Removes the given fragment from the array. Alias for `removeObject`.
 
         @method removeFragment
-        @param {DS.ModelFragment} fragment
-        @return {DS.ModelFragment} the removed fragment
+        @param {MF.Fragment} fragment
+        @return {MF.Fragment} the removed fragment
       */
       removeFragment: function(fragment) {
         return this.removeObject(fragment);
@@ -1090,8 +1091,8 @@
         of the fragment array
 
         @method createFragment
-        @param {DS.ModelFragment} fragment
-        @return {DS.ModelFragment} the newly added fragment
+        @param {MF.Fragment} fragment
+        @return {MF.Fragment} the newly added fragment
         */
       createFragment: function(props) {
         var record = model$fragments$lib$fragments$array$fragment$$get(this, 'owner');
@@ -1155,15 +1156,18 @@
     */
 
     var model$fragments$lib$fragments$attributes$$get = ember$lib$main$$default.get;
+    var model$fragments$lib$fragments$attributes$$isArray = ember$lib$main$$default.isArray;
     var model$fragments$lib$fragments$attributes$$typeOf = ember$lib$main$$default.typeOf;
+    var model$fragments$lib$fragments$attributes$$copy = ember$lib$main$$default.copy;
+    var model$fragments$lib$fragments$attributes$$computed = ember$lib$main$$default.computed;
 
     // Create a unique type string for the combination of fragment property type,
-    // fragment model name, and polymorphic type key
-    function model$fragments$lib$fragments$attributes$$metaTypeFor(type, modelName, options) {
-      var metaType = '-mf-' + type;
+    // transform type (or fragment model), and polymorphic type key
+    function model$fragments$lib$fragments$attributes$$metaTypeFor(name, type, options) {
+      var metaType = '-mf-' + name;
 
-      if (modelName) {
-        metaType += '$' + modelName;
+      if (type) {
+        metaType += '$' + type;
       }
 
       if (options && options.polymorphic) {
@@ -1174,48 +1178,51 @@
     }
 
     /**
-      `DS.hasOneFragment` defines an attribute on a `DS.Model` or `DS.ModelFragment`
-      instance. Much like `DS.belongsTo`, it creates a property that returns a
-      single fragment of the given type.
+      `MF.fragment` defines an attribute on a `DS.Model` or `MF.Fragment`. Much
+      like `DS.belongsTo`, it creates a property that returns a single fragment of
+      the given type.
 
-      `DS.hasOneFragment` takes an optional hash as a second parameter, currently
-      supported options are:
+      It takes an optional hash as a second parameter, currently supported options
+      are:
 
       - `defaultValue`: An object literal or a function to be called to set the
         attribute to a default value if none is supplied. Values are deep copied
         before being used. Note that default values will be passed through the
-        fragment's serializer when creating the fragment.
+        fragment's serializer when creating the fragment. Defaults to `null`.
+      - `polymorphic`: Whether or not the fragments in the array can be child
+        classes of the given type.
+      - `typeKey`: If `polymorphic` is true, the property to use as the fragment
+        type in the normalized data. Defaults to `type`.
 
       Example
 
       ```javascript
       App.Person = DS.Model.extend({
-        name: DS.hasOneFragment('name', { defaultValue: {} })
+        name: MF.fragment('name', { defaultValue: {} })
       });
 
-      App.Name = DS.ModelFragment.extend({
-        first  : DS.attr('string'),
-        last   : DS.attr('string')
+      App.Name = MF.Fragment.extend({
+        first: DS.attr('string'),
+        last: DS.attr('string')
       });
       ```
 
-      @namespace
-      @method hasOneFragment
-      @for DS
+      @namespace MF
+      @method fragment
       @param {String} type the fragment type
       @param {Object} options a hash of options
       @return {Attribute}
     */
-    function model$fragments$lib$fragments$attributes$$hasOneFragment(declaredModelName, options) {
+    function model$fragments$lib$fragments$attributes$$fragment(declaredModelName, options) {
       options = options || {};
 
       var metaType = model$fragments$lib$fragments$attributes$$metaTypeFor('fragment', declaredModelName, options);
 
       function setupFragment(store, record, key) {
-        var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(record);
         var data = model$fragments$lib$fragments$attributes$$getWithDefault(internalModel, key, options, 'object');
         var fragment = internalModel._fragments[key];
-        var actualTypeName = model$fragments$lib$fragments$model$$getActualFragmentType(declaredModelName, options, data);
+        var actualTypeName = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredModelName, options, data);
 
         // Regardless of whether being called as a setter or getter, the fragment
         // may not be initialized yet, in which case the data will contain a
@@ -1232,7 +1239,7 @@
           // Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
           // again we have it cached already
           internalModel._data[key] = fragment;
-          model$fragments$lib$fragments$model$$internalModelFor(fragment).setupData({
+          model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
             attributes: data
           });
         } else {
@@ -1245,25 +1252,25 @@
 
       function setFragmentValue(record, key, fragment, value) {
         var store = record.store;
-        var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(record);
 
         ember$lib$main$$default.assert("You can only assign `null`, an object literal or a '" + declaredModelName + "' fragment instance to this property", value === null || model$fragments$lib$fragments$attributes$$typeOf(value) === 'object' || model$fragments$lib$util$instance$of$type$$default(store.modelFor(declaredModelName), value));
 
         if (fragment && fragment !== value) {
           // Since the fragment no longer belongs to the record, free its owner
-          model$fragments$lib$fragments$model$$setFragmentOwner(fragment, null, null);
+          model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, null, null);
         }
 
         if (value) {
           if (model$fragments$lib$fragments$attributes$$typeOf(value) === 'object') {
             if (!fragment) {
-              var actualTypeName = model$fragments$lib$fragments$model$$getActualFragmentType(declaredModelName, options, value);
+              var actualTypeName = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredModelName, options, value);
               fragment = model$fragments$lib$fragments$attributes$$createFragment(store, actualTypeName, record, key);
             }
 
             fragment.setProperties(value);
           } else {
-            fragment = model$fragments$lib$fragments$model$$setFragmentOwner(value, record, key);
+            fragment = model$fragments$lib$fragments$fragment$$setFragmentOwner(value, record, key);
           }
         } else {
           fragment = null;
@@ -1282,50 +1289,47 @@
     }
 
     /**
-      `DS.hasManyFragments` defines an attribute on a `DS.Model` or
-      `DS.ModelFragment` instance. Much like `DS.hasMany`, it creates a property
-      that returns an array of fragments of the given type. The array is aware of
-      its original state and so has a `hasDirtyAttributes` property and a `rollback` method.
-      If a fragment type is not given, values are not converted to fragments, but
-      passed straight through.
+      `MF.fragmentArray` defines an attribute on a `DS.Model` or `MF.Fragment`.
+      Much like `DS.hasMany`, it creates a property that returns an array of
+      fragments of the given type. The array is aware of its original state and so
+      has a `hasDirtyAttributes` property and a `rollback` method.
 
-      `DS.hasOneFragment` takes an optional hash as a second parameter, currently
-      supported options are:
+      It takes an optional hash as a second parameter, currently supported options
+      are:
 
       - `defaultValue`: An array literal or a function to be called to set the
         attribute to a default value if none is supplied. Values are deep copied
         before being used. Note that default values will be passed through the
-        fragment's serializer when creating the fragment.
+        fragment's serializer when creating the fragment. Defaults to an empty
+        array.
+      - `polymorphic`: Whether or not the fragments in the array can be child
+        classes of the given type.
+      - `typeKey`: If `polymorphic` is true, the property to use as the fragment
+        type in the normalized data. Defaults to `type`.
 
       Example
 
       ```javascript
       App.Person = DS.Model.extend({
-        addresses: DS.hasManyFragments('address', { defaultValue: [] })
+        addresses: MF.fragmentArray('address', { defaultValue: null })
       });
 
-      App.Address = DS.ModelFragment.extend({
-        street  : DS.attr('string'),
-        city    : DS.attr('string'),
-        region  : DS.attr('string'),
-        country : DS.attr('string')
+      App.Address = MF.Fragment.extend({
+        street: DS.attr('string'),
+        city: DS.attr('string'),
+        region: DS.attr('string'),
+        country: DS.attr('string')
       });
       ```
 
-      @namespace
-      @method hasManyFragments
-      @for DS
+      @namespace MF
+      @method fragmentArray
       @param {String} type the fragment type (optional)
       @param {Object} options a hash of options
       @return {Attribute}
     */
-    function model$fragments$lib$fragments$attributes$$hasManyFragments(modelName, options) {
+    function model$fragments$lib$fragments$attributes$$fragmentArray(modelName, options) {
       options || (options = {});
-
-      // If a modelName is not given, it implies an array of primitives
-      if (model$fragments$lib$fragments$attributes$$typeOf(modelName) !== 'string') {
-        return model$fragments$lib$fragments$attributes$$arrayProperty(options);
-      }
 
       var metaType = model$fragments$lib$fragments$attributes$$metaTypeFor('fragment-array', modelName, options);
 
@@ -1339,10 +1343,43 @@
       });
     }
 
-    function model$fragments$lib$fragments$attributes$$arrayProperty(options) {
-      options || (options = {});
+    /**
+      `MF.array` defines an attribute on a `DS.Model` or `MF.Fragment`. It creates a
+      property that returns an array of values of the given primitive type. The
+      array is aware of its original state and so has a `hasDirtyAttributes`
+      property and a `rollback` method.
 
-      var metaType = model$fragments$lib$fragments$attributes$$metaTypeFor('array');
+      It takes an optional hash as a second parameter, currently supported options
+      are:
+
+      - `defaultValue`: An array literal or a function to be called to set the
+        attribute to a default value if none is supplied. Values are deep copied
+        before being used. Note that default values will be passed through the
+        fragment's serializer when creating the fragment.
+
+      Example
+
+      ```javascript
+      App.Person = DS.Model.extend({
+        aliases: MF.array('string')
+      });
+      ```
+
+      @namespace MF
+      @method array
+      @param {String} type the type of value contained in the array
+      @param {Object} options a hash of options
+      @return {Attribute}
+    */
+    function model$fragments$lib$fragments$attributes$$array(type, options) {
+      if (typeof type === 'object') {
+        options = type;
+        type = undefined;
+      } else {
+        options || (options = {});
+      }
+
+      var metaType = model$fragments$lib$fragments$attributes$$metaTypeFor('array', type);
 
       return model$fragments$lib$fragments$attributes$$fragmentArrayProperty(metaType, options, function createStatefulArray(record, key) {
         return model$fragments$lib$fragments$array$stateful$$default.create({
@@ -1365,13 +1402,13 @@
 
       return model$fragments$lib$util$ember$new$computed$$default({
         get: function(key) {
-          var internalModel = model$fragments$lib$fragments$model$$internalModelFor(this);
+          var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(this);
           var fragment = setupFragment(this.store, this, key);
 
           return internalModel._fragments[key] = fragment;
         },
         set: function(key, value) {
-          var internalModel = model$fragments$lib$fragments$model$$internalModelFor(this);
+          var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(this);
           var fragment = setupFragment(this.store, this, key);
 
           fragment = setFragmentValue(this, key, fragment, value);
@@ -1383,7 +1420,7 @@
 
     function model$fragments$lib$fragments$attributes$$fragmentArrayProperty(metaType, options, createArray) {
       function setupFragmentArray(store, record, key) {
-        var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(record);
         var data = model$fragments$lib$fragments$attributes$$getWithDefault(internalModel, key, options, 'array');
         var fragments = internalModel._fragments[key] || null;
 
@@ -1406,9 +1443,9 @@
       }
 
       function setFragmentValue(record, key, fragments, value) {
-        var internalModel = model$fragments$lib$fragments$model$$internalModelFor(record);
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(record);
 
-        if (ember$lib$main$$default.isArray(value)) {
+        if (model$fragments$lib$fragments$attributes$$isArray(value)) {
           fragments || (fragments = createArray(record, key));
           fragments.setObjects(value);
         } else if (value === null) {
@@ -1429,10 +1466,8 @@
       return model$fragments$lib$fragments$attributes$$fragmentProperty(metaType, options, setupFragmentArray, setFragmentValue);
     }
 
-    // Like `DS.belongsTo`, when used within a model fragment is a reference
-    // to the owner record
     /**
-      `DS.fragmentOwner` defines a read-only attribute on a `DS.ModelFragment`
+      `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`
       instance. The attribute returns a reference to the fragment's owner
       record.
 
@@ -1440,26 +1475,25 @@
 
       ```javascript
       App.Person = DS.Model.extend({
-        name: DS.hasOneFragment('name')
+        name: MF.fragment('name')
       });
 
-      App.Name = DS.ModelFragment.extend({
-        first  : DS.attr('string'),
-        last   : DS.attr('string'),
-        person : DS.fragmentOwner()
+      App.Name = MF.Fragment.extend({
+        first: DS.attr('string'),
+        last: DS.attr('string'),
+        person: MF.fragmentOwner()
       });
       ```
 
-      @namespace
+      @namespace MF
       @method fragmentOwner
-      @for DS
       @return {Attribute}
     */
     function model$fragments$lib$fragments$attributes$$fragmentOwner() {
-      return ember$lib$main$$default.computed(function() {
+      return model$fragments$lib$fragments$attributes$$computed(function() {
         ember$lib$main$$default.assert("Fragment owner properties can only be used on fragments.", this._isFragment);
 
-        return model$fragments$lib$fragments$model$$internalModelFor(this)._owner;
+        return model$fragments$lib$fragments$fragment$$internalModelFor(this)._owner;
       }).meta({
         isFragmentOwner: true
       }).readOnly();
@@ -1481,15 +1515,15 @@
         return null;
       }
 
-      ember$lib$main$$default.assert("The fragment's default value must be an " + type, (ember$lib$main$$default.typeOf(value) == type) || (value === null));
+      ember$lib$main$$default.assert("The fragment's default value must be an " + type, (model$fragments$lib$fragments$attributes$$typeOf(value) == type) || (value === null));
 
       // Create a deep copy of the resulting value to avoid shared reference errors
-      return ember$lib$main$$default.copy(value, true);
+      return model$fragments$lib$fragments$attributes$$copy(value, true);
     }
 
     // Creates a fragment and sets its owner to the given record
     function model$fragments$lib$fragments$attributes$$createFragment(store, type, record, key) {
-      return model$fragments$lib$fragments$model$$setFragmentOwner(store.createFragment(type), record, key);
+      return model$fragments$lib$fragments$fragment$$setFragmentOwner(store.createFragment(type), record, key);
     }
 
     // Returns the value of the property or the default propery
@@ -1505,23 +1539,66 @@
       @module ember-data.model-fragments
     */
 
+    var model$fragments$lib$fragments$transforms$array$$get = ember$lib$main$$default.get;
     var model$fragments$lib$fragments$transforms$array$$makeArray = ember$lib$main$$default.makeArray;
+    var model$fragments$lib$fragments$transforms$array$$computed = ember$lib$main$$default.computed;
 
     /**
-      Transform for array-like attributes fragment attribute with no model
+      Transform for `MF.array` that transforms array data with the given transform
+      type.
 
       @class ArrayTransform
-      @namespace DS
+      @namespace MF
       @extends DS.Transform
     */
     var model$fragments$lib$fragments$transforms$array$$ArrayTransform = ember$data$lib$system$transform$$default.extend({
+      store: null,
+      type: null,
+
       deserialize: function deserializeArray(data) {
-        return data == null ? null : model$fragments$lib$fragments$transforms$array$$makeArray(data);
+        if (data == null) {
+          return null;
+        }
+
+        var transform = model$fragments$lib$fragments$transforms$array$$get(this, 'transform');
+
+        data = model$fragments$lib$fragments$transforms$array$$makeArray(data);
+
+        if (!transform) {
+          return data;
+        }
+
+        return model$fragments$lib$util$map$$default(data, transform.deserialize, transform);
       },
 
       serialize: function serializeArray(array) {
-        return array && array.toArray ? array.toArray() : array;
-      }
+        if (array == null) {
+          return null;
+        }
+
+        var transform = model$fragments$lib$fragments$transforms$array$$get(this, 'transform');
+
+        array = array.toArray ? array.toArray() : array;
+
+        if (!transform) {
+          return array;
+        }
+
+        return model$fragments$lib$util$map$$default(array, transform.serialize, transform);
+      },
+
+      transform: model$fragments$lib$fragments$transforms$array$$computed('type', function() {
+        var attributeType = this.get('type');
+
+        if (!attributeType) {
+          return null;
+        }
+
+        var transform = model$fragments$lib$fragments$transforms$array$$get(this, 'store').container.lookup('transform:' + attributeType);
+        ember$lib$main$$default.assert("Unable to find transform for '" + attributeType + "'", !!transform);
+
+        return transform;
+      })
     });
 
     var model$fragments$lib$fragments$transforms$array$$default = model$fragments$lib$fragments$transforms$array$$ArrayTransform;
@@ -1533,16 +1610,16 @@
     var model$fragments$lib$fragments$transforms$fragment$$get = ember$lib$main$$default.get;
 
     /**
-      Transform for `DS.hasOneFragment` fragment attribute which delegates work to
+      Transform for `MF.fragment` fragment attribute which delegates work to
       the fragment type's serializer
 
       @class FragmentTransform
-      @namespace DS
+      @namespace MF
       @extends DS.Transform
     */
     var model$fragments$lib$fragments$transforms$fragment$$FragmentTransform = ember$data$lib$system$transform$$default.extend({
       store: null,
-      modelName: null,
+      type: null,
       polymorphicTypeProp: null,
 
       deserialize: function deserializeFragment(data) {
@@ -1565,7 +1642,7 @@
       },
 
       modelNameFor: function modelNameFor(data) {
-        var modelName = model$fragments$lib$fragments$transforms$fragment$$get(this, 'modelName');
+        var modelName = model$fragments$lib$fragments$transforms$fragment$$get(this, 'type');
         var polymorphicTypeProp = model$fragments$lib$fragments$transforms$fragment$$get(this, 'polymorphicTypeProp');
 
         if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
@@ -1603,11 +1680,11 @@
     */
 
     /**
-      Transform for `DS.hasManyFragments` fragment attribute which delegates work to
+      Transform for `MF.fragmentArray` fragment attribute which delegates work to
       the fragment type's serializer
 
       @class FragmentArrayTransform
-      @namespace DS
+      @namespace MF
       @extends DS.Transform
     */
     var model$fragments$lib$fragments$transforms$fragment$array$$FragmentArrayTransform = model$fragments$lib$fragments$transforms$fragment$$default.extend({
@@ -1644,6 +1721,10 @@
         before: "store",
 
         initialize: function(container, application) {
+          // Needed for ember-2.1 deprecation
+          if (!application) {
+            application = container;
+          }
           application.register('transform:fragment', model$fragments$lib$fragments$transforms$fragment$$default);
           application.register('transform:fragment-array', model$fragments$lib$fragments$transforms$fragment$array$$default);
           application.register('transform:array', model$fragments$lib$fragments$transforms$array$$default);
@@ -1653,16 +1734,58 @@
 
     var model$fragments$lib$initializers$$default = model$fragments$lib$initializers$$initializers;
 
-    function model$fragments$lib$main$$exportMethods(scope) {
-      scope.ModelFragment = model$fragments$lib$fragments$model$$default;
-      scope.FragmentArray = model$fragments$lib$fragments$array$fragment$$default;
-      scope.FragmentTransform = model$fragments$lib$fragments$transforms$fragment$$default;
-      scope.FragmentArrayTransform = model$fragments$lib$fragments$transforms$fragment$array$$default;
-      scope.ArrayTransform = model$fragments$lib$fragments$transforms$array$$default;
-      scope.hasOneFragment = model$fragments$lib$fragments$attributes$$hasOneFragment;
-      scope.hasManyFragments = model$fragments$lib$fragments$attributes$$hasManyFragments;
-      scope.fragmentOwner = model$fragments$lib$fragments$attributes$$fragmentOwner;
-    }
+    // Export classes to DS namespace for backwards compatibility
+    ember$data$lib$main$$default.ModelFragment = model$fragments$lib$fragments$fragment$$default;
+    ember$data$lib$main$$default.FragmentArray = model$fragments$lib$fragments$array$fragment$$default;
+    ember$data$lib$main$$default.FragmentTransform = model$fragments$lib$fragments$transforms$fragment$$default;
+    ember$data$lib$main$$default.FragmentArrayTransform = model$fragments$lib$fragments$transforms$fragment$array$$default;
+    ember$data$lib$main$$default.ArrayTransform = model$fragments$lib$fragments$transforms$array$$default;
+
+    /**
+      `DS.hasOneFragment` has been deprecated in favor of `MF.fragment`.
+
+      @namespace DS
+      @method hasOneFragment
+      @deprecated
+    */
+    ember$data$lib$main$$default.hasOneFragment = function hasOneFragmentDeprecation(modelName, options) {
+      ember$lib$main$$default.deprecate("The `DS.hasOneFragment` property has been deprecated in favor of `MF.fragment`");
+
+      return model$fragments$lib$fragments$attributes$$fragment(modelName, options);
+    };
+
+    /**
+      `DS.hasManyFragments` has been deprecated in favor of `MF.fragmentArray`.
+
+      @namespace DS
+      @method hasManyFragments
+      @deprecated
+    */
+    ember$data$lib$main$$default.hasManyFragments = function hasManyFragmentsDeprecation(modelName, options) {
+      // If a modelName is not given, it implies an array of primitives
+      if (ember$lib$main$$default.typeOf(modelName) !== 'string') {
+        ember$lib$main$$default.deprecate("The `DS.hasManyFragments` property without a model name has been deprecated in favor of `MF.array`");
+
+        return model$fragments$lib$fragments$attributes$$array(null, options);
+      }
+
+      ember$lib$main$$default.deprecate("The `DS.hasManyFragments` property has been deprecated in favor of `MF.fragmentArray`");
+
+      return model$fragments$lib$fragments$attributes$$fragmentArray(modelName, options);
+    };
+
+    /**
+      `DS.fragmentOwner` has been deprecated in favor of `MF.fragmentOwner`.
+
+      @namespace DS
+      @method fragmentOwner
+      @deprecated
+    */
+    ember$data$lib$main$$default.fragmentOwner = function fragmentOwnerDeprecation() {
+      ember$lib$main$$default.deprecate("The `DS.fragmentOwner` property has been deprecated in favor of `MF.fragmentOwner`");
+
+      return model$fragments$lib$fragments$attributes$$fragmentOwner();
+    };
 
     /**
       Ember Data Model Fragments
@@ -1671,13 +1794,17 @@
       @main ember-data.model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '0.4.2'
+      VERSION: '0.4.3',
+      Fragment: model$fragments$lib$fragments$fragment$$default,
+      FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
+      FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,
+      FragmentArrayTransform: model$fragments$lib$fragments$transforms$fragment$array$$default,
+      ArrayTransform: model$fragments$lib$fragments$transforms$array$$default,
+      fragment: model$fragments$lib$fragments$attributes$$fragment,
+      fragmentArray: model$fragments$lib$fragments$attributes$$fragmentArray,
+      array: model$fragments$lib$fragments$attributes$$array,
+      fragmentOwner: model$fragments$lib$fragments$attributes$$fragmentOwner
     });
-
-    model$fragments$lib$main$$exportMethods(model$fragments$lib$main$$MF);
-
-    // This will be removed at some point in favor of the `MF` namespace
-    model$fragments$lib$main$$exportMethods(ember$data$lib$main$$default);
 
     ember$lib$main$$default.onLoad('Ember.Application', function(Application) {
       model$fragments$lib$initializers$$default.forEach(Application.initializer, Application);
@@ -1686,6 +1813,8 @@
     if (ember$lib$main$$default.libraries) {
       ember$lib$main$$default.libraries.register('Model Fragments', model$fragments$lib$main$$MF.VERSION);
     }
+
+    ember$lib$main$$default.lookup.MF = model$fragments$lib$main$$MF;
 
     var model$fragments$lib$main$$default = model$fragments$lib$main$$MF;
 }).call(this);
