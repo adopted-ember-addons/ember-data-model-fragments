@@ -1,1 +1,1 @@
-export default DS.FragmentArrayTransform;
+export default MF.FragmentArrayTransform;

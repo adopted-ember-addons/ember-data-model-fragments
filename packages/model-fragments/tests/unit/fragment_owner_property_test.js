@@ -1,16 +1,16 @@
 var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit/fragments - DS.fragmentOwner", {
+QUnit.module("unit - `MF.fragmentOwner`", {
   setup: function() {
     Person = DS.Model.extend({
-      name: DS.hasOneFragment("name"),
+      name: MF.fragment('name'),
     });
 
-    Name = DS.ModelFragment.extend({
-      first : DS.attr("string"),
-      last  : DS.attr("string"),
-      person: DS.fragmentOwner()
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string'),
+      person: MF.fragmentOwner()
     });
 
     env = setupEnv({
@@ -46,13 +46,13 @@ test("fragments can reference their owner record", function() {
   return store.find('person', 1).then(function(person) {
     var name = person.get('name');
 
-    equal(name.get('person'), person, "`DS.fragmentOwner` property is reference to the owner record");
+    equal(name.get('person'), person, "fragment owner property is reference to the owner record");
   });
 });
 
 test("using a fragment owner property on a non-fragment throws an error", function() {
   Person.reopen({
-    owner: DS.fragmentOwner()
+    owner: MF.fragmentOwner()
   });
 
   var person = store.createRecord('person');
@@ -126,7 +126,7 @@ test("setting a fragment property to `null` releases it of its owner record", fu
 
 test("removing a fragment from an array property to `null` releases it of its owner record", function() {
   Person.reopen({
-    names: DS.hasManyFragments('name')
+    names: MF.fragmentArray('name')
   });
 
   store.push({

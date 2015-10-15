@@ -1,5 +1,5 @@
 import Ember from 'ember';
-// DS.Model gets munged to add fragment support, which must be included by CoreModel
+// DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
 
 /**
@@ -23,10 +23,10 @@ var copy = Ember.copy;
 
   ```javascript
   App.Person = DS.Model.extend({
-    name: DS.hasOneFragment('name')
+    name: MF.fragment('name')
   });
 
-  App.Name = DS.ModelFragment.extend({
+  App.Name = MF.Fragment.extend({
     first  : DS.attr('string'),
     last   : DS.attr('string')
   });
@@ -62,19 +62,19 @@ var copy = Ember.copy;
   person.get('hasDirtyAttributes'); // false
   ```
 
-  @class ModelFragment
-  @namespace DS
+  @class Fragment
+  @namespace MF
   @extends CoreModel
   @uses Ember.Comparable
   @uses Ember.Copyable
 */
-var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
+var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
     Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 
     @method compare
-    @param a {DS.ModelFragment} the first fragment to compare
-    @param b {DS.ModelFragment} the second fragment to compare
+    @param a {MF.Fragment} the first fragment to compare
+    @param b {MF.Fragment} the second fragment to compare
     @return {Integer} the result of the comparison
   */
   compare: function(f1, f2) {
@@ -87,7 +87,7 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     to other records safely.
 
     @method copy
-    @return {DS.ModelFragment} the newly created fragment
+    @return {MF.Fragment} the newly created fragment
   */
   copy: function() {
     var type = this.constructor;
@@ -140,7 +140,7 @@ var ModelFragment = Model.extend(Ember.Comparable, Ember.Copyable, {
  * and whether it is configured to be polymorphic.
  *
  * @private
- * @param {String} declaredType the type as declared by `DS.hasOneFragment` or `DS.hasManyFragments`
+ * @param {String} declaredType the type as declared by `MF.fragment` or `MF.fragmentArray`
  * @param {Object} options the fragment options
  * @param {Object} data the fragment data
  * @return {String} the actual fragment type
@@ -186,4 +186,4 @@ export function setFragmentOwner(fragment, record, key) {
   return fragment;
 }
 
-export default ModelFragment;
+export default Fragment;

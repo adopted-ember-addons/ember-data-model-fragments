@@ -5,8 +5,8 @@ import JSONSerializer from 'ember-data/serializers/json-serializer';
 import FragmentRootState from './states';
 import {
   internalModelFor,
-  default as ModelFragment
-} from './model';
+  default as Fragment
+} from './fragment';
 
 /**
   @module ember-data.model-fragments
@@ -37,12 +37,12 @@ Store.reopen({
     @param {String} type
     @param {Object} properties a hash of properties to set on the
       newly created fragment.
-    @return {DS.ModelFragment} fragment
+    @return {MF.Fragment} fragment
   */
   createFragment: function(modelName, props) {
     var type = this.modelFor(modelName);
 
-    Ember.assert("The '" + type + "' model must be a subclass of DS.ModelFragment", ModelFragment.detect(type));
+    Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", Fragment.detect(type));
 
     var internalModel = new InternalModel(type, null, this, this.container);
 
@@ -82,7 +82,7 @@ Model.reopen({
     ```javascript
     App.Mascot = DS.Model.extend({
       type: DS.attr('string'),
-      name: DS.hasOneFragment('name')
+      name: MF.fragment('name')
     });
 
     App.Name = DS.Model.extend({
@@ -240,16 +240,16 @@ function getFragmentTransform(container, store, attributeType) {
   var registry = container._registry || container.registry || container;
   var containerKey = 'transform:' + attributeType;
   var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-  var transformType = match[1];
-  var modelName = match[2];
+  var transformName = match[1];
+  var transformType = match[2];
   var polymorphicTypeProp = match[3];
 
   if (!registry.has(containerKey)) {
-    var transformClass = container.lookupFactory('transform:' + transformType);
+    var transformClass = container.lookupFactory('transform:' + transformName);
 
     registry.register(containerKey, transformClass.extend({
       store: store,
-      modelName: modelName,
+      type: transformType,
       polymorphicTypeProp: polymorphicTypeProp
     }));
   }

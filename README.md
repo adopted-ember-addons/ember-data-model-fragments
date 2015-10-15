@@ -1,4 +1,4 @@
-# Ember Data: Model Fragments
+# Ember Data Model Fragments
 
 [![Build Status](https://travis-ci.org/lytics/ember-data.model-fragments.svg)](https://travis-ci.org/lytics/ember-data.model-fragments)
 [![NPM Version](https://badge.fury.io/js/ember-data-model-fragments.svg)](http://badge.fury.io/js/ember-data-model-fragments)
@@ -6,12 +6,11 @@
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
+:warning: The API has changed significantly in preparation for v1.0. Deprecations have been added to all updated APIs with instructions on how to upgrade.
 
-:warning: Ember Data v1.0.0-beta.12 introduced a bug that makes it incompatible with any version of this project.
+## Compatibility
 
-:warning: Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
-
-:warning: Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
+This project makes extensive use of private Ember Data APIs and is therefore sensitive to minor changes in new Ember Data releases, regardless of semver guarantees. Every effort is made to maintain compatibility with the latest version, but updates always take time. See the [contributing](#contributing) section if you'd like to help out :shipit:
 
 Use the following table to decide which version of this project to use with your app:
 
@@ -20,7 +19,13 @@ Use the following table to decide which version of this project to use with your
 | > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
 | v1.0.0-beta.14 | v0.2.8 |
 | >= v1.0.0-beta.15 <= v1.0.0-beta.18 | v0.3.3 |
-| >= v1.13.x | >= v0.4.0 |
+| >= v1.13.x | >= v0.4.x |
+
+#### Notes
+
+- Ember Data v1.0.0-beta.12 introduced a bug that makes it incompatible with any version of this project.
+- Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
+- Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
 
 ## Installation
 
@@ -36,23 +41,23 @@ You may then start creating fragments with:
 $ ember generate fragment foo someAttr:string anotherAttr:boolean
 ```
 
-Which will create the module `app/models/foo.js` which exports a `DS.ModelFragment` class with the given attributes.
+Which will create the module `app/models/foo.js` which exports a `MF.Fragment` class with the given attributes.
 
 ## Example
 
 ```javascript
 App.Person = DS.Model.extend({
-  name      : DS.hasOneFragment('name'),
-  addresses : DS.hasManyFragments('address'),
-  titles    : DS.hasManyFragments()
+  name      : MF.fragment('name'),
+  addresses : MF.fragmentArray('address'),
+  titles    : MF.array()
 });
 
-App.Name = DS.ModelFragment.extend({
+App.Name = MF.Fragment.extend({
   first : DS.attr('string'),
   last  : DS.attr('string')
 });
 
-App.Address = DS.ModelFragment.extend({
+App.Address = MF.Fragment.extend({
   street  : DS.attr('string'),
   city    : DS.attr('string'),
   region  : DS.attr('string'),
@@ -157,17 +162,17 @@ titles.get('length'); // 2
 
 ## Default Values
 
-Ember Data attributes [support a `defaultValue` config option](http://emberjs.com/api/data/classes/DS.html#method_attr) that provides a default value when a model is created through `store#createRecord()`. Similarly, `DS.hasOneFragment` and `DS.hasManyFragments` properties support a `defaultValue` option:
+Ember Data attributes [support a `defaultValue` config option](http://emberjs.com/api/data/classes/DS.html#method_attr) that provides a default value when a model is created through `store#createRecord()`. Similarly, `MF.fragment` and `MF.fragmentArray` properties support a `defaultValue` option:
 
 ```javascript
 App.Person = DS.Model.extend({
-  name      : DS.hasOneFragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : DS.hasManyFragments('address', { defaultValue: [] }),
-  titles    : DS.hasManyFragments(null, { defaultValue: [] })
+  name      : MF.fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
+  addresses : MF.fragmentArray('address', { defaultValue: [] }),
+  titles    : MF.array('string', { defaultValue: [] })
 });
 ```
 
-Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, both `DS.hasOneFragment` and `DS.hasManyFragments` properties will default to `null`. Note that this may cause confusion when creating a record with a `DS.hasManyFragments` property:
+Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, both `MF.fragment` and `MF.fragmentArray` properties will default to `null`. Note that this may cause confusion when creating a record with a `MF.fragmentArray` property:
 
 ```javascript
 var person = store.createRecord('person');
@@ -183,7 +188,7 @@ Like `DS.attr`, the `defaultValue` option can be a function that is invoked to g
 
 ```javascript
 App.Person = DS.Model.extend({
-  name: DS.hasOneFragment('name', {
+  name: MF.fragment('name', {
     defaultValue: function() {
       return {
         first: 'Unsullied',
@@ -198,7 +203,7 @@ App.Person = DS.Model.extend({
 Serializing records with fragment attributes works using a special `DS.Transform` that serializes each fragment or fragment array. This results in fragments being nested in JSON as expected, and avoids the need for any custom serialization logic for most cases. This also means that model fragments can have their own custom serializers, just as normal models can:
 
 ```javascript
-App.Name = DS.ModelFragment.extend({
+App.Name = MF.Fragment.extend({
   given  : DS.attr('string'),
   family : DS.attr('string')
 });
@@ -249,15 +254,15 @@ Nesting of fragments is fully supported:
 ```javascript
 App.User = DS.Model.extend({
   name   : DS.attr('string'),
-  orders : DS.hasManyFragments('order')
+  orders : MF.fragmentArray('order')
 });
 
-App.Order = DS.ModelFragment.extend({
+App.Order = MF.Fragment.extend({
   amount   : DS.attr('string'),
-  products : DS.hasManyFragments('product')
+  products : MF.fragmentArray('product')
 });
 
-App.Product = DS.ModelFragment.extend({
+App.Product = MF.Fragment.extend({
   name  : DS.attr('string'),
   sku   : DS.attr('string'),
   price : DS.attr('string')
@@ -321,7 +326,7 @@ However, note that fragments do not currently support `DS.belongsTo` or `DS.hasM
 
 ## Polymorphism
 
-Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `hasOneFragment` or `hasManyFragments`
+Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `MF.fragment` or `MF.fragmentArray`
 with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to `'type'`.
 
 The `typeKey`'s value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass.
@@ -333,10 +338,10 @@ so to `typeKey`'s value can be `'animal'`, `'elephant'` or `'lion'`.
 App.Zoo = DS.Model.extend({
   name: DS.attr("string"),
   city: DS.attr("string"),
-  animals: DS.hasManyFragments("animal", { polymorphic: true, typeKey: '$type' }),
+  animals: MF.fragmentArray("animal", { polymorphic: true, typeKey: '$type' }),
 });
 
-App.Animal = DS.ModelFragment.extend({
+App.Animal = MF.Fragment.extend({
   name: DS.attr("string"),
 });
 

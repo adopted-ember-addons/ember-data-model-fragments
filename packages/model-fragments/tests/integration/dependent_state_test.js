@@ -1,24 +1,24 @@
 var env, store, Person, Name, Address, people;
 
-QUnit.module("integration/fragments - Dependent State", {
+QUnit.module("integration - Dependent State", {
   setup: function() {
     Person = DS.Model.extend({
-      title     : DS.attr("string"),
-      name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address", { defaultValue: null }),
-      titles    : DS.hasManyFragments(null, { defaultValue: null })
+      title: DS.attr('string'),
+      name: MF.fragment('name'),
+      addresses: MF.fragmentArray('address', { defaultValue: null }),
+      titles: MF.array({ defaultValue: null })
     });
 
-    Name = DS.ModelFragment.extend({
-      first : DS.attr("string"),
-      last  : DS.attr("string")
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string')
     });
 
-    Address = DS.ModelFragment.extend({
-      street  : DS.attr("string"),
-      city    : DS.attr("string"),
-      region  : DS.attr("string"),
-      country : DS.attr("string")
+    Address = MF.Fragment.extend({
+      street: DS.attr('string'),
+      city: DS.attr('string'),
+      region: DS.attr('string'),
+      country: DS.attr('string')
     });
 
     env = setupEnv({
@@ -78,7 +78,7 @@ function pushPerson(id) {
   });
 }
 
-test("changing a `DS.hasOneFragment` fragment property dirties the fragment and owner record", function() {
+test("changing a fragment property dirties the fragment and owner record", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -100,7 +100,7 @@ test("changing a `DS.hasOneFragment` fragment property dirties the fragment and 
   });
 });
 
-test("restoring a `DS.hasOneFragment` fragment to its original state returns the fragment and owner record to a clean state", function() {
+test("restoring a fragment property to its original state returns the fragment and owner record to a clean state", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -123,7 +123,7 @@ test("restoring a `DS.hasOneFragment` fragment to its original state returns the
   });
 });
 
-test("restoring a `DS.hasOneFragment` fragment to its original state when the owner record was dirty returns the fragment to a clean state maintains the owner record's dirty state", function() {
+test("restoring a fragment property to its original state when the owner record was dirty returns the fragment to a clean state maintains the owner record's dirty state", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -149,7 +149,7 @@ test("restoring a `DS.hasOneFragment` fragment to its original state when the ow
   });
 });
 
-test("rolling back the owner record returns a `DS.hasOneFragment` fragment and owner record to a clean state", function() {
+test("rolling back the owner record returns fragment and owner record to a clean state", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -204,7 +204,7 @@ test("a record can be rolled back multiple times", function() {
   });
 });
 
-test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the owner record to a clean state", function() {
+test("rolling back a fragment returns the fragment and the owner record to a clean state", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -229,7 +229,7 @@ test("rolling back a `DS.hasOneFragment` fragment returns the fragment and the o
   });
 });
 
-test("rolling back a `DS.hasOneFragment` fragment when the owner record is dirty returns the fragment to a clean state and maintains the owner record's dirty state", function() {
+test("rolling back a fragment when the owner record is dirty returns the fragment to a clean state and maintains the owner record's dirty state", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -255,7 +255,7 @@ test("rolling back a `DS.hasOneFragment` fragment when the owner record is dirty
   });
 });
 
-test("a `DS.hasOneFragment` fragment property that is set to null can be rolled back", function() {
+test("a fragment property that is set to null can be rolled back", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -273,7 +273,7 @@ test("a `DS.hasOneFragment` fragment property that is set to null can be rolled 
   });
 });
 
-test("a `DS.hasOneFragment` fragment property that is null can be rolled back", function() {
+test("a fragment property that is null can be rolled back", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -374,7 +374,7 @@ test("restoring a fragment array to its original order when the owner record was
   });
 });
 
-test("changing a `DS.hasManyFragments` fragment property dirties the fragment, fragment array, and owner record", function() {
+test("changing a fragment property in a fragment array dirties the fragment, fragment array, and owner record", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -389,7 +389,7 @@ test("changing a `DS.hasManyFragments` fragment property dirties the fragment, f
   });
 });
 
-test("restoring a `DS.hasManyFragments` fragment to its original state returns the fragment, fragment array, and owner record to a clean state", function() {
+test("restoring a fragment in a fragment array property to its original state returns the fragment, fragment array, and owner record to a clean state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -405,7 +405,7 @@ test("restoring a `DS.hasManyFragments` fragment to its original state returns t
   });
 });
 
-test("restoring a `DS.hasManyFragments` fragment to its original state when the fragment array was dirty returns the fragment to a clean state and maintains the fragment array and owner record's dirty state", function() {
+test("restoring a fragment in a fragment array property to its original state when the fragment array was dirty returns the fragment to a clean state and maintains the fragment array and owner record's dirty state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -424,7 +424,7 @@ test("restoring a `DS.hasManyFragments` fragment to its original state when the 
   });
 });
 
-test("restoring a `DS.hasManyFragments` fragment to its original state when the owner record was dirty returns the fragment and fragment array to a clean state maintains the owner record's dirty state", function() {
+test("restoring a fragment in a fragment array property to its original state when the owner record was dirty returns the fragment and fragment array to a clean state maintains the owner record's dirty state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -443,7 +443,7 @@ test("restoring a `DS.hasManyFragments` fragment to its original state when the 
   });
 });
 
-test("rolling back the owner record returns all `DS.hasManyFragments` fragments, the fragment array, and owner record to a clean state", function() {
+test("rolling back the owner record returns all fragments in a fragment array property, the fragment array, and owner record to a clean state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -463,7 +463,7 @@ test("rolling back the owner record returns all `DS.hasManyFragments` fragments,
   });
 });
 
-test("rolling back the owner record returns all `DS.hasManyFragments` primitive values, the array, and the owner record to a clean state", function() {
+test("rolling back the owner record returns all values in an array property, the array, and the owner record to a clean state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -483,7 +483,7 @@ test("rolling back the owner record returns all `DS.hasManyFragments` primitive 
 });
 
 
-test("rolling back a `DS.hasManyFragments` fragment array returns all fragments, the fragment array, and the owner record to a clean state", function() {
+test("rolling back a fragment array returns all fragments, the fragment array, and the owner record to a clean state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -502,7 +502,7 @@ test("rolling back a `DS.hasManyFragments` fragment array returns all fragments,
   });
 });
 
-test("rolling back a `DS.hasManyFragments` fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retain's the owner record's dirty state", function() {
+test("rolling back a fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retain's the owner record's dirty state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -522,7 +522,7 @@ test("rolling back a `DS.hasManyFragments` fragment array when the owner record 
   });
 });
 
-test("rolling back a `DS.hasManyFragments` fragment returns the fragment, fragment array, and owner record to a clean states", function() {
+test("rolling back a fragment in a fragment array property returns the fragment, fragment array, and owner record to a clean states", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -540,7 +540,7 @@ test("rolling back a `DS.hasManyFragments` fragment returns the fragment, fragme
   });
 });
 
-test("rolling back a `DS.hasManyFragments` fragment when the fragment array is dirty returns the fragment to a clean state and maintains the fragment array and owner record's dirty state", function() {
+test("rolling back a fragment in a fragment array property when the fragment array is dirty returns the fragment to a clean state and maintains the fragment array and owner record's dirty state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -559,7 +559,7 @@ test("rolling back a `DS.hasManyFragments` fragment when the fragment array is d
   });
 });
 
-test("rolling back a `DS.hasManyFragments` fragment when the owner record is dirty returns the fragment and fragment array to a clean state and maintains the owner record's dirty state", function() {
+test("rolling back a fragment in a fragment array property when the owner record is dirty returns the fragment and fragment array to a clean state and maintains the owner record's dirty state", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -578,7 +578,7 @@ test("rolling back a `DS.hasManyFragments` fragment when the owner record is dir
   });
 });
 
-test("a `DS.hasManyFragments` fragment property that is set to null can be rolled back", function() {
+test("a fragment array property that is set to null can be rolled back", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
@@ -596,7 +596,7 @@ test("a `DS.hasManyFragments` fragment property that is set to null can be rolle
   });
 });
 
-test("a `DS.hasManyFragments` fragment property that is null can be rolled back", function() {
+test("a fragment array property that is null can be rolled back", function() {
   store.push({
     type: 'person',
     id: 1,

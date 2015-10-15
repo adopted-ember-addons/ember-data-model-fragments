@@ -1,16 +1,16 @@
 var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit/fragments - DS.hasOneFragment", {
+QUnit.module("unit - `MF.fragment`", {
   setup: function() {
     Person = DS.Model.extend({
-      name  : DS.hasOneFragment("name"),
-      title : DS.attr('string')
+      name: MF.fragment('name'),
+      title: DS.attr('string')
     });
 
-    Name = DS.ModelFragment.extend({
-      first : DS.attr("string"),
-      last  : DS.attr("string")
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string')
     });
 
     env = setupEnv({
@@ -31,7 +31,7 @@ QUnit.module("unit/fragments - DS.hasOneFragment", {
   }
 });
 
-test("object literals are converted to instances of `DS.ModelFragment`", function() {
+test("object literals are converted to instances of `MF.Fragment`", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -44,7 +44,7 @@ test("object literals are converted to instances of `DS.ModelFragment`", functio
   });
 
   return store.find('person', 1).then(function(person) {
-    ok(person.get('name') instanceof Name, "name property is an `DS.ModelFragment` instance");
+    ok(person.get('name') instanceof Name, "name property is an `MF.Fragment` instance");
 
     equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
   });
@@ -153,7 +153,7 @@ test("fragments are created from object literals when creating a record", functi
     name: name
   });
 
-  ok(person.get('name') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+  ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
   equal(person.get('name.first'), name.first, "fragment has correct values");
 });
 
@@ -174,7 +174,7 @@ test("setting a fragment to an object literal creates a new fragment", function(
   return store.find('person', 1).then(function(person) {
     person.set('name', name);
 
-    ok(person.get('name') instanceof DS.ModelFragment, "a `DS.ModelFragment` instance is created");
+    ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
     equal(person.get('name.first'), name.first, "fragment has correct values");
   });
 });
@@ -213,7 +213,7 @@ test("fragments can have default values", function() {
   };
 
   var Ship = DS.Model.extend({
-    name: DS.hasOneFragment("name", { defaultValue: defaultValue }),
+    name: MF.fragment("name", { defaultValue: defaultValue }),
   });
 
   env.registry.register('model:ship', Ship);
@@ -236,7 +236,7 @@ test("fragment default values can be functions", function() {
   };
 
   var Sword = DS.Model.extend({
-    name: DS.hasOneFragment("name", { defaultValue: function() { return defaultValue; } }),
+    name: MF.fragment("name", { defaultValue: function() { return defaultValue; } }),
   });
 
   env.registry.register('model:sword', Sword);

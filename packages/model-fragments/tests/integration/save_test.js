@@ -1,28 +1,28 @@
 var env, store, Person, Name, Address;
 
-QUnit.module("integration/fragments - Persisting Records With Fragments", {
+QUnit.module("integration - Persistence", {
   setup: function() {
     Person = DS.Model.extend({
-      name      : DS.hasOneFragment("name"),
-      addresses : DS.hasManyFragments("address", { defaultValue: null }),
+      name: MF.fragment('name'),
+      addresses: MF.fragmentArray('address', { defaultValue: null }),
     });
 
-    Name = DS.ModelFragment.extend({
-      first  : DS.attr("string"),
-      last   : DS.attr("string")
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string')
     });
 
-    Address = DS.ModelFragment.extend({
-      street  : DS.attr("string"),
-      city    : DS.attr("string"),
-      region  : DS.attr("string"),
-      country : DS.attr("string")
+    Address = MF.Fragment.extend({
+      street: DS.attr('string'),
+      city: DS.attr('string'),
+      region: DS.attr('string'),
+      country : DS.attr('string')
     });
 
     env = setupEnv({
-      person  : Person,
-      name    : Name,
-      address : Address
+      person: Person,
+      name: Name,
+      address: Address
     });
 
     store = env.store;
@@ -69,8 +69,8 @@ test("persisting the owner record in a clean state maintains clean state", funct
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all fragment array fragments are clean");
     ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
@@ -113,10 +113,10 @@ test("persisting the owner record when a fragment is dirty moves owner record, f
     var addresses = person.get('addresses');
     var address = addresses.get('firstObject');
 
-    equal(name.get('first'), 'Arya', "`DS.hasOneFragment` change is persisted");
-    equal(address.get('street'), '1 Godswood', "`DS.hasManyFragments` change is persisted");
-    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    equal(name.get('first'), 'Arya', "change is persisted");
+    equal(address.get('street'), '1 Godswood', "fragment array change is persisted");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all fragment array fragments are clean");
     ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
@@ -154,8 +154,8 @@ test("persisting a new owner record moves the owner record, fragment array, and 
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all fragment array fragments are clean");
     ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
@@ -164,8 +164,8 @@ test("persisting a new owner record moves the owner record, fragment array, and 
 test("a new record can be persisted with null fragments", function() {
   var person = store.createRecord('person');
 
-  equal(person.get('name'), null, "`DS.hasOneFragment` property is null");
-  equal(person.get('addresses'), null, "`DS.hasManyFragments` property is null");
+  equal(person.get('name'), null, "fragment property is null");
+  equal(person.get('addresses'), null, "fragment array property is null");
 
   env.adapter.createRecord = function() {
     var payload = { id: 1 };
@@ -174,8 +174,8 @@ test("a new record can be persisted with null fragments", function() {
   };
 
   return person.save().then(function(person) {
-    equal(person.get('name'), null, "`DS.hasOneFragment` property is still null");
-    equal(person.get('addresses'), null, "`DS.hasManyFragments` property is still null");
+    equal(person.get('name'), null, "fragment property is still null");
+    equal(person.get('addresses'), null, "fragment array property is still null");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
@@ -218,12 +218,12 @@ test("the adapter can update fragments on save", function() {
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    ok(!name.get('hasDirtyAttributes'), "`DS.hasOneFragment` fragment is clean");
-    ok(!addresses.isAny('hasDirtyAttributes'), "all `DS.hasManyFragments` fragments are clean");
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!addresses.isAny('hasDirtyAttributes'), "all fragment array fragments are clean");
     ok(!addresses.get('hasDirtyAttributes'), "fragment array is clean");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
-    equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
-    equal(addresses.get('firstObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
+    equal(name.get('first'), 'Ned', "fragment correctly updated");
+    equal(addresses.get('firstObject.street'), '1 Godswood', "fragment array fragment correctly updated");
   });
 });
 
@@ -273,10 +273,10 @@ test("existing fragments are updated on save", function() {
     address = addresses.get('firstObject');
     return person.save();
   }).then(function() {
-    equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
-    equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
-    equal(addresses.get('lastObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
-    equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
+    equal(name.get('first'), 'Ned', "fragment correctly updated");
+    equal(address.get('street'), '1 Red Keep', "fragment array fragment correctly updated");
+    equal(addresses.get('lastObject.street'), '1 Godswood', "fragment array fragment correctly updated");
+    equal(addresses.get('length'), 2, "fragment array fragment correctly updated");
   });
 });
 
@@ -322,10 +322,10 @@ test("newly created fragments are updated on save", function() {
   var addresses = person.get('addresses');
 
   return person.save().then(function() {
-    equal(name.get('first'), 'Ned', "`DS.hasOneFragment` fragment correctly updated");
-    equal(address.get('street'), '1 Red Keep', "`DS.hasManyFragments` fragment correctly updated");
-    equal(addresses.get('lastObject.street'), '1 Godswood', "`DS.hasManyFragments` fragment correctly updated");
-    equal(addresses.get('length'), 2, "`DS.hasManyFragments` fragment correctly updated");
+    equal(name.get('first'), 'Ned', "fragment correctly updated");
+    equal(address.get('street'), '1 Red Keep', "fragment array fragment correctly updated");
+    equal(addresses.get('lastObject.street'), '1 Godswood', "fragment array fragment correctly updated");
+    equal(addresses.get('length'), 2, "fragment array fragment correctly updated");
   });
 });
 
@@ -371,8 +371,8 @@ test("the adapter can update fragments on reload", function() {
     var name = person.get('name');
     var addresses = person.get('addresses');
 
-    equal(name.get('first'), 'Bran', "`DS.hasOneFragment` fragment correctly updated");
-    equal(addresses.get('firstObject.street'), '1 Broken Tower', "`DS.hasManyFragments` fragment correctly updated");
+    equal(name.get('first'), 'Bran', "fragment correctly updated");
+    equal(addresses.get('firstObject.street'), '1 Broken Tower', "fragment array fragment correctly updated");
   });
 });
 
@@ -423,7 +423,7 @@ test("the adapter can update fragments without infinite loops when CPs are eager
 // means that the property actually _shouldn't_ be notified. Doing so requires
 // value diffing of deserialized model data, which means either saving a copy of
 // the data before giving it to the fragment
-test("`DS.hasManyFragments` array properties are notified on save", function() {
+test("fragment array properties are notified on save", function() {
   // The extra assertion comes from deprecation checking
   expect(2);
 
@@ -469,13 +469,13 @@ test("`DS.hasManyFragments` array properties are notified on save", function() {
   });
 });
 
-test("`DS.hasManyFragments` properties are notifed on reload", function() {
+test("fragment array properties are notifed on reload", function() {
   // The extra assertion comes from deprecation checking
   expect(2);
 
   var Army = DS.Model.extend({
     name     : DS.attr('string'),
-    soldiers : DS.hasManyFragments(null, { defaultValue: [] })
+    soldiers : MF.array({ defaultValue: [] })
   });
 
   env.registry.register('model:army', Army);

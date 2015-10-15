@@ -4,7 +4,7 @@ import {
   internalModelFor,
   setFragmentOwner,
   getActualFragmentType
-} from '../model';
+} from '../fragment';
 import isInstanceOfType from '../../util/instance-of-type';
 import map from '../../util/map';
 
@@ -64,10 +64,10 @@ function normalizeFragmentArray(array, content, objs) {
 /**
   A state-aware array of fragments that is tied to an attribute of a `DS.Model`
   instance. `FragmentArray` instances should not be created directly, instead
-  use the `DS.hasManyFragments` attribute.
+  use `MF.fragmentArray` or `MF.array`.
 
   @class FragmentArray
-  @namespace DS
+  @namespace MF
   @extends StatefulArray
 */
 var FragmentArray = StatefulArray.extend({
@@ -206,8 +206,8 @@ var FragmentArray = StatefulArray.extend({
     `addObject`.
 
     @method addFragment
-    @param {DS.ModelFragment} fragment
-    @return {DS.ModelFragment} the newly added fragment
+    @param {MF.Fragment} fragment
+    @return {MF.Fragment} the newly added fragment
   */
   addFragment: function(fragment) {
     return this.addObject(fragment);
@@ -217,8 +217,8 @@ var FragmentArray = StatefulArray.extend({
     Removes the given fragment from the array. Alias for `removeObject`.
 
     @method removeFragment
-    @param {DS.ModelFragment} fragment
-    @return {DS.ModelFragment} the removed fragment
+    @param {MF.Fragment} fragment
+    @return {MF.Fragment} the removed fragment
   */
   removeFragment: function(fragment) {
     return this.removeObject(fragment);
@@ -229,8 +229,8 @@ var FragmentArray = StatefulArray.extend({
     of the fragment array
 
     @method createFragment
-    @param {DS.ModelFragment} fragment
-    @return {DS.ModelFragment} the newly added fragment
+    @param {MF.Fragment} fragment
+    @return {MF.Fragment} the newly added fragment
     */
   createFragment: function(props) {
     var record = get(this, 'owner');

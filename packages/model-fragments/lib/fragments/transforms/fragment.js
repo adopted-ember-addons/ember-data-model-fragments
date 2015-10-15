@@ -9,16 +9,16 @@ import JSONAPISerializer from 'ember-data/serializers/json-api-serializer';
 var get = Ember.get;
 
 /**
-  Transform for `DS.hasOneFragment` fragment attribute which delegates work to
+  Transform for `MF.fragment` fragment attribute which delegates work to
   the fragment type's serializer
 
   @class FragmentTransform
-  @namespace DS
+  @namespace MF
   @extends DS.Transform
 */
 var FragmentTransform = Transform.extend({
   store: null,
-  modelName: null,
+  type: null,
   polymorphicTypeProp: null,
 
   deserialize: function deserializeFragment(data) {
@@ -41,7 +41,7 @@ var FragmentTransform = Transform.extend({
   },
 
   modelNameFor: function modelNameFor(data) {
-    var modelName = get(this, 'modelName');
+    var modelName = get(this, 'type');
     var polymorphicTypeProp = get(this, 'polymorphicTypeProp');
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {

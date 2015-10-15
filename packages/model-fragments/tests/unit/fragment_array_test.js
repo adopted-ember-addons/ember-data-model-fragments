@@ -1,14 +1,14 @@
 var env, store, Person, Name;
 
-QUnit.module("unit/fragments - DS.FragmentArray", {
+QUnit.module("unit - `MF.FragmentArray`", {
   setup: function() {
     Person = DS.Model.extend({
-      names: DS.hasManyFragments("name", { defaultValue: [] })
+      names: MF.fragmentArray('name', { defaultValue: [] })
     });
 
-    Name = DS.ModelFragment.extend({
-      first : DS.attr("string"),
-      last  : DS.attr("string")
+    Name = MF.Fragment.extend({
+      first: DS.attr('string'),
+      last: DS.attr('string')
     });
 
     env = setupEnv({

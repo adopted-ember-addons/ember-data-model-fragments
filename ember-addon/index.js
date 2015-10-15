@@ -10,5 +10,13 @@ module.exports = {
       development: app.bowerDirectory + '/ember-data.model-fragments/dist/ember-data.model-fragments.js',
       production: app.bowerDirectory + '/ember-data.model-fragments/dist/ember-data.model-fragments.prod.js'
     });
+
+    app.import('vendor/ember-data-model-fragments/shim.js', {
+      exports: {
+        'model-fragments': [
+          'default'
+        ]
+      }
+    });
   }
 };
