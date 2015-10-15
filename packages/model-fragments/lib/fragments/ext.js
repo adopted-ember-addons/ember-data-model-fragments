@@ -13,6 +13,7 @@ import {
 */
 
 var keys = Object.keys || Ember.keys;
+var create = Object.create || Ember.create;
 
 /**
   @class Store
@@ -203,7 +204,7 @@ decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushC
   @method adapterDidCommit
 */
 decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
-  var attributes = (args[0] && args[0].attributes) || {};
+  var attributes = (args[0] && args[0].attributes) || create(null);
   var fragment;
 
   // Notify fragments that the record was committed
