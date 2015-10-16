@@ -87,14 +87,14 @@ function pushPerson(id) {
   });
 }
 
-test("properties are instances of `DS.FragmentArray`", function() {
+test("properties are instances of `MF.FragmentArray`", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
     ok(Ember.isArray(addresses), "property is array-like");
-    ok(addresses instanceof DS.FragmentArray, "property is an instance of `DS.FragmentArray`");
+    ok(addresses instanceof MF.FragmentArray, "property is an instance of `MF.FragmentArray`");
   });
 });
 

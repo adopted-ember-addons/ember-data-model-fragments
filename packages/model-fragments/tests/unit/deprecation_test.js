@@ -34,38 +34,6 @@ QUnit.module("unit - Deprecations", {
   }
 });
 
-test("defining a `DS.hasOneFragment` property is deprecated", function() {
-  expectDeprecation(function() {
-    DS.Model.extend({
-      name: DS.hasOneFragment('name')
-    });
-  }, "The `DS.hasOneFragment` property has been deprecated in favor of `MF.fragment`");
-});
-
-test("defining a `DS.hasManyFragments` property is deprecated", function() {
-  expectDeprecation(function() {
-    DS.Model.extend({
-      names: DS.hasManyFragments('name')
-    });
-  }, "The `DS.hasManyFragments` property has been deprecated in favor of `MF.fragmentArray`");
-});
-
-test("defining a `DS.hasManyFragments` property without a model is deprecated", function() {
-  expectDeprecation(function() {
-    DS.Model.extend({
-      names: DS.hasManyFragments()
-    });
-  }, "The `DS.hasManyFragments` property without a model name has been deprecated in favor of `MF.array`");
-});
-
-test("defining a `DS.fragmentOwner` property is deprecated", function() {
-  expectDeprecation(function() {
-    MF.Fragment.extend({
-      names: DS.fragmentOwner()
-    });
-  }, "The `DS.fragmentOwner` property has been deprecated in favor of `MF.fragmentOwner`");
-});
-
 test("getting `isDirty` and calling `rollback` on a fragment is deprecated", function() {
   store.push({
     type: 'person',
