@@ -1,10 +1,11 @@
-var env, store, Person, Name, Address;
+var env, store, Person, Name, Address, Hobby;
 
 QUnit.module("integration - Persistence", {
   setup: function() {
     Person = DS.Model.extend({
       name: MF.fragment('name'),
-      addresses: MF.fragmentArray('address', { defaultValue: null }),
+      addresses: MF.fragmentArray('address'),
+      hobbies: MF.fragmentArray("hobby", { defaultValue: null })
     });
 
     Name = MF.Fragment.extend({
@@ -19,10 +20,15 @@ QUnit.module("integration - Persistence", {
       country : DS.attr('string')
     });
 
+    Hobby = MF.Fragment.extend({
+      name: DS.attr('string')
+    });
+
     env = setupEnv({
       person: Person,
       name: Name,
-      address: Address
+      address: Address,
+      hobby: Hobby
     });
 
     store = env.store;
@@ -36,6 +42,7 @@ QUnit.module("integration - Persistence", {
     Name = null;
     Person = null;
     Address = null;
+    Hobby = null;
   }
 });
 
@@ -165,7 +172,7 @@ test("a new record can be persisted with null fragments", function() {
   var person = store.createRecord('person');
 
   equal(person.get('name'), null, "fragment property is null");
-  equal(person.get('addresses'), null, "fragment array property is null");
+  equal(person.get('hobbies'), null, "fragment array property is null");
 
   env.adapter.createRecord = function() {
     var payload = { id: 1 };
@@ -175,7 +182,7 @@ test("a new record can be persisted with null fragments", function() {
 
   return person.save().then(function(person) {
     equal(person.get('name'), null, "fragment property is still null");
-    equal(person.get('addresses'), null, "fragment array property is still null");
+    equal(person.get('hobbies'), null, "fragment array property is still null");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
@@ -475,7 +482,7 @@ test("fragment array properties are notifed on reload", function() {
 
   var Army = DS.Model.extend({
     name     : DS.attr('string'),
-    soldiers : MF.array({ defaultValue: [] })
+    soldiers : MF.array()
   });
 
   env.registry.register('model:army', Army);

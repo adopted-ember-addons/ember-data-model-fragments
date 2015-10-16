@@ -44,8 +44,8 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   expect(8);
 
   Person.reopen({
-    houses   : MF.fragmentArray('house', { defaultValue: [] }),
-    children : MF.array({ defaultValue: [] })
+    houses   : MF.fragmentArray('house'),
+    children : MF.array()
   });
 
   var person = {
@@ -129,7 +129,7 @@ test("fragment properties are serialized as normal attributes using their own se
 
 test("serializing a fragment array creates a new array with contents the result of serializing each fragment", function() {
   Person.reopen({
-    names: MF.fragmentArray('name', { defaultValue: [] }),
+    names: MF.fragmentArray('name'),
   });
 
   var names = [

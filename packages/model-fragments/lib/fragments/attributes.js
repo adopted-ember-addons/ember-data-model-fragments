@@ -173,7 +173,7 @@ function fragment(declaredModelName, options) {
 
   ```javascript
   App.Person = DS.Model.extend({
-    addresses: MF.fragmentArray('address', { defaultValue: null })
+    addresses: MF.fragmentArray('address')
   });
 
   App.Address = MF.Fragment.extend({
@@ -366,13 +366,12 @@ function fragmentOwner() {
 function getDefaultValue(record, options, type) {
   var value;
 
-  Ember.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
-    "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || 'defaultValue' in options);
-
-  if (typeof options.defaultValue === "function") {
+  if (typeof options.defaultValue === 'function') {
     value = options.defaultValue();
   } else if ('defaultValue' in options) {
     value = options.defaultValue;
+  } else if (type === 'array') {
+    value = [];
   } else {
     return null;
   }

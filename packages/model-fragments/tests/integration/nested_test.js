@@ -4,17 +4,17 @@ QUnit.module("integration - Nested fragments", {
   setup: function() {
     User = DS.Model.extend({
       info: MF.fragment('info'),
-      orders: MF.fragmentArray('order', { defaultValue: [] })
+      orders: MF.fragmentArray('order')
     });
 
     Info = MF.Fragment.extend({
       name: DS.attr('string'),
-      notes: MF.array({ defaultValue: [] })
+      notes: MF.array()
     });
 
     Order = MF.Fragment.extend({
       amount: DS.attr('string'),
-      products: MF.fragmentArray('product', { defaultValue: [] })
+      products: MF.fragmentArray('product')
     });
 
     Product = MF.Fragment.extend({

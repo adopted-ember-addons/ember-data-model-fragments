@@ -4,7 +4,7 @@ QUnit.module("unit - `MF.array`", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.attr('string'),
-      titles: MF.array('string', { defaultValue: null })
+      titles: MF.array('string')
     });
 
     env = setupEnv({
@@ -72,6 +72,14 @@ test("setting to null is allowed", function() {
   });
 });
 
+test("array properties default to an empty array-ish", function() {
+  var person = store.createRecord('person', {
+    name: 'Boros Blount'
+  });
+
+  deepEqual(person.get('titles').toArray(), [], "default value is correct");
+});
+
 test("array properties can have default values", function() {
   Person.reopen({
     titles: MF.array({ defaultValue: [ 'Ser' ] })
@@ -82,9 +90,8 @@ test("array properties can have default values", function() {
   });
 
   ok(person.get('titles.length'), 1, "default value length is correct");
-  ok(person.get('titles.firstObject'), 'Ser', "default value is correct");
+  equal(person.get('titles.firstObject'), 'Ser', "default value is correct");
 });
-
 
 test("default values can be functions", function() {
   Person.reopen({
@@ -96,5 +103,5 @@ test("default values can be functions", function() {
   });
 
   ok(person.get('titles.length'), 1, "default value length is correct");
-  ok(person.get('titles.firstObject'), 'Viper', "default value is correct");
+  equal(person.get('titles.firstObject'), 'Viper', "default value is correct");
 });

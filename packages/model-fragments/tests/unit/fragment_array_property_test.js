@@ -1,11 +1,12 @@
-var env, store, Person, Address, people;
+var env, store, Person, Address, Hobby, people;
 var all = Ember.RSVP.all;
 
 QUnit.module("unit - `MF.fragmentArray`", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.attr('string'),
-      addresses: MF.fragmentArray('address', { defaultValue: null })
+      addresses: MF.fragmentArray('address'),
+      hobbies: MF.fragmentArray('hobby', { defaultValue: null })
     });
 
     Address = MF.Fragment.extend({
@@ -15,9 +16,14 @@ QUnit.module("unit - `MF.fragmentArray`", {
       country: DS.attr('string')
     });
 
+    Hobby = MF.Fragment.extend({
+      name: DS.attr('string')
+    });
+
     env = setupEnv({
       person: Person,
-      address: Address
+      address: Address,
+      hobby: Hobby
     });
 
     store = env.store;
@@ -68,6 +74,7 @@ QUnit.module("unit - `MF.fragmentArray`", {
     store = null;
     Person = null;
     Address = null;
+    Hobby = null;
     people = null;
   }
 });
@@ -172,6 +179,46 @@ test("setting to an array of fragments is allowed", function() {
     equal(person.get('addresses'), addresses, "fragment array is the same object");
     equal(person.get('addresses.length'), 1, "fragment array has the correct length");
     equal(person.get('addresses.firstObject'), address, "fragment array contains the new fragment");
+  });
+});
+
+test("defaults to an empty array", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {}
+  });
+
+  store.push({
+    type: 'person',
+    id: 2,
+    attributes: {}
+  });
+
+  return store.find('person', 1).then(function(person) {
+    ok(Ember.isArray(person.get('addresses')), "defaults to an array");
+    ok(Ember.isEmpty(person.get('addresses')), "default array is empty");
+
+    store.find('person', 2).then(function(person2) {
+      ok(person.get('addresses') !== person2.get('addresses'), "default array is unique");
+    });
+  });
+});
+
+test("default value can be null", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    equal(person.get('hobbies'), null, "defaults to null");
+
+    var hobbies = [
+      store.createFragment('hobby', {
+        name: 'guitar'
+      })
+    ];
+
+    person.set('hobbies', hobbies);
+    equal(person.get('hobbies.length'), 1, "can be set to an array");
   });
 });
 

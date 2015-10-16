@@ -167,8 +167,8 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 ```javascript
 App.Person = DS.Model.extend({
   name      : MF.fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : MF.fragmentArray('address', { defaultValue: [] }),
-  titles    : MF.array('string', { defaultValue: [] })
+  addresses : MF.fragmentArray('address'),
+  titles    : MF.array('string')
 });
 ```
 

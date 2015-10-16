@@ -6,7 +6,7 @@ QUnit.module("unit - Polymorphism", {
       name: DS.attr('string'),
       city: DS.attr('string'),
       star: MF.fragment('animal', { polymorphic: true, typeKey: '$type' }),
-      animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type', defaultValue: [] }),
+      animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
     });
 
     Animal = MF.Fragment.extend({

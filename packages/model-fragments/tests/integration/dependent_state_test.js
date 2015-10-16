@@ -1,12 +1,13 @@
-var env, store, Person, Name, Address, people;
+var env, store, Person, Name, Address, Hobby, people;
 
 QUnit.module("integration - Dependent State", {
   setup: function() {
     Person = DS.Model.extend({
       title: DS.attr('string'),
       name: MF.fragment('name'),
-      addresses: MF.fragmentArray('address', { defaultValue: null }),
-      titles: MF.array({ defaultValue: null })
+      addresses: MF.fragmentArray('address'),
+      titles: MF.array(),
+      hobbies: MF.fragmentArray('hobby', { defaultValue: null })
     });
 
     Name = MF.Fragment.extend({
@@ -21,10 +22,15 @@ QUnit.module("integration - Dependent State", {
       country: DS.attr('string')
     });
 
+    Hobby = MF.Fragment.extend({
+      name: DS.attr('string')
+    });
+
     env = setupEnv({
       person: Person,
       name: Name,
-      address: Address
+      address: Address,
+      hobby: Hobby
     });
 
     store = env.store;
@@ -66,6 +72,7 @@ QUnit.module("integration - Dependent State", {
     Person = null;
     Address = null;
     Name = null;
+    Hobby = null;
     people = null;
   }
 });
@@ -597,6 +604,29 @@ test("a fragment array property that is set to null can be rolled back", functio
 });
 
 test("a fragment array property that is null can be rolled back", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var hobbies = person.get('hobbies');
+
+    equal(hobbies, null, "property is null");
+
+    person.set('hobbies', [
+      store.createFragment('hobby', {
+        name: 'guitar'
+      })
+    ]);
+
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
+
+    person.rollbackAttributes();
+
+    equal(person.get('hobbies'), null, "property is null again");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
+  });
+});
+
+test("a fragment array property that is empty can be rolled back", function() {
   store.push({
     type: 'person',
     id: 1,
@@ -606,7 +636,7 @@ test("a fragment array property that is null can be rolled back", function() {
   return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
-    equal(addresses, null, "property is null");
+    ok(Ember.isArray(addresses) && Ember.isEmpty(addresses), "property is an empty array");
 
     person.set('addresses', [
       store.createFragment('address', {
@@ -621,7 +651,7 @@ test("a fragment array property that is null can be rolled back", function() {
 
     person.rollbackAttributes();
 
-    equal(person.get('addresses'), null, "property is null again");
+    ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), "property is an empty array again");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });

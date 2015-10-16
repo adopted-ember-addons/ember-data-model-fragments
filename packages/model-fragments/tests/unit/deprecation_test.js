@@ -168,27 +168,3 @@ test("getting `isDirty` and calling `rollback` on an untyped fragment array is d
     }, /Using array\.rollback\(\) has been deprecated/);
   });
 });
-
-test("creating a record with a fragment array property with no `defaultValue` logs a warning", function() {
-  Person.reopen({
-    titles: MF.fragmentArray(),
-  });
-
-  expectWarning(function() {
-    var person = store.createRecord('person');
-
-    person.get('titles');
-  }, /The default value of fragment array properties will change from `null` to an empty array in v1\.0/);
-});
-
-test("creating a record with a fragment array property with a `defaultValue` does not log a warning", function() {
-  Person.reopen({
-    titles: MF.fragmentArray({ defaultValue: [] }),
-  });
-
-  expectNoWarning(function() {
-    var person = store.createRecord('person');
-
-    person.getProperties('titles', 'name');
-  });
-});
