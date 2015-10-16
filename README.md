@@ -172,7 +172,7 @@ App.Person = DS.Model.extend({
 });
 ```
 
-Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, both `MF.fragment` and `MF.fragmentArray` properties will default to `null`. Note that this may cause confusion when creating a record with a `MF.fragmentArray` property:
+Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `MF.fragment` properties default to `null` and `MF.fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `MF.fragmentArray` property:
 
 ```javascript
 var person = store.createRecord('person');
