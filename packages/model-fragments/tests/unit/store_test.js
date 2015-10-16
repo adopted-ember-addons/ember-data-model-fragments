@@ -40,3 +40,25 @@ test("attempting to create a fragment type that does not inherit from `MF.Fragme
     store.createFragment('person');
   }, "an error is thrown when given a bad type");
 });
+
+test("the default fragment serializer does not use the application serializer", function() {
+  var Serializer = DS.JSONAPISerializer.extend();
+  env.registry.register('serializer:application', Serializer);
+
+  ok(!(store.serializerFor('name') instanceof Serializer), "fragment serializer fallback is not `DS.JSONAPISerializer`");
+  ok(store.serializerFor('name') instanceof DS.JSONSerializer, "fragment serializer fallback is correct");
+});
+
+test("the default fragment serializer does not use the adapter's `defaultSerializer`", function() {
+  env.adapter.set('defaultSerializer', '-json-api');
+
+  ok(!(store.serializerFor('name') instanceof DS.JSONAPISerializer), "fragment serializer fallback is not `DS.JSONAPISerializer`");
+  ok(store.serializerFor('name') instanceof DS.JSONSerializer, "fragment serializer fallback is correct");
+});
+
+test("the default fragment serializer is `serializer:-fragment` if registered", function() {
+  var Serializer = DS.JSONSerializer.extend();
+  env.registry.register('serializer:-fragment', Serializer);
+
+  ok(store.serializerFor('name') instanceof Serializer, "fragment serializer fallback is correct");
+});

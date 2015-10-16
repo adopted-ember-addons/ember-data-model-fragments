@@ -65,6 +65,40 @@ Store.reopen({
     fragment._isFragment = true;
 
     return fragment;
+  },
+
+  /**
+    Changes serializer fallbacks for fragments to use `serializer:-fragment`
+    if registered, then uses the default serializer.
+
+    @method serializerFor
+    @private
+    @param {String} modelName the record to serialize
+    @return {DS.Serializer}
+  */
+  serializerFor: function(modelOrClass) {
+    var modelName;
+
+    if (typeof modelOrClass === 'string') {
+      modelName = modelOrClass;
+    } else {
+      modelName = modelOrClass.modelName;
+    }
+
+    var type = this.modelFor(modelName);
+
+    // For fragments, don't use the application serializer or adapter default
+    // as a fallbacks
+    if (Fragment.detect(type)) {
+      var fallbacks = [
+        '-fragment',
+        '-default'
+      ];
+
+      return this.lookupSerializer(modelName, fallbacks);
+    }
+
+    return this._super(modelOrClass);
   }
 });
 
