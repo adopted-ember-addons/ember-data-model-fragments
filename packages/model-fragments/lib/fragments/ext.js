@@ -9,7 +9,7 @@ import {
 } from './fragment';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 var keys = Object.keys || Ember.keys;

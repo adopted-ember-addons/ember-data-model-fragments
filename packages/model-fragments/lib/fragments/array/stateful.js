@@ -2,7 +2,7 @@ import Ember from 'ember';
 import { fragmentDidDirty, fragmentDidReset } from '../states';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 var get = Ember.get;

@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  description: 'Generates an ember-data.model-fragments model.',
+  description: 'Generates an ember-data-model-fragments model.',
 
   anonymousOptions: [
     'name',

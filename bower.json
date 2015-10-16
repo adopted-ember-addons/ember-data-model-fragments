@@ -1,8 +1,8 @@
 {
-  "name": "ember-data.model-fragments",
+  "name": "ember-data-model-fragments",
   "version": "0.4.3",
   "license": "MIT",
-  "main": "dist/ember-data.model-fragments.js",
+  "main": "dist/ember-data-model-fragments.js",
   "ignore": [
     "bower_components",
     "node_modules",

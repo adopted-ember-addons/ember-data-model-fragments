@@ -14,7 +14,7 @@ import {
 import isInstanceOfType from '../util/instance-of-type';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 var get = Ember.get;
