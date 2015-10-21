@@ -186,4 +186,24 @@ export function setFragmentOwner(fragment, record, key) {
   return fragment;
 }
 
+// Creates a fragment and sets its owner to the given record
+export function createFragment(store, declaredModelName, record, key, options, data) {
+  var actualModelName = getActualFragmentType(declaredModelName, options, data);
+  var fragment = store.createFragment(actualModelName);
+
+  setFragmentOwner(fragment, record, key);
+
+  internalModelFor(fragment).setupData({
+    attributes: data
+  });
+
+  return fragment;
+}
+
+// Determine whether an object is a fragment instance using a stamp to reduce
+// the number of instanceof checks
+export function isFragment(obj) {
+  return obj && obj._isFragment;
+}
+
 export default Fragment;

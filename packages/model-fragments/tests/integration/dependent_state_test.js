@@ -107,6 +107,55 @@ test("changing a fragment property dirties the fragment and owner record", funct
   });
 });
 
+test("setting a fragment property to an object literal dirties the fragment and owner record", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: "Visenya",
+        last: "Targaryen"
+      }
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var name = person.get('name');
+
+    person.set('name', {
+      first: 'Rhaenys',
+    });
+
+    ok(name.get('hasDirtyAttributes'), "fragment is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
+  });
+});
+
+test("setting a fragment property with an object literal to the same value does not dirty the fragment or owner record", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: "Samwell",
+        last: "Tarly"
+      }
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var name = person.get('name');
+
+    person.set('name', {
+      first: "Samwell",
+      last: "Tarly"
+    });
+
+    ok(!name.get('hasDirtyAttributes'), "fragment is clean");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
+  });
+});
+
 test("restoring a fragment property to its original state returns the fragment and owner record to a clean state", function() {
   store.push({
     type: 'person',
@@ -299,6 +348,37 @@ test("a fragment property that is null can be rolled back", function() {
     person.rollbackAttributes();
 
     equal(person.get('name'), null, "property is null again");
+    ok(!person.get('hasDirtyAttributes'), "owner record is clean");
+  });
+});
+
+test("changing a fragment array property with object literals dirties the fragment and owner record", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var addresses = person.get('addresses');
+
+    addresses.pushObject({
+      street: "1 Dungeon Cell",
+      city: "King's Landing",
+      region: "Crownlands",
+      country: "Westeros"
+    });
+
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
+  });
+});
+
+test("setting a fragment property with object literals to the same values does not dirty the fragment or owner record", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var addresses = person.get('addresses');
+
+    person.set('addresses', people[0].addresses);
+
+    ok(!addresses.get('hasDirtyAttributes'), "fragment is clean");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
