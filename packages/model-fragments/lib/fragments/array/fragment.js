@@ -3,7 +3,8 @@ import StatefulArray from './stateful';
 import {
   internalModelFor,
   setFragmentOwner,
-  getActualFragmentType
+  createFragment,
+  isFragment
 } from '../fragment';
 import isInstanceOfType from '../../util/instance-of-type';
 import map from '../../util/map';
@@ -13,6 +14,7 @@ import map from '../../util/map';
 */
 
 var get = Ember.get;
+var setProperties = Ember.setProperties;
 var computed = Ember.computed;
 var typeOf = Ember.typeOf;
 
@@ -21,7 +23,7 @@ var typeOf = Ember.typeOf;
 function normalizeFragmentArray(array, content, objs) {
   var record = get(array, 'owner');
   var store = get(record, 'store');
-  var declaredType = get(array, 'type');
+  var declaredModelName = get(array, 'type');
   var options = get(array, 'options');
   var key = get(array, 'name');
   var fragment;
@@ -29,7 +31,7 @@ function normalizeFragmentArray(array, content, objs) {
   return map(objs, function(data, index) {
     Ember.assert("You can only add '" + get(array, 'type') + "' fragments or object literals to this property", typeOf(data) === 'object' || isInstanceOfType(store.modelFor(get(array, 'type')), data));
 
-    if (data._isFragment) {
+    if (isFragment(data)) {
       fragment = data;
 
       var owner = internalModelFor(fragment)._owner;
@@ -42,19 +44,11 @@ function normalizeFragmentArray(array, content, objs) {
     } else {
       fragment = content[index];
 
-      if (!fragment) {
-        // Create a new fragment from the data if needed
-        var actualType = getActualFragmentType(declaredType, options, data);
-
-        fragment = store.createFragment(actualType);
-
-        setFragmentOwner(fragment, record, key);
+      if (fragment) {
+        setProperties(fragment, data);
+      } else {
+        fragment = createFragment(store, declaredModelName, record, key, options, data);
       }
-
-      // Initialize the fragment with the data
-      internalModelFor(fragment).setupData({
-        attributes: data
-      });
     }
 
     return fragment;
