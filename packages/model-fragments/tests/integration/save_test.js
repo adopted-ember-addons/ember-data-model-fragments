@@ -386,15 +386,7 @@ test("the adapter can update fragments without infinite loops when CPs are eager
     name: {
       first: "Brandon",
       last: "Stark"
-    },
-    addresses: [
-      {
-        street: "1 Great Keep",
-        city: "Winterfell",
-        region: "North",
-        country: "Westeros"
-      }
-    ]
+    }
   };
 
   store.push({
@@ -404,10 +396,10 @@ test("the adapter can update fragments without infinite loops when CPs are eager
   });
 
   return store.find('person', 1).then(function(person) {
-    var personController = Ember.Controller.create({ content: person });
+    var personProxy = Ember.ObjectProxy.create({ content: person });
 
-    Ember.addObserver(personController, 'model.name.first', function() {});
-    personController.get('model.name.first');
+    Ember.addObserver(personProxy, 'name.first', function() {});
+    personProxy.get('name.first');
 
     store.push({
       type: 'person',
