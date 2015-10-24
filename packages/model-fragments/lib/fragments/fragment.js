@@ -126,7 +126,7 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     var props = [];
 
     this.eachComputedProperty(function(name, meta) {
-      if (meta.isFragmentOwner) {
+    if (meta.isFragmentOwner) {
         props.push(name);
       }
     });
@@ -173,7 +173,7 @@ export function internalModelFor(record) {
 export function setFragmentOwner(fragment, record, key) {
   var internalModel = internalModelFor(fragment);
 
-  Ember.assert("Fragments can only belong to one owner, try copying instead", !record || !internalModel._owner || internalModel._owner === record);
+  Ember.assert("To preserve rollback semantics, fragments can only belong to one owner. Try copying instead", !internalModel._owner || internalModel._owner === record);
 
   internalModel._owner = record;
   internalModel._name = key;
