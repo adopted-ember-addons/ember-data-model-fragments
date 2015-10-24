@@ -11,7 +11,8 @@ QUnit.module("integration - Dependent State", {
 
     Name = MF.Fragment.extend({
       first: DS.attr('string'),
-      last: DS.attr('string')
+      last: DS.attr('string'),
+      person: MF.fragmentOwner()
     });
 
     Address = MF.Fragment.extend({
@@ -275,6 +276,29 @@ test("rolling back a fragment returns the fragment and the owner record to a cle
 
     ok(!name.get('hasDirtyAttributes'), "fragment is clean");
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
+  });
+});
+
+test("changing a fragment property then rolling back the owner record preserves the fragment's owner", function() {
+  store.push({
+    type: 'person',
+    id: 1,
+    attributes: {
+      name: {
+        first: "Arya",
+        last: "Stark"
+      }
+    }
+  });
+
+  return store.find('person', 1).then(function(person) {
+    var name = person.get('name');
+
+    person.set('name', null);
+
+    person.rollbackAttributes();
+
+    equal(name.get('person'), person, "fragment owner is preserved");
   });
 });
 
