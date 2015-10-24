@@ -113,6 +113,13 @@ person.set('name', store.createFragment('name', {
   last  : 'Hill'
 }));
 person.get('isDirty'); // true
+
+// Fragments can also be set with hashes
+person.set('name', {
+  'first' : 'Tyrion',
+  'last'  : 'Lannister'
+});
+person.get('isDirty'); // false
 ```
 
 The `addresses` attribute can be treated similar to a `hasMany` relationship:
@@ -141,6 +148,16 @@ addresses.createFragment({
 });
 addresses.get('length'); // 3
 person.get('isDirty'); // true
+
+// Or with arrays of objects
+person.set('addresses', [
+  {
+    street  : '1 Great Pyramid',
+    city    : 'Meereen',
+    region  : 'Slaver\'s Bay',
+    country : 'Essos'
+  }
+]);
 ```
 
 The `titles` attribute can be treated as an `Ember.Array`:

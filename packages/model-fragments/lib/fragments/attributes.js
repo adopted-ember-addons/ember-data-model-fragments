@@ -9,7 +9,8 @@ import {
 import {
   internalModelFor,
   setFragmentOwner,
-  getActualFragmentType
+  createFragment,
+  isFragment
 } from './fragment';
 import isInstanceOfType from '../util/instance-of-type';
 
@@ -18,6 +19,7 @@ import isInstanceOfType from '../util/instance-of-type';
 */
 
 var get = Ember.get;
+var setProperties = Ember.setProperties;
 var isArray = Ember.isArray;
 var typeOf = Ember.typeOf;
 var copy = Ember.copy;
@@ -84,7 +86,6 @@ function fragment(declaredModelName, options) {
     var internalModel = internalModelFor(record);
     var data = getWithDefault(internalModel, key, options, 'object');
     var fragment = internalModel._fragments[key];
-    var actualTypeName = getActualFragmentType(declaredModelName, options, data);
 
     // Regardless of whether being called as a setter or getter, the fragment
     // may not be initialized yet, in which case the data will contain a
@@ -93,17 +94,17 @@ function fragment(declaredModelName, options) {
     // If we already have a processed fragment in _data and our current fragment is
     // null simply reuse the one from data. We can be in this state after a rollback
     // for example
-    if (!fragment && isInstanceOfType(store.modelFor(actualTypeName), data)) {
+    if (!fragment && isFragment(data)) {
       fragment = data;
     // Else initialize the fragment
     } else if (data && data !== fragment) {
-      fragment || (fragment = createFragment(store, actualTypeName, record, key));
-      // Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
-      // again we have it cached already
+      if (fragment) {
+        setProperties(fragment, data);
+      } else {
+        fragment = createFragment(store, declaredModelName, record, key, options, data);
+      }
+
       internalModel._data[key] = fragment;
-      internalModelFor(fragment).setupData({
-        attributes: data
-      });
     } else {
       // Handle the adapter setting the fragment to null
       fragment = data;
@@ -115,27 +116,29 @@ function fragment(declaredModelName, options) {
   function setFragmentValue(record, key, fragment, value) {
     var store = record.store;
     var internalModel = internalModelFor(record);
+    var originalFragment = fragment;
 
     Ember.assert("You can only assign `null`, an object literal or a '" + declaredModelName + "' fragment instance to this property", value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
 
-    if (fragment && fragment !== value) {
-      // Since the fragment no longer belongs to the record, free its owner
-      setFragmentOwner(fragment, null, null);
+    if (!value) {
+      fragment = null;
+    } else if (isFragment(value)) {
+      // A fragment instance was given, so just replace the existing value
+      fragment = setFragmentOwner(value, record, key);
+    } else if (!fragment) {
+      // A property hash was given but the property was null, so create a new
+      // fragment with the data
+      fragment = createFragment(store, declaredModelName, record, key, options, value);
+    } else {
+      // The fragment already exists and a property hash is given, so just set
+      // its values and let the state machine take care of the dirtiness
+      return setProperties(fragment, value);
     }
 
-    if (value) {
-      if (typeOf(value) === 'object') {
-        if (!fragment) {
-          var actualTypeName = getActualFragmentType(declaredModelName, options, value);
-          fragment = createFragment(store, actualTypeName, record, key);
-        }
-
-        fragment.setProperties(value);
-      } else {
-        fragment = setFragmentOwner(value, record, key);
-      }
-    } else {
-      fragment = null;
+    if (originalFragment && fragment !== originalFragment) {
+      // Since the original fragment no longer belongs to the record, free it
+      // of its owner record
+      setFragmentOwner(originalFragment, null, null);
     }
 
     if (internalModel._data[key] !== fragment) {
@@ -380,11 +383,6 @@ function getDefaultValue(record, options, type) {
 
   // Create a deep copy of the resulting value to avoid shared reference errors
   return copy(value, true);
-}
-
-// Creates a fragment and sets its owner to the given record
-function createFragment(store, type, record, key) {
-  return setFragmentOwner(store.createFragment(type), record, key);
 }
 
 // Returns the value of the property or the default propery
