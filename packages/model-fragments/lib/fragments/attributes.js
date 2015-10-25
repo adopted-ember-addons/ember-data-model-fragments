@@ -116,7 +116,6 @@ function fragment(declaredModelName, options) {
   function setFragmentValue(record, key, fragment, value) {
     var store = record.store;
     var internalModel = internalModelFor(record);
-    var originalFragment = fragment;
 
     Ember.assert("You can only assign `null`, an object literal or a '" + declaredModelName + "' fragment instance to this property", value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
 
@@ -133,12 +132,6 @@ function fragment(declaredModelName, options) {
       // The fragment already exists and a property hash is given, so just set
       // its values and let the state machine take care of the dirtiness
       return setProperties(fragment, value);
-    }
-
-    if (originalFragment && fragment !== originalFragment) {
-      // Since the original fragment no longer belongs to the record, free it
-      // of its owner record
-      setFragmentOwner(originalFragment, null, null);
     }
 
     if (internalModel._data[key] !== fragment) {
@@ -356,7 +349,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
 */
 function fragmentOwner() {
   return computed(function() {
-    Ember.assert("Fragment owner properties can only be used on fragments.", this._isFragment);
+    Ember.assert("Fragment owner properties can only be used on fragments.", isFragment(this));
 
     return internalModelFor(this)._owner;
   }).meta({
