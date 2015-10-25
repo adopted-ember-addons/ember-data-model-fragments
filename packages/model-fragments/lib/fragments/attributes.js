@@ -349,7 +349,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
 */
 function fragmentOwner() {
   return computed(function() {
-    Ember.assert("Fragment owner properties can only be used on fragments.", this._isFragment);
+    Ember.assert("Fragment owner properties can only be used on fragments.", isFragment(this));
 
     return internalModelFor(this)._owner;
   }).meta({
