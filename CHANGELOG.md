@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.4.4 (October 25, 2015)
+
+* Reverted clearing fragment owner to maintain rollback support
+* Fixed issue with record dirtiness when setting with object literal
+
 ### v0.4.3 (October 14, 2015)
 
 * Updated API and added deprecation warnings to all outdated APIs
