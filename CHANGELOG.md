@@ -1,5 +1,49 @@
 # Changelog
 
+### v1.13.0 (October 25, 2015)
+
+* Removed deprecated APIs
+* Changed default value of fragment array properties to an empty array
+* Changed repository name
+
+##### Breaking Changes
+
+Deprecated APIs have been removed:
+
+* `DS.ModelFragment` → `MF.Fragment`
+* `DS.hasOneFragment` → `MF.fragment`
+* `DS.hasManyFragments` → `MF.fragmentArray`
+* `DS.fragmentOwner` → `MF.fragmentOwner`
+
+Support for non-fragment array properties has been added with the new property `MF.array`, which supports transforms:
+
+```javascript
+export default DS.Model.extend({
+  things: MF.array('string'),
+  stuff: MF.array('my-custom-transform')
+});
+```
+
+The default value of fragment array properties is now an empty array (previously `null`):
+
+```javascript
+export default DS.Model.extend({
+  things: MF.fragmentArray('some-fragment'), // { defaultValue: [] } option is no longer necessary
+  stuff: MF.array('string') // Defaults to an empty array as well
+});
+```
+
+The repository name has changed from `ember-data.model-fragments` to `ember-data-model-fragments`. This does not affect the NPM package name, but does affect the Bower package. Consequently, when upgrading from v0.4.x to v1.13.x, in addition to making sure the addon blueprint runs, the old Bower package must be removed manually:
+
+```sh
+$ bower uninstall --save ember-data.model-fragments
+```
+
+### v0.4.4 (October 25, 2015)
+
+* Reverted clearing fragment owner to maintain rollback support
+* Fixed issue with record dirtiness when setting with object literal
+
 ### v0.4.3 (October 14, 2015)
 
 * Updated API and added deprecation warnings to all outdated APIs

@@ -6,7 +6,7 @@
 
 This package provides support for sub-models that can be treated much like `belongsTo` and `hasMany` relationships are, but whose persistence is managed completely through the parent object.
 
-:warning: The API has changed significantly in preparation for v1.0. Deprecations have been added to all updated APIs with instructions on how to upgrade.
+:warning: Deprecated APIs have been removed. See the [changelog](CHANGELOG.md) for more information on breaking changes.
 
 ## Compatibility
 
@@ -19,7 +19,7 @@ Use the following table to decide which version of this project to use with your
 | > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
 | v1.0.0-beta.14 | v0.2.8 |
 | >= v1.0.0-beta.15 <= v1.0.0-beta.18 | v0.3.3 |
-| >= v1.13.x | >= v0.4.x |
+| >= v1.13.x | >= v1.13.x |
 
 #### Notes
 

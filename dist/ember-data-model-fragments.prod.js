@@ -2,8 +2,8 @@
  * @overview  Ember Data Model Fragments
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
- *            See https://raw.githubusercontent.com/lytics/ember-data.model-fragments/master/LICENSE
- * @version   0.4.3
+ *            See https://raw.githubusercontent.com/lytics/ember-data-model-fragments/master/LICENSE
+ * @version   1.13.0
  */
 
 (function() {
@@ -20,7 +20,7 @@
     var ember$data$lib$system$transform$$default = DS.Transform;
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$states$$get = ember$lib$main$$default.get;
@@ -203,7 +203,7 @@
     }
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$array$stateful$$get = ember$lib$main$$default.get;
@@ -410,7 +410,7 @@
     var model$fragments$lib$fragments$array$stateful$$default = model$fragments$lib$fragments$array$stateful$$StatefulArray;
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$ext$$keys = Object.keys || Ember.keys;
@@ -466,6 +466,40 @@
         fragment._isFragment = true;
 
         return fragment;
+      },
+
+      /**
+        Changes serializer fallbacks for fragments to use `serializer:-fragment`
+        if registered, then uses the default serializer.
+
+        @method serializerFor
+        @private
+        @param {String} modelName the record to serialize
+        @return {DS.Serializer}
+      */
+      serializerFor: function(modelOrClass) {
+        var modelName;
+
+        if (typeof modelOrClass === 'string') {
+          modelName = modelOrClass;
+        } else {
+          modelName = modelOrClass.modelName;
+        }
+
+        var type = this.modelFor(modelName);
+
+        // For fragments, don't use the application serializer or adapter default
+        // as a fallbacks
+        if (model$fragments$lib$fragments$fragment$$default.detect(type)) {
+          var fallbacks = [
+            '-fragment',
+            '-default'
+          ];
+
+          return this.lookupSerializer(modelName, fallbacks);
+        }
+
+        return this._super(modelOrClass);
       }
     });
 
@@ -660,7 +694,7 @@
     }
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$fragment$$get = ember$lib$main$$default.get;
@@ -830,6 +864,23 @@
       return fragment;
     }
 
+    function model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, data) {
+      var actualModelName = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredModelName, options, data);
+      var fragment = store.createFragment(actualModelName);
+
+      model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, record, key);
+
+      model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
+        attributes: data
+      });
+
+      return fragment;
+    }
+
+    function model$fragments$lib$fragments$fragment$$isFragment(obj) {
+      return obj && obj._isFragment;
+    }
+
     var model$fragments$lib$fragments$fragment$$default = model$fragments$lib$fragments$fragment$$Fragment;
     function model$fragments$lib$util$instance$of$type$$isInstanceOfType(type, obj) {
       if (obj instanceof type) {
@@ -868,10 +919,11 @@
     }
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$array$fragment$$get = ember$lib$main$$default.get;
+    var model$fragments$lib$fragments$array$fragment$$setProperties = ember$lib$main$$default.setProperties;
     var model$fragments$lib$fragments$array$fragment$$computed = ember$lib$main$$default.computed;
     var model$fragments$lib$fragments$array$fragment$$typeOf = ember$lib$main$$default.typeOf;
 
@@ -880,14 +932,14 @@
     function model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(array, content, objs) {
       var record = model$fragments$lib$fragments$array$fragment$$get(array, 'owner');
       var store = model$fragments$lib$fragments$array$fragment$$get(record, 'store');
-      var declaredType = model$fragments$lib$fragments$array$fragment$$get(array, 'type');
+      var declaredModelName = model$fragments$lib$fragments$array$fragment$$get(array, 'type');
       var options = model$fragments$lib$fragments$array$fragment$$get(array, 'options');
       var key = model$fragments$lib$fragments$array$fragment$$get(array, 'name');
       var fragment;
 
       return model$fragments$lib$util$map$$default(objs, function(data, index) {
         
-        if (data._isFragment) {
+        if (model$fragments$lib$fragments$fragment$$isFragment(data)) {
           fragment = data;
 
           var owner = model$fragments$lib$fragments$fragment$$internalModelFor(fragment)._owner;
@@ -899,19 +951,11 @@
         } else {
           fragment = content[index];
 
-          if (!fragment) {
-            // Create a new fragment from the data if needed
-            var actualType = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredType, options, data);
-
-            fragment = store.createFragment(actualType);
-
-            model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, record, key);
+          if (fragment) {
+            model$fragments$lib$fragments$array$fragment$$setProperties(fragment, data);
+          } else {
+            fragment = model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, data);
           }
-
-          // Initialize the fragment with the data
-          model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
-            attributes: data
-          });
         }
 
         return fragment;
@@ -1048,13 +1092,6 @@
         var replacedContent = content.slice(index, index + amount);
         var fragments = model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(this, replacedContent, objs);
 
-        // If fragments get removed from the array, clear their owners
-        if (fragments.length < replacedContent.length) {
-          replacedContent.slice(fragments.length).forEach(function(fragment) {
-            model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, null, null);
-          });
-        }
-
         return content.replace(index, amount, fragments);
       },
 
@@ -1147,10 +1184,11 @@
     };
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$attributes$$get = ember$lib$main$$default.get;
+    var model$fragments$lib$fragments$attributes$$setProperties = ember$lib$main$$default.setProperties;
     var model$fragments$lib$fragments$attributes$$isArray = ember$lib$main$$default.isArray;
     var model$fragments$lib$fragments$attributes$$typeOf = ember$lib$main$$default.typeOf;
     var model$fragments$lib$fragments$attributes$$copy = ember$lib$main$$default.copy;
@@ -1217,7 +1255,6 @@
         var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(record);
         var data = model$fragments$lib$fragments$attributes$$getWithDefault(internalModel, key, options, 'object');
         var fragment = internalModel._fragments[key];
-        var actualTypeName = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredModelName, options, data);
 
         // Regardless of whether being called as a setter or getter, the fragment
         // may not be initialized yet, in which case the data will contain a
@@ -1226,17 +1263,17 @@
         // If we already have a processed fragment in _data and our current fragment is
         // null simply reuse the one from data. We can be in this state after a rollback
         // for example
-        if (!fragment && model$fragments$lib$util$instance$of$type$$default(store.modelFor(actualTypeName), data)) {
+        if (!fragment && model$fragments$lib$fragments$fragment$$isFragment(data)) {
           fragment = data;
         // Else initialize the fragment
         } else if (data && data !== fragment) {
-          fragment || (fragment = model$fragments$lib$fragments$attributes$$createFragment(store, actualTypeName, record, key));
-          // Make sure to first cache the fragment before calling setupData, so if setupData causes this CP to be accessed
-          // again we have it cached already
+          if (fragment) {
+            model$fragments$lib$fragments$attributes$$setProperties(fragment, data);
+          } else {
+            fragment = model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, data);
+          }
+
           internalModel._data[key] = fragment;
-          model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
-            attributes: data
-          });
         } else {
           // Handle the adapter setting the fragment to null
           fragment = data;
@@ -1250,24 +1287,19 @@
         var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(record);
 
         
-        if (fragment && fragment !== value) {
-          // Since the fragment no longer belongs to the record, free its owner
-          model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, null, null);
-        }
-
-        if (value) {
-          if (model$fragments$lib$fragments$attributes$$typeOf(value) === 'object') {
-            if (!fragment) {
-              var actualTypeName = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredModelName, options, value);
-              fragment = model$fragments$lib$fragments$attributes$$createFragment(store, actualTypeName, record, key);
-            }
-
-            fragment.setProperties(value);
-          } else {
-            fragment = model$fragments$lib$fragments$fragment$$setFragmentOwner(value, record, key);
-          }
-        } else {
+        if (!value) {
           fragment = null;
+        } else if (model$fragments$lib$fragments$fragment$$isFragment(value)) {
+          // A fragment instance was given, so just replace the existing value
+          fragment = model$fragments$lib$fragments$fragment$$setFragmentOwner(value, record, key);
+        } else if (!fragment) {
+          // A property hash was given but the property was null, so create a new
+          // fragment with the data
+          fragment = model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, value);
+        } else {
+          // The fragment already exists and a property hash is given, so just set
+          // its values and let the state machine take care of the dirtiness
+          return model$fragments$lib$fragments$attributes$$setProperties(fragment, value);
         }
 
         if (internalModel._data[key] !== fragment) {
@@ -1305,7 +1337,7 @@
 
       ```javascript
       App.Person = DS.Model.extend({
-        addresses: MF.fragmentArray('address', { defaultValue: null })
+        addresses: MF.fragmentArray('address')
       });
 
       App.Address = MF.Fragment.extend({
@@ -1496,13 +1528,12 @@
     function model$fragments$lib$fragments$attributes$$getDefaultValue(record, options, type) {
       var value;
 
-      ember$lib$main$$default.warn("The default value of fragment array properties will change from `null` to an empty array in v1.0. " +
-        "This warning can be silenced by explicitly setting a default value with the option `{ defaultValue: null }`", type !== 'array' || 'defaultValue' in options);
-
-      if (typeof options.defaultValue === "function") {
+      if (typeof options.defaultValue === 'function') {
         value = options.defaultValue();
       } else if ('defaultValue' in options) {
         value = options.defaultValue;
+      } else if (type === 'array') {
+        value = [];
       } else {
         return null;
       }
@@ -1510,11 +1541,6 @@
       
       // Create a deep copy of the resulting value to avoid shared reference errors
       return model$fragments$lib$fragments$attributes$$copy(value, true);
-    }
-
-    // Creates a fragment and sets its owner to the given record
-    function model$fragments$lib$fragments$attributes$$createFragment(store, type, record, key) {
-      return model$fragments$lib$fragments$fragment$$setFragmentOwner(store.createFragment(type), record, key);
     }
 
     // Returns the value of the property or the default propery
@@ -1527,7 +1553,7 @@
     }
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$transforms$array$$get = ember$lib$main$$default.get;
@@ -1594,7 +1620,7 @@
     var model$fragments$lib$fragments$transforms$array$$default = model$fragments$lib$fragments$transforms$array$$ArrayTransform;
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     var model$fragments$lib$fragments$transforms$fragment$$get = ember$lib$main$$default.get;
@@ -1665,7 +1691,7 @@
     var model$fragments$lib$fragments$transforms$fragment$$default = model$fragments$lib$fragments$transforms$fragment$$FragmentTransform;
 
     /**
-      @module ember-data.model-fragments
+      @module ember-data-model-fragments
     */
 
     /**
@@ -1723,63 +1749,14 @@
 
     var model$fragments$lib$initializers$$default = model$fragments$lib$initializers$$initializers;
 
-    // Export classes to DS namespace for backwards compatibility
-    ember$data$lib$main$$default.ModelFragment = model$fragments$lib$fragments$fragment$$default;
-    ember$data$lib$main$$default.FragmentArray = model$fragments$lib$fragments$array$fragment$$default;
-    ember$data$lib$main$$default.FragmentTransform = model$fragments$lib$fragments$transforms$fragment$$default;
-    ember$data$lib$main$$default.FragmentArrayTransform = model$fragments$lib$fragments$transforms$fragment$array$$default;
-    ember$data$lib$main$$default.ArrayTransform = model$fragments$lib$fragments$transforms$array$$default;
-
-    /**
-      `DS.hasOneFragment` has been deprecated in favor of `MF.fragment`.
-
-      @namespace DS
-      @method hasOneFragment
-      @deprecated
-    */
-    ember$data$lib$main$$default.hasOneFragment = function hasOneFragmentDeprecation(modelName, options) {
-      
-      return model$fragments$lib$fragments$attributes$$fragment(modelName, options);
-    };
-
-    /**
-      `DS.hasManyFragments` has been deprecated in favor of `MF.fragmentArray`.
-
-      @namespace DS
-      @method hasManyFragments
-      @deprecated
-    */
-    ember$data$lib$main$$default.hasManyFragments = function hasManyFragmentsDeprecation(modelName, options) {
-      // If a modelName is not given, it implies an array of primitives
-      if (ember$lib$main$$default.typeOf(modelName) !== 'string') {
-        
-        return model$fragments$lib$fragments$attributes$$array(null, options);
-      }
-
-      
-      return model$fragments$lib$fragments$attributes$$fragmentArray(modelName, options);
-    };
-
-    /**
-      `DS.fragmentOwner` has been deprecated in favor of `MF.fragmentOwner`.
-
-      @namespace DS
-      @method fragmentOwner
-      @deprecated
-    */
-    ember$data$lib$main$$default.fragmentOwner = function fragmentOwnerDeprecation() {
-      
-      return model$fragments$lib$fragments$attributes$$fragmentOwner();
-    };
-
     /**
       Ember Data Model Fragments
 
-      @module ember-data.model-fragments
-      @main ember-data.model-fragments
+      @module ember-data-model-fragments
+      @main ember-data-model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '0.4.3',
+      VERSION: '1.13.0',
       Fragment: model$fragments$lib$fragments$fragment$$default,
       FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
       FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,
