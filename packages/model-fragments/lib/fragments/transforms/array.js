@@ -3,7 +3,7 @@ import Transform from 'ember-data/system/transform';
 import map from '../../util/map';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 var get = Ember.get;

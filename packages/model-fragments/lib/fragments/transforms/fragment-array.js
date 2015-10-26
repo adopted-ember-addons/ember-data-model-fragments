@@ -2,7 +2,7 @@ import FragmentTransform from './fragment';
 import map from '../../util/map';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 /**

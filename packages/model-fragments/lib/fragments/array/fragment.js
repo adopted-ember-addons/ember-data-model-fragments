@@ -10,7 +10,7 @@ import isInstanceOfType from '../../util/instance-of-type';
 import map from '../../util/map';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 var get = Ember.get;

@@ -2,7 +2,7 @@ import Ember from 'ember';
 import RootState from 'ember-data/system/model/states';
 
 /**
-  @module ember-data.model-fragments
+  @module ember-data-model-fragments
 */
 
 var get = Ember.get;

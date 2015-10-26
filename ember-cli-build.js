@@ -18,7 +18,7 @@ var path            = require('path');
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var outputName = 'ember-data.model-fragments';
+var outputName = 'ember-data-model-fragments';
 
 module.exports = function() {
   var packages = merge([

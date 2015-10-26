@@ -4,7 +4,7 @@
   "version": "0.4.3",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lytics/ember-data.model-fragments.git"
+    "url": "https://github.com/lytics/ember-data-model-fragments.git"
   },
   "author": "Steven Lindberg <steven@lytics.io>",
   "license": "MIT",
