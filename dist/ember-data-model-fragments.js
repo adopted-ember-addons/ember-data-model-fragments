@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data-model-fragments/master/LICENSE
- * @version   1.13.0
+ * @version   2.0.0
  */
 
 (function() {
@@ -321,15 +321,6 @@
       },
 
       /**
-        @method isDirty
-        @deprecated Use `hasDirtyAttributes` instead
-      */
-      isDirty: model$fragments$lib$fragments$array$stateful$$computed('hasDirtyAttributes', function() {
-        ember$lib$main$$default.deprecate('The `isDirty` method of fragment arrays has been deprecated, please use `hasDirtyAttributes` instead');
-        return this.get('hasDirtyAttributes');
-      }),
-
-      /**
         If this property is `true` the contents of the array do not match its
         original state. The array has local changes that have not yet been saved by
         the adapter. This includes additions, removals, and reordering of elements.
@@ -350,15 +341,6 @@
       hasDirtyAttributes: model$fragments$lib$fragments$array$stateful$$computed('[]', '_originalState', function() {
         return ember$lib$main$$default.compare(this.toArray(), model$fragments$lib$fragments$array$stateful$$get(this, '_originalState')) !== 0;
       }),
-
-      /**
-        @method rollback
-        @deprecated Use `rollbackAttributes()` instead
-      */
-      rollback: function() {
-        ember$lib$main$$default.deprecate('Using array.rollback() has been deprecated. Use array.rollbackAttributes() to discard any unsaved changes to fragments in the array.');
-        this.rollbackAttributes();
-      },
 
       /**
         This method reverts local changes of the array's contents to its original
@@ -1305,7 +1287,9 @@
         } else {
           // The fragment already exists and a property hash is given, so just set
           // its values and let the state machine take care of the dirtiness
-          return model$fragments$lib$fragments$attributes$$setProperties(fragment, value);
+          model$fragments$lib$fragments$attributes$$setProperties(fragment, value);
+
+          return fragment;
         }
 
         if (internalModel._data[key] !== fragment) {
@@ -1685,17 +1669,12 @@
 
         ember$lib$main$$default.assert("The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`", !(serializer instanceof ember$data$lib$serializers$json$api$serializer$$default));
 
-        var isNewSerializerAPI = model$fragments$lib$fragments$transforms$fragment$$get(serializer, 'isNewSerializerAPI');
         var typeClass = store.modelFor(modelName);
         var serialized = serializer.normalize(typeClass, data);
 
-        // The new serializer API returns a full JSON API document, but we only need
-        // the attributes hash
-        if (isNewSerializerAPI) {
-          return model$fragments$lib$fragments$transforms$fragment$$get(serialized, 'data.attributes');
-        } else {
-          return serialized;
-        }
+        // `JSONSerializer#normalize` returns a full JSON API document, but we only
+        // need the attributes hash
+        return model$fragments$lib$fragments$transforms$fragment$$get(serialized, 'data.attributes');
       }
     });
 
@@ -1767,7 +1746,7 @@
       @main ember-data-model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '1.13.0',
+      VERSION: '2.0.0',
       Fragment: model$fragments$lib$fragments$fragment$$default,
       FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
       FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,

@@ -1,5 +1,15 @@
 # Changelog
 
+### v2.0.0 (October 28, 2015)
+
+* Removed Deprecated APIs
+* Fixed breaking changes in Ember 2.0
+* Fixed deserialization issue when `isNewSerializerAPI` is not specified
+
+##### Breaking Changes
+
+The `isDirty` and `rollback` methods on fragments and fragment arrays have been removed (use `hasDirtyAttributes` and `rollbackAttributes` instead).
+
 ### v1.13.0 (October 25, 2015)
 
 * Removed deprecated APIs
