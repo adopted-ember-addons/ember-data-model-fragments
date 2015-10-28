@@ -58,17 +58,12 @@ var FragmentTransform = Transform.extend({
 
     Ember.assert("The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`", !(serializer instanceof JSONAPISerializer));
 
-    var isNewSerializerAPI = get(serializer, 'isNewSerializerAPI');
     var typeClass = store.modelFor(modelName);
     var serialized = serializer.normalize(typeClass, data);
 
-    // The new serializer API returns a full JSON API document, but we only need
-    // the attributes hash
-    if (isNewSerializerAPI) {
-      return get(serialized, 'data.attributes');
-    } else {
-      return serialized;
-    }
+    // `JSONSerializer#normalize` returns a full JSON API document, but we only
+    // need the attributes hash
+    return get(serialized, 'data.attributes');
   }
 });
 
