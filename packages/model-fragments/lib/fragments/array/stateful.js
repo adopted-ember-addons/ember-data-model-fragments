@@ -120,15 +120,6 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   },
 
   /**
-    @method isDirty
-    @deprecated Use `hasDirtyAttributes` instead
-  */
-  isDirty: computed('hasDirtyAttributes', function() {
-    Ember.deprecate('The `isDirty` method of fragment arrays has been deprecated, please use `hasDirtyAttributes` instead');
-    return this.get('hasDirtyAttributes');
-  }),
-
-  /**
     If this property is `true` the contents of the array do not match its
     original state. The array has local changes that have not yet been saved by
     the adapter. This includes additions, removals, and reordering of elements.
@@ -149,15 +140,6 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   hasDirtyAttributes: computed('[]', '_originalState', function() {
     return Ember.compare(this.toArray(), get(this, '_originalState')) !== 0;
   }),
-
-  /**
-    @method rollback
-    @deprecated Use `rollbackAttributes()` instead
-  */
-  rollback: function() {
-    Ember.deprecate('Using array.rollback() has been deprecated. Use array.rollbackAttributes() to discard any unsaved changes to fragments in the array.');
-    this.rollbackAttributes();
-  },
 
   /**
     This method reverts local changes of the array's contents to its original

@@ -131,7 +131,9 @@ function fragment(declaredModelName, options) {
     } else {
       // The fragment already exists and a property hash is given, so just set
       // its values and let the state machine take care of the dirtiness
-      return setProperties(fragment, value);
+      setProperties(fragment, value);
+
+      return fragment;
     }
 
     if (internalModel._data[key] !== fragment) {

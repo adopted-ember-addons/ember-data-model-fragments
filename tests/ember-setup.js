@@ -25,9 +25,6 @@ window.setupEnv = function(options) {
   var adapterOptions = {
     shouldBackgroundReloadRecord: function() { return false; }
   };
-  var serializerOptions = {
-    isNewSerializerAPI: true
-  };
 
   for (var prop in options) {
     registry.register('model:' + Ember.String.dasherize(prop), options[prop]);
@@ -40,7 +37,7 @@ window.setupEnv = function(options) {
   registry.optionsForType('serializer', { singleton: false });
   registry.optionsForType('adapter', { singleton: false });
   registry.register('adapter:-default', DS.Adapter.extend(adapterOptions));
-  registry.register('serializer:-default', DS.JSONSerializer.extend(serializerOptions));
+  registry.register('serializer:-default', DS.JSONSerializer);
   registry.register('transform:boolean', DS.BooleanTransform);
   registry.register('transform:date', DS.DateTransform);
   registry.register('transform:number', DS.NumberTransform);
