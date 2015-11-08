@@ -62,3 +62,7 @@ test("the default fragment serializer is `serializer:-fragment` if registered", 
 
   ok(store.serializerFor('name') instanceof Serializer, "fragment serializer fallback is correct");
 });
+
+test("you can still call serializerFor('application')", function() {
+  ok(store.serializerFor('application') instanceof DS.JSONSerializer, "application serializer can still be looked up");
+});
