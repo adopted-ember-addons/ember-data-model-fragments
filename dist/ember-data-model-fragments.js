@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data-model-fragments/master/LICENSE
- * @version   2.0.1
+ * @version   2.1.0
  */
 
 (function() {
@@ -1726,11 +1726,7 @@
         name: "fragmentTransform",
         before: "store",
 
-        initialize: function(container, application) {
-          // Needed for ember-2.1 deprecation
-          if (!application) {
-            application = container;
-          }
+        initialize: function(application) {
           application.register('transform:fragment', model$fragments$lib$fragments$transforms$fragment$$default);
           application.register('transform:fragment-array', model$fragments$lib$fragments$transforms$fragment$array$$default);
           application.register('transform:array', model$fragments$lib$fragments$transforms$array$$default);
@@ -1747,7 +1743,7 @@
       @main ember-data-model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '2.0.1',
+      VERSION: '2.1.0',
       Fragment: model$fragments$lib$fragments$fragment$$default,
       FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
       FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,

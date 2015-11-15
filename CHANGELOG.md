@@ -1,5 +1,10 @@
 # Changelog
 
+### v2.1.0 (November 15, 2015)
+
+* Updated Ember/ED > v2.1.x
+* Fixed initializer argument deprecation
+
 ### v2.0.1 (November 15, 2015)
 
 * Fixed issue with looking up application/default serializers with `store#serializerFor` (@thec0keman)
