@@ -77,7 +77,6 @@ Store.reopen({
     @return {DS.Serializer}
   */
   serializerFor: function(modelOrClass) {
-    var defaultModelFallbacks = ['application', '-default'];
     var modelName;
 
     if (typeof modelOrClass === 'string') {
@@ -86,19 +85,18 @@ Store.reopen({
       modelName = modelOrClass.modelName;
     }
 
-    if (defaultModelFallbacks.indexOf(modelName) === -1) {
-      var type = this.modelFor(modelName);
+    // Don't fail on non-model lookups ('application', '-default', etc.)
+    var type = this.modelFactoryFor(modelName);
 
-      // For fragments, don't use the application serializer or adapter default
-      // as a fallbacks
-      if (Fragment.detect(type)) {
-        var fallbacks = [
-          '-fragment',
-          '-default'
-        ];
+    // For fragments, don't use the application serializer or adapter default
+    // as a fallbacks
+    if (type && Fragment.detect(type)) {
+      var fallbacks = [
+        '-fragment',
+        '-default'
+      ];
 
-        return this.lookupSerializer(modelName, fallbacks);
-      }
+      return this.lookupSerializer(modelName, fallbacks);
     }
 
     return this._super(modelOrClass);
