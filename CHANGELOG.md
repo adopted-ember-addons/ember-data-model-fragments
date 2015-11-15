@@ -1,5 +1,13 @@
 # Changelog
 
+### v2.0.1 (November 15, 2015)
+
+* Fixed issue with looking up application/default serializers with `store#serializerFor` (@thec0keman)
+
+### v1.13.1 (November 15, 2015)
+
+* Backported fix for application/default serializer lookup
+
 ### v2.0.0 (October 28, 2015)
 
 * Removed Deprecated APIs

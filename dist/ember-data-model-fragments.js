@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data-model-fragments/master/LICENSE
- * @version   2.0.0
+ * @version   2.0.1
  */
 
 (function() {
@@ -470,11 +470,12 @@
           modelName = modelOrClass.modelName;
         }
 
-        var type = this.modelFor(modelName);
+        // Don't fail on non-model lookups ('application', '-default', etc.)
+        var type = this.modelFactoryFor(modelName);
 
         // For fragments, don't use the application serializer or adapter default
         // as a fallbacks
-        if (model$fragments$lib$fragments$fragment$$default.detect(type)) {
+        if (type && model$fragments$lib$fragments$fragment$$default.detect(type)) {
           var fallbacks = [
             '-fragment',
             '-default'
@@ -1746,7 +1747,7 @@
       @main ember-data-model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '2.0.0',
+      VERSION: '2.0.1',
       Fragment: model$fragments$lib$fragments$fragment$$default,
       FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
       FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,
