@@ -85,11 +85,12 @@ Store.reopen({
       modelName = modelOrClass.modelName;
     }
 
-    var type = this.modelFor(modelName);
+    // Don't fail on non-model lookups ('application', '-default', etc.)
+    var type = this.modelFactoryFor(modelName);
 
     // For fragments, don't use the application serializer or adapter default
     // as a fallbacks
-    if (Fragment.detect(type)) {
+    if (type && Fragment.detect(type)) {
       var fallbacks = [
         '-fragment',
         '-default'
