@@ -9,6 +9,7 @@ import {
 import {
   internalModelFor,
   setFragmentOwner,
+  setFragmentData,
   createFragment,
   isFragment
 } from './fragment';
@@ -99,7 +100,7 @@ function fragment(declaredModelName, options) {
     // Else initialize the fragment
     } else if (data && data !== fragment) {
       if (fragment) {
-        setProperties(fragment, data);
+        setFragmentData(fragment, data);
       } else {
         fragment = createFragment(store, declaredModelName, record, key, options, data);
       }
