@@ -759,3 +759,25 @@ test("a fragment array property that is empty can be rolled back", function() {
     ok(!person.get('hasDirtyAttributes'), "owner record is clean");
   });
 });
+
+test("pushing a fragment update doesn't cause it to become dirty", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    ok(person.get('name.first'), "Tyrion");
+    ok(person.get('name.last'), "Lannister");
+    ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
+
+    store.push({
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: { first: "Jamie" }
+      }
+    });
+
+    ok(person.get('name.first'), "Jamie", "first name updated");
+    ok(person.get('name.last'), "Lannister", "last name is the same");
+    ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
+  });
+});
