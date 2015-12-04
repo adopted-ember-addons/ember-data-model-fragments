@@ -3,6 +3,7 @@ import StatefulArray from './stateful';
 import {
   internalModelFor,
   setFragmentOwner,
+  setFragmentData,
   createFragment,
   isFragment
 } from '../fragment';
@@ -14,7 +15,6 @@ import map from '../../util/map';
 */
 
 var get = Ember.get;
-var setProperties = Ember.setProperties;
 var computed = Ember.computed;
 var typeOf = Ember.typeOf;
 
@@ -45,7 +45,7 @@ function normalizeFragmentArray(array, content, objs) {
       fragment = content[index];
 
       if (fragment) {
-        setProperties(fragment, data);
+        setFragmentData(fragment, data);
       } else {
         fragment = createFragment(store, declaredModelName, record, key, options, data);
       }

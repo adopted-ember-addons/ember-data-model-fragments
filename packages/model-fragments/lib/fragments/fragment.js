@@ -186,16 +186,20 @@ export function setFragmentOwner(fragment, record, key) {
   return fragment;
 }
 
+// Sets the data of a fragment and leaves the fragment in a clean state
+export function setFragmentData(fragment, data) {
+  internalModelFor(fragment).setupData({
+    attributes: data
+  });
+}
+
 // Creates a fragment and sets its owner to the given record
 export function createFragment(store, declaredModelName, record, key, options, data) {
   var actualModelName = getActualFragmentType(declaredModelName, options, data);
   var fragment = store.createFragment(actualModelName);
 
   setFragmentOwner(fragment, record, key);
-
-  internalModelFor(fragment).setupData({
-    attributes: data
-  });
+  setFragmentData(fragment, data);
 
   return fragment;
 }
