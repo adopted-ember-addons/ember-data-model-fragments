@@ -382,6 +382,32 @@ test("changing a fragment array property with object literals dirties the fragme
   return store.find('person', 1).then(function(person) {
     var addresses = person.get('addresses');
 
+    person.set('addresses', [
+      {
+        street: "1 Sky Cell",
+        city: "Eyre",
+        region: "Vale of Arryn",
+        country: "Westeros"
+      },
+      {
+        street: "1 Dungeon Cell",
+        city: "King's Landing",
+        region: "Crownlands",
+        country: "Westeros"
+      }
+    ]);
+
+    ok(addresses.get('hasDirtyAttributes'), "fragment array is dirty");
+    ok(person.get('hasDirtyAttributes'), "owner record is dirty");
+  });
+});
+
+test("adding to a fragment array property with object literals dirties the fragment and owner record", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var addresses = person.get('addresses');
+
     addresses.pushObject({
       street: "1 Dungeon Cell",
       city: "King's Landing",
@@ -764,8 +790,6 @@ test("pushing a fragment update doesn't cause it to become dirty", function() {
   pushPerson(1);
 
   return store.find('person', 1).then(function(person) {
-    ok(person.get('name.first'), "Tyrion");
-    ok(person.get('name.last'), "Lannister");
     ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
 
     store.push({
@@ -776,8 +800,34 @@ test("pushing a fragment update doesn't cause it to become dirty", function() {
       }
     });
 
-    ok(person.get('name.first'), "Jamie", "first name updated");
-    ok(person.get('name.last'), "Lannister", "last name is the same");
+    equal(person.get('name.first'), "Jamie", "first name updated");
+    equal(person.get('name.last'), "Lannister", "last name is the same");
+    ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
+  });
+});
+
+test("pushing a fragment array update doesn't cause it to become dirty", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
+
+    store.push({
+      type: 'person',
+      id: 1,
+      attributes: {
+        addresses: [
+          // Yeah, this is pretty weird...
+          {},
+          {
+            street: "1 Dungeon Cell",
+          }
+        ]
+      }
+    });
+
+    equal(person.get('addresses.lastObject.street'), "1 Dungeon Cell", "street updated");
+    equal(person.get('addresses.lastObject.city'), "King's Landing", "city is the same");
     ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
   });
 });

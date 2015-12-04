@@ -15,12 +15,13 @@ import map from '../../util/map';
 */
 
 var get = Ember.get;
+var setProperties = Ember.setProperties;
 var computed = Ember.computed;
 var typeOf = Ember.typeOf;
 
 // Normalizes an array of object literals or fragments into fragment instances,
 // reusing fragments from a source content array when possible
-function normalizeFragmentArray(array, content, objs) {
+function normalizeFragmentArray(array, content, objs, canonical) {
   var record = get(array, 'owner');
   var store = get(record, 'store');
   var declaredModelName = get(array, 'type');
@@ -45,7 +46,14 @@ function normalizeFragmentArray(array, content, objs) {
       fragment = content[index];
 
       if (fragment) {
-        setFragmentData(fragment, data);
+        // The data could come from a property update, which should leave the
+        // fragment in a dirty state, or an adapter operation which should leave
+        // it in a clean state
+        if (canonical) {
+          setFragmentData(fragment, data);
+        } else {
+          setProperties(fragment, data);
+        }
       } else {
         fragment = createFragment(store, declaredModelName, record, key, options, data);
       }
@@ -84,7 +92,7 @@ var FragmentArray = StatefulArray.extend({
   _normalizeData: function(data) {
     var content = get(this, 'content');
 
-    return normalizeFragmentArray(this, content, data);
+    return normalizeFragmentArray(this, content, data, true);
   },
 
   /**
