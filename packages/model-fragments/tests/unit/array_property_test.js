@@ -21,11 +21,13 @@ test("array properties are converted to an array-ish containing original values"
   var values = [ "Hand of the King", "Master of Coin" ];
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: "Tyrion Lannister",
-      titles: values
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: "Tyrion Lannister",
+        titles: values
+      }
     }
   });
 
@@ -42,11 +44,13 @@ test("array properties are converted to an array-ish containing original values"
 
 test("null values are allowed", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: 'Many-Faced God',
-      titles: null
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: 'Many-Faced God',
+        titles: null
+      }
     }
   });
 
@@ -57,11 +61,13 @@ test("null values are allowed", function() {
 
 test("setting to null is allowed", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: "R'hllor",
-      titles: [ 'Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow' ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: "R'hllor",
+        titles: [ 'Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow' ]
+      }
     }
   });
 

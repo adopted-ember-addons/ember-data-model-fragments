@@ -81,9 +81,11 @@ test("`DS.hasManyFragment` properties can be nested", function() {
   };
 
   store.push({
-    type: 'user',
-    id: 1,
-    attributes: Ember.copy(data, true)
+    data: {
+      type: 'user',
+      id: 1,
+      attributes: Ember.copy(data, true)
+    }
   });
 
   env.adapter.updateRecord = function() {
@@ -220,9 +222,11 @@ test("Nested fragments can be copied", function() {
   });
 
   store.push({
-    type: 'user',
-    id: 1,
-    attributes: Ember.copy(data, true)
+    data: {
+      type: 'user',
+      id: 1,
+      attributes: Ember.copy(data, true)
+    }
   });
 
   return store.find('user', 1).then(function(user) {

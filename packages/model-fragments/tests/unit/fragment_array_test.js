@@ -40,9 +40,11 @@ test("fragment arrays can be copied", function() {
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -56,15 +58,17 @@ test("fragment arrays can be copied", function() {
 
 test("fragments can be created and added through the fragment array", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: [
-        {
-          first: "Tyrion",
-          last: "Lannister"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: [
+          {
+            first: "Tyrion",
+            last: "Lannister"
+          }
+        ]
+      }
     }
   });
 
@@ -84,15 +88,17 @@ test("fragments can be created and added through the fragment array", function()
 
 test("fragments can be added to the fragment array", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: [
-        {
-          first: "Tyrion",
-          last: "Lannister"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: [
+          {
+            first: "Tyrion",
+            last: "Lannister"
+          }
+        ]
+      }
     }
   });
 
@@ -113,15 +119,17 @@ test("fragments can be added to the fragment array", function() {
 
 test("fragments can be removed from the fragment array", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: [
-        {
-          first: "Arya",
-          last: "Stark"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: [
+          {
+            first: "Arya",
+            last: "Stark"
+          }
+        ]
+      }
     }
   });
 
@@ -139,19 +147,21 @@ test("fragments can be removed from the fragment array", function() {
 
 test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: [
-        {
-          first: "Aegon",
-          last: "Targaryen"
-        },
-        {
-          first: "Visenya",
-          last: "Targaryen"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: [
+          {
+            first: "Aegon",
+            last: "Targaryen"
+          },
+          {
+            first: "Visenya",
+            last: "Targaryen"
+          }
+        ]
+      }
     }
   });
 
@@ -195,15 +205,17 @@ test("changes to array contents change the fragment array 'hasDirtyAttributes' p
 
 test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: [
-        {
-          first: "Jon",
-          last: "Snow"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: [
+          {
+            first: "Jon",
+            last: "Snow"
+          }
+        ]
+      }
     }
   });
 
@@ -225,19 +237,21 @@ test("changes to array contents change the fragment array 'hasDirtyAttributes' p
 
 test("changes to array contents and fragments can be rolled back", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: [
-        {
-          first: "Catelyn",
-          last: "Tully"
-        },
-        {
-          first: "Catelyn",
-          last: "Stark"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: [
+          {
+            first: "Catelyn",
+            last: "Tully"
+          },
+          {
+            first: "Catelyn",
+            last: "Stark"
+          }
+        ]
+      }
     }
   });
 

@@ -33,12 +33,14 @@ QUnit.module("unit - `MF.fragmentOwner` property", {
 
 test("fragments can reference their owner record", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Samwell",
-        last: "Tarly"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Samwell",
+          last: "Tarly"
+        }
       }
     }
   });
@@ -64,23 +66,27 @@ test("using a fragment owner property on a non-fragment throws an error", functi
 
 test("attempting to change a fragment's owner record throws an error", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Samwell",
-        last: "Tarly"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Samwell",
+          last: "Tarly"
+        }
       }
     }
   });
 
   store.push({
-    type: 'person',
-    id: 2,
-    attributes: {
-      name: {
-        first: "Samwell",
-        last: "Tarly"
+    data: {
+      type: 'person',
+      id: 2,
+      attributes: {
+        name: {
+          first: "Samwell",
+          last: "Tarly"
+        }
       }
     }
   });
@@ -99,12 +105,14 @@ test("attempting to change a fragment's owner record throws an error", function(
 
 test("fragment owner properties are notified of change", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Jeyne",
-        last: "Poole"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Jeyne",
+          last: "Poole"
+        }
       }
     }
   });

@@ -81,9 +81,11 @@ QUnit.module("unit - `MF.fragmentArray` property", {
 
 function pushPerson(id) {
   store.push({
-    type: 'person',
-    id: id,
-    attributes: Ember.A(people).findBy('id', id)
+    data: {
+      type: 'person',
+      id: id,
+      attributes: Ember.A(people).findBy('id', id)
+    }
   });
 }
 
@@ -184,15 +186,19 @@ test("setting to an array of fragments is allowed", function() {
 
 test("defaults to an empty array", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {}
+    }
   });
 
   store.push({
-    type: 'person',
-    id: 2,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 2,
+      attributes: {}
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -269,14 +275,16 @@ test("setting a fragment array to an array of to an object literals creates new 
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: 'Asha',
-        last: 'Greyjoy'
-      },
-      addresses: null
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: 'Asha',
+          last: 'Greyjoy'
+        },
+        addresses: null
+      }
     }
   });
 
@@ -297,21 +305,23 @@ test("setting a fragment array to an array of object literals reuses an existing
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: 'Theon',
-        last: 'Greyjoy'
-      },
-      addresses: [
-        {
-          street: '1 Great Keep',
-          city: 'Pyke',
-          region: 'Iron Islands',
-          country: 'Westeros'
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: 'Theon',
+          last: 'Greyjoy'
+        },
+        addresses: [
+          {
+            street: '1 Great Keep',
+            city: 'Pyke',
+            region: 'Iron Islands',
+            country: 'Westeros'
+          }
+        ]
+      }
     }
   });
 

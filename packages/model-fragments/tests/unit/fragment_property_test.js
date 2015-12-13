@@ -33,12 +33,14 @@ QUnit.module("unit - `MF.fragment` property", {
 
 test("object literals are converted to instances of `MF.Fragment`", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Tyrion",
-        last: "Lannister"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Tyrion",
+          last: "Lannister"
+        }
       }
     }
   });
@@ -52,9 +54,11 @@ test("object literals are converted to instances of `MF.Fragment`", function() {
 
 test("a fragment can be created through the store and set", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {}
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -71,9 +75,11 @@ test("a fragment can be created through the store and set", function() {
 
 test("setting to a non-fragment or object literal throws an error", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {}
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -85,20 +91,24 @@ test("setting to a non-fragment or object literal throws an error", function() {
 
 test("setting fragments from other records throws an error", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Roose",
-        last: "Bolton"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Roose",
+          last: "Bolton"
+        }
       }
     }
   });
 
   store.push({
-    type: 'person',
-    id: 2,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 2,
+      attributes: {}
+    }
   });
 
   return all([
@@ -113,10 +123,12 @@ test("setting fragments from other records throws an error", function() {
 
 test("null values are allowed", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: null
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: null
+      }
     }
   });
 
@@ -127,12 +139,14 @@ test("null values are allowed", function() {
 
 test("setting to null is allowed", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Barristan",
-        last: "Selmy"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Barristan",
+          last: "Selmy"
+        }
       }
     }
   });
@@ -164,10 +178,12 @@ test("setting a fragment to an object literal creates a new fragment", function(
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: null
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: null
+      }
     }
   });
 
@@ -186,12 +202,14 @@ test("setting a fragment to an object literal reuses an existing fragment", func
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: 'Theon',
-        last: 'Greyjoy'
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: 'Theon',
+          last: 'Greyjoy'
+        }
       }
     }
   });

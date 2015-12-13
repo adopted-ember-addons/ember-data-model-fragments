@@ -75,9 +75,11 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: person
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: person
+    }
   });
 
   env.registry.register('serializer:person', env.serializer.extend({
@@ -104,12 +106,14 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
 
 test("fragment properties are serialized as normal attributes using their own serializers", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Aerys",
-        last: "Targaryen"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Aerys",
+          last: "Targaryen"
+        }
       }
     }
   });
@@ -148,10 +152,12 @@ test("serializing a fragment array creates a new array with contents the result 
   ];
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      names: names
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        names: names
+      }
     }
   });
 
@@ -190,12 +196,14 @@ test("normalizing data can handle `null` fragment values", function() {
   });
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: null,
-      houses: null,
-      children: null
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: null,
+        houses: null,
+        children: null
+      }
     }
   });
 
@@ -242,12 +250,14 @@ test("array properties use the specified transform to serialize data", function(
   });
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      strings: values,
-      numbers: values,
-      booleans: values
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        strings: values,
+        numbers: values,
+        booleans: values
+      }
     }
   });
 
