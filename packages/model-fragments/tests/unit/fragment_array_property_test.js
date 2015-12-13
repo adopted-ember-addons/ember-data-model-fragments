@@ -1,7 +1,7 @@
 var env, store, Person, Address, Hobby, people;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit - `MF.fragmentArray`", {
+QUnit.module("unit - `MF.fragmentArray` property", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.attr('string'),
