@@ -1,7 +1,7 @@
 var env, store, Person, Name;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit - `MF.fragmentOwner`", {
+QUnit.module("unit - `MF.fragmentOwner` property", {
   setup: function() {
     Person = DS.Model.extend({
       name: MF.fragment('name'),
