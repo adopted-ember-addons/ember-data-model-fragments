@@ -1,5 +1,17 @@
 # Changelog
 
+### v2.1.1 (December 23, 2015)
+
+* Fixed issue with `store.push` leaving records dirty
+
+### v2.0.2 (December 23, 2015)
+
+* Backported fix for issue with `store.push` leaving records dirty
+
+### v1.13.2 (December 23, 2015)
+
+* Backported fix for issue with `store.push` leaving records dirty
+
 ### v2.1.0 (November 15, 2015)
 
 * Updated Ember/ED > v2.1.x
