@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data-model-fragments/master/LICENSE
- * @version   2.0.1
+ * @version   2.0.2
  */
 
 (function() {
@@ -850,15 +850,18 @@
       return fragment;
     }
 
+    function model$fragments$lib$fragments$fragment$$setFragmentData(fragment, data) {
+      model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
+        attributes: data
+      });
+    }
+
     function model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, data) {
       var actualModelName = model$fragments$lib$fragments$fragment$$getActualFragmentType(declaredModelName, options, data);
       var fragment = store.createFragment(actualModelName);
 
       model$fragments$lib$fragments$fragment$$setFragmentOwner(fragment, record, key);
-
-      model$fragments$lib$fragments$fragment$$internalModelFor(fragment).setupData({
-        attributes: data
-      });
+      model$fragments$lib$fragments$fragment$$setFragmentData(fragment, data);
 
       return fragment;
     }
@@ -915,7 +918,7 @@
 
     // Normalizes an array of object literals or fragments into fragment instances,
     // reusing fragments from a source content array when possible
-    function model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(array, content, objs) {
+    function model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(array, content, objs, canonical) {
       var record = model$fragments$lib$fragments$array$fragment$$get(array, 'owner');
       var store = model$fragments$lib$fragments$array$fragment$$get(record, 'store');
       var declaredModelName = model$fragments$lib$fragments$array$fragment$$get(array, 'type');
@@ -940,7 +943,14 @@
           fragment = content[index];
 
           if (fragment) {
-            model$fragments$lib$fragments$array$fragment$$setProperties(fragment, data);
+            // The data could come from a property update, which should leave the
+            // fragment in a dirty state, or an adapter operation which should leave
+            // it in a clean state
+            if (canonical) {
+              model$fragments$lib$fragments$fragment$$setFragmentData(fragment, data);
+            } else {
+              model$fragments$lib$fragments$array$fragment$$setProperties(fragment, data);
+            }
           } else {
             fragment = model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, data);
           }
@@ -979,7 +989,7 @@
       _normalizeData: function(data) {
         var content = model$fragments$lib$fragments$array$fragment$$get(this, 'content');
 
-        return model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(this, content, data);
+        return model$fragments$lib$fragments$array$fragment$$normalizeFragmentArray(this, content, data, true);
       },
 
       /**
@@ -1256,7 +1266,7 @@
         // Else initialize the fragment
         } else if (data && data !== fragment) {
           if (fragment) {
-            model$fragments$lib$fragments$attributes$$setProperties(fragment, data);
+            model$fragments$lib$fragments$fragment$$setFragmentData(fragment, data);
           } else {
             fragment = model$fragments$lib$fragments$fragment$$createFragment(store, declaredModelName, record, key, options, data);
           }
@@ -1747,7 +1757,7 @@
       @main ember-data-model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '2.0.1',
+      VERSION: '2.0.2',
       Fragment: model$fragments$lib$fragments$fragment$$default,
       FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
       FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,
