@@ -67,9 +67,11 @@ QUnit.module("unit - Polymorphism", {
 
 test("fragment properties support polymorphism", function() {
   store.push({
-    type: 'zoo',
-    id: 1,
-    attributes: zoo
+    data: {
+      type: 'zoo',
+      id: 1,
+      attributes: zoo
+    }
   });
 
   return store.find('zoo', 1).then(function(zoo) {
@@ -86,9 +88,11 @@ test("fragment properties support polymorphism", function() {
 
 test("fragment array properties support polymorphism", function() {
   store.push({
-    type: 'zoo',
-    id: 1,
-    attributes: zoo
+    data: {
+      type: 'zoo',
+      id: 1,
+      attributes: zoo
+    }
   });
 
   return store.find('zoo', 1).then(function(zoo) {
@@ -114,9 +118,11 @@ test("fragment property type-checks check the superclass when MODEL_FACTORY_INJE
   expect(2);
 
   store.push({
-    type: 'zoo',
-    id: 1,
-    attributes: zoo
+    data: {
+      type: 'zoo',
+      id: 1,
+      attributes: zoo
+    }
   });
 
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
@@ -141,9 +147,11 @@ test("rolling back a fragment property that was set to null checks the superclas
   expect(2);
 
   store.push({
-    type: 'zoo',
-    id: 1,
-    attributes: zoo
+    data: {
+      type: 'zoo',
+      id: 1,
+      attributes: zoo
+    }
   });
 
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;

@@ -45,20 +45,24 @@ test("fragments are `Ember.Copyable`", function() {
 
 test("copied fragments can be added to any record", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Jon",
-        last: "Snow"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Jon",
+          last: "Snow"
+        }
       }
     }
   });
 
   store.push({
-    type: 'person',
-    id: 2,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 2,
+      attributes: {}
+    }
   });
 
   return all([
@@ -75,12 +79,14 @@ test("copied fragments can be added to any record", function() {
 
 test("copying a fragment copies the fragment's properties", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Jon",
-        last: "Snow"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Jon",
+          last: "Snow"
+        }
       }
     }
   });
@@ -115,12 +121,14 @@ test("fragments are compared by reference", function() {
 
 test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Loras",
-        last: "Tyrell"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Loras",
+          last: "Tyrell"
+        }
       }
     }
   });
@@ -136,12 +144,14 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
 
 test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Rob",
-        last: "Stark"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Rob",
+          last: "Stark"
+        }
       }
     }
   });
@@ -155,12 +165,14 @@ test("fragment properties that are set to null are indicated in the owner record
 
 test("changes to attributes can be rolled back", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Ramsay",
-        last: "Snow"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Ramsay",
+          last: "Snow"
+        }
       }
     }
   });

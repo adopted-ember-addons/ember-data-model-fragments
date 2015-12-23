@@ -48,21 +48,23 @@ QUnit.module("integration - Persistence", {
 
 test("persisting the owner record in a clean state maintains clean state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Tyrion",
-        last: "Lannister"
-      },
-      addresses: [
-        {
-          street: "1 Sky Cell",
-          city: "Eyre",
-          region: "Vale of Arryn",
-          country: "Westeros"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Tyrion",
+          last: "Lannister"
+        },
+        addresses: [
+          {
+            street: "1 Sky Cell",
+            city: "Eyre",
+            region: "Vale of Arryn",
+            country: "Westeros"
+          }
+        ]
+      }
     }
   });
 
@@ -85,21 +87,23 @@ test("persisting the owner record in a clean state maintains clean state", funct
 
 test("persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Eddard",
-        last: "Stark"
-      },
-      addresses: [
-        {
-          street: "1 Great Keep",
-          city: "Winterfell",
-          region: "North",
-          country: "Westeros"
-        }
-      ]
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Eddard",
+          last: "Stark"
+        },
+        addresses: [
+          {
+            street: "1 Great Keep",
+            city: "Winterfell",
+            region: "North",
+            country: "Westeros"
+          }
+        ]
+      }
     }
   });
 
@@ -204,9 +208,11 @@ test("the adapter can update fragments on save", function() {
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
   });
 
   env.adapter.updateRecord = function() {
@@ -251,9 +257,11 @@ test("existing fragments are updated on save", function() {
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
   });
 
   env.adapter.updateRecord = function() {
@@ -353,9 +361,11 @@ test("the adapter can update fragments on reload", function() {
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
   });
 
   env.adapter.findRecord = function() {
@@ -397,9 +407,11 @@ test("the adapter can update fragments without infinite loops when CPs are eager
   };
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -409,9 +421,11 @@ test("the adapter can update fragments without infinite loops when CPs are eager
     personProxy.get('name.first');
 
     store.push({
-      type: 'person',
-      id: 1,
-      attributes: data
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data
+      }
     });
 
     equal(person.get('name.first'), 'Brandon');
@@ -449,9 +463,11 @@ test("fragment array properties are notified on save", function() {
   });
 
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
   });
 
   env.adapter.updateRecord = function() {
@@ -496,9 +512,11 @@ test("fragment array properties are notifed on reload", function() {
   });
 
   store.push({
-    type: 'army',
-    id: 1,
-    attributes: data
+    data: {
+      type: 'army',
+      id: 1,
+      attributes: data
+    }
   });
 
   env.adapter.findRecord = function() {

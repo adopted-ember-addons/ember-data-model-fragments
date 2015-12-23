@@ -6,5 +6,5 @@ before_install:
   - "npm install --global ember-cli bower"
 before_script:
   - "bower install"
-  - "bower install ember#~2.1.0"
-  - "bower install ember-data#~2.1.0"
+  - "bower install ember#~2.2.0"
+  - "bower install ember-data#~2.2.0"

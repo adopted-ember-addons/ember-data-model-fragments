@@ -80,20 +80,24 @@ QUnit.module("integration - Dependent State", {
 
 function pushPerson(id) {
   store.push({
-    type: 'person',
-    id: id,
-    attributes: Ember.A(people).findBy('id', id)
+    data: {
+      type: 'person',
+      id: id,
+      attributes: Ember.A(people).findBy('id', id)
+    }
   });
 }
 
 test("changing a fragment property dirties the fragment and owner record", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Jamie",
-        last: "Lannister"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Jamie",
+          last: "Lannister"
+        }
       }
     }
   });
@@ -110,12 +114,14 @@ test("changing a fragment property dirties the fragment and owner record", funct
 
 test("setting a fragment property to an object literal dirties the fragment and owner record", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Visenya",
-        last: "Targaryen"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Visenya",
+          last: "Targaryen"
+        }
       }
     }
   });
@@ -134,12 +140,14 @@ test("setting a fragment property to an object literal dirties the fragment and 
 
 test("setting a fragment property with an object literal to the same value does not dirty the fragment or owner record", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Samwell",
-        last: "Tarly"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Samwell",
+          last: "Tarly"
+        }
       }
     }
   });
@@ -159,12 +167,14 @@ test("setting a fragment property with an object literal to the same value does 
 
 test("restoring a fragment property to its original state returns the fragment and owner record to a clean state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Hoster",
-        last: "Tully"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Hoster",
+          last: "Tully"
+        }
       }
     }
   });
@@ -182,12 +192,14 @@ test("restoring a fragment property to its original state returns the fragment a
 
 test("restoring a fragment property to its original state when the owner record was dirty returns the fragment to a clean state maintains the owner record's dirty state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Jorah",
-        last: "Mormont"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Jorah",
+          last: "Mormont"
+        }
       }
     }
   });
@@ -208,12 +220,14 @@ test("restoring a fragment property to its original state when the owner record 
 
 test("rolling back the owner record returns fragment and owner record to a clean state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Catelyn",
-        last: "Stark"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Catelyn",
+          last: "Stark"
+        }
       }
     }
   });
@@ -232,12 +246,14 @@ test("rolling back the owner record returns fragment and owner record to a clean
 
 test("a record can be rolled back multiple times", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Arya",
-        last: "Stark"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Arya",
+          last: "Stark"
+        }
       }
     }
   });
@@ -263,12 +279,14 @@ test("a record can be rolled back multiple times", function() {
 
 test("rolling back a fragment returns the fragment and the owner record to a clean state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Sansa",
-        last: "Stark"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Sansa",
+          last: "Stark"
+        }
       }
     }
   });
@@ -288,12 +306,14 @@ test("rolling back a fragment returns the fragment and the owner record to a cle
 
 test("changing a fragment property then rolling back the owner record preserves the fragment's owner", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Arya",
-        last: "Stark"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Arya",
+          last: "Stark"
+        }
       }
     }
   });
@@ -311,12 +331,14 @@ test("changing a fragment property then rolling back the owner record preserves 
 
 test("rolling back a fragment when the owner record is dirty returns the fragment to a clean state and maintains the owner record's dirty state", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {
-      name: {
-        first: "Sansa",
-        last: "Stark"
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {
+        name: {
+          first: "Sansa",
+          last: "Stark"
+        }
       }
     }
   });
@@ -355,9 +377,11 @@ test("a fragment property that is set to null can be rolled back", function() {
 
 test("a fragment property that is null can be rolled back", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {}
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -758,9 +782,11 @@ test("a fragment array property that is null can be rolled back", function() {
 
 test("a fragment array property that is empty can be rolled back", function() {
   store.push({
-    type: 'person',
-    id: 1,
-    attributes: {}
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: {}
+    }
   });
 
   return store.find('person', 1).then(function(person) {
@@ -793,10 +819,12 @@ test("pushing a fragment update doesn't cause it to become dirty", function() {
     ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
 
     store.push({
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: { first: "Jamie" }
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: { first: "Jamie" }
+        }
       }
     });
 
@@ -813,16 +841,18 @@ test("pushing a fragment array update doesn't cause it to become dirty", functio
     ok(!person.get('hasDirtyAttributes'), "person record is not dirty");
 
     store.push({
-      type: 'person',
-      id: 1,
-      attributes: {
-        addresses: [
-          // Yeah, this is pretty weird...
-          {},
-          {
-            street: "1 Dungeon Cell",
-          }
-        ]
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          addresses: [
+            // Yeah, this is pretty weird...
+            {},
+            {
+              street: "1 Dungeon Cell",
+            }
+          ]
+        }
       }
     });
 
