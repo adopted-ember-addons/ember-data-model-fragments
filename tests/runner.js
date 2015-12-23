@@ -1,14 +1,17 @@
 (function() {
   // Setup ember-dev test helpers
-  var DeprecationAssert = require('ember-dev/test-helper/deprecation').default;
+  var CompositeAssert = require('ember-dev/test-helper/index').default;
   var setupQUnit = require('ember-dev/test-helper/setup-qunit').default;
+  var debugModule = Ember.__loader.require('ember-metal/debug');
 
-  var testHelpers = new DeprecationAssert({
+  var env = new CompositeAssert({
     Ember: window.Ember,
-    runningProdBuild: false
+    runningProdBuild: false,
+    getDebugFunction: debugModule.getDebugFunction,
+    setDebugFunction: debugModule.setDebugFunction,
   });
 
-  setupQUnit(testHelpers);
+  setupQUnit(env);
 
   // Require actual tests
   var moduleNames = Object.keys(requirejs.entries);

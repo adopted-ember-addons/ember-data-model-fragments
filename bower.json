@@ -25,6 +25,6 @@
     "jquery": "^2.0.0",
     "ember": "^2.1.0",
     "loader.js": "~3.2.1",
-    "ember-dev": "emberjs/ember-dev#c2c495f660a31bed291ebf8038326c80f962ac98"
+    "ember-dev": "emberjs/ember-dev#bcfb9c3487ec2fd58b932394a15ce16fd9cf7eed"
   }
 }

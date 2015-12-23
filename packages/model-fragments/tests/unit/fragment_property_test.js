@@ -158,17 +158,19 @@ test("setting to null is allowed", function() {
 });
 
 test("fragments are created from object literals when creating a record", function() {
-  var name = {
-    first: 'Balon',
-    last: 'Greyjoy'
-  };
+  Ember.run(function() {
+    var name = {
+      first: 'Balon',
+      last: 'Greyjoy'
+    };
 
-  var person = store.createRecord('person', {
-    name: name
+    var person = store.createRecord('person', {
+      name: name
+    });
+
+    ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
+    equal(person.get('name.first'), name.first, "fragment has correct values");
   });
-
-  ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-  equal(person.get('name.first'), name.first, "fragment has correct values");
 });
 
 test("setting a fragment to an object literal creates a new fragment", function() {
@@ -225,41 +227,45 @@ test("setting a fragment to an object literal reuses an existing fragment", func
 });
 
 test("fragments can have default values", function() {
-  var defaultValue = {
-    first: "Iron",
-    last: "Victory"
-  };
+  Ember.run(function() {
+    var defaultValue = {
+      first: "Iron",
+      last: "Victory"
+    };
 
-  var Ship = DS.Model.extend({
-    name: MF.fragment("name", { defaultValue: defaultValue }),
+    var Ship = DS.Model.extend({
+      name: MF.fragment("name", { defaultValue: defaultValue }),
+    });
+
+    env.registry.register('model:ship', Ship);
+
+    var ship = store.createRecord('ship');
+
+    equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
+
+    ship.set('name', null);
+    equal(ship.get('name'), null, "the default value is not used when the value is set to null");
+
+    ship = store.createRecord('ship', { name: null });
+    equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
   });
-
-  env.registry.register('model:ship', Ship);
-
-  var ship = store.createRecord('ship');
-
-  equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
-
-  ship.set('name', null);
-  equal(ship.get('name'), null, "the default value is not used when the value is set to null");
-
-  ship = store.createRecord('ship', { name: null });
-  equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
 });
 
 test("fragment default values can be functions", function() {
-  var defaultValue = {
-    first: "Oath",
-    last: "Keeper"
-  };
+  Ember.run(function() {
+    var defaultValue = {
+      first: "Oath",
+      last: "Keeper"
+    };
 
-  var Sword = DS.Model.extend({
-    name: MF.fragment("name", { defaultValue: function() { return defaultValue; } }),
+    var Sword = DS.Model.extend({
+      name: MF.fragment("name", { defaultValue: function() { return defaultValue; } }),
+    });
+
+    env.registry.register('model:sword', Sword);
+
+    var sword = store.createRecord('sword');
+
+    equal(sword.get('name.first'), defaultValue.first, "the default value is correct");
   });
-
-  env.registry.register('model:sword', Sword);
-
-  var sword = store.createRecord('sword');
-
-  equal(sword.get('name.first'), defaultValue.first, "the default value is correct");
 });

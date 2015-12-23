@@ -247,23 +247,25 @@ test("setting to null is allowed", function() {
 });
 
 test("fragments are created from an array of object literals when creating a record", function() {
-  var address = {
-    street: '1 Sea Tower',
-    city: 'Pyke',
-    region: 'Iron Islands',
-    country: 'Westeros'
-  };
+  Ember.run(function() {
+    var address = {
+      street: '1 Sea Tower',
+      city: 'Pyke',
+      region: 'Iron Islands',
+      country: 'Westeros'
+    };
 
-  var person = store.createRecord('person', {
-    name: {
-      first: 'Balon',
-      last: 'Greyjoy'
-    },
-    addresses: [ address ]
+    var person = store.createRecord('person', {
+      name: {
+        first: 'Balon',
+        last: 'Greyjoy'
+      },
+      addresses: [ address ]
+    });
+
+    ok(person.get('addresses.firstObject') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
+    equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
   });
-
-  ok(person.get('addresses.firstObject') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-  equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
 });
 
 test("setting a fragment array to an array of to an object literals creates new fragments", function() {
@@ -347,51 +349,55 @@ test("setting to an array of non-fragments throws an error", function() {
 });
 
 test("fragments can have default values", function() {
-  var defaultValue = [
-    {
-      street: "1 Throne Room",
-      city: "King's Landing",
-      region: "Crownlands",
-      country: "Westeros"
-    }
-  ];
+  Ember.run(function() {
+    var defaultValue = [
+      {
+        street: "1 Throne Room",
+        city: "King's Landing",
+        region: "Crownlands",
+        country: "Westeros"
+      }
+    ];
 
-  var Throne = DS.Model.extend({
-    name: DS.attr('string'),
-    addresses: MF.fragmentArray('address', { defaultValue: defaultValue })
+    var Throne = DS.Model.extend({
+      name: DS.attr('string'),
+      addresses: MF.fragmentArray('address', { defaultValue: defaultValue })
+    });
+
+    env.registry.register('model:throne', Throne);
+
+    var throne = store.createRecord('throne', { name: 'Iron' });
+
+    equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is used when the value has not been specified");
+
+    throne.set('addresses', null);
+    equal(throne.get('addresses'), null, "the default value is not used when the value is set to null");
+
+    throne = store.createRecord('throne', { name: 'Iron', addresses: null });
+    equal(throne.get('addresses'), null, "the default value is not used when the value is initialized to null");
   });
-
-  env.registry.register('model:throne', Throne);
-
-  var throne = store.createRecord('throne', { name: 'Iron' });
-
-  equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is used when the value has not been specified");
-
-  throne.set('addresses', null);
-  equal(throne.get('addresses'), null, "the default value is not used when the value is set to null");
-
-  throne = store.createRecord('throne', { name: 'Iron', addresses: null });
-  equal(throne.get('addresses'), null, "the default value is not used when the value is initialized to null");
 });
 
 test("fragment default values can be functions", function() {
-  var defaultValue = [
-    {
-      street: "1 Great Keep",
-      city: "Winterfell",
-      region: "North",
-      country: "Westeros"
-    }
-  ];
+  Ember.run(function() {
+    var defaultValue = [
+      {
+        street: "1 Great Keep",
+        city: "Winterfell",
+        region: "North",
+        country: "Westeros"
+      }
+    ];
 
-  var Sword = DS.Model.extend({
-    name: DS.attr('string'),
-    addresses: MF.fragmentArray('address', { defaultValue: function() { return defaultValue; } })
+    var Sword = DS.Model.extend({
+      name: DS.attr('string'),
+      addresses: MF.fragmentArray('address', { defaultValue: function() { return defaultValue; } })
+    });
+
+    env.registry.register('model:sword', Sword);
+
+    var sword = store.createRecord('sword', { name: 'Ice' });
+
+    equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
   });
-
-  env.registry.register('model:sword', Sword);
-
-  var sword = store.createRecord('sword', { name: 'Ice' });
-
-  equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
 });
