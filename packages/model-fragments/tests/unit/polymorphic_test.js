@@ -117,20 +117,20 @@ test("fragment property type-checks check the superclass when MODEL_FACTORY_INJE
   // The extra assertion comes from deprecation checking
   expect(2);
 
-  store.push({
-    data: {
-      type: 'zoo',
-      id: 1,
-      attributes: zoo
-    }
-  });
-
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
   try {
-    Ember.run(function () {
-      var zoo = store.createRecord('zoo', { name: 'The World' });
+    Ember.run(function() {
+      store.push({
+        data: {
+          type: 'zoo',
+          id: 1,
+          attributes: zoo
+        }
+      });
+
+      zoo = store.createRecord('zoo', { name: 'The World' });
       var animal = store.createFragment('elephant', { name: 'Mr. Pink' });
 
       zoo.set('star', animal);

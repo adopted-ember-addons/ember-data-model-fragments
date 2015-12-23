@@ -38,9 +38,11 @@ QUnit.module("unit - `MF.Fragment`", {
 });
 
 test("fragments are `Ember.Copyable`", function() {
-  var fragment = store.createFragment('name');
+  Ember.run(function() {
+    var fragment = store.createFragment('name');
 
-  ok(Ember.Copyable.detect(fragment), "fragments are copyable");
+    ok(Ember.Copyable.detect(fragment), "fragments are copyable");
+  });
 });
 
 test("copied fragments can be added to any record", function() {
@@ -100,23 +102,27 @@ test("copying a fragment copies the fragment's properties", function() {
 });
 
 test("fragments are `Ember.Comparable`", function() {
-  var fragment = store.createFragment('name');
+  Ember.run(function() {
+    var fragment = store.createFragment('name');
 
-  ok(Ember.Comparable.detect(fragment), "fragments are comparable");
+    ok(Ember.Comparable.detect(fragment), "fragments are comparable");
+  });
 });
 
 test("fragments are compared by reference", function() {
-  var fragment1 = store.createFragment('name', {
-    first: "Jon",
-    last: "Arryn"
-  });
-  var fragment2 = store.createFragment('name', {
-    first: "Jon",
-    last: "Arryn"
-  });
+  Ember.run(function() {
+    var fragment1 = store.createFragment('name', {
+      first: "Jon",
+      last: "Arryn"
+    });
+    var fragment2 = store.createFragment('name', {
+      first: "Jon",
+      last: "Arryn"
+    });
 
-  ok(fragment1.compare(fragment1, fragment2) !== 0, "deeply equal objects are not the same");
-  ok(fragment1.compare(fragment1, fragment1) === 0, "identical objects are the same");
+    ok(fragment1.compare(fragment1, fragment2) !== 0, "deeply equal objects are not the same");
+    ok(fragment1.compare(fragment1, fragment1) === 0, "identical objects are the same");
+  });
 });
 
 test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {

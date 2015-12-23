@@ -120,82 +120,86 @@ test("`DS.hasManyFragment` properties can be nested", function() {
 });
 
 test("Fragments can be created with nested object literals", function() {
-  var data = {
-    info: {
-      name: 'Tyrion Lannister',
-      notes: [ 'smart', 'short' ]
-    },
-    orders: [
-      {
-        amount   : '799.98',
-        products : [
-          {
-            name   : 'Tears of Lys',
-            sku    : 'poison-bd-32',
-            price  : '499.99'
-          },
-          {
-            name   : 'The Strangler',
-            sku    : 'poison-md-24',
-            price  : '299.99'
-          }
-        ]
+  Ember.run(function() {
+    var data = {
+      info: {
+        name: 'Tyrion Lannister',
+        notes: [ 'smart', 'short' ]
       },
-      {
-        amount: '10999.99',
-        products: [
-          {
-            name  : 'Lives of Four Kings',
-            sku   : 'old-book-32',
-            price : '10999.99'
-          }
-        ]
-      }
-    ]
-  };
+      orders: [
+        {
+          amount   : '799.98',
+          products : [
+            {
+              name   : 'Tears of Lys',
+              sku    : 'poison-bd-32',
+              price  : '499.99'
+            },
+            {
+              name   : 'The Strangler',
+              sku    : 'poison-md-24',
+              price  : '299.99'
+            }
+          ]
+        },
+        {
+          amount: '10999.99',
+          products: [
+            {
+              name  : 'Lives of Four Kings',
+              sku   : 'old-book-32',
+              price : '10999.99'
+            }
+          ]
+        }
+      ]
+    };
 
-  var user = store.createRecord('user', data);
-  var orders = user.get('orders');
+    var user = store.createRecord('user', data);
+    var orders = user.get('orders');
 
-  equal(orders.get('length'), 2, "fragment array length is correct");
-  ok(orders.get('firstObject') instanceof Order, "fragment instances are created");
-  equal(orders.get('firstObject.amount'), data.orders[0].amount, "fragment properties are correct");
-  equal(orders.get('firstObject.products.length'), 2, "nested fragment array length is correct");
-  ok(orders.get('firstObject.products.firstObject') instanceof Product, "nested fragment instances are created");
-  equal(orders.get('firstObject.products.firstObject.name'), data.orders[0].products[0].name, "nested fragment properties are correct");
+    equal(orders.get('length'), 2, "fragment array length is correct");
+    ok(orders.get('firstObject') instanceof Order, "fragment instances are created");
+    equal(orders.get('firstObject.amount'), data.orders[0].amount, "fragment properties are correct");
+    equal(orders.get('firstObject.products.length'), 2, "nested fragment array length is correct");
+    ok(orders.get('firstObject.products.firstObject') instanceof Product, "nested fragment instances are created");
+    equal(orders.get('firstObject.products.firstObject.name'), data.orders[0].products[0].name, "nested fragment properties are correct");
+  });
 });
 
 test("Nested fragments can have default values", function() {
-  var defaultInfo = {
-    notes: [ 'dangerous', 'sorry' ]
-  };
-  var defaultOrders = [
-    {
-      amount   : '1499.99',
-      products : [
-        {
-          name  : 'Live Manticore',
-          sku   : 'manticore-lv-2',
-          price : '1499.99',
-        }
-      ]
-    },
-  ];
+  Ember.run(function() {
+    var defaultInfo = {
+      notes: [ 'dangerous', 'sorry' ]
+    };
+    var defaultOrders = [
+      {
+        amount   : '1499.99',
+        products : [
+          {
+            name  : 'Live Manticore',
+            sku   : 'manticore-lv-2',
+            price : '1499.99',
+          }
+        ]
+      },
+    ];
 
-  var Assassin = DS.Model.extend({
-    info   : MF.fragment("info", { defaultValue: defaultInfo }),
-    orders : MF.fragmentArray("order", { defaultValue: defaultOrders })
+    var Assassin = DS.Model.extend({
+      info   : MF.fragment("info", { defaultValue: defaultInfo }),
+      orders : MF.fragmentArray("order", { defaultValue: defaultOrders })
+    });
+
+    env.registry.register('model:assassin', Assassin);
+
+    var user = store.createRecord('assassin');
+
+    ok(user.get('info'), "a nested fragment is created with the default value");
+    deepEqual(user.get('info.notes').toArray(), defaultInfo.notes, "a doubly nested fragment array is created with the default value");
+    ok(user.get('orders.firstObject'), "a nested fragment array is created with the default value");
+    equal(user.get('orders.firstObject.amount'), defaultOrders[0].amount, "a nested fragment is created with the default value");
+    equal(user.get('orders.firstObject.products.firstObject.name'), defaultOrders[0].products[0].name, "a nested fragment is created with the default value");
   });
-
-  env.registry.register('model:assassin', Assassin);
-
-  var user = store.createRecord('assassin');
-
-  ok(user.get('info'), "a nested fragment is created with the default value");
-  deepEqual(user.get('info.notes').toArray(), defaultInfo.notes, "a doubly nested fragment array is created with the default value");
-  ok(user.get('orders.firstObject'), "a nested fragment array is created with the default value");
-  equal(user.get('orders.firstObject.amount'), defaultOrders[0].amount, "a nested fragment is created with the default value");
-  equal(user.get('orders.firstObject.products.firstObject.name'), defaultOrders[0].products[0].name, "a nested fragment is created with the default value");
 });
 
 test("Nested fragments can be copied", function() {
