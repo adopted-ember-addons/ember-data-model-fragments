@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.13.2 (December 23, 2015)
+
+* Fixed issue with `store.push` leaving records dirty
+
 ### v1.13.1 (November 15, 2015)
 
 * Fixed issue with looking up application/default serializers with `store#serializerFor` (@thec0keman)
