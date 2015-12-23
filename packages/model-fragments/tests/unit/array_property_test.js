@@ -1,6 +1,6 @@
 var env, store, Person;
 
-QUnit.module("unit - `MF.array`", {
+QUnit.module("unit - `MF.array` property", {
   setup: function() {
     Person = DS.Model.extend({
       name: DS.attr('string'),
@@ -73,35 +73,41 @@ test("setting to null is allowed", function() {
 });
 
 test("array properties default to an empty array-ish", function() {
-  var person = store.createRecord('person', {
-    name: 'Boros Blount'
-  });
+  Ember.run(function() {
+    var person = store.createRecord('person', {
+      name: 'Boros Blount'
+    });
 
-  deepEqual(person.get('titles').toArray(), [], "default value is correct");
+    deepEqual(person.get('titles').toArray(), [], "default value is correct");
+  });
 });
 
 test("array properties can have default values", function() {
-  Person.reopen({
-    titles: MF.array({ defaultValue: [ 'Ser' ] })
-  });
+  Ember.run(function() {
+    Person.reopen({
+      titles: MF.array({ defaultValue: [ 'Ser' ] })
+    });
 
-  var person = store.createRecord('person', {
-    name: 'Barristan Selmy'
-  });
+    var person = store.createRecord('person', {
+      name: 'Barristan Selmy'
+    });
 
-  ok(person.get('titles.length'), 1, "default value length is correct");
-  equal(person.get('titles.firstObject'), 'Ser', "default value is correct");
+    ok(person.get('titles.length'), 1, "default value length is correct");
+    equal(person.get('titles.firstObject'), 'Ser', "default value is correct");
+  });
 });
 
 test("default values can be functions", function() {
-  Person.reopen({
-    titles: MF.array({ defaultValue: function() { return [ 'Viper' ]; } })
-  });
+  Ember.run(function() {
+    Person.reopen({
+      titles: MF.array({ defaultValue: function() { return [ 'Viper' ]; } })
+    });
 
-  var person = store.createRecord('person', {
-    name: 'Oberyn Martell'
-  });
+    var person = store.createRecord('person', {
+      name: 'Oberyn Martell'
+    });
 
-  ok(person.get('titles.length'), 1, "default value length is correct");
-  equal(person.get('titles.firstObject'), 'Viper', "default value is correct");
+    ok(person.get('titles.length'), 1, "default value length is correct");
+    equal(person.get('titles.firstObject'), 'Viper', "default value is correct");
+  });
 });

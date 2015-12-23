@@ -51,15 +51,17 @@ test("fragments can reference their owner record", function() {
 });
 
 test("using a fragment owner property on a non-fragment throws an error", function() {
-  Person.reopen({
-    owner: MF.fragmentOwner()
+  Ember.run(function() {
+    Person.reopen({
+      owner: MF.fragmentOwner()
+    });
+
+    var person = store.createRecord('person');
+
+    throws(function() {
+      person.get('owner');
+    }, /Fragment owner properties can only be used on fragments/, "getting fragment owner on non-fragment throws an error");
   });
-
-  var person = store.createRecord('person');
-
-  throws(function() {
-    person.get('owner');
-  }, /Fragment owner properties can only be used on fragments/, "getting fragment owner on non-fragment throws an error");
 });
 
 test("attempting to change a fragment's owner record throws an error", function() {

@@ -29,10 +29,12 @@ QUnit.module("unit - `DS.Store`", {
 });
 
 test("a fragment can be created that starts in a dirty state", function() {
-  var address = store.createFragment('name');
+  Ember.run(function() {
+    var address = store.createFragment('name');
 
-  ok(address instanceof Name, "fragment is correct type");
-  ok(address.get('hasDirtyAttributes'), "fragment starts in dirty state");
+    ok(address instanceof Name, "fragment is correct type");
+    ok(address.get('hasDirtyAttributes'), "fragment starts in dirty state");
+  });
 });
 
 test("attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error", function() {
