@@ -8,6 +8,9 @@
   },
   "author": "Steven Lindberg <steven@lytics.io>",
   "license": "MIT",
+  "publishConfig": {
+    "tag": "2.0.x"
+  },
   "scripts": {
     "build": "ember build",
     "build:production": "ember build --environment=production",
