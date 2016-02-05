@@ -1,16 +1,12 @@
 {
   "framework": "qunit",
-  "src_files": [
-    "tests/env.js",
-    "bower_components/jquery/dist/jquery.js",
-    "bower_components/ember/ember.debug.js",
-    "bower_components/ember-data/ember-data.js",
-    "bower_components/loader.js/loader.js",
-    "dist/ember-data-model-fragments.js",
-    "tests/ember-setup.js",
-    "dist/ember-data-model-fragments-tests.js",
-    "tests/runner.js"
+  "test_page": "tests/index.html?hidepassed",
+  "disable_watching": true,
+  "launch_in_ci": [
+    "PhantomJS"
   ],
-  "launch_in_dev": [ "Chrome" ],
-  "launch_in_ci": [ "PhantomJS" ]
+  "launch_in_dev": [
+    "PhantomJS",
+    "Chrome"
+  ]
 }
