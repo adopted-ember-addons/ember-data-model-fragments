@@ -193,3 +193,11 @@ test("changes to attributes can be rolled back", function() {
     ok(!name.get('hasDirtyAttributes'), "fragment is in clean state");
   });
 });
+
+test("fragments without an owner can be destroyed", function() {
+  Ember.run(function() {
+    var fragment = store.createFragment('name');
+    fragment.destroy();
+    ok(fragment.get('isDestroying'), "the fragment is being destroyed");
+  });
+});
