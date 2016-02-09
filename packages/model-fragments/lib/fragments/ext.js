@@ -7,6 +7,7 @@ import {
   internalModelFor,
   default as Fragment
 } from './fragment';
+import FragmentArray from './array/fragment';
 
 /**
   @module ember-data-model-fragments
@@ -151,6 +152,29 @@ Model.reopen({
 
     return diffData;
   },
+
+  willDestroy: function() {
+    this._super.apply(this, arguments);
+
+    var internalModel = internalModelFor(this);
+    var key, fragment;
+
+    // destroy the current state
+    for (key in internalModel._fragments) {
+      if (fragment = internalModel._fragments[key]) {
+        fragment.destroy();
+      }
+    }
+
+    // destroy the original state
+    for (key in internalModel._data) {
+      if (fragment = internalModel._data[key]) {
+        if (fragment instanceof Fragment || fragment instanceof FragmentArray) {
+          fragment.destroy();
+        }
+      }
+    }
+  }
 });
 
 // Replace a method on an object with a new one that calls the original and then

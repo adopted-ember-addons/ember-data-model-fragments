@@ -391,3 +391,43 @@ test("fragment default values can be functions", function() {
     equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
   });
 });
+
+test("destroy a fragment array which was set to null", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var addresses = person.get('addresses');
+    var firstAddress = addresses.objectAt(0);
+    var secondAddress = addresses.objectAt(1);
+    person.set('addresses', null);
+
+    person.destroy();
+
+    Ember.run.schedule('destroy', function() {
+      ok(person.get('isDestroying'), "the model is being destroyed");
+      ok(addresses.get('isDestroying'), "the fragment array is being destroyed");
+      ok(firstAddress.get('isDestroying'), "the first fragment is being destroyed");
+      ok(secondAddress.get('isDestroying'), "the second fragment is being destroyed");
+    });
+  });
+});
+
+test("destroy a fragment which was removed from the fragment array", function() {
+  pushPerson(1);
+
+  return store.find('person', 1).then(function(person) {
+    var addresses = person.get('addresses');
+    var firstAddress = addresses.objectAt(0);
+    var secondAddress = addresses.objectAt(1);
+    addresses.removeAt(0);
+
+    person.destroy();
+
+    Ember.run.schedule('destroy', function() {
+      ok(person.get('isDestroying'), "the model is being destroyed");
+      ok(addresses.get('isDestroying'), "the fragment array is being destroyed");
+      ok(firstAddress.get('isDestroying'), "the removed fragment is being destroyed");
+      ok(secondAddress.get('isDestroying'), "the remaining fragment is being destroyed");
+    });
+  });
+});
