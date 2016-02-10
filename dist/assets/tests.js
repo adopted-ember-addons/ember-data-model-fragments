@@ -1187,11 +1187,6 @@ define('dummy/tests/integration/nested_test', ['exports', 'ember', 'ember-data-m
       }]
     };
 
-    _dummyModelsOrder['default'].reopen({
-      recurring: _emberData['default'].attr('boolean'),
-      product: _emberDataModelFragments['default'].fragment('product')
-    });
-
     _ember['default'].run(function () {
       store.push({
         data: {
@@ -1756,6 +1751,24 @@ define('dummy/tests/models/address.jshint', ['exports'], function (exports) {
     assert.ok(true, 'models/address.js should pass jshint.');
   });
 });
+define('dummy/tests/models/animal.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models');
+  QUnit.test('models/animal.js should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/animal.js should pass jshint.');
+  });
+});
+define('dummy/tests/models/elephant.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models');
+  QUnit.test('models/elephant.js should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/elephant.js should pass jshint.');
+  });
+});
 define('dummy/tests/models/hobby.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -1781,6 +1794,15 @@ define('dummy/tests/models/info.jshint', ['exports'], function (exports) {
   QUnit.test('models/info.js should pass jshint', function (assert) {
     assert.expect(1);
     assert.ok(true, 'models/info.js should pass jshint.');
+  });
+});
+define('dummy/tests/models/lion.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models');
+  QUnit.test('models/lion.js should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/lion.js should pass jshint.');
   });
 });
 define('dummy/tests/models/name.jshint', ['exports'], function (exports) {
@@ -1828,6 +1850,15 @@ define('dummy/tests/models/user.jshint', ['exports'], function (exports) {
     assert.ok(true, 'models/user.js should pass jshint.');
   });
 });
+define('dummy/tests/models/zoo.jshint', ['exports'], function (exports) {
+  'use strict';
+
+  QUnit.module('JSHint - models');
+  QUnit.test('models/zoo.js should pass jshint', function (assert) {
+    assert.expect(1);
+    assert.ok(true, 'models/zoo.js should pass jshint.');
+  });
+});
 define('dummy/tests/router.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -1850,16 +1881,13 @@ define('dummy/tests/test-helper.jshint', ['exports'], function (exports) {
     assert.ok(true, 'test-helper.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/person'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsPerson) {
+define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'ember-data-model-fragments', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/person'], function (exports, _ember, _emberDataModelFragments, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsPerson) {
 
   var store;
 
   (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - `MF.array` property", {
     beforeEach: function beforeEach() {
       store = this.application.__container__.lookup('service:store');
-      _dummyModelsPerson['default'].reopen({
-        name: DS.attr('string')
-      });
       //expectNoDeprecation();
     }
   });
@@ -1873,7 +1901,7 @@ define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'du
           type: 'person',
           id: 1,
           attributes: {
-            name: "Tyrion Lannister",
+            nickName: "Tyrion Lannister",
             titles: values
           }
         }
@@ -1898,7 +1926,7 @@ define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'du
           type: 'person',
           id: 1,
           attributes: {
-            name: 'Many-Faced God',
+            nickName: 'Many-Faced God',
             titles: null
           }
         }
@@ -1917,7 +1945,7 @@ define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'du
           type: 'person',
           id: 1,
           attributes: {
-            name: "R'hllor",
+            nickName: "R'hllor",
             titles: ['Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow']
           }
         }
@@ -1934,7 +1962,7 @@ define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'du
   (0, _qunit.test)("array properties default to an empty array-ish", function (assert) {
     _ember['default'].run(function () {
       var person = store.createRecord('person', {
-        name: 'Boros Blount'
+        nickName: 'Boros Blount'
       });
 
       assert.deepEqual(person.get('titles').toArray(), [], "default value is correct");
@@ -1944,11 +1972,11 @@ define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'du
   (0, _qunit.test)("array properties can have default values", function (assert) {
     _ember['default'].run(function () {
       _dummyModelsPerson['default'].reopen({
-        titles: MF.array({ defaultValue: ['Ser'] })
+        titles: _emberDataModelFragments['default'].array({ defaultValue: ['Ser'] })
       });
 
       var person = store.createRecord('person', {
-        name: 'Barristan Selmy'
+        nickName: 'Barristan Selmy'
       });
 
       assert.ok(person.get('titles.length'), 1, "default value length is correct");
@@ -1959,13 +1987,13 @@ define('dummy/tests/unit/array_property_test', ['exports', 'ember', 'qunit', 'du
   (0, _qunit.test)("default values can be functions", function (assert) {
     _ember['default'].run(function () {
       _dummyModelsPerson['default'].reopen({
-        titles: MF.array({ defaultValue: function defaultValue() {
+        titles: _emberDataModelFragments['default'].array({ defaultValue: function defaultValue() {
             return ['Viper'];
           } })
       });
 
       var person = store.createRecord('person', {
-        name: 'Oberyn Martell'
+        nickName: 'Oberyn Martell'
       });
 
       assert.ok(person.get('titles.length'), 1, "default value length is correct");
@@ -1979,13 +2007,12 @@ define('dummy/tests/unit/array_property_test.jshint', ['exports'], function (exp
   QUnit.module('JSHint - unit');
   QUnit.test('unit/array_property_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/array_property_test.js should pass jshint.\nunit/array_property_test.js: line 98, col 15, \'MF\' is not defined.\nunit/array_property_test.js: line 113, col 15, \'MF\' is not defined.\nunit/array_property_test.js: line 2, col 10, \'module\' is defined but never used.\n\n3 errors');
+    assert.ok(true, 'unit/array_property_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/deprecation_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance) {
-  var store;
+define("dummy/tests/unit/deprecation_test", ["exports", "dummy/tests/helpers/module-for-acceptance"], function (exports, _dummyTestsHelpersModuleForAcceptance) {
 
-  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - Deprecations", {
+  (0, _dummyTestsHelpersModuleForAcceptance["default"])("unit - Deprecations", {
     setup: function setup() {},
 
     teardown: function teardown() {}
@@ -1999,10 +2026,10 @@ define('dummy/tests/unit/deprecation_test.jshint', ['exports'], function (export
   QUnit.module('JSHint - unit');
   QUnit.test('unit/deprecation_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/deprecation_test.js should pass jshint.\nunit/deprecation_test.js: line 1, col 8, \'Ember\' is defined but never used.\nunit/deprecation_test.js: line 2, col 10, \'module\' is defined but never used.\nunit/deprecation_test.js: line 2, col 18, \'test\' is defined but never used.\nunit/deprecation_test.js: line 4, col 5, \'store\' is defined but never used.\n\n4 errors');
+    assert.ok(true, 'unit/deprecation_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'ember-data', 'ember-data-model-fragments', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/person'], function (exports, _ember, _emberData, _emberDataModelFragments, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsPerson) {
+define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'ember-data', 'ember-data-model-fragments', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/address'], function (exports, _ember, _emberData, _emberDataModelFragments, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsAddress) {
 
   var application, store, people;
   var all = _ember['default'].RSVP.all;
@@ -2011,17 +2038,13 @@ define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'em
     beforeEach: function beforeEach() {
       application = this.application;
 
-      _dummyModelsPerson['default'].reopen({
-        name: _emberData['default'].attr('string')
-      });
-
       store = application.__container__.lookup('service:store');
 
       //expectNoDeprecation();
 
       people = [{
         id: 1,
-        name: "Tyrion Lannister",
+        nickName: "Tyrion Lannister",
         addresses: [{
           street: "1 Sky Cell",
           city: "Eyre",
@@ -2035,7 +2058,7 @@ define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'em
         }]
       }, {
         id: 2,
-        name: "Eddard Stark",
+        nickName: "Eddard Stark",
         addresses: [{
           street: "1 Great Keep",
           city: "Winterfell",
@@ -2044,7 +2067,7 @@ define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'em
         }]
       }, {
         id: 3,
-        name: "Jojen Reed",
+        nickName: "Jojen Reed",
         addresses: null
       }];
     },
@@ -2086,7 +2109,7 @@ define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'em
         var addresses = person.get('addresses');
 
         assert.ok(addresses.every(function (address) {
-          return address instanceof Address;
+          return address instanceof _dummyModelsAddress['default'];
         }), "each fragment is a `MF.Fragment` instance");
       });
     });
@@ -2225,7 +2248,7 @@ define('dummy/tests/unit/fragment_array_property_test', ['exports', 'ember', 'em
     });
   });
 
-  (0, _qunit.test)("setting to null is allowed", function (person) {
+  (0, _qunit.test)("setting to null is allowed", function (assert) {
     _ember['default'].run(function () {
       pushPerson(1);
 
@@ -2400,37 +2423,24 @@ define('dummy/tests/unit/fragment_array_property_test.jshint', ['exports'], func
   QUnit.module('JSHint - unit');
   QUnit.test('unit/fragment_array_property_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/fragment_array_property_test.js should pass jshint.\nunit/fragment_array_property_test.js: line 243, col 45, \'person\' is defined but never used.\nunit/fragment_array_property_test.js: line 99, col 35, \'Address\' is not defined.\nunit/fragment_array_property_test.js: line 250, col 7, \'assert\' is not defined.\nunit/fragment_array_property_test.js: line 4, col 10, \'module\' is defined but never used.\n\n4 errors');
+    assert.ok(true, 'unit/fragment_array_property_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/fragment_array_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, Person, Name;
+define('dummy/tests/unit/fragment_array_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance) {
+  var store;
 
-  moduleForAcceptance("unit - `MF.fragmentArray`", {
-    setup: function setup() {
-      Person = DS.Model.extend({
-        names: MF.fragmentArray('name')
-      });
-
-      env = setupEnv({
-        person: Person,
-        name: Name
-      });
-
-      store = env.store;
-
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - `MF.fragmentArray`", {
+    beforeEach: function beforeEach() {
+      store = this.application.__container__.lookup('service:store');
       //expectNoDeprecation();
     },
 
-    teardown: function teardown() {
-      env = null;
+    afterEach: function afterEach() {
       store = null;
-      Person = null;
-      Name = null;
     }
   });
 
-  test("fragment arrays can be copied", function () {
+  (0, _qunit.test)("fragment arrays can be copied", function (assert) {
     var data = {
       names: [{
         first: "Meryn",
@@ -2438,226 +2448,240 @@ define('dummy/tests/unit/fragment_array_test', ['exports', 'ember'], function (e
       }]
     };
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: data
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var copy = person.get('names').copy();
-
-      equal(copy.length, person.get('names.length'), "copy's size is correct");
-      equal(copy[0].get('first'), data.names[0].first, "child fragments are copied");
-      ok(copy[0] !== person.get('names.firstObject'), "copied fragments are new fragments");
-    });
-  });
-
-  test("fragments can be created and added through the fragment array", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: [{
-            first: "Tyrion",
-            last: "Lannister"
-          }]
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: data
         }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var fragments = person.get('names');
-      var length = fragments.get('length');
-
-      var fragment = fragments.createFragment({
-        first: "Hugor",
-        last: "Hill"
       });
 
-      equal(fragments.get('length'), length + 1, "property size is correct");
-      equal(fragments.indexOf(fragment), length, "new fragment is in correct location");
+      return store.find('person', 1).then(function (person) {
+        var copy = person.get('names').copy();
+
+        assert.equal(copy.length, person.get('names.length'), "copy's size is correct");
+        assert.equal(copy[0].get('first'), data.names[0].first, "child fragments are copied");
+        assert.ok(copy[0] !== person.get('names.firstObject'), "copied fragments are new fragments");
+      });
     });
   });
 
-  test("fragments can be added to the fragment array", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: [{
-            first: "Tyrion",
-            last: "Lannister"
-          }]
+  (0, _qunit.test)("fragments can be created and added through the fragment array", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [{
+              first: "Tyrion",
+              last: "Lannister"
+            }]
+          }
         }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var fragments = person.get('names');
-      var length = fragments.get('length');
-
-      var fragment = store.createFragment('name', {
-        first: "Yollo"
       });
 
-      fragments.addFragment(fragment);
+      return store.find('person', 1).then(function (person) {
+        var fragments = person.get('names');
+        var length = fragments.get('length');
 
-      equal(fragments.get('length'), length + 1, "property size is correct");
-      equal(fragments.indexOf(fragment), length, "fragment is in correct location");
+        var fragment = fragments.createFragment({
+          first: "Hugor",
+          last: "Hill"
+        });
+
+        assert.equal(fragments.get('length'), length + 1, "property size is correct");
+        assert.equal(fragments.indexOf(fragment), length, "new fragment is in correct location");
+      });
     });
   });
 
-  test("fragments can be removed from the fragment array", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: [{
-            first: "Arya",
-            last: "Stark"
-          }]
+  (0, _qunit.test)("fragments can be added to the fragment array", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [{
+              first: "Tyrion",
+              last: "Lannister"
+            }]
+          }
         }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var fragments = person.get('names');
-      var fragment = fragments.get('firstObject');
-      var length = fragments.get('length');
-
-      fragments.removeFragment(fragment);
-
-      equal(fragments.get('length'), length - 1, "property size is correct");
-      ok(!fragments.contains(fragment), "fragment is removed");
-    });
-  });
-
-  test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: [{
-            first: "Aegon",
-            last: "Targaryen"
-          }, {
-            first: "Visenya",
-            last: "Targaryen"
-          }]
-        }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var fragments = person.get('names');
-      var fragment = fragments.get('firstObject');
-      var newFragment = store.createFragment('name', {
-        first: 'Rhaenys',
-        last: 'Targaryen'
       });
 
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
+      return store.find('person', 1).then(function (person) {
+        var fragments = person.get('names');
+        var length = fragments.get('length');
 
-      fragments.removeFragment(fragment);
+        var fragment = store.createFragment('name', {
+          first: "Yollo"
+        });
 
-      ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after removal");
+        fragments.addFragment(fragment);
 
-      fragments.unshiftObject(fragment);
-
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
-
-      fragments.addFragment(newFragment);
-
-      ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after addition");
-
-      fragments.removeFragment(newFragment);
-
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
-
-      fragments.removeFragment(fragment);
-      fragments.addFragment(fragment);
-
-      ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after reordering");
-
-      fragments.removeFragment(fragment);
-      fragments.unshiftObject(fragment);
-
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
+        assert.equal(fragments.get('length'), length + 1, "property size is correct");
+        assert.equal(fragments.indexOf(fragment), length, "fragment is in correct location");
+      });
     });
   });
 
-  test("changes to array contents change the fragment array 'hasDirtyAttributes' property", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: [{
-            first: "Jon",
-            last: "Snow"
-          }]
+  (0, _qunit.test)("fragments can be removed from the fragment array", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [{
+              first: "Arya",
+              last: "Stark"
+            }]
+          }
         }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var fragments = person.get('names');
-      var fragment = fragments.get('firstObject');
-
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
-
-      fragment.set('last', 'Stark');
-
-      ok(fragments.get('hasDirtyAttributes'), "fragment array in dirty state after change to a fragment");
-
-      fragment.set('last', 'Snow');
-
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
-    });
-  });
-
-  test("changes to array contents and fragments can be rolled back", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: [{
-            first: "Catelyn",
-            last: "Tully"
-          }, {
-            first: "Catelyn",
-            last: "Stark"
-          }]
-        }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var fragments = person.get('names');
-      var fragment = fragments.get('firstObject');
-
-      var originalState = fragments.toArray();
-
-      fragment.set('first', 'Cat');
-      fragments.removeFragment(fragments.get('lastObject'));
-      fragments.createFragment({
-        first: 'Lady',
-        last: 'Stonehart'
       });
 
-      fragments.rollbackAttributes();
+      return store.find('person', 1).then(function (person) {
+        var fragments = person.get('names');
+        var fragment = fragments.get('firstObject');
+        var length = fragments.get('length');
 
-      ok(!fragments.get('hasDirtyAttributes'), "fragment array is not dirty");
-      ok(!fragments.isAny('hasDirtyAttributes'), "all fragments are in clean state");
-      deepEqual(fragments.toArray(), originalState, "original array contents is restored");
+        fragments.removeFragment(fragment);
+
+        assert.equal(fragments.get('length'), length - 1, "property size is correct");
+        assert.ok(!fragments.contains(fragment), "fragment is removed");
+      });
+    });
+  });
+
+  (0, _qunit.test)("changes to array contents change the fragment array 'hasDirtyAttributes' property", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [{
+              first: "Aegon",
+              last: "Targaryen"
+            }, {
+              first: "Visenya",
+              last: "Targaryen"
+            }]
+          }
+        }
+      });
+
+      return store.find('person', 1).then(function (person) {
+        var fragments = person.get('names');
+        var fragment = fragments.get('firstObject');
+        var newFragment = store.createFragment('name', {
+          first: 'Rhaenys',
+          last: 'Targaryen'
+        });
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
+
+        fragments.removeFragment(fragment);
+
+        assert.ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after removal");
+
+        fragments.unshiftObject(fragment);
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
+
+        fragments.addFragment(newFragment);
+
+        assert.ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after addition");
+
+        fragments.removeFragment(newFragment);
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
+
+        fragments.removeFragment(fragment);
+        fragments.addFragment(fragment);
+
+        assert.ok(fragments.get('hasDirtyAttributes'), "fragment array is in dirty state after reordering");
+
+        fragments.removeFragment(fragment);
+        fragments.unshiftObject(fragment);
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
+      });
+    });
+  });
+
+  (0, _qunit.test)("changes to array contents change the fragment array 'hasDirtyAttributes' property", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [{
+              first: "Jon",
+              last: "Snow"
+            }]
+          }
+        }
+      });
+
+      return store.find('person', 1).then(function (person) {
+        var fragments = person.get('names');
+        var fragment = fragments.get('firstObject');
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is initially in a clean state");
+
+        fragment.set('last', 'Stark');
+
+        assert.ok(fragments.get('hasDirtyAttributes'), "fragment array in dirty state after change to a fragment");
+
+        fragment.set('last', 'Snow');
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is returned to clean state");
+      });
+    });
+  });
+
+  (0, _qunit.test)("changes to array contents and fragments can be rolled back", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [{
+              first: "Catelyn",
+              last: "Tully"
+            }, {
+              first: "Catelyn",
+              last: "Stark"
+            }]
+          }
+        }
+      });
+
+      return store.find('person', 1).then(function (person) {
+        var fragments = person.get('names');
+        var fragment = fragments.get('firstObject');
+
+        var originalState = fragments.toArray();
+
+        fragment.set('first', 'Cat');
+        fragments.removeFragment(fragments.get('lastObject'));
+        fragments.createFragment({
+          first: 'Lady',
+          last: 'Stonehart'
+        });
+
+        fragments.rollbackAttributes();
+
+        assert.ok(!fragments.get('hasDirtyAttributes'), "fragment array is not dirty");
+        assert.ok(!fragments.isAny('hasDirtyAttributes'), "all fragments are in clean state");
+        assert.deepEqual(fragments.toArray(), originalState, "original array contents is restored");
+      });
     });
   });
 });
@@ -2667,139 +2691,129 @@ define('dummy/tests/unit/fragment_array_test.jshint', ['exports'], function (exp
   QUnit.module('JSHint - unit');
   QUnit.test('unit/fragment_array_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/fragment_array_test.js should pass jshint.\nunit/fragment_array_test.js: line 4, col 1, \'moduleForAcceptance\' is not defined.\nunit/fragment_array_test.js: line 7, col 14, \'MF\' is not defined.\nunit/fragment_array_test.js: line 10, col 11, \'setupEnv\' is not defined.\nunit/fragment_array_test.js: line 28, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 55, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 85, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 116, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 144, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 202, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 234, col 1, \'test\' is not defined.\nunit/fragment_array_test.js: line 49, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 50, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 80, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 81, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 111, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 112, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 139, col 5, \'equal\' is not defined.\nunit/fragment_array_test.js: line 51, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 140, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 172, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 176, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 180, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 184, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 188, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 193, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 198, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 222, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 226, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 230, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 269, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 270, col 5, \'ok\' is not defined.\nunit/fragment_array_test.js: line 271, col 5, \'deepEqual\' is not defined.\nunit/fragment_array_test.js: line 1, col 8, \'Ember\' is defined but never used.\n\n33 errors');
+    assert.ok(true, 'unit/fragment_array_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/fragment_owner_property_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, Person, Name;
+define('dummy/tests/unit/fragment_owner_property_test', ['exports', 'ember', 'ember-data', 'ember-data-model-fragments', 'qunit', 'dummy/tests/helpers/module-for-acceptance'], function (exports, _ember, _emberData, _emberDataModelFragments, _qunit, _dummyTestsHelpersModuleForAcceptance) {
+  var store, application;
   var all = _ember['default'].RSVP.all;
 
-  QUnit.module("unit - `MF.fragmentOwner` property", {
-    setup: function setup() {
-      Person = DS.Model.extend({
-        name: MF.fragment('name')
-      });
-
-      Name = MF.Fragment.extend({
-        first: DS.attr('string'),
-        last: DS.attr('string'),
-        person: MF.fragmentOwner()
-      });
-
-      env = setupEnv({
-        person: Person,
-        name: Name
-      });
-
-      store = env.store;
-
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - `MF.fragmentOwner` property", {
+    beforeEach: function beforeEach() {
+      application = this.application;
+      store = application.__container__.lookup('service:store');
       //expectNoDeprecation();
     },
 
-    teardown: function teardown() {
-      env = null;
+    afterEach: function afterEach() {
       store = null;
-      Person = null;
-      Name = null;
     }
   });
 
-  test("fragments can reference their owner record", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Samwell",
-            last: "Tarly"
+  (0, _qunit.test)("fragments can reference their owner record", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Samwell",
+              last: "Tarly"
+            }
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var name = person.get('name');
+      return store.find('person', 1).then(function (person) {
+        var name = person.get('name');
 
-      equal(name.get('person'), person, "fragment owner property is reference to the owner record");
+        assert.equal(name.get('person'), person, "fragment owner property is reference to the owner record");
+      });
     });
   });
 
-  test("using a fragment owner property on a non-fragment throws an error", function () {
+  (0, _qunit.test)("using a fragment owner property on a non-fragment throws an error", function (assert) {
     _ember['default'].run(function () {
-      Person.reopen({
-        owner: MF.fragmentOwner()
+      var InvalidModel = _emberData['default'].Model.extend({
+        owner: _emberDataModelFragments['default'].fragmentOwner()
       });
 
-      var person = store.createRecord('person');
+      application.register('model:invalidModel', InvalidModel);
 
-      throws(function () {
-        person.get('owner');
+      var invalid = store.createRecord('invalidModel');
+
+      assert.throws(function () {
+        invalid.get('owner');
       }, /Fragment owner properties can only be used on fragments/, "getting fragment owner on non-fragment throws an error");
     });
   });
 
-  test("attempting to change a fragment's owner record throws an error", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Samwell",
-            last: "Tarly"
+  (0, _qunit.test)("attempting to change a fragment's owner record throws an error", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Samwell",
+              last: "Tarly"
+            }
           }
         }
-      }
-    });
+      });
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 2,
-        attributes: {
-          name: {
-            first: "Samwell",
-            last: "Tarly"
+      store.push({
+        data: {
+          type: 'person',
+          id: 2,
+          attributes: {
+            name: {
+              first: "Samwell",
+              last: "Tarly"
+            }
           }
         }
-      }
-    });
+      });
 
-    return all([store.find('person', 1), store.find('person', 2)]).then(function (people) {
-      var name = people[0].get('name');
+      return all([store.find('person', 1), store.find('person', 2)]).then(function (people) {
+        var name = people[0].get('name');
 
-      throws(function () {
-        name.set('person', people[1]);
-      }, "setting the owner property throws an error");
+        assert.throws(function () {
+          name.set('person', people[1]);
+        }, "setting the owner property throws an error");
+      });
     });
   });
 
-  test("fragment owner properties are notified of change", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Jeyne",
-            last: "Poole"
+  (0, _qunit.test)("fragment owner properties are notified of change", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Jeyne",
+              last: "Poole"
+            }
           }
         }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var name = store.createFragment('name', {
-        first: 'Arya',
-        last: 'Stark'
       });
 
-      ok(!name.get('person'), "fragment owner property is null");
+      return store.find('person', 1).then(function (person) {
+        var name = store.createFragment('name', {
+          first: 'Arya',
+          last: 'Stark'
+        });
 
-      person.set('name', name);
+        assert.ok(!name.get('person'), "fragment owner property is null");
 
-      equal(name.get('person'), person, "fragment owner property is updated");
+        person.set('name', name);
+
+        assert.equal(name.get('person'), person, "fragment owner property is updated");
+      });
     });
   });
 });
@@ -2809,167 +2823,162 @@ define('dummy/tests/unit/fragment_owner_property_test.jshint', ['exports'], func
   QUnit.module('JSHint - unit');
   QUnit.test('unit/fragment_owner_property_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/fragment_owner_property_test.js should pass jshint.\nunit/fragment_owner_property_test.js: line 5, col 1, \'QUnit\' is not defined.\nunit/fragment_owner_property_test.js: line 8, col 13, \'MF\' is not defined.\nunit/fragment_owner_property_test.js: line 11, col 12, \'MF\' is not defined.\nunit/fragment_owner_property_test.js: line 14, col 15, \'MF\' is not defined.\nunit/fragment_owner_property_test.js: line 59, col 14, \'MF\' is not defined.\nunit/fragment_owner_property_test.js: line 17, col 11, \'setupEnv\' is not defined.\nunit/fragment_owner_property_test.js: line 35, col 1, \'test\' is not defined.\nunit/fragment_owner_property_test.js: line 56, col 1, \'test\' is not defined.\nunit/fragment_owner_property_test.js: line 70, col 1, \'test\' is not defined.\nunit/fragment_owner_property_test.js: line 109, col 1, \'test\' is not defined.\nunit/fragment_owner_property_test.js: line 52, col 5, \'equal\' is not defined.\nunit/fragment_owner_property_test.js: line 133, col 5, \'equal\' is not defined.\nunit/fragment_owner_property_test.js: line 64, col 5, \'throws\' is not defined.\nunit/fragment_owner_property_test.js: line 103, col 5, \'throws\' is not defined.\nunit/fragment_owner_property_test.js: line 129, col 5, \'ok\' is not defined.\n\n15 errors');
+    assert.ok(true, 'unit/fragment_owner_property_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/fragment_property_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, Person, Name;
+define('dummy/tests/unit/fragment_property_test', ['exports', 'ember', 'ember-data', 'ember-data-model-fragments', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/name'], function (exports, _ember, _emberData, _emberDataModelFragments, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsName) {
+  var store, application;
   var all = _ember['default'].RSVP.all;
 
-  QUnit.module("unit - `MF.fragment` property", {
-    setup: function setup() {
-      Person = DS.Model.extend({
-        name: MF.fragment('name'),
-        title: DS.attr('string')
-      });
-
-      Name = MF.Fragment.extend({
-        first: DS.attr('string'),
-        last: DS.attr('string')
-      });
-
-      env = setupEnv({
-        person: Person,
-        name: Name
-      });
-
-      store = env.store;
-
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - `MF.fragment` property", {
+    beforeEach: function beforeEach() {
+      application = this.application;
+      store = application.__container__.lookup('service:store');
       //expectNoDeprecation();
     },
 
-    teardown: function teardown() {
-      env = null;
+    afterEach: function afterEach() {
       store = null;
-      Person = null;
-      Name = null;
+      application = null;
     }
   });
 
-  test("object literals are converted to instances of `MF.Fragment`", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Tyrion",
-            last: "Lannister"
+  (0, _qunit.test)("object literals are converted to instances of `MF.Fragment`", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Tyrion",
+              last: "Lannister"
+            }
           }
         }
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      ok(person.get('name') instanceof Name, "name property is an `MF.Fragment` instance");
-
-      equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
-    });
-  });
-
-  test("a fragment can be created through the store and set", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {}
-      }
-    });
-
-    return store.find('person', 1).then(function (person) {
-      var name = store.createFragment('name', {
-        first: "Davos",
-        last: "Seaworth"
       });
 
-      person.set('name', name);
+      return store.find('person', 1).then(function (person) {
+        assert.ok(person.get('name') instanceof _dummyModelsName['default'], "name property is an `MF.Fragment` instance");
 
-      equal(person.get('name.first'), 'Davos', "new fragment is correctly set");
+        assert.equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
+      });
     });
   });
 
-  test("setting to a non-fragment or object literal throws an error", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {}
-      }
-    });
+  (0, _qunit.test)("a fragment can be created through the store and set", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {}
+        }
+      });
 
-    return store.find('person', 1).then(function (person) {
-      throws(function () {
-        person.set('name', store.createRecord('person'));
-      }, "error is thrown when setting non-fragment");
+      return store.find('person', 1).then(function (person) {
+        var name = store.createFragment('name', {
+          first: "Davos",
+          last: "Seaworth"
+        });
+
+        person.set('name', name);
+
+        assert.equal(person.get('name.first'), 'Davos', "new fragment is correctly set");
+      });
     });
   });
 
-  test("setting fragments from other records throws an error", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Roose",
-            last: "Bolton"
+  (0, _qunit.test)("setting to a non-fragment or object literal throws an error", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {}
+        }
+      });
+
+      return store.find('person', 1).then(function (person) {
+        assert.throws(function () {
+          person.set('name', store.createRecord('person'));
+        }, "error is thrown when setting non-fragment");
+      });
+    });
+  });
+
+  (0, _qunit.test)("setting fragments from other records throws an error", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Roose",
+              last: "Bolton"
+            }
           }
         }
-      }
-    });
+      });
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 2,
-        attributes: {}
-      }
-    });
-
-    return all([store.find('person', 1), store.find('person', 2)]).then(function (people) {
-      throws(function () {
-        people[1].set('name', people[0].get('name'));
-      }, "error is thrown when setting to a fragment of another record");
-    });
-  });
-
-  test("null values are allowed", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: null
+      store.push({
+        data: {
+          type: 'person',
+          id: 2,
+          attributes: {}
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      equal(person.get('name'), null, "property is null");
+      return all([store.find('person', 1), store.find('person', 2)]).then(function (people) {
+        assert.throws(function () {
+          people[1].set('name', people[0].get('name'));
+        }, "error is thrown when setting to a fragment of another record");
+      });
     });
   });
 
-  test("setting to null is allowed", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Barristan",
-            last: "Selmy"
+  (0, _qunit.test)("null values are allowed", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: null
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      person.set('name', null);
-      equal(person.get('name'), null, "property is null");
+      return store.find('person', 1).then(function (person) {
+        assert.equal(person.get('name'), null, "property is null");
+      });
     });
   });
 
-  test("fragments are created from object literals when creating a record", function () {
+  (0, _qunit.test)("setting to null is allowed", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Barristan",
+              last: "Selmy"
+            }
+          }
+        }
+      });
+
+      return store.find('person', 1).then(function (person) {
+        person.set('name', null);
+        assert.equal(person.get('name'), null, "property is null");
+      });
+    });
+  });
+
+  (0, _qunit.test)("fragments are created from object literals when creating a record", function (assert) {
     _ember['default'].run(function () {
       var name = {
         first: 'Balon',
@@ -2980,107 +2989,111 @@ define('dummy/tests/unit/fragment_property_test', ['exports', 'ember'], function
         name: name
       });
 
-      ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-      equal(person.get('name.first'), name.first, "fragment has correct values");
+      assert.ok(person.get('name') instanceof _emberDataModelFragments['default'].Fragment, "a `MF.Fragment` instance is created");
+      assert.equal(person.get('name.first'), name.first, "fragment has correct values");
     });
   });
 
-  test("setting a fragment to an object literal creates a new fragment", function () {
+  (0, _qunit.test)("setting a fragment to an object literal creates a new fragment", function (assert) {
     var name = {
       first: 'Asha',
       last: 'Greyjoy'
     };
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: null
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: null
+          }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      person.set('name', name);
+      return store.find('person', 1).then(function (person) {
+        person.set('name', name);
 
-      ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-      equal(person.get('name.first'), name.first, "fragment has correct values");
+        assert.ok(person.get('name') instanceof _emberDataModelFragments['default'].Fragment, "a `MF.Fragment` instance is created");
+        assert.equal(person.get('name.first'), name.first, "fragment has correct values");
+      });
     });
   });
 
-  test("setting a fragment to an object literal reuses an existing fragment", function () {
+  (0, _qunit.test)("setting a fragment to an object literal reuses an existing fragment", function (assert) {
     var newName = {
       first: 'Reek',
       last: null
     };
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: 'Theon',
-            last: 'Greyjoy'
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: 'Theon',
+              last: 'Greyjoy'
+            }
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var name = person.get('name');
+      return store.find('person', 1).then(function (person) {
+        var name = person.get('name');
 
-      person.set('name', newName);
+        person.set('name', newName);
 
-      equal(name, person.get('name'), "fragment instances are reused");
-      equal(person.get('name.first'), newName.first, "fragment has correct values");
+        assert.equal(name, person.get('name'), "fragment instances are reused");
+        assert.equal(person.get('name.first'), newName.first, "fragment has correct values");
+      });
     });
   });
 
-  test("fragments can have default values", function () {
+  (0, _qunit.test)("fragments can have default values", function (assert) {
     _ember['default'].run(function () {
       var defaultValue = {
         first: "Iron",
         last: "Victory"
       };
 
-      var Ship = DS.Model.extend({
-        name: MF.fragment("name", { defaultValue: defaultValue })
+      var Ship = _emberData['default'].Model.extend({
+        name: _emberDataModelFragments['default'].fragment("name", { defaultValue: defaultValue })
       });
 
-      env.registry.register('model:ship', Ship);
+      application.register('model:ship', Ship);
 
       var ship = store.createRecord('ship');
 
-      equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
+      assert.equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
 
       ship.set('name', null);
-      equal(ship.get('name'), null, "the default value is not used when the value is set to null");
+      assert.equal(ship.get('name'), null, "the default value is not used when the value is set to null");
 
       ship = store.createRecord('ship', { name: null });
-      equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
+      assert.equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
     });
   });
 
-  test("fragment default values can be functions", function () {
+  (0, _qunit.test)("fragment default values can be functions", function (assert) {
     _ember['default'].run(function () {
       var _defaultValue = {
         first: "Oath",
         last: "Keeper"
       };
 
-      var Sword = DS.Model.extend({
-        name: MF.fragment("name", { defaultValue: function defaultValue() {
+      var Sword = _emberData['default'].Model.extend({
+        name: _emberDataModelFragments['default'].fragment("name", { defaultValue: function defaultValue() {
             return _defaultValue;
           } })
       });
 
-      env.registry.register('model:sword', Sword);
+      application.register('model:sword', Sword);
 
       var sword = store.createRecord('sword');
 
-      equal(sword.get('name.first'), _defaultValue.first, "the default value is correct");
+      assert.equal(sword.get('name.first'), _defaultValue.first, "the default value is correct");
     });
   });
 });
@@ -3090,119 +3103,97 @@ define('dummy/tests/unit/fragment_property_test.jshint', ['exports'], function (
   QUnit.module('JSHint - unit');
   QUnit.test('unit/fragment_property_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/fragment_property_test.js should pass jshint.\nunit/fragment_property_test.js: line 5, col 1, \'QUnit\' is not defined.\nunit/fragment_property_test.js: line 8, col 13, \'MF\' is not defined.\nunit/fragment_property_test.js: line 12, col 12, \'MF\' is not defined.\nunit/fragment_property_test.js: line 172, col 38, \'MF\' is not defined.\nunit/fragment_property_test.js: line 196, col 38, \'MF\' is not defined.\nunit/fragment_property_test.js: line 238, col 13, \'MF\' is not defined.\nunit/fragment_property_test.js: line 263, col 13, \'MF\' is not defined.\nunit/fragment_property_test.js: line 17, col 11, \'setupEnv\' is not defined.\nunit/fragment_property_test.js: line 35, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 56, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 77, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 93, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 125, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 141, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 161, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 177, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 201, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 230, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 255, col 1, \'test\' is not defined.\nunit/fragment_property_test.js: line 50, col 5, \'ok\' is not defined.\nunit/fragment_property_test.js: line 172, col 5, \'ok\' is not defined.\nunit/fragment_property_test.js: line 196, col 5, \'ok\' is not defined.\nunit/fragment_property_test.js: line 52, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 73, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 137, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 157, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 173, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 197, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 225, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 226, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 245, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 248, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 251, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 270, col 5, \'equal\' is not defined.\nunit/fragment_property_test.js: line 87, col 5, \'throws\' is not defined.\nunit/fragment_property_test.js: line 119, col 5, \'throws\' is not defined.\n\n36 errors');
+    assert.ok(true, 'unit/fragment_property_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/fragment_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, Person, Name, House;
+define('dummy/tests/unit/fragment_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance) {
+  var store;
   var all = _ember['default'].RSVP.all;
 
-  QUnit.module("unit - `MF.Fragment`", {
-    setup: function setup() {
-      Person = DS.Model.extend({
-        name: MF.fragment('name')
-      });
-
-      Name = MF.Fragment.extend({
-        first: DS.attr('string'),
-        last: DS.attr('string')
-      });
-
-      House = MF.Fragment.extend({
-        name: DS.attr('string'),
-        region: DS.attr('string'),
-        exiled: DS.attr('boolean')
-      });
-
-      env = setupEnv({
-        person: Person,
-        name: Name,
-        house: House
-      });
-
-      store = env.store;
-
-      //expectNoDeprecation();
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - `MF.Fragment`", {
+    beforeEach: function beforeEach() {
+      store = this.application.__container__.lookup('service:store');
     },
 
-    teardown: function teardown() {
-      env = null;
+    afterEach: function afterEach() {
       store = null;
-      Person = null;
-      Name = null;
     }
   });
 
-  test("fragments are `Ember.Copyable`", function () {
+  (0, _qunit.test)("fragments are `Ember.Copyable`", function (assert) {
     _ember['default'].run(function () {
       var fragment = store.createFragment('name');
 
-      ok(_ember['default'].Copyable.detect(fragment), "fragments are copyable");
+      assert.ok(_ember['default'].Copyable.detect(fragment), "fragments are copyable");
     });
   });
 
-  test("copied fragments can be added to any record", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Jon",
-            last: "Snow"
+  (0, _qunit.test)("copied fragments can be added to any record", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Jon",
+              last: "Snow"
+            }
           }
         }
-      }
-    });
+      });
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 2,
-        attributes: {}
-      }
-    });
+      store.push({
+        data: {
+          type: 'person',
+          id: 2,
+          attributes: {}
+        }
+      });
 
-    return all([store.find('person', 1), store.find('person', 2)]).then(function (people) {
-      var copy = people[0].get('name').copy();
+      return all([store.find('person', 1), store.find('person', 2)]).then(function (people) {
+        var copy = people[0].get('name').copy();
 
-      people[1].set('name', copy);
+        people[1].set('name', copy);
 
-      ok(true, "fragment copies can be assigned to other records");
+        assert.ok(true, "fragment copies can be assigned to other records");
+      });
     });
   });
 
-  test("copying a fragment copies the fragment's properties", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Jon",
-            last: "Snow"
+  (0, _qunit.test)("copying a fragment copies the fragment's properties", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Jon",
+              last: "Snow"
+            }
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var copy = person.get('name').copy();
+      return store.find('person', 1).then(function (person) {
+        var copy = person.get('name').copy();
 
-      ok(copy.get('first'), "Jon");
-      ok(copy.get('last'), "Snow");
+        assert.ok(copy.get('first'), "Jon");
+        assert.ok(copy.get('last'), "Snow");
+      });
     });
   });
 
-  test("fragments are `Ember.Comparable`", function () {
+  (0, _qunit.test)("fragments are `Ember.Comparable`", function (assert) {
     _ember['default'].run(function () {
       var fragment = store.createFragment('name');
 
-      ok(_ember['default'].Comparable.detect(fragment), "fragments are comparable");
+      assert.ok(_ember['default'].Comparable.detect(fragment), "fragments are comparable");
     });
   });
 
-  test("fragments are compared by reference", function () {
+  (0, _qunit.test)("fragments are compared by reference", function (assert) {
     _ember['default'].run(function () {
       var fragment1 = store.createFragment('name', {
         first: "Jon",
@@ -3213,77 +3204,83 @@ define('dummy/tests/unit/fragment_test', ['exports', 'ember'], function (exports
         last: "Arryn"
       });
 
-      ok(fragment1.compare(fragment1, fragment2) !== 0, "deeply equal objects are not the same");
-      ok(fragment1.compare(fragment1, fragment1) === 0, "identical objects are the same");
+      assert.ok(fragment1.compare(fragment1, fragment2) !== 0, "deeply equal objects are not the same");
+      assert.ok(fragment1.compare(fragment1, fragment1) === 0, "identical objects are the same");
     });
   });
 
-  test("changes to fragments are indicated in the owner record's `changedAttributes`", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Loras",
-            last: "Tyrell"
+  (0, _qunit.test)("changes to fragments are indicated in the owner record's `changedAttributes`", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Loras",
+              last: "Tyrell"
+            }
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var name = person.get('name');
+      return store.find('person', 1).then(function (person) {
+        var name = person.get('name');
 
-      name.set('last', 'Baratheon');
+        name.set('last', 'Baratheon');
 
-      equal(person.changedAttributes().name, true, "changed fragments are indicated in the diff object");
+        assert.equal(person.changedAttributes().name, true, "changed fragments are indicated in the diff object");
+      });
     });
   });
 
-  test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Rob",
-            last: "Stark"
+  (0, _qunit.test)("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Rob",
+              last: "Stark"
+            }
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      person.set('name', null);
+      return store.find('person', 1).then(function (person) {
+        person.set('name', null);
 
-      equal(person.changedAttributes().name, true, "null fragments are indicated in the diff object");
+        assert.equal(person.changedAttributes().name, true, "null fragments are indicated in the diff object");
+      });
     });
   });
 
-  test("changes to attributes can be rolled back", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Ramsay",
-            last: "Snow"
+  (0, _qunit.test)("changes to attributes can be rolled back", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Ramsay",
+              last: "Snow"
+            }
           }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var name = person.get('name');
+      return store.find('person', 1).then(function (person) {
+        var name = person.get('name');
 
-      name.set('last', 'Bolton');
-      name.rollbackAttributes();
+        name.set('last', 'Bolton');
+        name.rollbackAttributes();
 
-      ok(name.get('last', 'Snow'), "fragment properties are restored");
-      ok(!name.get('hasDirtyAttributes'), "fragment is in clean state");
+        assert.ok(name.get('last', 'Snow'), "fragment properties are restored");
+        assert.ok(!name.get('hasDirtyAttributes'), "fragment is in clean state");
+      });
     });
   });
 });
@@ -3293,41 +3290,15 @@ define('dummy/tests/unit/fragment_test.jshint', ['exports'], function (exports) 
   QUnit.module('JSHint - unit');
   QUnit.test('unit/fragment_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/fragment_test.js should pass jshint.\nunit/fragment_test.js: line 5, col 1, \'QUnit\' is not defined.\nunit/fragment_test.js: line 8, col 13, \'MF\' is not defined.\nunit/fragment_test.js: line 11, col 12, \'MF\' is not defined.\nunit/fragment_test.js: line 16, col 13, \'MF\' is not defined.\nunit/fragment_test.js: line 22, col 11, \'setupEnv\' is not defined.\nunit/fragment_test.js: line 41, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 49, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 83, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 105, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 113, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 129, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 152, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 173, col 1, \'test\' is not defined.\nunit/fragment_test.js: line 45, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 79, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 100, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 101, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 109, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 124, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 125, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 193, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 194, col 5, \'ok\' is not defined.\nunit/fragment_test.js: line 148, col 5, \'equal\' is not defined.\nunit/fragment_test.js: line 169, col 5, \'equal\' is not defined.\n\n24 errors');
+    assert.ok(true, 'unit/fragment_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/polymorphic_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, zoo, Zoo, Animal, Elephant, Lion;
+define('dummy/tests/unit/polymorphic_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/animal', 'dummy/models/lion', 'dummy/models/elephant'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsAnimal, _dummyModelsLion, _dummyModelsElephant) {
+  var store, zoo;
 
-  QUnit.module("unit - Polymorphism", {
-    setup: function setup() {
-      Zoo = DS.Model.extend({
-        name: DS.attr('string'),
-        city: DS.attr('string'),
-        star: MF.fragment('animal', { polymorphic: true, typeKey: '$type' }),
-        animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type' })
-      });
-
-      Animal = MF.Fragment.extend({
-        name: DS.attr('string')
-      });
-
-      Elephant = Animal.extend({
-        trunkLength: DS.attr('number')
-      });
-
-      Lion = Animal.extend({
-        hasManes: DS.attr('boolean')
-      });
-
-      env = setupEnv({
-        zoo: Zoo,
-        animal: Animal,
-        elephant: Elephant,
-        lion: Lion
-      });
-
-      store = env.store;
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - Polymorphism", {
+    beforeEach: function beforeEach() {
+      store = this.application.__container__.lookup('service:store');
 
       //expectNoDeprecation();
 
@@ -3351,68 +3322,64 @@ define('dummy/tests/unit/polymorphic_test', ['exports', 'ember'], function (expo
       };
     },
 
-    teardown: function teardown() {
-      env = null;
+    afterEach: function afterEach() {
       store = null;
-      Zoo = null;
-      Animal = null;
-      Elephant = null;
-      Lion = null;
     }
   });
 
-  test("fragment properties support polymorphism", function () {
-    store.push({
-      data: {
-        type: 'zoo',
-        id: 1,
-        attributes: zoo
-      }
-    });
+  (0, _qunit.test)("fragment properties support polymorphism", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'zoo',
+          id: 1,
+          attributes: zoo
+        }
+      });
 
-    return store.find('zoo', 1).then(function (zoo) {
-      equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
-      equal(zoo.get("city"), "Winterfell", "zoo city is correct");
+      return store.find('zoo', 1).then(function (zoo) {
+        assert.equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
+        assert.equal(zoo.get("city"), "Winterfell", "zoo city is correct");
 
-      var star = zoo.get("star");
-      ok(star instanceof Animal, "zoo's star is an animal");
-      equal(star.get("name"), "Mittens", "animal name is correct");
-      ok(star instanceof Lion, "zoo's star is a lion");
-      ok(star.get("hasManes"), "lion has manes");
-    });
-  });
-
-  test("fragment array properties support polymorphism", function () {
-    store.push({
-      data: {
-        type: 'zoo',
-        id: 1,
-        attributes: zoo
-      }
-    });
-
-    return store.find('zoo', 1).then(function (zoo) {
-      var animals = zoo.get("animals");
-      equal(animals.get("length"), 2);
-
-      var first = animals.objectAt(0);
-      ok(first instanceof Animal);
-      equal(first.get("name"), "Mittens", "first animal's name is correct");
-      ok(first instanceof Lion);
-      ok(first.get("hasManes"), "lion has manes");
-
-      var second = animals.objectAt(1);
-      ok(second instanceof Animal);
-      equal(second.get("name"), "Snuitje", "second animal's name is correct");
-      ok(second instanceof Elephant);
-      equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
+        var star = zoo.get("star");
+        assert.ok(star instanceof _dummyModelsAnimal['default'], "zoo's star is an animal");
+        assert.equal(star.get("name"), "Mittens", "animal name is correct");
+        assert.ok(star instanceof _dummyModelsLion['default'], "zoo's star is a lion");
+        assert.ok(star.get("hasManes"), "lion has manes");
+      });
     });
   });
 
-  test("fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function () {
-    // The extra assertion comes from deprecation checking
-    expect(2);
+  (0, _qunit.test)("fragment array properties support polymorphism", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'zoo',
+          id: 1,
+          attributes: zoo
+        }
+      });
 
+      return store.find('zoo', 1).then(function (zoo) {
+        var animals = zoo.get("animals");
+        assert.equal(animals.get("length"), 2);
+
+        var first = animals.objectAt(0);
+        assert.ok(first instanceof _dummyModelsAnimal['default']);
+        assert.equal(first.get("name"), "Mittens", "first animal's name is correct");
+        assert.ok(first instanceof _dummyModelsLion['default']);
+        assert.ok(first.get("hasManes"), "lion has manes");
+
+        var second = animals.objectAt(1);
+        assert.ok(second instanceof _dummyModelsAnimal['default']);
+        assert.equal(second.get("name"), "Snuitje", "second animal's name is correct");
+        assert.ok(second instanceof _dummyModelsElephant['default']);
+        assert.equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
+      });
+    });
+  });
+
+  (0, _qunit.test)("fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function (assert) {
     var injectionValue = _ember['default'].MODEL_FACTORY_INJECTIONS;
     _ember['default'].MODEL_FACTORY_INJECTIONS = true;
 
@@ -3431,44 +3398,40 @@ define('dummy/tests/unit/polymorphic_test', ['exports', 'ember'], function (expo
 
         zoo.set('star', animal);
 
-        equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
+        assert.equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
       });
     } finally {
       _ember['default'].MODEL_FACTORY_INJECTIONS = injectionValue;
     }
   });
 
-  test("rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function () {
-    // The extra assertion comes from deprecation checking
-    expect(2);
+  (0, _qunit.test)("rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'zoo',
+          id: 1,
+          attributes: zoo
+        }
+      });
 
-    store.push({
-      data: {
-        type: 'zoo',
-        id: 1,
-        attributes: zoo
-      }
-    });
+      var injectionValue = _ember['default'].MODEL_FACTORY_INJECTIONS;
+      _ember['default'].MODEL_FACTORY_INJECTIONS = true;
 
-    var injectionValue = _ember['default'].MODEL_FACTORY_INJECTIONS;
-    _ember['default'].MODEL_FACTORY_INJECTIONS = true;
+      return store.find('zoo', 1).then(function (zoo) {
+        var animal = zoo.get('star');
 
-    return store.find('zoo', 1).then(function (zoo) {
-      var animal = zoo.get('star');
+        zoo.set('star', null);
+        zoo.rollbackAttributes();
 
-      zoo.set('star', null);
-      zoo.rollbackAttributes();
-
-      equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
-    })['finally'](function () {
-      _ember['default'].MODEL_FACTORY_INJECTIONS = injectionValue;
+        assert.equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
+      })['finally'](function () {
+        _ember['default'].MODEL_FACTORY_INJECTIONS = injectionValue;
+      });
     });
   });
 
-  test("fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function () {
-    // The extra assertion comes from deprecation checking
-    expect(2);
-
+  (0, _qunit.test)("fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function (assert) {
     var injectionValue = _ember['default'].MODEL_FACTORY_INJECTIONS;
     _ember['default'].MODEL_FACTORY_INJECTIONS = true;
 
@@ -3479,7 +3442,7 @@ define('dummy/tests/unit/polymorphic_test', ['exports', 'ember'], function (expo
 
         zoo.get('animals').pushObject(animal);
 
-        equal(zoo.get('animals.firstObject.name'), animal.get('name'), 'The type check succeeded');
+        assert.equal(zoo.get('animals.firstObject.name'), animal.get('name'), 'The type check succeeded');
       });
     } finally {
       _ember['default'].MODEL_FACTORY_INJECTIONS = injectionValue;
@@ -3492,36 +3455,16 @@ define('dummy/tests/unit/polymorphic_test.jshint', ['exports'], function (export
   QUnit.module('JSHint - unit');
   QUnit.test('unit/polymorphic_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/polymorphic_test.js should pass jshint.\nunit/polymorphic_test.js: line 4, col 1, \'QUnit\' is not defined.\nunit/polymorphic_test.js: line 9, col 13, \'MF\' is not defined.\nunit/polymorphic_test.js: line 10, col 16, \'MF\' is not defined.\nunit/polymorphic_test.js: line 13, col 14, \'MF\' is not defined.\nunit/polymorphic_test.js: line 25, col 11, \'setupEnv\' is not defined.\nunit/polymorphic_test.js: line 69, col 1, \'test\' is not defined.\nunit/polymorphic_test.js: line 90, col 1, \'test\' is not defined.\nunit/polymorphic_test.js: line 117, col 1, \'test\' is not defined.\nunit/polymorphic_test.js: line 146, col 1, \'test\' is not defined.\nunit/polymorphic_test.js: line 173, col 1, \'test\' is not defined.\nunit/polymorphic_test.js: line 79, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 80, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 84, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 101, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 105, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 111, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 113, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 139, col 7, \'equal\' is not defined.\nunit/polymorphic_test.js: line 167, col 5, \'equal\' is not defined.\nunit/polymorphic_test.js: line 187, col 7, \'equal\' is not defined.\nunit/polymorphic_test.js: line 83, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 85, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 86, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 104, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 106, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 107, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 110, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 112, col 5, \'ok\' is not defined.\nunit/polymorphic_test.js: line 119, col 3, \'expect\' is not defined.\nunit/polymorphic_test.js: line 148, col 3, \'expect\' is not defined.\nunit/polymorphic_test.js: line 175, col 3, \'expect\' is not defined.\n\n31 errors');
+    assert.ok(true, 'unit/polymorphic_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/serialize_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, Person, Name, House;
+define('dummy/tests/unit/serialize_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'ember-data/serializers/json', 'dummy/models/person', 'ember-data-model-fragments'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance, _emberDataSerializersJson, _dummyModelsPerson, _emberDataModelFragments) {
+  var store, application;
 
-  QUnit.module("unit - Serialization", {
-    setup: function setup() {
-      Person = DS.Model.extend({
-        name: MF.fragment('name')
-      });
-
-      Name = MF.Fragment.extend({
-        first: DS.attr('string'),
-        last: DS.attr('string')
-      });
-
-      House = MF.Fragment.extend({
-        name: DS.attr('string'),
-        region: DS.attr('string'),
-        exiled: DS.attr('boolean')
-      });
-
-      env = setupEnv({
-        person: Person,
-        name: Name,
-        house: House
-      });
-
-      store = env.store;
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - Serialization", {
+    beforeEach: function beforeEach() {
+      application = this.application;
+      store = application.__container__.lookup('service:store');
 
       //expectNoDeprecation();
 
@@ -3529,23 +3472,13 @@ define('dummy/tests/unit/serialize_test', ['exports', 'ember'], function (export
       store.modelFor('person');
     },
 
-    teardown: function teardown() {
-      env = null;
+    afterEach: function afterEach() {
+      application = null;
       store = null;
-      Person = null;
-      Name = null;
     }
   });
 
-  test("fragment properties are snapshotted as normal attributes on the owner record snapshot", function () {
-    // The extra assertion comes from deprecation checking
-    expect(8);
-
-    Person.reopen({
-      houses: MF.fragmentArray('house'),
-      children: MF.array()
-    });
-
+  (0, _qunit.test)("fragment properties are snapshotted as normal attributes on the owner record snapshot", function (assert) {
     var person = {
       name: {
         first: "Catelyn",
@@ -3563,68 +3496,68 @@ define('dummy/tests/unit/serialize_test', ['exports', 'ember'], function (export
       children: ['Robb', 'Sansa', 'Arya', 'Brandon', 'Rickon']
     };
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: person
-      }
-    });
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: person
+        }
+      });
 
-    env.registry.register('serializer:person', env.serializer.extend({
-      serialize: function serialize(snapshot) {
-        var name = snapshot.attr('name');
-        ok(name instanceof DS.Snapshot, "fragment snapshot attribute is a snapshot");
-        equal(name.attr('first'), person.name.first, "fragment attributes are snapshoted correctly");
+      application.register('serializer:person', _emberDataSerializersJson['default'].extend({
+        serialize: function serialize(snapshot) {
+          var name = snapshot.attr('name');
+          assert.ok(name instanceof DS.Snapshot, "fragment snapshot attribute is a snapshot");
+          assert.equal(name.attr('first'), person.name.first, "fragment attributes are snapshoted correctly");
 
-        var houses = snapshot.attr('houses');
-        ok(Array.isArray(houses), "fragment array attribute is an array");
-        ok(houses[0] instanceof DS.Snapshot, "fragment array attribute is an array of snapshots");
-        equal(houses[0].attr('name'), person.houses[0].name, "fragment array attributes are snapshotted correctly");
+          var houses = snapshot.attr('houses');
+          assert.ok(Array.isArray(houses), "fragment array attribute is an array");
+          assert.ok(houses[0] instanceof DS.Snapshot, "fragment array attribute is an array of snapshots");
+          assert.equal(houses[0].attr('name'), person.houses[0].name, "fragment array attributes are snapshotted correctly");
 
-        var children = snapshot.attr('children');
-        ok(Array.isArray(children), "array attribute is an array");
-        deepEqual(children, person.children, "array attribute is snapshotted correctly");
-      }
-    }));
+          var children = snapshot.attr('children');
+          assert.ok(Array.isArray(children), "array attribute is an array");
+          assert.deepEqual(children, person.children, "array attribute is snapshotted correctly");
+        }
+      }));
 
-    return store.find('person', 1).then(function (person) {
-      person.serialize();
+      return store.find('person', 1).then(function (person) {
+        person.serialize();
+      });
     });
   });
 
-  test("fragment properties are serialized as normal attributes using their own serializers", function () {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: {
-            first: "Aerys",
-            last: "Targaryen"
+  (0, _qunit.test)("fragment properties are serialized as normal attributes using their own serializers", function (assert) {
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: {
+              first: "Aerys",
+              last: "Targaryen"
+            }
           }
         }
-      }
-    });
+      });
 
-    env.registry.register('serializer:name', env.serializer.extend({
-      serialize: function serialize() {
-        return 'Mad King';
-      }
-    }));
+      application.register('serializer:name', _emberDataSerializersJson['default'].extend({
+        serialize: function serialize() {
+          return 'Mad King';
+        }
+      }));
 
-    return store.find('person', 1).then(function (person) {
-      var serialized = person.serialize();
+      return store.find('person', 1).then(function (person) {
+        var serialized = person.serialize();
 
-      equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");
+        assert.equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");
+      });
     });
   });
 
-  test("serializing a fragment array creates a new array with contents the result of serializing each fragment", function () {
-    Person.reopen({
-      names: MF.fragmentArray('name')
-    });
-
+  (0, _qunit.test)("serializing a fragment array creates a new array with contents the result of serializing each fragment", function (assert) {
     var names = [{
       first: "Rhaegar",
       last: "Targaryen"
@@ -3636,32 +3569,36 @@ define('dummy/tests/unit/serialize_test', ['exports', 'ember'], function (export
       last: "Targaryen"
     }];
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          names: names
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: names
+          }
         }
-      }
-    });
+      });
 
-    env.registry.register('serializer:name', env.serializer);
+      application.register('serializer:name', _emberDataSerializersJson['default']);
 
-    return store.find('person', 1).then(function (person) {
-      var serialized = person.serialize();
+      return store.find('person', 1).then(function (person) {
+        var serialized = person.serialize();
 
-      deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
+        assert.deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
+      });
     });
   });
 
-  test("normalizing data can handle `null` fragment values", function () {
-    Person.reopen({
-      houses: MF.fragmentArray('house', { defaultValue: null }),
-      children: MF.array({ defaultValue: null })
+  (0, _qunit.test)("normalizing data can handle `null` fragment values", function (assert) {
+    var NullDefaultPerson = _dummyModelsPerson['default'].extend({
+      houses: _emberDataModelFragments['default'].fragmentArray('house', { defaultValue: null }),
+      children: _emberDataModelFragments['default'].array({ defaultValue: null })
     });
 
-    var normalized = store.normalize('person', {
+    application.register('model:nullDefaultPerson', NullDefaultPerson);
+
+    var normalized = store.normalize('nullDefaultPerson', {
       name: null,
       houses: null,
       children: null
@@ -3669,46 +3606,44 @@ define('dummy/tests/unit/serialize_test', ['exports', 'ember'], function (export
 
     var attributes = normalized.data.attributes;
 
-    strictEqual(attributes.name, null, "fragment property values can be null");
-    strictEqual(attributes.houses, null, "fragment array property values can be null");
-    strictEqual(attributes.children, null, "`array property values can be null");
+    assert.strictEqual(attributes.name, null, "fragment property values can be null");
+    assert.strictEqual(attributes.houses, null, "fragment array property values can be null");
+    assert.strictEqual(attributes.children, null, "`array property values can be null");
   });
 
-  test("normalizing data can handle `null` fragment values", function () {
-    Person.reopen({
-      houses: MF.fragmentArray('house', { defaultValue: null }),
-      children: MF.array({ defaultValue: null })
+  (0, _qunit.test)("normalizing data can handle `null` fragment values", function (assert) {
+    var NullDefaultPerson = _dummyModelsPerson['default'].extend({
+      houses: _emberDataModelFragments['default'].fragmentArray('house', { defaultValue: null }),
+      children: _emberDataModelFragments['default'].array({ defaultValue: null })
     });
 
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          name: null,
-          houses: null,
-          children: null
+    application.register('model:nullDefaultPerson', NullDefaultPerson);
+
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'NullDefaultPerson',
+          id: 1,
+          attributes: {
+            name: null,
+            houses: null,
+            children: null
+          }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var serialized = person.serialize();
+      return store.find('nullDefaultPerson', 1).then(function (person) {
+        var serialized = person.serialize();
 
-      strictEqual(serialized.name, null, "fragment property values can be null");
-      strictEqual(serialized.houses, null, "fragment array property values can be null");
-      strictEqual(serialized.children, null, "`array property values can be null");
+        assert.strictEqual(serialized.name, null, "fragment property values can be null");
+        assert.strictEqual(serialized.houses, null, "fragment array property values can be null");
+        assert.strictEqual(serialized.children, null, "`array property values can be null");
+      });
     });
   });
 
-  test("array properties use the specified transform to normalize data", function () {
+  (0, _qunit.test)("array properties use the specified transform to normalize data", function (assert) {
     var values = [1, 0, true, false, 'true', ''];
-
-    Person.reopen({
-      strings: MF.array('string'),
-      numbers: MF.array('number'),
-      booleans: MF.array('boolean')
-    });
 
     var normalized = store.normalize('person', {
       strings: values,
@@ -3718,38 +3653,34 @@ define('dummy/tests/unit/serialize_test', ['exports', 'ember'], function (export
 
     var attributes = normalized.data.attributes;
 
-    ok(values.every(function (value, index) {
+    assert.ok(values.every(function (value, index) {
       return attributes.strings[index] === String(value) && attributes.numbers[index] === (_ember['default'].isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) && attributes.booleans[index] === Boolean(value);
     }), "fragment property values are normalized");
   });
 
-  test("array properties use the specified transform to serialize data", function () {
+  (0, _qunit.test)("array properties use the specified transform to serialize data", function (assert) {
     var values = [1, 0, true, false, 'true', ''];
 
-    Person.reopen({
-      strings: MF.array('string'),
-      numbers: MF.array('number'),
-      booleans: MF.array('boolean')
-    });
-
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          strings: values,
-          numbers: values,
-          booleans: values
+    _ember['default'].run(function () {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            strings: values,
+            numbers: values,
+            booleans: values
+          }
         }
-      }
-    });
+      });
 
-    return store.find('person', 1).then(function (person) {
-      var serialized = person.serialize();
+      return store.find('person', 1).then(function (person) {
+        var serialized = person.serialize();
 
-      ok(values.every(function (value, index) {
-        return serialized.strings[index] === String(value) && serialized.numbers[index] === (_ember['default'].isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) && serialized.booleans[index] === Boolean(value);
-      }), "fragment property values are normalized");
+        assert.ok(values.every(function (value, index) {
+          return serialized.strings[index] === String(value) && serialized.numbers[index] === (_ember['default'].isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) && serialized.booleans[index] === Boolean(value);
+        }), "fragment property values are normalized");
+      });
     });
   });
 });
@@ -3759,83 +3690,71 @@ define('dummy/tests/unit/serialize_test.jshint', ['exports'], function (exports)
   QUnit.module('JSHint - unit');
   QUnit.test('unit/serialize_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/serialize_test.js should pass jshint.\nunit/serialize_test.js: line 4, col 1, \'QUnit\' is not defined.\nunit/serialize_test.js: line 7, col 13, \'MF\' is not defined.\nunit/serialize_test.js: line 10, col 12, \'MF\' is not defined.\nunit/serialize_test.js: line 15, col 13, \'MF\' is not defined.\nunit/serialize_test.js: line 48, col 16, \'MF\' is not defined.\nunit/serialize_test.js: line 49, col 16, \'MF\' is not defined.\nunit/serialize_test.js: line 137, col 12, \'MF\' is not defined.\nunit/serialize_test.js: line 176, col 13, \'MF\' is not defined.\nunit/serialize_test.js: line 177, col 15, \'MF\' is not defined.\nunit/serialize_test.js: line 195, col 13, \'MF\' is not defined.\nunit/serialize_test.js: line 196, col 15, \'MF\' is not defined.\nunit/serialize_test.js: line 224, col 14, \'MF\' is not defined.\nunit/serialize_test.js: line 225, col 14, \'MF\' is not defined.\nunit/serialize_test.js: line 226, col 15, \'MF\' is not defined.\nunit/serialize_test.js: line 248, col 14, \'MF\' is not defined.\nunit/serialize_test.js: line 249, col 14, \'MF\' is not defined.\nunit/serialize_test.js: line 250, col 15, \'MF\' is not defined.\nunit/serialize_test.js: line 21, col 11, \'setupEnv\' is not defined.\nunit/serialize_test.js: line 43, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 108, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 135, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 174, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 193, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 220, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 244, col 1, \'test\' is not defined.\nunit/serialize_test.js: line 45, col 3, \'expect\' is not defined.\nunit/serialize_test.js: line 89, col 7, \'ok\' is not defined.\nunit/serialize_test.js: line 93, col 7, \'ok\' is not defined.\nunit/serialize_test.js: line 94, col 7, \'ok\' is not defined.\nunit/serialize_test.js: line 98, col 7, \'ok\' is not defined.\nunit/serialize_test.js: line 237, col 3, \'ok\' is not defined.\nunit/serialize_test.js: line 268, col 5, \'ok\' is not defined.\nunit/serialize_test.js: line 90, col 7, \'equal\' is not defined.\nunit/serialize_test.js: line 95, col 7, \'equal\' is not defined.\nunit/serialize_test.js: line 131, col 5, \'equal\' is not defined.\nunit/serialize_test.js: line 99, col 7, \'deepEqual\' is not defined.\nunit/serialize_test.js: line 170, col 5, \'deepEqual\' is not defined.\nunit/serialize_test.js: line 188, col 3, \'strictEqual\' is not defined.\nunit/serialize_test.js: line 189, col 3, \'strictEqual\' is not defined.\nunit/serialize_test.js: line 190, col 3, \'strictEqual\' is not defined.\nunit/serialize_test.js: line 214, col 5, \'strictEqual\' is not defined.\nunit/serialize_test.js: line 215, col 5, \'strictEqual\' is not defined.\nunit/serialize_test.js: line 216, col 5, \'strictEqual\' is not defined.\n\n43 errors');
+    assert.ok(true, 'unit/serialize_test.js should pass jshint.');
   });
 });
-define('dummy/tests/unit/store_test', ['exports', 'ember'], function (exports, _ember) {
-  var env, store, Person, Name;
+define('dummy/tests/unit/store_test', ['exports', 'ember', 'qunit', 'dummy/tests/helpers/module-for-acceptance', 'dummy/models/name', 'ember-data/serializers/json-api', 'ember-data/serializers/json'], function (exports, _ember, _qunit, _dummyTestsHelpersModuleForAcceptance, _dummyModelsName, _emberDataSerializersJsonApi, _emberDataSerializersJson) {
+  var store, application;
 
-  QUnit.module("unit - `DS.Store`", {
-    setup: function setup() {
-      Person = DS.Model.extend({
-        name: MF.fragment('name')
-      });
-
-      Name = MF.Fragment.extend({
-        first: DS.attr('string'),
-        last: DS.attr('string')
-      });
-
-      env = setupEnv({
-        person: Person,
-        name: Name
-      });
-
-      store = env.store;
+  (0, _dummyTestsHelpersModuleForAcceptance['default'])("unit - `DS.Store`", {
+    beforeEach: function beforeEach() {
+      application = this.application;
+      store = application.__container__.lookup('service:store');
 
       //expectNoDeprecation();
     },
 
-    teardown: function teardown() {
+    afterEach: function afterEach() {
       store = null;
-      Person = null;
-      Name = null;
+      application = null;
     }
   });
 
-  test("a fragment can be created that starts in a dirty state", function () {
+  (0, _qunit.test)("a fragment can be created that starts in a dirty state", function (assert) {
     _ember['default'].run(function () {
       var address = store.createFragment('name');
 
-      ok(address instanceof Name, "fragment is correct type");
-      ok(address.get('hasDirtyAttributes'), "fragment starts in dirty state");
+      assert.ok(address instanceof _dummyModelsName['default'], "fragment is correct type");
+      assert.ok(address.get('hasDirtyAttributes'), "fragment starts in dirty state");
     });
   });
 
-  test("attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error", function () {
-    throws(function () {
-      store.createFragment('person');
-    }, "an error is thrown when given a bad type");
+  (0, _qunit.test)("attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error", function (assert) {
+    _ember['default'].run(function () {
+      assert.throws(function () {
+        store.createFragment('person');
+      }, "an error is thrown when given a bad type");
+    });
   });
 
-  test("the default fragment serializer does not use the application serializer", function () {
-    var Serializer = DS.JSONAPISerializer.extend();
-    env.registry.register('serializer:application', Serializer);
+  (0, _qunit.test)("the default fragment serializer does not use the application serializer", function (assert) {
+    var Serializer = _emberDataSerializersJsonApi['default'].extend();
+    application.register('serializer:application', Serializer);
 
-    ok(!(store.serializerFor('name') instanceof Serializer), "fragment serializer fallback is not `DS.JSONAPISerializer`");
-    ok(store.serializerFor('name') instanceof DS.JSONSerializer, "fragment serializer fallback is correct");
+    assert.ok(!(store.serializerFor('name') instanceof Serializer), "fragment serializer fallback is not `JSONAPISerializer`");
+    assert.ok(store.serializerFor('name') instanceof _emberDataSerializersJson['default'], "fragment serializer fallback is correct");
   });
 
-  test("the default fragment serializer does not use the adapter's `defaultSerializer`", function () {
-    env.adapter.set('defaultSerializer', '-json-api');
+  (0, _qunit.test)("the default fragment serializer does not use the adapter's `defaultSerializer`", function (assert) {
+    store.set('defaultAdapter.defaultSerializer', '-json-api');
 
-    ok(!(store.serializerFor('name') instanceof DS.JSONAPISerializer), "fragment serializer fallback is not `DS.JSONAPISerializer`");
-    ok(store.serializerFor('name') instanceof DS.JSONSerializer, "fragment serializer fallback is correct");
+    assert.ok(!(store.serializerFor('name') instanceof _emberDataSerializersJsonApi['default']), "fragment serializer fallback is not `JSONAPISerializer`");
+    assert.ok(store.serializerFor('name') instanceof _emberDataSerializersJson['default'], "fragment serializer fallback is correct");
   });
 
-  test("the default fragment serializer is `serializer:-fragment` if registered", function () {
-    var Serializer = DS.JSONSerializer.extend();
-    env.registry.register('serializer:-fragment', Serializer);
+  (0, _qunit.test)("the default fragment serializer is `serializer:-fragment` if registered", function (assert) {
+    var Serializer = _emberDataSerializersJson['default'].extend();
+    application.register('serializer:-fragment', Serializer);
 
-    ok(store.serializerFor('name') instanceof Serializer, "fragment serializer fallback is correct");
+    assert.ok(store.serializerFor('name') instanceof Serializer, "fragment serializer fallback is correct");
   });
 
-  test("the application serializer can be looked up", function () {
-    ok(store.serializerFor('application') instanceof DS.JSONSerializer, "application serializer can still be looked up");
+  (0, _qunit.test)("the application serializer can be looked up", function (assert) {
+    assert.ok(store.serializerFor('application') instanceof _emberDataSerializersJson['default'], "application serializer can still be looked up");
   });
 
-  test("the default serializer can be looked up", function () {
-    ok(store.serializerFor('-default') instanceof DS.JSONSerializer, "default serializer can still be looked up");
+  (0, _qunit.test)("the default serializer can be looked up", function (assert) {
+    assert.ok(store.serializerFor('-default') instanceof _emberDataSerializersJson['default'], "default serializer can still be looked up");
   });
 });
 define('dummy/tests/unit/store_test.jshint', ['exports'], function (exports) {
@@ -3844,7 +3763,7 @@ define('dummy/tests/unit/store_test.jshint', ['exports'], function (exports) {
   QUnit.module('JSHint - unit');
   QUnit.test('unit/store_test.js should pass jshint', function (assert) {
     assert.expect(1);
-    assert.ok(false, 'unit/store_test.js should pass jshint.\nunit/store_test.js: line 4, col 1, \'QUnit\' is not defined.\nunit/store_test.js: line 7, col 13, \'MF\' is not defined.\nunit/store_test.js: line 10, col 12, \'MF\' is not defined.\nunit/store_test.js: line 15, col 11, \'setupEnv\' is not defined.\nunit/store_test.js: line 32, col 1, \'test\' is not defined.\nunit/store_test.js: line 41, col 1, \'test\' is not defined.\nunit/store_test.js: line 47, col 1, \'test\' is not defined.\nunit/store_test.js: line 55, col 1, \'test\' is not defined.\nunit/store_test.js: line 62, col 1, \'test\' is not defined.\nunit/store_test.js: line 69, col 1, \'test\' is not defined.\nunit/store_test.js: line 73, col 1, \'test\' is not defined.\nunit/store_test.js: line 36, col 5, \'ok\' is not defined.\nunit/store_test.js: line 37, col 5, \'ok\' is not defined.\nunit/store_test.js: line 51, col 3, \'ok\' is not defined.\nunit/store_test.js: line 52, col 3, \'ok\' is not defined.\nunit/store_test.js: line 58, col 3, \'ok\' is not defined.\nunit/store_test.js: line 59, col 3, \'ok\' is not defined.\nunit/store_test.js: line 66, col 3, \'ok\' is not defined.\nunit/store_test.js: line 70, col 3, \'ok\' is not defined.\nunit/store_test.js: line 74, col 3, \'ok\' is not defined.\nunit/store_test.js: line 42, col 3, \'throws\' is not defined.\n\n21 errors');
+    assert.ok(true, 'unit/store_test.js should pass jshint.');
   });
 });
 /* jshint ignore:start */

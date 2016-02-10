@@ -1,30 +1,15 @@
 import Ember from 'ember';
-var env, store, Person, Name, House;
+import { test } from 'qunit';
+import moduleForAcceptance from '../helpers/module-for-acceptance';
+import JSONSerializer from 'ember-data/serializers/json';
+import Person from 'dummy/models/person';
+import MF from 'ember-data-model-fragments';
+var store, application;
 
-QUnit.module("unit - Serialization", {
-  setup: function() {
-    Person = DS.Model.extend({
-      name: MF.fragment('name')
-    });
-
-    Name = MF.Fragment.extend({
-      first: DS.attr('string'),
-      last: DS.attr('string')
-    });
-
-    House = MF.Fragment.extend({
-      name: DS.attr('string'),
-      region: DS.attr('string'),
-      exiled: DS.attr('boolean')
-    });
-
-    env = setupEnv({
-      person: Person,
-      name: Name,
-      house: House
-    });
-
-    store = env.store;
+moduleForAcceptance("unit - Serialization", {
+  beforeEach: function() {
+    application = this.application;
+    store = application.__container__.lookup('service:store');
 
     //expectNoDeprecation();
 
@@ -32,23 +17,13 @@ QUnit.module("unit - Serialization", {
     store.modelFor('person');
   },
 
-  teardown: function() {
-    env = null;
+  afterEach: function() {
+    application = null;
     store = null;
-    Person = null;
-    Name = null;
   }
 });
 
-test("fragment properties are snapshotted as normal attributes on the owner record snapshot", function() {
-  // The extra assertion comes from deprecation checking
-  expect(8);
-
-  Person.reopen({
-    houses   : MF.fragmentArray('house'),
-    children : MF.array()
-  });
-
+test("fragment properties are snapshotted as normal attributes on the owner record snapshot", function(assert) {
   var person = {
     name: {
       first : "Catelyn",
@@ -75,68 +50,68 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
     ]
   };
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: person
-    }
-  });
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: person
+      }
+    });
 
-  env.registry.register('serializer:person', env.serializer.extend({
-    serialize: function(snapshot) {
-      var name = snapshot.attr('name');
-      ok(name instanceof DS.Snapshot, "fragment snapshot attribute is a snapshot");
-      equal(name.attr('first'), person.name.first, "fragment attributes are snapshoted correctly");
+    application.register('serializer:person', JSONSerializer.extend({
+      serialize: function(snapshot) {
+        var name = snapshot.attr('name');
+        assert.ok(name instanceof DS.Snapshot, "fragment snapshot attribute is a snapshot");
+        assert.equal(name.attr('first'), person.name.first, "fragment attributes are snapshoted correctly");
 
-      var houses = snapshot.attr('houses');
-      ok(Array.isArray(houses), "fragment array attribute is an array");
-      ok(houses[0] instanceof DS.Snapshot, "fragment array attribute is an array of snapshots");
-      equal(houses[0].attr('name'), person.houses[0].name, "fragment array attributes are snapshotted correctly");
+        var houses = snapshot.attr('houses');
+        assert.ok(Array.isArray(houses), "fragment array attribute is an array");
+        assert.ok(houses[0] instanceof DS.Snapshot, "fragment array attribute is an array of snapshots");
+        assert.equal(houses[0].attr('name'), person.houses[0].name, "fragment array attributes are snapshotted correctly");
 
-      var children = snapshot.attr('children');
-      ok(Array.isArray(children), "array attribute is an array");
-      deepEqual(children, person.children, "array attribute is snapshotted correctly");
-    }
-  }));
+        var children = snapshot.attr('children');
+        assert.ok(Array.isArray(children), "array attribute is an array");
+        assert.deepEqual(children, person.children, "array attribute is snapshotted correctly");
+      }
+    }));
 
-  return store.find('person', 1).then(function(person) {
-    person.serialize();
+    return store.find('person', 1).then(function(person) {
+      person.serialize();
+    });
   });
 });
 
-test("fragment properties are serialized as normal attributes using their own serializers", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Aerys",
-          last: "Targaryen"
+test("fragment properties are serialized as normal attributes using their own serializers", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Aerys",
+            last: "Targaryen"
+          }
         }
       }
-    }
-  });
+    });
 
-  env.registry.register('serializer:name', env.serializer.extend({
-    serialize: function() {
-      return 'Mad King';
-    }
-  }));
+    application.register('serializer:name', JSONSerializer.extend({
+      serialize: function() {
+        return 'Mad King';
+      }
+    }));
 
-  return store.find('person', 1).then(function(person) {
-    var serialized = person.serialize();
+    return store.find('person', 1).then(function(person) {
+      var serialized = person.serialize();
 
-    equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");
+      assert.equal(serialized.name, 'Mad King', "serialization uses result from `fragment#serialize`");
+    });
   });
 });
 
-test("serializing a fragment array creates a new array with contents the result of serializing each fragment", function() {
-  Person.reopen({
-    names: MF.fragmentArray('name'),
-  });
-
+test("serializing a fragment array creates a new array with contents the result of serializing each fragment", function(assert) {
   var names = [
     {
       first: "Rhaegar",
@@ -152,32 +127,36 @@ test("serializing a fragment array creates a new array with contents the result 
     }
   ];
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        names: names
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: names
+        }
       }
-    }
-  });
+    });
 
-  env.registry.register('serializer:name', env.serializer);
+    application.register('serializer:name', JSONSerializer);
 
-  return store.find('person', 1).then(function(person) {
-    var serialized = person.serialize();
+    return store.find('person', 1).then(function(person) {
+      var serialized = person.serialize();
 
-    deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
+      assert.deepEqual(serialized.names, names, "serializing returns array of each fragment serialized");
+    });
   });
 });
 
-test("normalizing data can handle `null` fragment values", function() {
-  Person.reopen({
+test("normalizing data can handle `null` fragment values", function(assert) {
+  var NullDefaultPerson = Person.extend({
     houses: MF.fragmentArray('house', { defaultValue: null }),
     children: MF.array({ defaultValue: null })
   });
 
-  var normalized = store.normalize('person', {
+  application.register('model:nullDefaultPerson', NullDefaultPerson);
+
+  var normalized = store.normalize('nullDefaultPerson', {
     name: null,
     houses: null,
     children: null
@@ -185,46 +164,44 @@ test("normalizing data can handle `null` fragment values", function() {
 
   var attributes = normalized.data.attributes;
 
-  strictEqual(attributes.name, null, "fragment property values can be null");
-  strictEqual(attributes.houses, null, "fragment array property values can be null");
-  strictEqual(attributes.children, null, "`array property values can be null");
+  assert.strictEqual(attributes.name, null, "fragment property values can be null");
+  assert.strictEqual(attributes.houses, null, "fragment array property values can be null");
+  assert.strictEqual(attributes.children, null, "`array property values can be null");
 });
 
-test("normalizing data can handle `null` fragment values", function() {
-  Person.reopen({
+test("normalizing data can handle `null` fragment values", function(assert) {
+  var NullDefaultPerson = Person.extend({
     houses: MF.fragmentArray('house', { defaultValue: null }),
     children: MF.array({ defaultValue: null })
   });
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: null,
-        houses: null,
-        children: null
+  application.register('model:nullDefaultPerson', NullDefaultPerson);
+
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'NullDefaultPerson',
+        id: 1,
+        attributes: {
+          name: null,
+          houses: null,
+          children: null
+        }
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    var serialized = person.serialize();
+    return store.find('nullDefaultPerson', 1).then(function(person) {
+      var serialized = person.serialize();
 
-    strictEqual(serialized.name, null, "fragment property values can be null");
-    strictEqual(serialized.houses, null, "fragment array property values can be null");
-    strictEqual(serialized.children, null, "`array property values can be null");
+      assert.strictEqual(serialized.name, null, "fragment property values can be null");
+      assert.strictEqual(serialized.houses, null, "fragment array property values can be null");
+      assert.strictEqual(serialized.children, null, "`array property values can be null");
+    });
   });
 });
 
-test("array properties use the specified transform to normalize data", function() {
+test("array properties use the specified transform to normalize data", function(assert) {
   var values = [ 1, 0, true, false, 'true', '' ];
-
-  Person.reopen({
-    strings: MF.array('string'),
-    numbers: MF.array('number'),
-    booleans: MF.array('boolean')
-  });
 
   var normalized = store.normalize('person', {
     strings: values,
@@ -234,41 +211,37 @@ test("array properties use the specified transform to normalize data", function(
 
   var attributes = normalized.data.attributes;
 
-  ok(values.every(function(value, index) {
+  assert.ok(values.every(function(value, index) {
     return attributes.strings[index] === String(value) &&
       attributes.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
       attributes.booleans[index] === Boolean(value);
   }), "fragment property values are normalized");
 });
 
-test("array properties use the specified transform to serialize data", function() {
+test("array properties use the specified transform to serialize data", function(assert) {
   var values = [ 1, 0, true, false, 'true', '' ];
 
-  Person.reopen({
-    strings: MF.array('string'),
-    numbers: MF.array('number'),
-    booleans: MF.array('boolean')
-  });
-
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        strings: values,
-        numbers: values,
-        booleans: values
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          strings: values,
+          numbers: values,
+          booleans: values
+        }
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    var serialized = person.serialize();
+    return store.find('person', 1).then(function(person) {
+      var serialized = person.serialize();
 
-    ok(values.every(function(value, index) {
-      return serialized.strings[index] === String(value) &&
-        serialized.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
-        serialized.booleans[index] === Boolean(value);
-    }), "fragment property values are normalized");
+      assert.ok(values.every(function(value, index) {
+        return serialized.strings[index] === String(value) &&
+          serialized.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
+          serialized.booleans[index] === Boolean(value);
+      }), "fragment property values are normalized");
+    });
   });
 });

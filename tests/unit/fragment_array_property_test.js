@@ -1,9 +1,9 @@
 import Ember from 'ember';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
-import { module, test } from 'qunit';
+import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
-import Person from 'dummy/models/person';
+import Address from 'dummy/models/address';
 
 var application, store, people;
 var all = Ember.RSVP.all;
@@ -12,10 +12,6 @@ moduleForAcceptance("unit - `MF.fragmentArray` property", {
   beforeEach: function() {
     application = this.application;
 
-    Person.reopen({
-      name: DS.attr('string')
-    });
-
     store = application.__container__.lookup('service:store');
 
     //expectNoDeprecation();
@@ -23,7 +19,7 @@ moduleForAcceptance("unit - `MF.fragmentArray` property", {
     people = [
       {
         id: 1,
-        name: "Tyrion Lannister",
+        nickName: "Tyrion Lannister",
         addresses: [
           {
             street: "1 Sky Cell",
@@ -41,7 +37,7 @@ moduleForAcceptance("unit - `MF.fragmentArray` property", {
       },
       {
         id: 2,
-        name: "Eddard Stark",
+        nickName: "Eddard Stark",
         addresses: [
           {
             street: "1 Great Keep",
@@ -53,7 +49,7 @@ moduleForAcceptance("unit - `MF.fragmentArray` property", {
       },
       {
         id: 3,
-        name: "Jojen Reed",
+        nickName: "Jojen Reed",
         addresses: null
       }
     ];
@@ -240,7 +236,7 @@ test("null values are allowed", function(assert) {
   });
 });
 
-test("setting to null is allowed", function(person) {
+test("setting to null is allowed", function(assert) {
   Ember.run(() => {
     pushPerson(1);
 

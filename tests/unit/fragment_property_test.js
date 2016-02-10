@@ -1,165 +1,165 @@
 import Ember from 'ember';
-var env, store, Person, Name;
+import DS from 'ember-data';
+import MF from 'ember-data-model-fragments';
+import { test } from 'qunit';
+import moduleForAcceptance from '../helpers/module-for-acceptance';
+import Name from 'dummy/models/name';
+var store, application;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit - `MF.fragment` property", {
-  setup: function() {
-    Person = DS.Model.extend({
-      name: MF.fragment('name'),
-      title: DS.attr('string')
-    });
-
-    Name = MF.Fragment.extend({
-      first: DS.attr('string'),
-      last: DS.attr('string')
-    });
-
-    env = setupEnv({
-      person: Person,
-      name: Name
-    });
-
-    store = env.store;
-
+moduleForAcceptance("unit - `MF.fragment` property", {
+  beforeEach: function() {
+    application = this.application;
+    store = application.__container__.lookup('service:store');
     //expectNoDeprecation();
   },
 
-  teardown: function() {
-    env = null;
+  afterEach: function() {
     store = null;
-    Person = null;
-    Name = null;
+    application = null;
   }
 });
 
-test("object literals are converted to instances of `MF.Fragment`", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Tyrion",
-          last: "Lannister"
+test("object literals are converted to instances of `MF.Fragment`", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Tyrion",
+            last: "Lannister"
+          }
         }
       }
-    }
-  });
-
-  return store.find('person', 1).then(function(person) {
-    ok(person.get('name') instanceof Name, "name property is an `MF.Fragment` instance");
-
-    equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
-  });
-});
-
-test("a fragment can be created through the store and set", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {}
-    }
-  });
-
-  return store.find('person', 1).then(function(person) {
-    var name = store.createFragment('name', {
-      first: "Davos",
-      last: "Seaworth"
     });
 
-    person.set('name', name);
+    return store.find('person', 1).then(function(person) {
+      assert.ok(person.get('name') instanceof Name, "name property is an `MF.Fragment` instance");
 
-    equal(person.get('name.first'), 'Davos', "new fragment is correctly set");
+      assert.equal(person.get('name.first'), 'Tyrion', "nested properties have original value");
+    });
   });
 });
 
-test("setting to a non-fragment or object literal throws an error", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {}
-    }
-  });
+test("a fragment can be created through the store and set", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {}
+      }
+    });
 
-  return store.find('person', 1).then(function(person) {
-    throws(function() {
-      person.set('name', store.createRecord('person'));
-    }, "error is thrown when setting non-fragment");
+    return store.find('person', 1).then(function(person) {
+      var name = store.createFragment('name', {
+        first: "Davos",
+        last: "Seaworth"
+      });
+
+      person.set('name', name);
+
+      assert.equal(person.get('name.first'), 'Davos', "new fragment is correctly set");
+    });
   });
 });
 
-test("setting fragments from other records throws an error", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Roose",
-          last: "Bolton"
+test("setting to a non-fragment or object literal throws an error", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {}
+      }
+    });
+
+    return store.find('person', 1).then(function(person) {
+      assert.throws(function() {
+        person.set('name', store.createRecord('person'));
+      }, "error is thrown when setting non-fragment");
+    });
+  });
+});
+
+test("setting fragments from other records throws an error", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Roose",
+            last: "Bolton"
+          }
         }
       }
-    }
-  });
+    });
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 2,
-      attributes: {}
-    }
-  });
-
-  return all([
-    store.find('person', 1),
-    store.find('person', 2)
-  ]).then(function(people) {
-    throws(function() {
-      people[1].set('name', people[0].get('name'));
-    }, "error is thrown when setting to a fragment of another record");
-  });
-});
-
-test("null values are allowed", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: null
+    store.push({
+      data: {
+        type: 'person',
+        id: 2,
+        attributes: {}
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    equal(person.get('name'), null, "property is null");
+    return all([
+      store.find('person', 1),
+      store.find('person', 2)
+    ]).then(function(people) {
+      assert.throws(function() {
+        people[1].set('name', people[0].get('name'));
+      }, "error is thrown when setting to a fragment of another record");
+    });
   });
 });
 
-test("setting to null is allowed", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Barristan",
-          last: "Selmy"
+test("null values are allowed", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null
         }
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    person.set('name', null);
-    equal(person.get('name'), null, "property is null");
+    return store.find('person', 1).then(function(person) {
+      assert.equal(person.get('name'), null, "property is null");
+    });
   });
 });
 
-test("fragments are created from object literals when creating a record", function() {
-  Ember.run(function() {
+test("setting to null is allowed", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Barristan",
+            last: "Selmy"
+          }
+        }
+      }
+    });
+
+    return store.find('person', 1).then(function(person) {
+      person.set('name', null);
+      assert.equal(person.get('name'), null, "property is null");
+    });
+  });
+});
+
+test("fragments are created from object literals when creating a record", function(assert) {
+  Ember.run(() => {
     var name = {
       first: 'Balon',
       last: 'Greyjoy'
@@ -169,66 +169,70 @@ test("fragments are created from object literals when creating a record", functi
       name: name
     });
 
-    ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-    equal(person.get('name.first'), name.first, "fragment has correct values");
+    assert.ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
+    assert.equal(person.get('name.first'), name.first, "fragment has correct values");
   });
 });
 
-test("setting a fragment to an object literal creates a new fragment", function() {
+test("setting a fragment to an object literal creates a new fragment", function(assert) {
   var name = {
     first: 'Asha',
     last: 'Greyjoy'
   };
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: null
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null
+        }
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    person.set('name', name);
+    return store.find('person', 1).then(function(person) {
+      person.set('name', name);
 
-    ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-    equal(person.get('name.first'), name.first, "fragment has correct values");
+      assert.ok(person.get('name') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
+      assert.equal(person.get('name.first'), name.first, "fragment has correct values");
+    });
   });
 });
 
-test("setting a fragment to an object literal reuses an existing fragment", function() {
+test("setting a fragment to an object literal reuses an existing fragment", function(assert) {
   var newName = {
     first: 'Reek',
     last: null
   };
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: 'Theon',
-          last: 'Greyjoy'
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Theon',
+            last: 'Greyjoy'
+          }
         }
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    var name = person.get('name');
+    return store.find('person', 1).then(function(person) {
+      var name = person.get('name');
 
-    person.set('name', newName);
+      person.set('name', newName);
 
-    equal(name, person.get('name'), "fragment instances are reused");
-    equal(person.get('name.first'), newName.first, "fragment has correct values");
+      assert.equal(name, person.get('name'), "fragment instances are reused");
+      assert.equal(person.get('name.first'), newName.first, "fragment has correct values");
+    });
   });
 });
 
-test("fragments can have default values", function() {
-  Ember.run(function() {
+test("fragments can have default values", function(assert) {
+  Ember.run(() => {
     var defaultValue = {
       first: "Iron",
       last: "Victory"
@@ -238,22 +242,22 @@ test("fragments can have default values", function() {
       name: MF.fragment("name", { defaultValue: defaultValue }),
     });
 
-    env.registry.register('model:ship', Ship);
+    application.register('model:ship', Ship);
 
     var ship = store.createRecord('ship');
 
-    equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
+    assert.equal(ship.get('name.first'), defaultValue.first, "the default value is used when the value has not been specified");
 
     ship.set('name', null);
-    equal(ship.get('name'), null, "the default value is not used when the value is set to null");
+    assert.equal(ship.get('name'), null, "the default value is not used when the value is set to null");
 
     ship = store.createRecord('ship', { name: null });
-    equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
+    assert.equal(ship.get('name'), null, "the default value is not used when the value is initialized to null");
   });
 });
 
-test("fragment default values can be functions", function() {
-  Ember.run(function() {
+test("fragment default values can be functions", function(assert) {
+  Ember.run(() => {
     var defaultValue = {
       first: "Oath",
       last: "Keeper"
@@ -263,10 +267,10 @@ test("fragment default values can be functions", function() {
       name: MF.fragment("name", { defaultValue: function() { return defaultValue; } }),
     });
 
-    env.registry.register('model:sword', Sword);
+    application.register('model:sword', Sword);
 
     var sword = store.createRecord('sword');
 
-    equal(sword.get('name.first'), defaultValue.first, "the default value is correct");
+    assert.equal(sword.get('name.first'), defaultValue.first, "the default value is correct");
   });
 });

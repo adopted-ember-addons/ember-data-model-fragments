@@ -1,135 +1,129 @@
 import Ember from 'ember';
-var env, store, Person, Name;
+import DS from 'ember-data';
+import MF from 'ember-data-model-fragments';
+import { test } from 'qunit';
+import moduleForAcceptance from '../helpers/module-for-acceptance';
+var store, application;
 var all = Ember.RSVP.all;
 
-QUnit.module("unit - `MF.fragmentOwner` property", {
-  setup: function() {
-    Person = DS.Model.extend({
-      name: MF.fragment('name'),
-    });
-
-    Name = MF.Fragment.extend({
-      first: DS.attr('string'),
-      last: DS.attr('string'),
-      person: MF.fragmentOwner()
-    });
-
-    env = setupEnv({
-      person: Person,
-      name: Name
-    });
-
-    store = env.store;
-
+moduleForAcceptance("unit - `MF.fragmentOwner` property", {
+  beforeEach: function() {
+    application = this.application;
+    store = application.__container__.lookup('service:store');
     //expectNoDeprecation();
   },
 
-  teardown: function() {
-    env = null;
+  afterEach: function() {
     store = null;
-    Person = null;
-    Name = null;
   }
 });
 
-test("fragments can reference their owner record", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Samwell",
-          last: "Tarly"
+test("fragments can reference their owner record", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Samwell",
+            last: "Tarly"
+          }
         }
       }
-    }
-  });
+    });
 
-  return store.find('person', 1).then(function(person) {
-    var name = person.get('name');
+    return store.find('person', 1).then(function(person) {
+      var name = person.get('name');
 
-    equal(name.get('person'), person, "fragment owner property is reference to the owner record");
+      assert.equal(name.get('person'), person, "fragment owner property is reference to the owner record");
+    });
   });
 });
 
-test("using a fragment owner property on a non-fragment throws an error", function() {
+test("using a fragment owner property on a non-fragment throws an error", function(assert) {
   Ember.run(function() {
-    Person.reopen({
+    var InvalidModel = DS.Model.extend({
       owner: MF.fragmentOwner()
     });
 
-    var person = store.createRecord('person');
+    application.register('model:invalidModel', InvalidModel);
 
-    throws(function() {
-      person.get('owner');
+    var invalid = store.createRecord('invalidModel');
+
+    assert.throws(function() {
+      invalid.get('owner');
     }, /Fragment owner properties can only be used on fragments/, "getting fragment owner on non-fragment throws an error");
   });
 });
 
-test("attempting to change a fragment's owner record throws an error", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Samwell",
-          last: "Tarly"
+test("attempting to change a fragment's owner record throws an error", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Samwell",
+            last: "Tarly"
+          }
         }
       }
-    }
-  });
+    });
 
-  store.push({
-    data: {
-      type: 'person',
-      id: 2,
-      attributes: {
-        name: {
-          first: "Samwell",
-          last: "Tarly"
+    store.push({
+      data: {
+        type: 'person',
+        id: 2,
+        attributes: {
+          name: {
+            first: "Samwell",
+            last: "Tarly"
+          }
         }
       }
-    }
-  });
+    });
 
-  return all([
-    store.find('person', 1),
-    store.find('person', 2)
-  ]).then(function(people) {
-    var name = people[0].get('name');
+    return all([
+      store.find('person', 1),
+      store.find('person', 2)
+    ]).then(function(people) {
+      var name = people[0].get('name');
 
-    throws(function() {
-      name.set('person', people[1]);
-    }, "setting the owner property throws an error");
+      assert.throws(function() {
+        name.set('person', people[1]);
+      }, "setting the owner property throws an error");
+    });
   });
 });
 
-test("fragment owner properties are notified of change", function() {
-  store.push({
-    data: {
-      type: 'person',
-      id: 1,
-      attributes: {
-        name: {
-          first: "Jeyne",
-          last: "Poole"
+test("fragment owner properties are notified of change", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Jeyne",
+            last: "Poole"
+          }
         }
       }
-    }
-  });
-
-  return store.find('person', 1).then(function(person) {
-    var name = store.createFragment('name', {
-      first: 'Arya',
-      last: 'Stark'
     });
 
-    ok(!name.get('person'), "fragment owner property is null");
+    return store.find('person', 1).then(function(person) {
+      var name = store.createFragment('name', {
+        first: 'Arya',
+        last: 'Stark'
+      });
 
-    person.set('name', name);
+      assert.ok(!name.get('person'), "fragment owner property is null");
 
-    equal(name.get('person'), person, "fragment owner property is updated");
+      person.set('name', name);
+
+      assert.equal(name.get('person'), person, "fragment owner property is updated");
+    });
   });
 });

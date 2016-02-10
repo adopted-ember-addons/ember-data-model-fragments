@@ -200,11 +200,6 @@ test("Nested fragments can be copied", function(assert) {
     ]
   };
 
-  Order.reopen({
-    recurring : DS.attr('boolean'),
-    product   : MF.fragment('product')
-  });
-
   Ember.run(() => {
     store.push({
       data: {

@@ -1,5 +1,6 @@
 import Ember from 'ember';
-import { module, test } from 'qunit';
+import MF from 'ember-data-model-fragments';
+import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import Person from 'dummy/models/person';
 
@@ -8,9 +9,6 @@ var store;
 moduleForAcceptance("unit - `MF.array` property", {
   beforeEach: function() {
     store = this.application.__container__.lookup('service:store');
-    Person.reopen({
-      name: DS.attr('string')
-    });
     //expectNoDeprecation();
   }
 });
@@ -24,7 +22,7 @@ test("array properties are converted to an array-ish containing original values"
         type: 'person',
         id: 1,
         attributes: {
-          name: "Tyrion Lannister",
+          nickName: "Tyrion Lannister",
           titles: values
         }
       }
@@ -49,7 +47,7 @@ test("null values are allowed", function(assert) {
         type: 'person',
         id: 1,
         attributes: {
-          name: 'Many-Faced God',
+          nickName: 'Many-Faced God',
           titles: null
         }
       }
@@ -68,7 +66,7 @@ test("setting to null is allowed", function(assert) {
         type: 'person',
         id: 1,
         attributes: {
-          name: "R'hllor",
+          nickName: "R'hllor",
           titles: [ 'Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow' ]
         }
       }
@@ -85,7 +83,7 @@ test("setting to null is allowed", function(assert) {
 test("array properties default to an empty array-ish", function(assert) {
   Ember.run(function() {
     var person = store.createRecord('person', {
-      name: 'Boros Blount'
+      nickName: 'Boros Blount'
     });
 
     assert.deepEqual(person.get('titles').toArray(), [], "default value is correct");
@@ -99,7 +97,7 @@ test("array properties can have default values", function(assert) {
     });
 
     var person = store.createRecord('person', {
-      name: 'Barristan Selmy'
+      nickName: 'Barristan Selmy'
     });
 
     assert.ok(person.get('titles.length'), 1, "default value length is correct");
@@ -114,7 +112,7 @@ test("default values can be functions", function(assert) {
     });
 
     var person = store.createRecord('person', {
-      name: 'Oberyn Martell'
+      nickName: 'Oberyn Martell'
     });
 
     assert.ok(person.get('titles.length'), 1, "default value length is correct");

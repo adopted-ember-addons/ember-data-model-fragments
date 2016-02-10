@@ -297,6 +297,16 @@ define('dummy/models/address', ['exports', 'ember-data-model-fragments', 'ember-
     country: _emberData['default'].attr('string')
   });
 });
+define('dummy/models/animal', ['exports', 'ember-data', 'ember-data-model-fragments'], function (exports, _emberData, _emberDataModelFragments) {
+  exports['default'] = _emberDataModelFragments['default'].Fragment.extend({
+    name: _emberData['default'].attr('string')
+  });
+});
+define('dummy/models/elephant', ['exports', 'ember-data', 'dummy/models/animal'], function (exports, _emberData, _dummyModelsAnimal) {
+  exports['default'] = _dummyModelsAnimal['default'].extend({
+    trunkLength: _emberData['default'].attr('number')
+  });
+});
 define('dummy/models/hobby', ['exports', 'ember-data-model-fragments', 'ember-data'], function (exports, _emberDataModelFragments, _emberData) {
   exports['default'] = _emberDataModelFragments['default'].Fragment.extend({
     name: _emberData['default'].attr('string')
@@ -315,6 +325,11 @@ define('dummy/models/info', ['exports', 'ember-data-model-fragments', 'ember-dat
     notes: _emberDataModelFragments['default'].array()
   });
 });
+define('dummy/models/lion', ['exports', 'ember-data', 'dummy/models/animal'], function (exports, _emberData, _dummyModelsAnimal) {
+  exports['default'] = _dummyModelsAnimal['default'].extend({
+    hasManes: _emberData['default'].attr('boolean')
+  });
+});
 define('dummy/models/name', ['exports', 'ember-data-model-fragments', 'ember-data'], function (exports, _emberDataModelFragments, _emberData) {
   exports['default'] = _emberDataModelFragments['default'].Fragment.extend({
     first: _emberData['default'].attr('string'),
@@ -325,16 +340,25 @@ define('dummy/models/name', ['exports', 'ember-data-model-fragments', 'ember-dat
 define('dummy/models/order', ['exports', 'ember-data-model-fragments', 'ember-data'], function (exports, _emberDataModelFragments, _emberData) {
   exports['default'] = _emberDataModelFragments['default'].Fragment.extend({
     amount: _emberData['default'].attr('string'),
-    products: _emberDataModelFragments['default'].fragmentArray('product')
+    recurring: _emberData['default'].attr('boolean'),
+    products: _emberDataModelFragments['default'].fragmentArray('product'),
+    product: _emberDataModelFragments['default'].fragment('product')
   });
 });
 define('dummy/models/person', ['exports', 'ember-data', 'ember-data-model-fragments'], function (exports, _emberData, _emberDataModelFragments) {
   exports['default'] = _emberData['default'].Model.extend({
     title: _emberData['default'].attr('string'),
+    nickName: _emberData['default'].attr('string'),
     name: _emberDataModelFragments['default'].fragment('name'),
+    names: _emberDataModelFragments['default'].fragmentArray('name'),
     addresses: _emberDataModelFragments['default'].fragmentArray('address'),
     titles: _emberDataModelFragments['default'].array(),
-    hobbies: _emberDataModelFragments['default'].fragmentArray('hobby', { defaultValue: null })
+    hobbies: _emberDataModelFragments['default'].fragmentArray('hobby', { defaultValue: null }),
+    houses: _emberDataModelFragments['default'].fragmentArray('house'),
+    children: _emberDataModelFragments['default'].array(),
+    strings: _emberDataModelFragments['default'].array('string'),
+    numbers: _emberDataModelFragments['default'].array('number'),
+    booleans: _emberDataModelFragments['default'].array('boolean')
   });
 });
 define('dummy/models/product', ['exports', 'ember-data-model-fragments', 'ember-data'], function (exports, _emberDataModelFragments, _emberData) {
@@ -348,6 +372,14 @@ define('dummy/models/user', ['exports', 'ember-data', 'ember-data-model-fragment
   exports['default'] = _emberData['default'].Model.extend({
     info: _emberDataModelFragments['default'].fragment('info'),
     orders: _emberDataModelFragments['default'].fragmentArray('order')
+  });
+});
+define('dummy/models/zoo', ['exports', 'ember-data', 'ember-data-model-fragments'], function (exports, _emberData, _emberDataModelFragments) {
+  exports['default'] = _emberData['default'].Model.extend({
+    name: _emberData['default'].attr('string'),
+    city: _emberData['default'].attr('string'),
+    star: _emberDataModelFragments['default'].fragment('animal', { polymorphic: true, typeKey: '$type' }),
+    animals: _emberDataModelFragments['default'].fragmentArray('animal', { polymorphic: true, typeKey: '$type' })
   });
 });
 define('dummy/router', ['exports', 'ember', 'dummy/config/environment'], function (exports, _ember, _dummyConfigEnvironment) {
@@ -447,7 +479,7 @@ catch(err) {
 });
 
 if (!runningTests) {
-  require("dummy/app")["default"].create({"name":"ember-data-model-fragments","version":"2.1.1+ee69d33d"});
+  require("dummy/app")["default"].create({"name":"ember-data-model-fragments","version":"2.1.1+a42d9040"});
 }
 
 /* jshint ignore:end */

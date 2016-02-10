@@ -3,5 +3,7 @@ import DS from 'ember-data';
 
 export default MF.Fragment.extend({
   amount: DS.attr('string'),
-  products: MF.fragmentArray('product')
+  recurring : DS.attr('boolean'),
+  products: MF.fragmentArray('product'),
+  product: MF.fragment('product')
 });

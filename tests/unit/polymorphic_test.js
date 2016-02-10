@@ -1,35 +1,14 @@
 import Ember from 'ember';
-var env, store, zoo, Zoo, Animal, Elephant, Lion;
+import { test } from 'qunit';
+import moduleForAcceptance from '../helpers/module-for-acceptance';
+import Animal from 'dummy/models/animal';
+import Lion from 'dummy/models/lion';
+import Elephant from 'dummy/models/elephant';
+var store, zoo;
 
-QUnit.module("unit - Polymorphism", {
-  setup: function() {
-    Zoo = DS.Model.extend({
-      name: DS.attr('string'),
-      city: DS.attr('string'),
-      star: MF.fragment('animal', { polymorphic: true, typeKey: '$type' }),
-      animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
-    });
-
-    Animal = MF.Fragment.extend({
-      name: DS.attr('string'),
-    });
-
-    Elephant = Animal.extend({
-      trunkLength: DS.attr('number'),
-    });
-
-    Lion = Animal.extend({
-      hasManes: DS.attr('boolean'),
-    });
-
-    env = setupEnv({
-      zoo: Zoo,
-      animal: Animal,
-      elephant: Elephant,
-      lion: Lion,
-    });
-
-    store = env.store;
+moduleForAcceptance("unit - Polymorphism", {
+  beforeEach: function() {
+    store = this.application.__container__.lookup('service:store');
 
     //expectNoDeprecation();
 
@@ -56,73 +35,69 @@ QUnit.module("unit - Polymorphism", {
     };
   },
 
-  teardown: function() {
-    env = null;
+  afterEach: function() {
     store = null;
-    Zoo = null;
-    Animal = null;
-    Elephant = null;
-    Lion = null;
   }
 });
 
-test("fragment properties support polymorphism", function() {
-  store.push({
-    data: {
-      type: 'zoo',
-      id: 1,
-      attributes: zoo
-    }
-  });
+test("fragment properties support polymorphism", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'zoo',
+        id: 1,
+        attributes: zoo
+      }
+    });
 
-  return store.find('zoo', 1).then(function(zoo) {
-    equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
-    equal(zoo.get("city"), "Winterfell", "zoo city is correct");
+    return store.find('zoo', 1).then(function(zoo) {
+      assert.equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
+      assert.equal(zoo.get("city"), "Winterfell", "zoo city is correct");
 
-    var star = zoo.get("star");
-    ok(star instanceof Animal, "zoo's star is an animal");
-    equal(star.get("name"), "Mittens", "animal name is correct");
-    ok(star instanceof Lion, "zoo's star is a lion");
-    ok(star.get("hasManes"), "lion has manes");
-  });
-});
-
-test("fragment array properties support polymorphism", function() {
-  store.push({
-    data: {
-      type: 'zoo',
-      id: 1,
-      attributes: zoo
-    }
-  });
-
-  return store.find('zoo', 1).then(function(zoo) {
-    var animals = zoo.get("animals");
-    equal(animals.get("length"), 2);
-
-    var first = animals.objectAt(0);
-    ok(first instanceof Animal);
-    equal(first.get("name"), "Mittens", "first animal's name is correct");
-    ok(first instanceof Lion);
-    ok(first.get("hasManes"), "lion has manes");
-
-    var second = animals.objectAt(1);
-    ok(second instanceof Animal);
-    equal(second.get("name"), "Snuitje", "second animal's name is correct");
-    ok(second instanceof Elephant);
-    equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
+      var star = zoo.get("star");
+      assert.ok(star instanceof Animal, "zoo's star is an animal");
+      assert.equal(star.get("name"), "Mittens", "animal name is correct");
+      assert.ok(star instanceof Lion, "zoo's star is a lion");
+      assert.ok(star.get("hasManes"), "lion has manes");
+    });
   });
 });
 
-test("fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
-  // The extra assertion comes from deprecation checking
-  expect(2);
+test("fragment array properties support polymorphism", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'zoo',
+        id: 1,
+        attributes: zoo
+      }
+    });
 
+    return store.find('zoo', 1).then(function(zoo) {
+      var animals = zoo.get("animals");
+      assert.equal(animals.get("length"), 2);
+
+      var first = animals.objectAt(0);
+      assert.ok(first instanceof Animal);
+      assert.equal(first.get("name"), "Mittens", "first animal's name is correct");
+      assert.ok(first instanceof Lion);
+      assert.ok(first.get("hasManes"), "lion has manes");
+
+      var second = animals.objectAt(1);
+      assert.ok(second instanceof Animal);
+      assert.equal(second.get("name"), "Snuitje", "second animal's name is correct");
+      assert.ok(second instanceof Elephant);
+      assert.equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
+    });
+  });
+});
+
+test("fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function(assert) {
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
   try {
-    Ember.run(function() {
+    Ember.run(() => {
       store.push({
         data: {
           type: 'zoo',
@@ -136,55 +111,51 @@ test("fragment property type-checks check the superclass when MODEL_FACTORY_INJE
 
       zoo.set('star', animal);
 
-      equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
+      assert.equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
     });
   } finally {
     Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
   }
 });
 
-test("rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
-  // The extra assertion comes from deprecation checking
-  expect(2);
+test("rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'zoo',
+        id: 1,
+        attributes: zoo
+      }
+    });
 
-  store.push({
-    data: {
-      type: 'zoo',
-      id: 1,
-      attributes: zoo
-    }
-  });
+    var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+    Ember.MODEL_FACTORY_INJECTIONS = true;
 
-  var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
-  Ember.MODEL_FACTORY_INJECTIONS = true;
+    return store.find('zoo', 1).then(function(zoo) {
+      var animal = zoo.get('star');
 
-  return store.find('zoo', 1).then(function(zoo) {
-    var animal = zoo.get('star');
+      zoo.set('star', null);
+      zoo.rollbackAttributes();
 
-    zoo.set('star', null);
-    zoo.rollbackAttributes();
-
-    equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
-  }).finally(function() {
-    Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
+      assert.equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
+    }).finally(function() {
+      Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
+    });
   });
 });
 
-test("fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function() {
-  // The extra assertion comes from deprecation checking
-  expect(2);
-
+test("fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function(assert) {
   var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
   try {
-    Ember.run(function () {
+    Ember.run(() => {
       var zoo = store.createRecord('zoo', { name: 'The World' });
       var animal = store.createFragment('elephant', { name: 'Whitey' });
 
       zoo.get('animals').pushObject(animal);
 
-      equal(zoo.get('animals.firstObject.name'), animal.get('name'), 'The type check succeeded');
+      assert.equal(zoo.get('animals.firstObject.name'), animal.get('name'), 'The type check succeeded');
     });
   } finally {
     Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
