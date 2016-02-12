@@ -119,6 +119,10 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     }
   },
 
+  _adapterDidError: function(/*error*/) {
+    // No-Op
+  },
+
   /**
     @method isDirty
     @deprecated Use `hasDirtyAttributes` instead

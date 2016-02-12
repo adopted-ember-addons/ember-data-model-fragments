@@ -1,4 +1,4 @@
-var env, store, Person, Name, Address, Hobby;
+var env, store, Person, Name, Address, Hobby, Army;
 
 QUnit.module("integration - Persistence", {
   setup: function() {
@@ -24,11 +24,17 @@ QUnit.module("integration - Persistence", {
       name: DS.attr('string')
     });
 
+    Army = DS.Model.extend({
+      name     : DS.attr('string'),
+      soldiers : MF.array()
+    });
+
     env = setupEnv({
       person: Person,
       name: Name,
       address: Address,
-      hobby: Hobby
+      hobby: Hobby,
+      army: Army
     });
 
     store = env.store;
@@ -43,6 +49,7 @@ QUnit.module("integration - Persistence", {
     Person = null;
     Address = null;
     Hobby = null;
+    Army = null;
   }
 });
 
@@ -472,13 +479,6 @@ test("fragment array properties are notifed on reload", function() {
   // The extra assertion comes from deprecation checking
   expect(2);
 
-  var Army = DS.Model.extend({
-    name     : DS.attr('string'),
-    soldiers : MF.array()
-  });
-
-  env.registry.register('model:army', Army);
-
   var data = {
     name: "Golden Company",
     soldiers: [
@@ -513,5 +513,97 @@ test("fragment array properties are notifed on reload", function() {
   return store.find('army', 1).then(function(army) {
     ArmyObserver.create({ army: army });
     return army.reload();
+  });
+});
+
+test('string array can be rolled back on failed save', function() {
+  expect(3);
+
+  var data = {
+    name: "Golden Company",
+    soldiers: [
+      "Aegor Rivers",
+      "Jon Connington",
+      "Tristan Rivers"
+    ]
+  };
+
+  store.push({
+    data: {
+      type: 'army',
+      id: 1,
+      attributes: data
+    }
+  });
+
+  env.adapter.updateRecord = function() {
+    return Ember.RSVP.reject({});
+  };
+
+  var army, soliders;
+  return store.find('army', 1).then(function(_army) {
+    army = _army;
+    soliders = army.get('soldiers');
+    soliders.pushObject('Lysono Maar');
+    soliders.removeObject('Jon Connington');
+
+    deepEqual(soliders.toArray(), ['Aegor Rivers', 'Tristan Rivers', 'Lysono Maar']);
+
+    return army.save();
+  }).catch(function() {
+    army.rollbackAttributes();
+
+    deepEqual(soliders.toArray(), ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']);
+  });
+});
+
+test('existing fragments can be rolled back on failed save', function() {
+  expect(3);
+
+  var data = {
+    name: {
+      first: 'Eddard',
+      last: 'Stark'
+    },
+    addresses: [
+      {
+        street: '1 Great Keep',
+        city: 'Winterfell',
+        region: 'North',
+        country: 'Westeros'
+      }
+    ]
+  };
+
+  store.push({
+    data: {
+      type: 'person',
+      id: 1,
+      attributes: data
+    }
+  });
+
+  env.adapter.updateRecord = function() {
+    return Ember.RSVP.reject({});
+  };
+
+  var mrStark, name, address;
+
+  return store.find('person', 1).then(function(person) {
+    mrStark = person;
+
+    name = mrStark.get('name');
+    address = mrStark.get('addresses.firstObject');
+
+    name.set('first', 'BadFirstName');
+    name.set('last', 'BadLastName');
+    address.set('street', 'BadStreet');
+
+    return mrStark.save();
+  }).catch(function() {
+    mrStark.rollbackAttributes();
+
+    equal(name.get('first') + ' ' + name.get('last'), 'Eddard Stark', 'fragment name rolled back');
+    equal(address.get('street'), '1 Great Keep', 'fragment array fragment correctly rolled back');
   });
 });
