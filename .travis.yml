@@ -3,8 +3,8 @@ language: node_js
 node_js:
   - "0.12"
 before_install:
-  - "npm install --global ember-cli bower"
+  - "npm install --global ember-cli bower phantomjs-prebuilt@2"
 before_script:
   - "bower install"
-  - "bower install ember#~2.2.0"
   - "bower install ember-data#~2.2.0"
+  - "bower install ember#~2.2.0"
