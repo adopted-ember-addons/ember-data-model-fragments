@@ -234,6 +234,20 @@ var FragmentArray = StatefulArray.extend({
     var fragment = store.createFragment(type, props);
 
     return this.pushObject(fragment);
+  },
+
+  willDestroy: function() {
+    this._super.apply(this, arguments);
+
+    // destroy the current state
+    this.forEach(function(fragment) {
+      fragment.destroy();
+    });
+
+    // destroy the original state
+    this._originalState.forEach(function(fragment) {
+      fragment.destroy();
+    });
   }
 });
 
