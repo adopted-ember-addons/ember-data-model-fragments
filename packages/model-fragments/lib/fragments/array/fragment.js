@@ -130,6 +130,20 @@ var FragmentArray = StatefulArray.extend({
   },
 
   /**
+    @method _adapterDidError
+    @private
+  */
+  _adapterDidError: function(error) {
+    this._super(error);
+
+    // Notify all records of the error; if the adapter update did not contain new
+    // data, just notify each fragment so it can transition to a clean state
+    this.forEach(function(fragment) {
+      fragment._adapterDidError(error);
+    });
+  },
+
+  /**
     If this property is `true`, either the contents of the array do not match
     its original state, or one or more of the fragments in the array are dirty.
 

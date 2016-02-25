@@ -119,6 +119,10 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     }
   },
 
+  _adapterDidError: function(/*error*/) {
+    // No-Op
+  },
+
   /**
     If this property is `true` the contents of the array do not match its
     original state. The array has local changes that have not yet been saved by
