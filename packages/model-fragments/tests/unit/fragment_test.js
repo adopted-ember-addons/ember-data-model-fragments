@@ -125,6 +125,14 @@ test("fragments are compared by reference", function() {
   });
 });
 
+test("newly create fragments start in the new state", function() {
+  Ember.run(function() {
+    var fragment = store.createFragment('name');
+
+    ok(fragment.get('isNew'), "fragments start as new");
+  });
+});
+
 test("changes to fragments are indicated in the owner record's `changedAttributes`", function() {
   store.push({
     data: {
