@@ -53,6 +53,31 @@ QUnit.module("integration - Persistence", {
   }
 });
 
+test("persisting the owner record changes the fragment state to non-new", function() {
+  var data = {
+    name: {
+      first: "Viserys",
+      last: "Targaryen"
+    }
+  };
+
+  var person = store.createRecord('person');
+
+  person.set('name', store.createFragment('name', data.name));
+
+  env.adapter.createRecord = function() {
+    var payload = Ember.copy(data, true);
+
+    payload.id = 3;
+
+    return Ember.RSVP.resolve(payload);
+  };
+
+  return person.save().then(function(person) {
+    ok(!person.get('name.isNew'), "fragments are not new after save");
+  });
+});
+
 test("persisting the owner record in a clean state maintains clean state", function() {
   store.push({
     type: 'person',
