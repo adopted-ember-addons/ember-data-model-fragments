@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "ember": "^2.2.0",
-    "ember-data": "^2.2.0"
+    "ember-data": "~2.2.0"
   },
   "devDependencies": {
     "jquery": "^2.0.0",
