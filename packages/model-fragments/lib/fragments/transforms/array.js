@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import Transform from 'ember-data/system/transform';
 import map from '../../util/map';
+import getOwner from '../../util/ember-getowner-polyfill-polyfill';
 
 /**
   @module ember-data-model-fragments
@@ -60,8 +61,8 @@ var ArrayTransform = Transform.extend({
     if (!attributeType) {
       return null;
     }
-
-    var transform = get(this, 'store').container.lookup('transform:' + attributeType);
+    var appInstance = getOwner(get(this, 'store'));
+    var transform = appInstance.lookup('transform:' + attributeType);
     Ember.assert("Unable to find transform for '" + attributeType + "'", !!transform);
 
     return transform;
