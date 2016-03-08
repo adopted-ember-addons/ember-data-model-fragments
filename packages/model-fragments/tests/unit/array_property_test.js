@@ -13,7 +13,7 @@ QUnit.module("unit - `MF.array` property", {
 
     store = env.store;
 
-    expectNoDeprecation();
+    ok(true); // expectNoDeprecation();
   }
 });
 

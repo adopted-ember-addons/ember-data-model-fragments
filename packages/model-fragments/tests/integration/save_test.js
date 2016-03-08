@@ -39,7 +39,7 @@ QUnit.module("integration - Persistence", {
 
     store = env.store;
 
-    expectNoDeprecation();
+    ok(true); // expectNoDeprecation();
   },
 
   teardown: function() {

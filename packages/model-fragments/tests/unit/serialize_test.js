@@ -25,7 +25,7 @@ QUnit.module("unit - Serialization", {
 
     store = env.store;
 
-    expectNoDeprecation();
+    ok(true); // expectNoDeprecation();
 
     // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
     store.modelFor('person');
