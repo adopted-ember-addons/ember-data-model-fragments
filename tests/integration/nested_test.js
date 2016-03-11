@@ -5,21 +5,22 @@ import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import Order from 'dummy/models/order';
 import Product from 'dummy/models/product';
+import Pretender from 'pretender';
 
-var store, adapter, application;
+var store, application, server;
 
 moduleForAcceptance("integration - Nested fragments", {
   beforeEach: function() {
     application = this.application;
-    store       = application.__container__.lookup('service:store');
-    adapter     = store.get('defaultAdapter');
+    store = application.__container__.lookup('service:store');
+    server = new Pretender();
     //expectNoDeprecation();
   },
 
   afterEach: function() {
     store = null;
-    adapter = null;
     application = null;
+    server.shutdown();
   }
 });
 
@@ -58,7 +59,7 @@ test("`DS.hasManyFragment` properties can be nested", function(assert) {
     ]
   };
 
-  Ember.run(() => {
+  return Ember.run(() => {
     store.push({
       data: {
         type: 'user',
@@ -67,14 +68,15 @@ test("`DS.hasManyFragment` properties can be nested", function(assert) {
       }
     });
 
-    adapter.updateRecord = function() {
-      var payload = Ember.copy(data, true);
-
-      payload.id = 1;
-      payload.orders[0].products.splice(0, 1);
-
-      return Ember.RSVP.resolve(payload);
+    var payload = {
+      user: Ember.copy(data, true)
     };
+    payload.user.id = 1;
+    payload.user.orders[0].products.splice(0, 1);
+
+    server.put('/users/1', function() {
+      return [ 200, {"Content-Type": "application/json"}, JSON.stringify(payload) ];
+    });
 
     return store.find('user', 1).then(function(user) {
       assert.equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested fragment array properties are converted properly");
