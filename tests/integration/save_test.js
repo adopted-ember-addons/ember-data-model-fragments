@@ -544,3 +544,106 @@ test("fragment array properties are notifed on reload", function(assert) {
     });
   });
 });
+
+test('string array can be rolled back on failed save', function(assert) {
+  //assert.expect(3);
+
+  var data = {
+    name: "Golden Company",
+    soldiers: [
+      "Aegor Rivers",
+      "Jon Connington",
+      "Tristan Rivers"
+    ]
+  };
+
+  var Army = DS.Model.extend({
+    name     : DS.attr('string'),
+    soldiers : MF.array()
+  });
+
+  application.register('model:army', Army);
+
+  return Ember.run(() => {
+    store.push({
+      data: {
+        type: 'army',
+        id: 1,
+        attributes: data
+      }
+    });
+
+    server.get('/armies', function() {
+      return [ 500, {"Content-Type": "application/json"} ];
+    });
+
+    var army, soliders;
+    return store.find('army', 1).then(function(_army) {
+      army = _army;
+      soliders = army.get('soldiers');
+      soliders.pushObject('Lysono Maar');
+      soliders.removeObject('Jon Connington');
+
+      assert.deepEqual(soliders.toArray(), ['Aegor Rivers', 'Tristan Rivers', 'Lysono Maar']);
+
+      return army.save();
+    }).catch(function() {
+      army.rollbackAttributes();
+
+      assert.deepEqual(soliders.toArray(), ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']);
+    });
+  });
+});
+
+test('existing fragments can be rolled back on failed save', function(assert) {
+  //assert.expect(3);
+
+  var data = {
+    name: {
+      first: 'Eddard',
+      last: 'Stark'
+    },
+    addresses: [
+      {
+        street: '1 Great Keep',
+        city: 'Winterfell',
+        region: 'North',
+        country: 'Westeros'
+      }
+    ]
+  };
+
+  return Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data
+      }
+    });
+
+    server.put('/armies/1', function() {
+      return [ 500, {"Content-Type": "application/json"} ];
+    });
+
+    var mrStark, name, address;
+
+    return store.find('person', 1).then(function(person) {
+      mrStark = person;
+
+      name = mrStark.get('name');
+      address = mrStark.get('addresses.firstObject');
+
+      name.set('first', 'BadFirstName');
+      name.set('last', 'BadLastName');
+      address.set('street', 'BadStreet');
+
+      return mrStark.save();
+    }).catch(function() {
+      mrStark.rollbackAttributes();
+
+      assert.equal(name.get('first') + ' ' + name.get('last'), 'Eddard Stark', 'fragment name rolled back');
+      assert.equal(address.get('street'), '1 Great Keep', 'fragment array fragment correctly rolled back');
+    });
+  });
+});

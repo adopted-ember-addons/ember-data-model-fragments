@@ -274,6 +274,18 @@ decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCo
   }
 });
 
+decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
+  var error = args[0] || create(null);
+  var fragment;
+
+  // Notify fragments that the record was committed
+  for (var key in this._fragments) {
+    if (fragment = this._fragments[key]) {
+      fragment._adapterDidError(error);
+    }
+  }
+});
+
 /**
   @class JSONSerializer
   @namespace DS

@@ -118,6 +118,13 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     });
   },
 
+  /**
+    @method _adapterDidCommit
+  */
+  _adapterDidError: function(/*error*/) {
+    internalModelFor(this)._saveWasRejected();
+  },
+
   toStringExtension: function() {
     return 'owner(' + get(internalModelFor(this)._owner, 'id') + ')';
   }
