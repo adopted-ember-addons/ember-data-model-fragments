@@ -2,5 +2,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-data-model-fragments'
+  name: 'model-fragments'
 };

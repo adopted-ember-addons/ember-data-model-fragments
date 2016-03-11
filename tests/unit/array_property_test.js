@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import MF from 'ember-data-model-fragments';
+import MF from 'model-fragments';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import Person from 'dummy/models/person';

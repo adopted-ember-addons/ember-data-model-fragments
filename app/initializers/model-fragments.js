@@ -1,6 +1,6 @@
-import FragmentTransform from 'ember-data-model-fragments/transforms/fragment';
-import FragmentArrayTransform from 'ember-data-model-fragments/transforms/fragment-array';
-import ArrayTransform from 'ember-data-model-fragments/transforms/array';
+import FragmentTransform from 'model-fragments/transforms/fragment';
+import FragmentArrayTransform from 'model-fragments/transforms/fragment-array';
+import ArrayTransform from 'model-fragments/transforms/array';
 
 export default {
   name: "fragmentTransform",

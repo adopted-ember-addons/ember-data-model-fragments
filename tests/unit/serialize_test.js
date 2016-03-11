@@ -3,7 +3,7 @@ import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import JSONSerializer from 'ember-data/serializers/json';
 import Person from 'dummy/models/person';
-import MF from 'ember-data-model-fragments';
+import MF from 'model-fragments';
 var store, application;
 
 moduleForAcceptance("unit - Serialization", {

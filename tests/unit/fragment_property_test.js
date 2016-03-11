@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import MF from 'ember-data-model-fragments';
+import MF from 'model-fragments';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import Name from 'dummy/models/name';

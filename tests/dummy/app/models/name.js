@@ -1,4 +1,4 @@
-import MF from 'ember-data-model-fragments';
+import MF from 'model-fragments';
 import DS from 'ember-data';
 
 export default MF.Fragment.extend({
