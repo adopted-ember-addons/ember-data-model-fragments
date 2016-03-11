@@ -66,3 +66,22 @@ test("the application serializer can be looked up", function(assert) {
 test("the default serializer can be looked up", function(assert) {
   assert.ok(store.serializerFor('-default') instanceof JSONSerializer, "default serializer can still be looked up");
 });
+
+test("unloadAll destroys fragments", function(assert) {
+  Ember.run(() => {
+    var person = store.createRecord('person', {
+      name: {
+        first: "Catelyn",
+        last: "Stark"
+      }
+    });
+    var name = person.get('name');
+
+    store.unloadAll();
+
+    Ember.run.schedule('destroy', function() {
+      assert.ok(person.get('isDestroying'), "the model is being destroyed");
+      assert.ok(name.get('isDestroying'), "the fragment is being destroyed");
+    });
+  });
+});

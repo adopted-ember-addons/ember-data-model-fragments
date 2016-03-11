@@ -274,3 +274,65 @@ test("fragment default values can be functions", function(assert) {
     assert.equal(sword.get('name.first'), defaultValue.first, "the default value is correct");
   });
 });
+
+test("destroy a fragment which was set to null", function(assert) {
+  return Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Barristan",
+            last: "Selmy"
+          }
+        }
+      }
+    });
+
+    return store.find('person', 1).then(function(person) {
+      var name = person.get('name');
+      person.set('name', null);
+
+      person.destroy();
+
+      Ember.run.schedule('destroy', function() {
+        assert.ok(person.get('isDestroying'), "the model is being destroyed");
+        assert.ok(name.get('isDestroying'), "the fragment is being destroyed");
+      });
+    });
+  });
+});
+
+test("destroy the old and new fragment value", function(assert) {
+  return Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: "Barristan",
+            last: "Selmy"
+          }
+        }
+      }
+    });
+
+    return store.find('person', 1).then(function(person) {
+      var oldName = person.get('name');
+      var newName = store.createFragment('name');
+      person.set('name', newName);
+
+      assert.ok(!oldName.get('isDestroying'), "don't destroy the old fragment yet because we could rollback");
+
+      person.destroy();
+
+      Ember.run.schedule('destroy', function() {
+        assert.ok(person.get('isDestroying'), "the model is being destroyed");
+        assert.ok(oldName.get('isDestroying'), "the old fragment is being destroyed");
+        assert.ok(newName.get('isDestroying'), "the new fragment is being destroyed");
+      });
+    });
+  });
+});

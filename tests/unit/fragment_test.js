@@ -180,3 +180,11 @@ test("changes to attributes can be rolled back", function(assert) {
     });
   });
 });
+
+test("fragments without an owner can be destroyed", function(assert) {
+  Ember.run(() => {
+    var fragment = store.createFragment('name');
+    fragment.destroy();
+    assert.ok(fragment.get('isDestroying'), "the fragment is being destroyed");
+  });
+});
