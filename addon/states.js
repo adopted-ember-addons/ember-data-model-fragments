@@ -107,6 +107,8 @@ var FragmentRootState = {
     created: {
       isDirty: true,
 
+      isNew: true,
+
       setup: dirtySetup,
 
       didCommit: function(internalModel) {

@@ -21,6 +21,34 @@ moduleForAcceptance("integration - Persistence", {
   }
 });
 
+test("persisting the owner record changes the fragment state to non-new", function(assert) {
+  var data = {
+    name: {
+      first: "Viserys",
+      last: "Targaryen"
+    }
+  };
+
+  return Ember.run(() => {
+    var person = store.createRecord('person');
+
+    person.set('name', store.createFragment('name', data.name));
+
+    var payload = {
+      person: Ember.copy(data, true)
+    };
+    payload.person.id = 3;
+
+    server.post('/people', function() {
+      return [ 200, {"Content-Type": "application/json"}, JSON.stringify(payload) ];
+    });
+
+    return person.save().then(function(person) {
+      assert.ok(!person.get('name.isNew'), "fragments are not new after save");
+    });
+  });
+});
+
 test("persisting the owner record in a clean state maintains clean state", function(assert) {
   return Ember.run(() => {
     store.push({
