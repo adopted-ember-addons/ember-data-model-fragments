@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import computedPolyfill from './util/ember-new-computed';
+import computedPolyfill from 'ember-new-computed';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
 import {
