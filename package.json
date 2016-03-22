@@ -47,13 +47,13 @@
     "ember-disable-proxy-controllers": "^1.0.1",
     "ember-export-application-global": "^1.0.4",
     "ember-load-initializers": "0.5.1",
-    "ember-new-computed": "1.0.3",
     "ember-resolver": "^2.0.3",
     "ember-try": "^0.2.2",
     "loader.js": "^4.0.0"
   },
   "dependencies": {
-    "ember-cli-babel": "^5.1.5"
+    "ember-cli-babel": "^5.1.5",
+    "ember-new-computed": "1.0.3"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
