@@ -5,9 +5,10 @@ import getOwner from '../helpers/get-owner';
 var store;
 
 moduleForAcceptance("unit - `MF.fragmentArray`", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     store = getOwner(this).lookup('service:store');
-    //expectNoDeprecation();
+    
+    assert.expectNoDeprecation();
   },
 
   afterEach: function() {

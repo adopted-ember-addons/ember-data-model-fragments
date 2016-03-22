@@ -9,10 +9,11 @@ var store, owner;
 var all = Ember.RSVP.all;
 
 moduleForAcceptance("unit - `MF.fragmentOwner` property", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     owner = getOwner(this);
     store = owner.lookup('service:store');
-    //expectNoDeprecation();
+    
+    assert.expectNoDeprecation();
   },
 
   afterEach: function() {

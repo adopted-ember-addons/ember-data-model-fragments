@@ -8,11 +8,11 @@ import MF from 'model-fragments';
 var store, owner;
 
 moduleForAcceptance("unit - Serialization", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     owner = getOwner(this);
     store = owner.lookup('service:store');
 
-    //expectNoDeprecation();
+    assert.expectNoDeprecation();
 
     // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
     store.modelFor('person');

@@ -11,11 +11,12 @@ import Pretender from 'pretender';
 var store, owner, server;
 
 moduleForAcceptance("integration - Nested fragments", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     owner = getOwner(this);
     store = owner.lookup('service:store');
     server = new Pretender();
-    //expectNoDeprecation();
+    
+    assert.expectNoDeprecation();
   },
 
   afterEach: function() {

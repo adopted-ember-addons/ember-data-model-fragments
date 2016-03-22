@@ -6,10 +6,10 @@ import getOwner from '../helpers/get-owner';
 var store, people;
 
 moduleForAcceptance("integration - Dependent State", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     store = getOwner(this).lookup('service:store');
 
-    //expectNoDeprecation();
+    assert.expectNoDeprecation();
 
     people = [
       {

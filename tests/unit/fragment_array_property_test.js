@@ -10,12 +10,12 @@ var owner, store, people;
 var all = Ember.RSVP.all;
 
 moduleForAcceptance("unit - `MF.fragmentArray` property", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     owner = getOwner(this);
 
     store = owner.lookup('service:store');
 
-    //expectNoDeprecation();
+    assert.expectNoDeprecation();
 
     people = [
       {

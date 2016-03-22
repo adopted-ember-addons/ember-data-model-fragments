@@ -8,11 +8,11 @@ import JSONSerializer from 'ember-data/serializers/json';
 var store, owner;
 
 moduleForAcceptance("unit - `DS.Store`", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     owner = getOwner(this);
     store = owner.lookup('service:store');
 
-    //expectNoDeprecation();
+    assert.expectNoDeprecation();
   },
 
   afterEach: function() {

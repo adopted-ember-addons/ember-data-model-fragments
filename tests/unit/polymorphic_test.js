@@ -8,10 +8,10 @@ import Elephant from 'dummy/models/elephant';
 var store, zoo;
 
 moduleForAcceptance("unit - Polymorphism", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     store = getOwner(this).lookup('service:store');
 
-    //expectNoDeprecation();
+    assert.expectNoDeprecation();
 
     zoo = {
       name: 'Chilly Zoo',

@@ -8,9 +8,10 @@ import Person from 'dummy/models/person';
 var store;
 
 moduleForAcceptance("unit - `MF.array` property", {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     store = getOwner(this).lookup('service:store');
-    //expectNoDeprecation();
+    
+    assert.expectNoDeprecation();
   },
 
   afterEach: function() {
