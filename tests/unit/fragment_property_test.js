@@ -3,20 +3,22 @@ import DS from 'ember-data';
 import MF from 'model-fragments';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import Name from 'dummy/models/name';
-var store, application;
+
+var store, owner;
 var all = Ember.RSVP.all;
 
 moduleForAcceptance("unit - `MF.fragment` property", {
   beforeEach: function() {
-    application = this.application;
-    store = application.__container__.lookup('service:store');
+    owner = getOwner(this);
+    store = owner.lookup('service:store');
     //expectNoDeprecation();
   },
 
   afterEach: function() {
+    owner = null;
     store = null;
-    application = null;
   }
 });
 
@@ -242,7 +244,7 @@ test("fragments can have default values", function(assert) {
       name: MF.fragment("name", { defaultValue: defaultValue }),
     });
 
-    application.register('model:ship', Ship);
+    owner.register('model:ship', Ship);
 
     var ship = store.createRecord('ship');
 
@@ -267,7 +269,7 @@ test("fragment default values can be functions", function(assert) {
       name: MF.fragment("name", { defaultValue: function() { return defaultValue; } }),
     });
 
-    application.register('model:sword', Sword);
+    owner.register('model:sword', Sword);
 
     var sword = store.createRecord('sword');
 

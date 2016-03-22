@@ -1,22 +1,23 @@
 import Ember from 'ember';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import Name from 'dummy/models/name';
 import JSONAPISerializer from 'ember-data/serializers/json-api';
 import JSONSerializer from 'ember-data/serializers/json';
-var store, application;
+var store, owner;
 
 moduleForAcceptance("unit - `DS.Store`", {
   beforeEach: function() {
-    application = this.application;
-    store = application.__container__.lookup('service:store');
+    owner = getOwner(this);
+    store = owner.lookup('service:store');
 
     //expectNoDeprecation();
   },
 
   afterEach: function() {
     store = null;
-    application = null;
+    owner = null;
   }
 });
 
@@ -39,7 +40,7 @@ test("attempting to create a fragment type that does not inherit from `MF.Fragme
 
 test("the default fragment serializer does not use the application serializer", function(assert) {
   var Serializer = JSONAPISerializer.extend();
-  application.register('serializer:application', Serializer);
+  owner.register('serializer:application', Serializer);
 
   assert.ok(!(store.serializerFor('name') instanceof Serializer), "fragment serializer fallback is not `JSONAPISerializer`");
   assert.ok(store.serializerFor('name') instanceof JSONSerializer, "fragment serializer fallback is correct");
@@ -54,7 +55,7 @@ test("the default fragment serializer does not use the adapter's `defaultSeriali
 
 test("the default fragment serializer is `serializer:-fragment` if registered", function(assert) {
   var Serializer = JSONSerializer.extend();
-  application.register('serializer:-fragment', Serializer);
+  owner.register('serializer:-fragment', Serializer);
 
   assert.ok(store.serializerFor('name') instanceof Serializer, "fragment serializer fallback is correct");
 });

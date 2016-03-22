@@ -3,20 +3,21 @@ import MF from 'model-fragments';
 import DS from 'ember-data';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import Pretender from 'pretender';
-var store, application, server;
+var store, owner, server;
 
 moduleForAcceptance("integration - Persistence", {
   beforeEach: function() {
-    application = this.application;
-    store = application.__container__.lookup('service:store');
+    owner = getOwner(this);
+    store = owner.lookup('service:store');
     server = new Pretender();
     //expectNoDeprecation();
   },
 
   afterEach: function() {
     store = null;
-    application = null;
+    owner = null;
     server.shutdown();
   }
 });
@@ -189,9 +190,9 @@ test("a new record can be persisted with null fragments", function(assert) {
     assert.equal(person.get('name'), null, "fragment property is null");
     assert.equal(person.get('hobbies'), null, "fragment array property is null");
 
-    var payload = { 
+    var payload = {
       person: {
-        id: 1 
+        id: 1
       }
     };
 
@@ -529,7 +530,7 @@ test("fragment array properties are notifed on reload", function(assert) {
     soldiers : MF.array()
   });
 
-  application.register('model:army', Army);
+  owner.register('model:army', Army);
 
   var data = {
     name: "Golden Company",
@@ -590,7 +591,7 @@ test('string array can be rolled back on failed save', function(assert) {
     soldiers : MF.array()
   });
 
-  application.register('model:army', Army);
+  owner.register('model:army', Army);
 
   return Ember.run(() => {
     store.push({

@@ -2,14 +2,19 @@ import Ember from 'ember';
 import MF from 'model-fragments';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import Person from 'dummy/models/person';
 
 var store;
 
 moduleForAcceptance("unit - `MF.array` property", {
   beforeEach: function() {
-    store = this.application.__container__.lookup('service:store');
+    store = getOwner(this).lookup('service:store');
     //expectNoDeprecation();
+  },
+
+  afterEach: function() {
+    store = null;
   }
 });
 

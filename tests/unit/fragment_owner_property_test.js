@@ -3,17 +3,20 @@ import DS from 'ember-data';
 import MF from 'model-fragments';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
-var store, application;
+import getOwner from '../helpers/get-owner';
+
+var store, owner;
 var all = Ember.RSVP.all;
 
 moduleForAcceptance("unit - `MF.fragmentOwner` property", {
   beforeEach: function() {
-    application = this.application;
-    store = application.__container__.lookup('service:store');
+    owner = getOwner(this);
+    store = owner.lookup('service:store');
     //expectNoDeprecation();
   },
 
   afterEach: function() {
+    owner = null;
     store = null;
   }
 });
@@ -47,7 +50,7 @@ test("using a fragment owner property on a non-fragment throws an error", functi
       owner: MF.fragmentOwner()
     });
 
-    application.register('model:invalidModel', InvalidModel);
+    owner.register('model:invalidModel', InvalidModel);
 
     var invalid = store.createRecord('invalidModel');
 

@@ -9,6 +9,7 @@ import map from '../util/map';
 var get = Ember.get;
 var makeArray = Ember.makeArray;
 var computed = Ember.computed;
+var getOwner = Ember.getOwner;
 
 /**
   Transform for `MF.array` that transforms array data with the given transform
@@ -61,7 +62,7 @@ var ArrayTransform = Transform.extend({
       return null;
     }
 
-    var transform = get(this, 'store').container.lookup('transform:' + attributeType);
+    var transform = getOwner(this).lookup('transform:' + attributeType);
     Ember.assert("Unable to find transform for '" + attributeType + "'", !!transform);
 
     return transform;

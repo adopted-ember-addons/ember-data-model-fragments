@@ -1,15 +1,16 @@
 import Ember from 'ember';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import JSONSerializer from 'ember-data/serializers/json';
 import Person from 'dummy/models/person';
 import MF from 'model-fragments';
-var store, application;
+var store, owner;
 
 moduleForAcceptance("unit - Serialization", {
   beforeEach: function() {
-    application = this.application;
-    store = application.__container__.lookup('service:store');
+    owner = getOwner(this);
+    store = owner.lookup('service:store');
 
     //expectNoDeprecation();
 
@@ -18,7 +19,7 @@ moduleForAcceptance("unit - Serialization", {
   },
 
   afterEach: function() {
-    application = null;
+    owner = null;
     store = null;
   }
 });
@@ -59,7 +60,7 @@ test("fragment properties are snapshotted as normal attributes on the owner reco
       }
     });
 
-    application.register('serializer:person', JSONSerializer.extend({
+    owner.register('serializer:person', JSONSerializer.extend({
       serialize: function(snapshot) {
         var name = snapshot.attr('name');
         assert.ok(name instanceof DS.Snapshot, "fragment snapshot attribute is a snapshot");
@@ -97,7 +98,7 @@ test("fragment properties are serialized as normal attributes using their own se
       }
     });
 
-    application.register('serializer:name', JSONSerializer.extend({
+    owner.register('serializer:name', JSONSerializer.extend({
       serialize: function() {
         return 'Mad King';
       }
@@ -138,7 +139,7 @@ test("serializing a fragment array creates a new array with contents the result 
       }
     });
 
-    application.register('serializer:name', JSONSerializer);
+    owner.register('serializer:name', JSONSerializer);
 
     return store.find('person', 1).then(function(person) {
       var serialized = person.serialize();
@@ -154,7 +155,7 @@ test("normalizing data can handle `null` fragment values", function(assert) {
     children: MF.array({ defaultValue: null })
   });
 
-  application.register('model:nullDefaultPerson', NullDefaultPerson);
+  owner.register('model:nullDefaultPerson', NullDefaultPerson);
 
   var normalized = store.normalize('nullDefaultPerson', {
     name: null,
@@ -175,7 +176,7 @@ test("normalizing data can handle `null` fragment values", function(assert) {
     children: MF.array({ defaultValue: null })
   });
 
-  application.register('model:nullDefaultPerson', NullDefaultPerson);
+  owner.register('model:nullDefaultPerson', NullDefaultPerson);
 
   Ember.run(() => {
     store.push({

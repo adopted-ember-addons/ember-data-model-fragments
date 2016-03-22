@@ -3,23 +3,24 @@ import MF from 'model-fragments';
 import DS from 'ember-data';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import Order from 'dummy/models/order';
 import Product from 'dummy/models/product';
 import Pretender from 'pretender';
 
-var store, application, server;
+var store, owner, server;
 
 moduleForAcceptance("integration - Nested fragments", {
   beforeEach: function() {
-    application = this.application;
-    store = application.__container__.lookup('service:store');
+    owner = getOwner(this);
+    store = owner.lookup('service:store');
     server = new Pretender();
     //expectNoDeprecation();
   },
 
   afterEach: function() {
     store = null;
-    application = null;
+    owner = null;
     server.shutdown();
   }
 });
@@ -172,7 +173,7 @@ test("Nested fragments can have default values", function(assert) {
       orders : MF.fragmentArray("order", { defaultValue: defaultOrders })
     });
 
-    application.register('model:assassin', Assassin);
+    owner.register('model:assassin', Assassin);
 
     var user = store.createRecord('assassin');
 

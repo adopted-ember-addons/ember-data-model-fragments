@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 import Animal from 'dummy/models/animal';
 import Lion from 'dummy/models/lion';
 import Elephant from 'dummy/models/elephant';
@@ -8,7 +9,7 @@ var store, zoo;
 
 moduleForAcceptance("unit - Polymorphism", {
   beforeEach: function() {
-    store = this.application.__container__.lookup('service:store');
+    store = getOwner(this).lookup('service:store');
 
     //expectNoDeprecation();
 

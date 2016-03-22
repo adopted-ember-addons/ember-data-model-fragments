@@ -1,11 +1,12 @@
 import Ember from 'ember';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
+import getOwner from '../helpers/get-owner';
 var store;
 
 moduleForAcceptance("unit - `MF.fragmentArray`", {
   beforeEach: function() {
-    store = this.application.__container__.lookup('service:store');
+    store = getOwner(this).lookup('service:store');
     //expectNoDeprecation();
   },
 
