@@ -20,7 +20,7 @@ QUnit.module("unit - `MF.fragment` property", {
 
     store = env.store;
 
-    expectNoDeprecation();
+    ok(true); // expectNoDeprecation();
   },
 
   teardown: function() {

@@ -8,6 +8,7 @@ import {
   default as Fragment
 } from './fragment';
 import FragmentArray from './array/fragment';
+import getOwner from '../util/ember-getowner-polyfill-polyfill';
 
 /**
   @module ember-data-model-fragments
@@ -46,7 +47,7 @@ Store.reopen({
 
     Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", Fragment.detect(type));
 
-    var internalModel = new InternalModel(type, null, this, this.container);
+    var internalModel = new InternalModel(type, null, this, getOwner(this));
 
     // Re-wire the internal model to use the fragment state machine
     internalModel.currentState = FragmentRootState.empty;
@@ -300,7 +301,7 @@ JSONSerializer.reopen({
   */
   transformFor: function(attributeType) {
     if (attributeType.indexOf('-mf-') === 0) {
-      return getFragmentTransform(this.container, this.store, attributeType);
+      return getFragmentTransform(getOwner(this), this.store, attributeType);
     }
 
     return this._super.apply(this, arguments);
@@ -308,25 +309,24 @@ JSONSerializer.reopen({
 });
 
 // Retrieve or create a transform for the specific fragment type
-function getFragmentTransform(container, store, attributeType) {
-  var registry = container._registry || container.registry || container;
+function getFragmentTransform(appInstance, store, attributeType) {
   var containerKey = 'transform:' + attributeType;
   var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
   var transformName = match[1];
   var transformType = match[2];
   var polymorphicTypeProp = match[3];
 
-  if (!registry.has(containerKey)) {
-    var transformClass = container.lookupFactory('transform:' + transformName);
+  if (!appInstance.hasRegistration(containerKey)) {
+    var transformClass = appInstance._lookupFactory('transform:' + transformName);
 
-    registry.register(containerKey, transformClass.extend({
+    appInstance.register(containerKey, transformClass.extend({
       store: store,
       type: transformType,
       polymorphicTypeProp: polymorphicTypeProp
     }));
   }
 
-  return container.lookup(containerKey);
+  return appInstance.lookup(containerKey);
 }
 
 export { Store, Model, JSONSerializer };

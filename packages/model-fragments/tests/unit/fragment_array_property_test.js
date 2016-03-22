@@ -28,7 +28,7 @@ QUnit.module("unit - `MF.fragmentArray` property", {
 
     store = env.store;
 
-    expectNoDeprecation();
+    ok(true); // expectNoDeprecation();
 
     people = [
       {
