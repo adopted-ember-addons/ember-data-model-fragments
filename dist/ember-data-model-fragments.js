@@ -3,7 +3,7 @@
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/lytics/ember-data-model-fragments/master/LICENSE
- * @version   2.1.1
+ * @version   2.1.2
  */
 
 (function() {
@@ -124,6 +124,8 @@
 
         created: {
           isDirty: true,
+
+          isNew: true,
 
           setup: model$fragments$lib$fragments$states$$dirtySetup,
 
@@ -318,6 +320,10 @@
           // Fragment array has been persisted; use the current state as the original state
           model$fragments$lib$fragments$array$stateful$$set(this, '_originalState', this.toArray());
         }
+      },
+
+      _adapterDidError: function(/*error*/) {
+        // No-Op
       },
 
       /**
@@ -536,6 +542,29 @@
 
         return diffData;
       },
+
+      willDestroy: function() {
+        this._super.apply(this, arguments);
+
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(this);
+        var key, fragment;
+
+        // destroy the current state
+        for (key in internalModel._fragments) {
+          if (fragment = internalModel._fragments[key]) {
+            fragment.destroy();
+          }
+        }
+
+        // destroy the original state
+        for (key in internalModel._data) {
+          if (fragment = internalModel._data[key]) {
+            if (fragment instanceof model$fragments$lib$fragments$fragment$$default || fragment instanceof model$fragments$lib$fragments$array$fragment$$default) {
+              fragment.destroy();
+            }
+          }
+        }
+      }
     });
 
     // Replace a method on an object with a new one that calls the original and then
@@ -631,6 +660,18 @@
       for (var key in this._fragments) {
         if (fragment = this._fragments[key]) {
           fragment._adapterDidCommit(attributes[key]);
+        }
+      }
+    });
+
+    model$fragments$lib$fragments$ext$$decorateMethod(model$fragments$lib$fragments$ext$$InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
+      var error = args[0] || model$fragments$lib$fragments$ext$$create(null);
+      var fragment;
+
+      // Notify fragments that the record was committed
+      for (var key in this._fragments) {
+        if (fragment = this._fragments[key]) {
+          fragment._adapterDidError(error);
         }
       }
     });
@@ -792,6 +833,13 @@
         model$fragments$lib$fragments$fragment$$internalModelFor(this).adapterDidCommit({
           attributes: data || model$fragments$lib$fragments$fragment$$create(null)
         });
+      },
+
+      /**
+        @method _adapterDidCommit
+      */
+      _adapterDidError: function(/*error*/) {
+        model$fragments$lib$fragments$fragment$$internalModelFor(this)._saveWasRejected();
       },
 
       toStringExtension: function() {
@@ -1027,6 +1075,20 @@
       },
 
       /**
+        @method _adapterDidError
+        @private
+      */
+      _adapterDidError: function(error) {
+        this._super(error);
+
+        // Notify all records of the error; if the adapter update did not contain new
+        // data, just notify each fragment so it can transition to a clean state
+        this.forEach(function(fragment) {
+          fragment._adapterDidError(error);
+        });
+      },
+
+      /**
         If this property is `true`, either the contents of the array do not match
         its original state, or one or more of the fragments in the array are dirty.
 
@@ -1131,6 +1193,20 @@
         var fragment = store.createFragment(type, props);
 
         return this.pushObject(fragment);
+      },
+
+      willDestroy: function() {
+        this._super.apply(this, arguments);
+
+        // destroy the current state
+        this.forEach(function(fragment) {
+          fragment.destroy();
+        });
+
+        // destroy the original state
+        this._originalState.forEach(function(fragment) {
+          fragment.destroy();
+        });
       }
     });
 
@@ -1753,7 +1829,7 @@
       @main ember-data-model-fragments
     */
     var model$fragments$lib$main$$MF = ember$lib$main$$default.Namespace.create({
-      VERSION: '2.1.1',
+      VERSION: '2.1.2',
       Fragment: model$fragments$lib$fragments$fragment$$default,
       FragmentArray: model$fragments$lib$fragments$array$fragment$$default,
       FragmentTransform: model$fragments$lib$fragments$transforms$fragment$$default,
