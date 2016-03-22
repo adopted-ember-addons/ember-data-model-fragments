@@ -16,6 +16,6 @@ module.exports = {
     return task.run({
       environment: 'production',
       outputPath: 'dist/'
-    }));
+    });
   }
 };
