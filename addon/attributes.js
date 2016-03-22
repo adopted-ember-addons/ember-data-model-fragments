@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import computedPolyfill from 'ember-new-computed';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
 import {
@@ -261,7 +260,7 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
     options: options
   };
 
-  return computedPolyfill({
+  return computed({
     get: function(key) {
       var internalModel = internalModelFor(this);
       var fragment = setupFragment(this.store, this, key);

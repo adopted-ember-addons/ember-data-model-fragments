@@ -52,8 +52,7 @@
     "loader.js": "^4.0.0"
   },
   "dependencies": {
-    "ember-cli-babel": "^5.1.5",
-    "ember-new-computed": "1.0.3"
+    "ember-cli-babel": "^5.1.5"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
