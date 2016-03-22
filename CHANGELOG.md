@@ -1,5 +1,11 @@
 # Changelog
 
+### v1.13.3 (March 21, 2016)
+
+* Fixed memory leak caused by fragments not being destroyed (@dwickern)
+* Fixed issue with rolling back fragments after adapter error (@workmanw)
+* Fixed `isNew` not reporting correct state
+
 ### v1.13.2 (December 23, 2015)
 
 * Fixed issue with `store.push` leaving records dirty
