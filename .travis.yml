@@ -19,12 +19,11 @@ matrix:
   fast_finish: true
 
 before_install:
-  - export PATH=/usr/local/phantomjs-2.0.0/bin:$PATH
   - "npm config set spin false"
   - "npm install -g npm@^2"
 
 install:
-  - npm install -g bower
+  - npm install -g bower phantomjs-prebuilt@2
   - npm install
   - bower install
 
