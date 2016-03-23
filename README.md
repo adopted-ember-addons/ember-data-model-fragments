@@ -22,12 +22,14 @@ Use the following table to decide which version of this project to use with your
 | >= v1.13.x < v2.0.0 | v1.13.x |
 | >= v2.0.x < v2.1.0 | v2.0.x |
 | >= v2.1.x | v2.1.x |
+| >= v2.3.x | v2.3.x |
 
 #### Notes
 
 - Ember Data v1.0.0-beta.12 introduced a bug that makes it incompatible with any version of this project.
 - Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
 - Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
+- Ember Data 2.3 converted to a full Ember CLI addon. Removing the global `DS` namespace and switching to an import module strategy. More: [Ember Data 2.3 Released](http://emberjs.com/blog/2016/01/12/ember-data-2-3-released.html).  
 
 ## Installation
 
@@ -43,27 +45,47 @@ You may then start creating fragments with:
 $ ember generate fragment foo someAttr:string anotherAttr:boolean
 ```
 
-Which will create the module `app/models/foo.js` which exports a `MF.Fragment` class with the given attributes.
+Which will create the module `app/models/foo.js` which exports a `Fragment` class with the given attributes.
 
 ## Example
 
 ```javascript
-App.Person = DS.Model.extend({
-  name      : MF.fragment('name'),
-  addresses : MF.fragmentArray('address'),
-  titles    : MF.array()
-});
+// app/models/person.js
+import Model from 'ember-data/model';
+import {
+  fragment,
+  fragmentArray,
+  array
+} from 'model-fragments/attributes';
 
-App.Name = MF.Fragment.extend({
-  first : DS.attr('string'),
-  last  : DS.attr('string')
+export default Model.extend({
+  name      : fragment('name'),
+  addresses : fragmentArray('address'),
+  titles    : array()
 });
+```
 
-App.Address = MF.Fragment.extend({
-  street  : DS.attr('string'),
-  city    : DS.attr('string'),
-  region  : DS.attr('string'),
-  country : DS.attr('string')
+```javascript
+// app/models/name.js
+import attr from 'ember-data/attr';
+import Fragment from 'model-fragments/fragment';
+
+export default Fragment.extend({
+  first : attr('string'),
+  last  : attr('string')
+});
+```
+
+```javascript
+// app/models/address.js
+import attr from 'ember-data/attr';
+import Fragment from 'model-fragments/fragment';
+
+export default Fragment.extend({
+  street  : attr('string'),
+  city    : attr('string'),
+  region  : attr('string'),
+  country : attr('string')
 });
 ```
 
@@ -181,17 +203,25 @@ titles.get('length'); // 2
 
 ## Default Values
 
-Ember Data attributes [support a `defaultValue` config option](http://emberjs.com/api/data/classes/DS.html#method_attr) that provides a default value when a model is created through `store#createRecord()`. Similarly, `MF.fragment` and `MF.fragmentArray` properties support a `defaultValue` option:
+Ember Data attributes [support a `defaultValue` config option](http://emberjs.com/api/data/classes/DS.html#method_attr) that provides a default value when a model is created through `store#createRecord()`. Similarly, `fragment` and `fragmentArray` properties support a `defaultValue` option:
 
 ```javascript
-App.Person = DS.Model.extend({
-  name      : MF.fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : MF.fragmentArray('address'),
-  titles    : MF.array('string')
+// app/models/person.js
+import Model from 'ember-data/model';
+import {
+  fragment,
+  fragmentArray,
+  array
+} from 'model-fragments/attributes';
+
+export default Model.extend({
+  name      : fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
+  addresses : fragmentArray('address'),
+  titles    : array('string')
 });
 ```
 
-Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `MF.fragment` properties default to `null` and `MF.fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `MF.fragmentArray` property:
+Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `fragment` properties default to `null` and `fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `fragmentArray` property:
 
 ```javascript
 var person = store.createRecord('person');
@@ -203,11 +233,15 @@ addresses.createFragment({
 });
 ```
 
-Like `DS.attr`, the `defaultValue` option can be a function that is invoked to generate the default value:
+Like `attr`, the `defaultValue` option can be a function that is invoked to generate the default value:
 
 ```javascript
-App.Person = DS.Model.extend({
-  name: MF.fragment('name', {
+// app/models/person.js
+import Model from 'ember-data/model';
+import { fragment } from 'model-fragments/attributes';
+
+export default Model.extend({
+  name: fragment('name', {
     defaultValue: function() {
       return {
         first: 'Unsullied',
@@ -219,16 +253,25 @@ App.Person = DS.Model.extend({
 ```
 ## Serializing
 
-Serializing records with fragment attributes works using a special `DS.Transform` that serializes each fragment or fragment array. This results in fragments being nested in JSON as expected, and avoids the need for any custom serialization logic for most cases. This also means that model fragments can have their own custom serializers, just as normal models can:
+Serializing records with fragment attributes works using a special `Transform` that serializes each fragment or fragment array. This results in fragments being nested in JSON as expected, and avoids the need for any custom serialization logic for most cases. This also means that model fragments can have their own custom serializers, just as normal models can:
 
 ```javascript
-App.Name = MF.Fragment.extend({
-  given  : DS.attr('string'),
-  family : DS.attr('string')
-});
+// app/models/name.js
+import attr from 'ember-data/attr';
+import Fragment from 'model-fragments/fragment';
 
+export default Fragment.extend({
+  given  : attr('string'),
+  family : attr('string')
+});
+```
+
+```javascript
+// apps/serializers/name.js
 // Serializers for fragments work just as with models
-App.NameSerializer = DS.JSONSerializer.extend({
+import JSONSerializer from 'ember-data/serializers/json';
+
+export default JSONSerializer.extend({
   attrs: {
     given  : 'first',
     family : 'last'
@@ -236,22 +279,25 @@ App.NameSerializer = DS.JSONSerializer.extend({
 });
 ```
 
-Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `DS.JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `DS.JSONSerializer`. If common logic must be added to auto-generated fragment serializers, apps can register a custom `serializer:-fragment` with the application in an initializer.
+Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `JSONSerializer`. If common logic must be added to auto-generated fragment serializers, apps can register a custom `serializer:-fragment` with the application in an initializer.
 
 If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.Snapshot.html) can be accessed using the [`Snapshot#attr`](http://emberjs.com/api/data/classes/DS.Snapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
 
 ```javascript
+// apps/serializers/person.js
 // Fragment snapshots are accessed using `snapshot.attr()`
-App.PersonSerializer = DS.JSONSerializer.extend({
+import JSONSerializer from 'ember-data/serializers/json';
+
+export default JSONSerializer.extend({
   serialize: function(snapshot, options) {
     var json = this._super(snapshot, options);
 
-    // Returns a `DS.Snapshot` instance of the fragment
+    // Returns a `Snapshot` instance of the fragment
     var nameSnapshot = snapshot.attr('name');
 
     json.full_name = nameSnapshot.attr('given') + ' ' + nameSnapshot.attr('family');
 
-    // Returns a plain array of `DS.Snapshot` instances
+    // Returns a plain array of `Snapshot` instances
     var addressSnapshots = snapshot.attr('addresses');
 
     json.countries = addressSnapshots.map(function(addressSnapshot) {
@@ -273,20 +319,38 @@ App.PersonSerializer = DS.JSONSerializer.extend({
 Nesting of fragments is fully supported:
 
 ```javascript
-App.User = DS.Model.extend({
-  name   : DS.attr('string'),
-  orders : MF.fragmentArray('order')
-});
+// app/models/user.js
+import Model from 'ember-data/model';
+import attr from 'ember-data/attr';
+import { fragmentArray } from 'model-fragments/attributes';
 
-App.Order = MF.Fragment.extend({
-  amount   : DS.attr('string'),
-  products : MF.fragmentArray('product')
+export default Model.extend({
+  name   : attr('string'),
+  orders : fragmentArray('order')
 });
+```
 
-App.Product = MF.Fragment.extend({
-  name  : DS.attr('string'),
-  sku   : DS.attr('string'),
-  price : DS.attr('string')
+```javascript
+// app/models/order.js
+import attr from 'ember-data/attr';
+import Fragment from 'model-fragments/fragment';
+import { fragmentArray } from 'model-fragments/attributes';
+
+export default Fragment.extend({
+  amount   : attr('string'),
+  products : fragmentArray('product')
+});
+```
+
+```javascript
+// app/models/product.js
+import attr from 'ember-data/attr';
+import Fragment from 'model-fragments/fragment';
+
+export default Fragment.extend({
+  name  : attr('string'),
+  sku   : attr('string'),
+  price : attr('string')
 });
 ```
 
@@ -343,11 +407,11 @@ user.get('isDirty'); // false
 product.get('price'); // '299.99'
 ```
 
-However, note that fragments do not currently support `DS.belongsTo` or `DS.hasMany` properties. See the [Limitations](#relationships-to-models) section below.
+However, note that fragments do not currently support `belongsTo` or `hasMany` properties. See the [Limitations](#relationships-to-models) section below.
 
 ## Polymorphism
 
-Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `MF.fragment` or `MF.fragmentArray`
+Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `fragment` or `fragmentArray`
 with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to `'type'`.
 
 The `typeKey`'s value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass.
@@ -356,22 +420,45 @@ In the following example the declared type of `animals` is `animal`, which corre
 so to `typeKey`'s value can be `'animal'`, `'elephant'` or `'lion'`.
 
 ```javascript
-App.Zoo = DS.Model.extend({
-  name: DS.attr("string"),
-  city: DS.attr("string"),
-  animals: MF.fragmentArray("animal", { polymorphic: true, typeKey: '$type' }),
-});
+// app/models/zoo.js
+import Model from 'ember-data/model';
+import attr from 'ember-data/attr';
+import { fragmentArray } from 'model-fragments/attributes';
 
-App.Animal = MF.Fragment.extend({
-  name: DS.attr("string"),
+export default Model.extend({
+  name: attr("string"),
+  city: attr("string"),
+  animals: fragmentArray("animal", { polymorphic: true, typeKey: '$type' }),
 });
+```
 
-App.Elephant = Animal.extend({
-  trunkLength: DS.attr("number"),
+```javascript
+// app/models/animal.js
+import Fragment from 'model-fragments/fragment';
+import attr from 'ember-data/attr';
+
+App.Animal = Fragment.extend({
+  name: attr("string"),
 });
+```
 
-App.Lion = Animal.extend({
-  hasManes: DS.attr("boolean"),
+```javascript
+// app/models/elephant.js
+import Animal from "./Animal";
+import attr from 'ember-data/attr';
+
+export default Animal.extend({
+  trunkLength: attr("number"),
+});
+```
+
+```javascript
+// app/models/lion.js
+import Animal from "./Animal";
+import attr from 'ember-data/attr';
+
+export default Animal.extend({
+  hasManes: attr("boolean"),
 });
 ```
 
@@ -411,7 +498,10 @@ The expected JSON payload is as follows:
 Serializing the fragment type back to JSON is not currently supported out of the box. To serialize the polymorphic type, create a custom serializer to perform manual introspection:
 
 ```javascript
-App.AnimalSerializer = DS.JSONSerializer.extend({
+// app/serializers/animal.js
+import JSONSerializer from 'ember-data/serializers/json';
+
+export default JSONSerializer.extend({
   serialize: function(record, options) {
     var json = this._super(record, options);
 
@@ -426,9 +516,20 @@ App.AnimalSerializer = DS.JSONSerializer.extend({
     return json;
   }
 });
+```
 
-App.ElephantSerializer = App.AnimalSerializer;
-App.LionSerializer = App.AnimalSerializer;
+```javscript
+// app/serializers/elephant.js
+import AnimalSerializer from './animal';
+
+export default AnimalSerializer;
+```
+
+```javascript
+// app/serializers/lion.js
+import AnimalSerializer from './animal';
+
+export default AnimalSerializer;
 ```
 
 ## Limitations
@@ -437,7 +538,7 @@ App.LionSerializer = App.AnimalSerializer;
 
 There is a very good reason that support for id-less embedded records has not been added to Ember Data: merging conflicts is very difficult. Imagine a scenario where your app requests a record with an array of simple embedded objects, and then a minute later makes the same request again. If the array of objects has changed – for instance an object is added to the beginning – without unique identifiers there is no reliable way to map those objects onto the array of records in memory.
 
-This plugin handles merging fragment arrays *by swapping out the data of existing fragments*. For example, when a record is fetched with a fragment array property, a fragment model is created for each object in the array. Then, after the record is reloaded via `reload` or `save`, the data received is mapped directly onto those existing fragment instances, adding or removing from the end when necessary. This means that reordering the array will cause fragment objects' data to swap, rather than simply reordering the array of fragments in memory. The biggest implication of this behavior is when a fragment in a fragment array is dirty and the parent model gets reloaded. If the record is then saved, the change will likely affect the wrong object, causing data loss. Additionally, any time a reference to a model fragment is held onto, reloading can give it a completely different semantic meaning. If your app does not persist models with fragment arrays, this is of no concern (and indeed you may wish to use the `DS.EmbeddedRecordMixin` instead).
+This plugin handles merging fragment arrays *by swapping out the data of existing fragments*. For example, when a record is fetched with a fragment array property, a fragment model is created for each object in the array. Then, after the record is reloaded via `reload` or `save`, the data received is mapped directly onto those existing fragment instances, adding or removing from the end when necessary. This means that reordering the array will cause fragment objects' data to swap, rather than simply reordering the array of fragments in memory. The biggest implication of this behavior is when a fragment in a fragment array is dirty and the parent model gets reloaded. If the record is then saved, the change will likely affect the wrong object, causing data loss. Additionally, any time a reference to a model fragment is held onto, reloading can give it a completely different semantic meaning. If your app does not persist models with fragment arrays, this is of no concern (and indeed you may wish to use the `EmbeddedRecordMixin` instead).
 
 ### Filtered Record Arrays
 
@@ -445,31 +546,27 @@ Another consequence of id-less records is that an ID map of all fragment instanc
 
 ### Relationships to Models
 
-Currently, fragments cannot have normal `DS.belongsTo` or `DS.hasMany` relationships. This is not a technical limitation, but rather due to the fact that relationship management in Ember Data is in a state of flux and would require accessing private (and changing) APIs.
+Currently, fragments cannot have normal `belongsTo` or `hasMany` relationships. This is not a technical limitation, but rather due to the fact that relationship management in Ember Data is in a state of flux and would require accessing private (and changing) APIs.
 
 ## Testing
 
-Building requires [Ember CLI](http://www.ember-cli.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem) and [Bower](http://bower.io/), which can all be installed globally with:
+Building requires [Ember CLI](http://www.ember-cli.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can all be installed globally with:
 
 ```sh
-$ npm install --global ember-cli bower testem
+$ npm install --global ember-cli testem
 ```
 
-Then install NPM & Bower packages, build the project, and start the development test server:
+Then install NPM packages, build the project, and start the development test server:
 
 ```sh
-$ npm install && bower install
+$ npm install
 $ ember build
 $ testem
 ```
 
 If you encounter test errors, ensure that your global testem NPM package is up to date.
 
-When developing, it is often convenient to build the project with `ember serve` which will watch for file changes and rebuild, which triggers the test runner to re-run tests. A production build with debugging aids stripped out can also be made by running:
-
-```sh
-$ ember build --environment=production
-```
+When developing, it is often convenient to build the project with `ember serve` which will watch for file changes and rebuild, which triggers the test runner to re-run tests. 
 
 ## Contributing
 
