@@ -426,9 +426,9 @@ import attr from 'ember-data/attr';
 import { fragmentArray } from 'model-fragments/attributes';
 
 export default Model.extend({
-  name: attr("string"),
-  city: attr("string"),
-  animals: fragmentArray("animal", { polymorphic: true, typeKey: '$type' }),
+  name: attr('string'),
+  city: attr('string'),
+  animals: fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
 });
 ```
 
@@ -438,27 +438,27 @@ import Fragment from 'model-fragments/fragment';
 import attr from 'ember-data/attr';
 
 App.Animal = Fragment.extend({
-  name: attr("string"),
+  name: attr('string'),
 });
 ```
 
 ```javascript
 // app/models/elephant.js
-import Animal from "./Animal";
+import Animal from './Animal';
 import attr from 'ember-data/attr';
 
 export default Animal.extend({
-  trunkLength: attr("number"),
+  trunkLength: attr('number'),
 });
 ```
 
 ```javascript
 // app/models/lion.js
-import Animal from "./Animal";
+import Animal from './Animal';
 import attr from 'ember-data/attr';
 
 export default Animal.extend({
-  hasManes: attr("boolean"),
+  hasManes: attr('boolean'),
 });
 ```
 
@@ -518,7 +518,7 @@ export default JSONSerializer.extend({
 });
 ```
 
-```javscript
+```javascript
 // app/serializers/elephant.js
 import AnimalSerializer from './animal';
 
