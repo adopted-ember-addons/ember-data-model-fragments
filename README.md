@@ -21,7 +21,7 @@ Use the following table to decide which version of this project to use with your
 | >= v1.0.0-beta.15 <= v1.0.0-beta.18 | v0.3.3 |
 | >= v1.13.x < v2.0.0 | v1.13.x |
 | >= v2.0.x < v2.1.0 | v2.0.x |
-| >= v2.1.x | v2.1.x |
+| >= v2.1.x < v2.3.x | v2.1.x |
 | >= v2.3.x | v2.3.x |
 
 #### Notes
@@ -29,7 +29,7 @@ Use the following table to decide which version of this project to use with your
 - Ember Data v1.0.0-beta.12 introduced a bug that makes it incompatible with any version of this project.
 - Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
 - Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
-- Ember Data 2.3 converted to a full Ember CLI addon. Removing the global `DS` namespace and switching to an import module strategy. More: [Ember Data 2.3 Released](http://emberjs.com/blog/2016/01/12/ember-data-2-3-released.html).  
+- Ember Data 2.3 converted to a full Ember CLI addon. Removing the global `DS` namespace and switching to an import module strategy. More: [Ember Data 2.3 Released](http://emberjs.com/blog/2016/01/12/ember-data-2-3-released.html). Following ember-data's lead, the `MF` namespace was also removed. Import modules directly.
 
 ## Installation
 
@@ -553,20 +553,25 @@ Currently, fragments cannot have normal `belongsTo` or `hasMany` relationships. 
 Building requires [Ember CLI](http://www.ember-cli.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can all be installed globally with:
 
 ```sh
-$ npm install --global ember-cli testem
+$ npm install --global ember-cli
 ```
 
-Then install NPM packages, build the project, and start the development test server:
+Then install NPM packages and start the development test server:
 
 ```sh
 $ npm install
-$ ember build
-$ testem
+$ ember test --server
 ```
 
-If you encounter test errors, ensure that your global testem NPM package is up to date.
+It is also possible to run the tests in a headless fashion. This requires [PhantomJS 2](http://phantomjs.org) to be installed.
 
-When developing, it is often convenient to build the project with `ember serve` which will watch for file changes and rebuild, which triggers the test runner to re-run tests. 
+```sh
+$ ember test
+
+# Using `npm test` will invoke `ember try:testall`.
+# This will test each version of ember supported by this addon.
+$ npm test
+```
 
 ## Contributing
 
