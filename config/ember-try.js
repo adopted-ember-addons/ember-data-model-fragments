@@ -4,13 +4,15 @@ module.exports = {
     {
       name: 'default',
       bower: {
-        dependencies: { }
+        devDependencies: { }
+      },
+      npm: {
+        devDependencies: { }
       }
     },
 
     {
       name: 'ember-2-3',
-      command: 'npm run install-and-ember-test',
       bower: {
         devDependencies: {
           'ember': '2.3.1'
@@ -31,7 +33,6 @@ module.exports = {
 
     {
       name: 'ember-release',
-      command: 'npm run install-and-ember-test',
       bower: {
         devDependencies: {
           'ember': 'components/ember#release'
@@ -52,7 +53,6 @@ module.exports = {
 
     {
       name: 'ember-beta',
-      command: 'npm run install-and-ember-test',
       allowedToFail: true,
       bower: {
         devDependencies: {
@@ -74,7 +74,6 @@ module.exports = {
 
     {
       name: 'ember-canary',
-      command: 'npm run install-and-ember-test',
       allowedToFail: true,
       bower: {
         devDependencies: {

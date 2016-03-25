@@ -15,8 +15,7 @@
   "scripts": {
     "build": "ember build",
     "start": "ember server",
-    "test": "ember try:each",
-    "install-and-ember-test": "npm install && ember test"
+    "test": "ember try:each"
   },
   "keywords": [
     "ember-addon",
