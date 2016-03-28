@@ -1,3 +1,4 @@
+import _ from 'model-fragments';
 import FragmentTransform from 'model-fragments/transforms/fragment';
 import FragmentArrayTransform from 'model-fragments/transforms/fragment-array';
 import ArrayTransform from 'model-fragments/transforms/array';
