@@ -1,4 +1,6 @@
-import _ from 'model-fragments';
+// Import the fragment base class to ensure monkey-patching side effects are
+// applied before any store instances are created :(
+import _ from 'model-fragments/fragment';
 import FragmentTransform from 'model-fragments/transforms/fragment';
 import FragmentArrayTransform from 'model-fragments/transforms/fragment-array';
 import ArrayTransform from 'model-fragments/transforms/array';
@@ -13,4 +15,3 @@ export default {
     application.register('transform:array', ArrayTransform);
   }
 };
-
