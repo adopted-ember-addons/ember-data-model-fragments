@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import VERSION from './version';
 import Fragment from './fragment';
 import FragmentArray from './array/fragment';
 import FragmentTransform from './transforms/fragment';
@@ -18,7 +19,7 @@ import {
   @main ember-data-model-fragments
 */
 var MF = Ember.Namespace.create({
-  VERSION: 'VERSION_STRING_PLACEHOLDER',
+  VERSION: VERSION,
   Fragment: Fragment,
   FragmentArray: FragmentArray,
   FragmentTransform: FragmentTransform,
