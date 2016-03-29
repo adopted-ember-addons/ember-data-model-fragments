@@ -35,6 +35,4 @@ if (Ember.libraries) {
   Ember.libraries.register('Model Fragments', MF.VERSION);
 }
 
-Ember.lookup.MF = MF;
-
 export default MF;
