@@ -1,8 +1,6 @@
 /*jshint node:true*/
 /* global require, module */
 var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
-var fs         = require('fs');
-var replace    = require('broccoli-replace')
 
 module.exports = function(defaults) {
   var app = new EmberAddon(defaults, {
@@ -16,21 +14,5 @@ module.exports = function(defaults) {
     behave. You most likely want to be modifying `./index.js` or app's build file
   */
 
-  var compiled = app.toTree();
-  compiled = versionStamp(compiled);
-  return compiled;
+  return app.toTree();
 };
-
-function versionStamp(tree) {
-  // The version in package.json can be changed, so this can't be `required()`
-  // directly, and the git repo version is similarly unreliable
-  var version = JSON.parse(fs.readFileSync('./package.json')).version;
-
-  return replace(tree, {
-    files: ['**/*'],
-    patterns: [{
-      match: /VERSION_STRING_PLACEHOLDER/g,
-      replacement: version
-    }]
-  });
-}
