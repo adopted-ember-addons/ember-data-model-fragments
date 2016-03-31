@@ -1,10 +1,32 @@
-sudo: false
+---
 language: node_js
 node_js:
   - "0.12"
+
+sudo: false
+
+cache:
+  directories:
+    - node_modules
+
+env:
+  - EMBER_TRY_SCENARIO=default
+  - EMBER_TRY_SCENARIO=ember-2-3
+  - EMBER_TRY_SCENARIO=ember-release
+  - EMBER_TRY_SCENARIO=ember-beta
+  - EMBER_TRY_SCENARIO=ember-canary
+
+matrix:
+  fast_finish: true
+
 before_install:
-  - "npm install --global ember-cli bower phantomjs-prebuilt@2"
-before_script:
-  - "bower install"
-  - "bower install ember-data#~2.2.0"
-  - "bower install ember#~2.2.0"
+  - "npm config set spin false"
+  - "npm install -g npm@^2"
+
+install:
+  - npm install -g bower phantomjs-prebuilt@2
+  - npm install
+  - bower install
+
+script:
+  - ember try $EMBER_TRY_SCENARIO test
