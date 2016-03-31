@@ -7,6 +7,20 @@ var version = require('./lib/version');
 module.exports = {
   name: 'model-fragments',
 
+  init: function() {
+    var bowerDeps = this.project.bowerDependencies();
+
+    if (bowerDeps['ember-data-model-fragments']) {
+      var message = 'Please remove `ember-data-model-fragments` from `bower.json`, it is no longer used as of v2.3.0';
+
+      if (this.ui.writeWarnLine) {
+        this.ui.writeWarnLine(message);
+      } else {
+        this.ui.writeLine(message);
+      }
+    }
+  },
+
   treeForAddon: function(tree) {
     var versioned = merge([ version(), tree ]);
 
