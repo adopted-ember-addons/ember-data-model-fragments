@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.3.0 (March 31, 2016)
+
+* Fully converted to ember-cli addon (@jakesjews, @workmanw)
+
 ### v2.1.2 (March 21, 2016)
 
 * Fixed memory leak caused by fragments not being destroyed (@dwickern)
