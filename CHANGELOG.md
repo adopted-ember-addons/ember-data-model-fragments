@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.3.1 (April 20, 2016)
+
+* Fixed issue with deprecated use of `Ember.get` (@jakesjews)
+
 ### v2.3.0 (March 31, 2016)
 
 * Fully converted to ember-cli addon (@jakesjews, @workmanw)
