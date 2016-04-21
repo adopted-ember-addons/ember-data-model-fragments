@@ -47,6 +47,8 @@ $ ember generate fragment foo someAttr:string anotherAttr:boolean
 
 Which will create the module `app/models/foo.js` which exports a `Fragment` class with the given attributes.
 
+You might also want to take a look at [FEDITOR.IO's Ember Data model generator](http://feditor.io/content/gist/6478b5134893399879c0), which can generate `Model` and `Fragment` classes based on your API's JSON response.
+
 ## Example
 
 ```javascript
@@ -93,26 +95,28 @@ With a JSON payload of:
 
 ```json
 {
-  "id": "1",
-  "name": {
-    "first": "Tyrion",
-    "last": "Lannister"
-  },
-  "addresses": [
-    {
-      "street": "1 Sky Cell",
-      "city": "Eyre",
-      "region": "Vale of Arryn",
-      "country": "Westeros"
+  "person": {
+    "id": "1",
+    "name": {
+      "first": "Tyrion",
+      "last": "Lannister"
     },
-    {
-      "street": "1 Tower of the Hand",
-      "city": "King's Landing",
-      "region": "Crownlands",
-      "country": "Westeros"
-    }
-  ],
-  "titles": [ "Imp", "Hand of the King" ]
+    "addresses": [
+      {
+        "street": "1 Sky Cell",
+        "city": "Eyre",
+        "region": "Vale of Arryn",
+        "country": "Westeros"
+      },
+      {
+        "street": "1 Tower of the Hand",
+        "city": "King's Landing",
+        "region": "Crownlands",
+        "country": "Westeros"
+      }
+    ],
+    "titles": [ "Imp", "Hand of the King" ]
+  }
 }
 ```
 
