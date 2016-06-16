@@ -8,6 +8,8 @@ module.exports = {
   name: 'model-fragments',
 
   init: function() {
+    this._super.init && this._super.init.apply(this, arguments);
+
     var bowerDeps = this.project.bowerDependencies();
 
     if (bowerDeps['ember-data-model-fragments']) {
