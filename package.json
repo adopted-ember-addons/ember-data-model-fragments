@@ -37,7 +37,7 @@
     "ember-cli-qunit": "^1.4.0",
     "ember-cli-release": "^1.0.0-beta.1",
     "ember-cli-uglify": "^1.2.0",
-    "ember-data": "^2.4.0",
+    "ember-data": "^2.6.1",
     "ember-dev": "emberjs/ember-dev",
     "ember-disable-prototype-extensions": "^1.1.0",
     "ember-load-initializers": "0.5.1",
