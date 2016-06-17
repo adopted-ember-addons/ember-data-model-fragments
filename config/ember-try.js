@@ -52,6 +52,26 @@ module.exports = {
     },
 
     {
+      name: 'ember-2-5',
+      bower: {
+        devDependencies: {
+          'ember': '2.5.1'
+        },
+        resolutions: {
+          'ember': '2.5.1'
+        }
+      },
+      npm: {
+        devDependencies: {
+          'ember-data': '2.5.3'
+        },
+        resolutions: {
+          'ember-data': '2.5.3'
+        }
+      }
+    },
+
+    {
       name: 'ember-release',
       bower: {
         devDependencies: {
