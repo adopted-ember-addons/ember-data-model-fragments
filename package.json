@@ -1,7 +1,7 @@
 {
   "name": "ember-data-model-fragments",
   "description": "Ember Data addon to support nested JSON documents",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/lytics/ember-data-model-fragments.git"

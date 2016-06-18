@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.3.2 (June 18, 2016)
+
+* Fixed ember-cli deprecation warning (@jakesjews)
+
 ### v2.3.1 (April 20, 2016)
 
 * Fixed issue with deprecated use of `Ember.get` (@jakesjews)
