@@ -283,7 +283,32 @@ export default JSONSerializer.extend({
 });
 ```
 
-Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `JSONSerializer`. If common logic must be added to auto-generated fragment serializers, apps can register a custom `serializer:-fragment` with the application in an initializer.
+Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `JSONSerializer`.
+
+If common logic must be added to auto-generated fragment serializers, apps can register a custom `serializer:-fragment` with the application in an initializer.
+
+```javascript
+// app/serializers/fragment.js
+import JSONSerializer from 'ember-data/serializers/json';
+
+export default JSONSerializer.extend({
+
+});
+```
+
+```javascript
+// app/initializers/fragment-serializer.js
+import FragmentSerializer from '../serializers/fragment';
+
+export function initialize(application) {
+	application.register('serializer:-fragment', FragmentSerializer);
+}
+
+export default {
+	name: 'fragment-serializer',
+	initialize: initialize
+};
+```
 
 If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.Snapshot.html) can be accessed using the [`Snapshot#attr`](http://emberjs.com/api/data/classes/DS.Snapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
 
