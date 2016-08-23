@@ -4,10 +4,16 @@ import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
 var store;
 
+// `contains` was deprecated in Ember 2.8. Replaced with `includes`.
+// Use `includes` when possible because if using >= ember-2-8, `contains` will produce a deprecation.
+function includes(array, item) {
+  return array.includes ? array.includes(item) : array.contains(item);
+}
+
 moduleForAcceptance("unit - `MF.fragmentArray`", {
   beforeEach: function(assert) {
     store = getOwner(this).lookup('service:store');
-    
+
     assert.expectNoDeprecation();
   },
 
@@ -135,7 +141,7 @@ test("fragments can be removed from the fragment array", function(assert) {
       fragments.removeFragment(fragment);
 
       assert.equal(fragments.get('length'), length - 1, "property size is correct");
-      assert.ok(!fragments.contains(fragment), "fragment is removed");
+      assert.ok(!includes(fragments, fragment), "fragment is removed");
     });
   });
 });
