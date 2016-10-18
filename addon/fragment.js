@@ -126,7 +126,8 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   },
 
   toStringExtension: function() {
-    let owner = internalModelFor(this)._owner;
+    let internalModel = internalModelFor(this);
+    let owner = internalModel && internalModel._owner;
     if (owner) {
       return 'owner(' + get(owner, 'id') + ')';
     } else {
@@ -174,7 +175,7 @@ export function internalModelFor(record) {
 
   // Ensure the internal model has a fragments hash, since we can't override the
   // constructor function anymore
-  if (!internalModel._fragments) {
+  if (internalModel && !internalModel._fragments) {
     internalModel._fragments = create(null);
   }
 
