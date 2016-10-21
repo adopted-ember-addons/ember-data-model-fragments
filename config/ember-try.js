@@ -12,33 +12,13 @@ module.exports = {
     },
 
     {
-      name: 'ember-2-3',
+      name: 'ember-lts-2-4',
       bower: {
         devDependencies: {
-          'ember': '2.3.1'
+          'ember': 'components/ember#lts-2-4'
         },
         resolutions: {
-          'ember': '2.3.1'
-        }
-      },
-      npm: {
-        devDependencies: {
-          'ember-data': '2.3.3'
-        },
-        resolutions: {
-          'ember-data': '2.3.3'
-        }
-      }
-    },
-
-    {
-      name: 'ember-2-4',
-      bower: {
-        devDependencies: {
-          'ember': '2.4.5'
-        },
-        resolutions: {
-          'ember': '2.4.5'
+          'ember': 'lts-2-4'
         }
       },
       npm: {
@@ -47,26 +27,6 @@ module.exports = {
         },
         resolutions: {
           'ember-data': '2.4.3'
-        }
-      }
-    },
-
-    {
-      name: 'ember-2-5',
-      bower: {
-        devDependencies: {
-          'ember': '2.5.1'
-        },
-        resolutions: {
-          'ember': '2.5.1'
-        }
-      },
-      npm: {
-        devDependencies: {
-          'ember-data': '2.5.3'
-        },
-        resolutions: {
-          'ember-data': '2.5.3'
         }
       }
     },
