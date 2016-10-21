@@ -12,7 +12,7 @@ module.exports = {
     },
 
     {
-      name: 'ember-lts-2-4',
+      name: 'ember-lts-2.4',
       bower: {
         devDependencies: {
           'ember': 'components/ember#lts-2-4'
