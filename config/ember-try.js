@@ -90,27 +90,6 @@ module.exports = {
           'ember-data': 'beta'
         }
       }
-    },
-
-    {
-      name: 'ember-canary',
-      allowedToFail: true,
-      bower: {
-        devDependencies: {
-          'ember': 'components/ember#canary'
-        },
-        resolutions: {
-          'ember': 'canary'
-        }
-      },
-      npm: {
-        devDependencies: {
-          'ember-data': 'emberjs/data#master'
-        },
-        resolutions: {
-          'ember-data': 'master'
-        }
-      }
     }
   ]
 };
