@@ -32,6 +32,26 @@ module.exports = {
     },
 
     {
+      name: 'ember-lts-2.8',
+      bower: {
+        dependencies: {
+          'ember': 'components/ember#lts-2-8'
+        },
+        resolutions: {
+          'ember': 'lts-2-8'
+        }
+      },
+      npm: {
+        devDependencies: {
+          'ember-data': '2.8.1'
+        },
+        resolutions: {
+          'ember-data': '2.8.1'
+        }
+      }
+    },
+
+    {
       name: 'ember-release',
       bower: {
         devDependencies: {
