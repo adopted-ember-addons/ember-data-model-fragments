@@ -1,5 +1,8 @@
 # Changelog
 
+### v2.1.3 (Novermber 11, 2016)
+* Backported fix for `toStringExtension` internalModel error (@DingoEatingFuzz, @cesarizu)
+
 ### v2.1.2 (March 21, 2016)
 
 * Fixed memory leak caused by fragments not being destroyed (@dwickern)
