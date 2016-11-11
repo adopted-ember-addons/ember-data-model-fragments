@@ -126,7 +126,13 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   },
 
   toStringExtension: function() {
-    return 'owner(' + get(internalModelFor(this)._owner, 'id') + ')';
+    var internalModel = internalModelFor(this);
+    var owner = internalModel && internalModel._owner;
+    if (owner) {
+      return 'owner(' + get(owner, 'id') + ')';
+    } else {
+      return '';
+    }
   }
 }).reopenClass({
   fragmentOwnerProperties: Ember.computed(function() {
