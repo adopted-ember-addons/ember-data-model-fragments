@@ -843,7 +843,13 @@
       },
 
       toStringExtension: function() {
-        return 'owner(' + model$fragments$lib$fragments$fragment$$get(model$fragments$lib$fragments$fragment$$internalModelFor(this)._owner, 'id') + ')';
+        var internalModel = model$fragments$lib$fragments$fragment$$internalModelFor(this);
+        var owner = internalModel && internalModel._owner;
+        if (owner) {
+          return 'owner(' + model$fragments$lib$fragments$fragment$$get(owner, 'id') + ')';
+        } else {
+          return '';
+        }
       }
     }).reopenClass({
       fragmentOwnerProperties: ember$lib$main$$default.computed(function() {
