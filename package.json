@@ -1,7 +1,7 @@
 {
   "name": "ember-data-model-fragments",
   "description": "Ember Data addon to support nested JSON documents",
-  "version": "2.3.3",
+  "version": "2.11.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/lytics/ember-data-model-fragments.git"
@@ -38,7 +38,7 @@
     "ember-cli-release": "^1.0.0-beta.2",
     "ember-cli-test-loader": "^1.1.0",
     "ember-cli-uglify": "^1.2.0",
-    "ember-data": "^2.10.0",
+    "ember-data": "~2.11.0",
     "ember-dev": "emberjs/ember-dev",
     "ember-disable-prototype-extensions": "^1.1.0",
     "ember-load-initializers": "^0.5.1",

@@ -22,7 +22,8 @@ Use the following table to decide which version of this project to use with your
 | >= v1.13.x < v2.0.0 | v1.13.x |
 | >= v2.0.x < v2.1.0 | v2.0.x |
 | >= v2.1.x < v2.3.x | v2.1.x |
-| >= v2.3.x | v2.3.x |
+| >= v2.3.x < v2.11.x | v2.3.x |
+| >= v2.11.x | v2.11.x |
 
 #### Notes
 
@@ -30,6 +31,7 @@ Use the following table to decide which version of this project to use with your
 - Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
 - Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
 - Ember Data 2.3 converted to a full Ember CLI addon. Removing the global `DS` namespace and switching to an import module strategy. More: [Ember Data 2.3 Released](http://emberjs.com/blog/2016/01/12/ember-data-2-3-released.html). Following ember-data's lead, the `MF` namespace was also removed. Import modules directly.
+- Ember Data 2.11 changed the implementation of their `ContainerInstanceCache`. We had to follow suite with our patches so that we could continue offering fragments their own default serializer. See [#224](https://github.com/lytics/ember-data-model-fragments/issues/224).
 
 ## Installation
 

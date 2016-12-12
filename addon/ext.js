@@ -2,6 +2,7 @@ import Ember from 'ember';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
 import InternalModel from 'ember-data/-private/system/model/internal-model';
+import ContainerInstanceCache from 'ember-data/-private/system/store/container-instance-cache';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
 import {
@@ -80,41 +81,6 @@ Store.reopen({
   isFragment(modelName) {
     var type = this.modelFor(modelName);
     return Fragment.detect(type);
-  },
-
-  /**
-    Changes serializer fallbacks for fragments to use `serializer:-fragment`
-    if registered, then uses the default serializer.
-
-    @method serializerFor
-    @private
-    @param {String} modelName the record to serialize
-    @return {DS.Serializer}
-  */
-  serializerFor: function(modelOrClass) {
-    var modelName;
-
-    if (typeof modelOrClass === 'string') {
-      modelName = modelOrClass;
-    } else {
-      modelName = modelOrClass.modelName;
-    }
-
-    // Don't fail on non-model lookups ('application', '-default', etc.)
-    var type = this.modelFactoryFor(modelName);
-
-    // For fragments, don't use the application serializer or adapter default
-    // as a fallbacks
-    if (type && Fragment.detect(type)) {
-      var fallbacks = [
-        '-fragment',
-        '-default'
-      ];
-
-      return this.lookupSerializer(modelName, fallbacks);
-    }
-
-    return this._super(modelOrClass);
   }
 });
 
@@ -341,5 +307,30 @@ function getFragmentTransform(owner, store, attributeType) {
 
   return owner.lookup(containerKey);
 }
+
+/*
+  Patch ember-data's ContainerInstanceCache. Changes fallbacks for fragments
+  to use `serializer:-fragment` if registered, then uses the default serializer.
+  Previously this was implemented by overriding the `serializerFor` on the store,
+  however an ember-data improved their implementation, so we followed suite.
+  See: https://github.com/lytics/ember-data-model-fragments/issues/224
+*/
+(function patchContainerInstanceCache(instanceCache) {
+  var ContainerInstanceCachePrototype = ContainerInstanceCache.prototype;
+  var _super = ContainerInstanceCachePrototype._fallbacksFor;
+  ContainerInstanceCachePrototype._fallbacksFor = function _modelFragmentsPatchedFallbacksFor(namespace, preferredKey) {
+    if (namespace === 'serializer') {
+      var model = this._store.modelFactoryFor(preferredKey);
+      if (model && Fragment.detect(model)) {
+        return [
+          '-fragment',
+          '-default'
+        ];
+      }
+    }
+
+    return _super.apply(this, [namespace, preferredKey]);
+  };
+})();
 
 export { Store, Model, JSONSerializer };
