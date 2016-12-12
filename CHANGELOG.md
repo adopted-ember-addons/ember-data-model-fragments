@@ -1,5 +1,11 @@
 # Changelog
 
+### v2.3.3 (December 12, 2016)
+
+* Updated to ember-cli 2.10.0 (@jakesjews)
+* Use the `ember-data` initializer as a target instead of the soon to be deprecated `store` initializer (@bmac)
+* Fixed issue that caused `internalModel is null` exception (@cesarizu)
+
 ### v2.3.2 (June 18, 2016)
 
 * Fixed ember-cli deprecation warning (@jakesjews)
