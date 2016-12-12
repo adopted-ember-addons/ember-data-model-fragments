@@ -7,7 +7,7 @@ import ArrayTransform from 'model-fragments/transforms/array';
 
 export default {
   name: "fragmentTransform",
-  before: "store",
+  before: "ember-data",
 
   initialize: function(application) {
     application.register('transform:fragment', FragmentTransform);
