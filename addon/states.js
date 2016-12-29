@@ -57,11 +57,11 @@ var FragmentRootState = {
 
   didSetProperty: didSetProperty,
 
-  propertyWasReset: Ember.K,
+  propertyWasReset() {},
 
-  becomeDirty: Ember.K,
+  becomeDirty() {},
 
-  rolledBack: Ember.K,
+  rolledBack() {},
 
   empty: {
     isEmpty: true,
@@ -95,9 +95,9 @@ var FragmentRootState = {
         }
       },
 
-      pushedData: Ember.K,
+      pushedData() {},
 
-      didCommit: Ember.K,
+      didCommit() {},
 
       becomeDirty: function(internalModel) {
         internalModel.transitionTo('updated');
