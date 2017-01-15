@@ -46,7 +46,7 @@ Store.reopen({
   createFragment: function(modelName, props) {
     var type = this.modelFor(modelName);
 
-    Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", Fragment.detect(type));
+    Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", this.isFragment(type));
 
     var internalModel = new InternalModel(type, null, this, getOwner(this).container);
 
@@ -68,6 +68,19 @@ Store.reopen({
     fragment._isFragment = true;
 
     return fragment;
+  },
+
+  /**
+    Returns true if the modelName is a fragment, false if not
+
+    @method isFragment
+    @private
+    @param {String} the modelName to check if a fragment
+    @return {boolean}
+  */
+  isFragment(modelName) {
+    var type = this.modelFor(modelName);
+    return Fragment.detect(type);
   },
 
   /**

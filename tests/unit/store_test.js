@@ -38,6 +38,11 @@ test("attempting to create a fragment type that does not inherit from `MF.Fragme
   });
 });
 
+test("the store has an `isFragment` method", function(assert) {
+  assert.ok(store.isFragment('name'), 'a fragment should return true');
+  assert.notOk(store.isFragment('person', 'a model should return false'));
+});
+
 test("the default fragment serializer does not use the application serializer", function(assert) {
   var Serializer = JSONAPISerializer.extend();
   owner.register('serializer:application', Serializer);
