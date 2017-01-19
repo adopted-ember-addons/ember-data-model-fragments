@@ -1,5 +1,11 @@
 # Changelog
 
+### v2.11.0 (January 19th, 2017)
+
+* Fixed infinite loop issue caused by deprecation of `store.lookupSerializer` (@runspired, @workmanw)
+* Added `store.isFragment` for easier detection (@gavinjoyce)
+* Removed usage of deprecated Ember.K (@cibernox)
+
 ### v2.3.3 (December 12, 2016)
 
 * Updated to ember-cli 2.10.0 (@jakesjews)
