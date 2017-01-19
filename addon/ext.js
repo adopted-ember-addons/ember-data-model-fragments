@@ -111,7 +111,7 @@ Store.reopen({
         '-default'
       ];
 
-      return this.lookupSerializer(modelName, fallbacks);
+      return this._super(modelName, fallbacks);
     }
 
     return this._super(modelOrClass);
