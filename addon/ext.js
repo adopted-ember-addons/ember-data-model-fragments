@@ -44,10 +44,9 @@ Store.reopen({
     @return {MF.Fragment} fragment
   */
   createFragment: function(modelName, props) {
+    Ember.assert("The '" + modelName + "' model must be a subclass of MF.Fragment", this.isFragment(modelName));
+    
     var type = this.modelFor(modelName);
-
-    Ember.assert("The '" + type + "' model must be a subclass of MF.Fragment", this.isFragment(type));
-
     var internalModel = new InternalModel(type, null, this, getOwner(this).container);
 
     // Re-wire the internal model to use the fragment state machine
