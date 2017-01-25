@@ -1,37 +1,6 @@
 /*jshint node:true*/
-module.exports = function() {
-  return {
+module.exports = {
   scenarios: [
-    {
-      name: 'default',
-      bower: {
-        devDependencies: { }
-      },
-      npm: {
-        devDependencies: { }
-      }
-    },
-
-    {
-      name: 'ember-2-11',
-      bower: {
-        devDependencies: {
-          'ember': '~2.11.0-beta.4',
-        },
-        resolutions: {
-          'ember': '~2.11.0-beta.4',
-        }
-      },
-      npm: {
-        devDependencies: {
-          'ember-data': '~2.11.0'
-        },
-        resolutions: {
-          'ember-data': '~2.11.0'
-        }
-      }
-    },
-
     {
       name: 'ember-release',
       bower: {
@@ -44,17 +13,13 @@ module.exports = function() {
       },
       npm: {
         devDependencies: {
+          'ember-source':  null,
           'ember-data': 'emberjs/data#release'
-        },
-        resolutions: {
-          'ember-data': 'release'
         }
       }
     },
-
     {
       name: 'ember-beta',
-      allowedToFail: true,
       bower: {
         devDependencies: {
           'ember': 'components/ember#beta'
@@ -65,12 +30,33 @@ module.exports = function() {
       },
       npm: {
         devDependencies: {
+          'ember-source':  null,
           'ember-data': 'emberjs/data#beta'
+        }
+      }
+    },
+    {
+      name: 'ember-canary',
+      bower: {
+        dependencies: {
+          'ember': 'components/ember#canary'
         },
         resolutions: {
-          'ember-data': 'beta'
+          'ember': 'canary'
         }
+      },
+      npm: {
+        devDependencies: {
+          'ember-source': null,
+          'ember-data': 'emberjs/data#canary'
+        }
+      }
+    },
+    {
+      name: 'ember-default',
+      npm: {
+        devDependencies: {}
       }
     }
   ]};
-};
+;
