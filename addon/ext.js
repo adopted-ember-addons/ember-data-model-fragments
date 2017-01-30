@@ -19,6 +19,10 @@ var keys = Object.keys || Ember.keys;
 var create = Object.create || Ember.create;
 var getOwner = Ember.getOwner;
 
+var InternalModelPrototype = InternalModel.prototype;
+var internalModelExpectsModelName = InternalModelPrototype.hasOwnProperty('modelClass');
+
+
 /**
   @class Store
   @namespace DS
@@ -47,8 +51,15 @@ Store.reopen({
   createFragment: function(modelName, props) {
     Ember.assert("The '" + modelName + "' model must be a subclass of MF.Fragment", this.isFragment(modelName));
 
-    var type = this.modelFor(modelName);
-    var internalModel = new InternalModel(type, null, this, getOwner(this).container);
+    var internalModel;
+    if (internalModelExpectsModelName) {
+      internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
+    } else {
+      // BACKWARDS_COMPAT: <= Ember 2.11 the `InternalModel` expected the class,
+      // rather than the modelName, as it's first argument.
+      var type = this.modelFor(modelName);
+      internalModel = new InternalModel(type, null, this, getOwner(this).container);
+    }
 
     // Re-wire the internal model to use the fragment state machine
     internalModel.currentState = FragmentRootState.empty;
@@ -168,8 +179,6 @@ function decorateMethod(obj, name, fn) {
     return fn.call(this, value, arguments);
   };
 }
-
-var InternalModelPrototype = InternalModel.prototype;
 
 /**
   Override parent method to snapshot fragment attributes before they are
