@@ -46,7 +46,7 @@ Store.reopen({
   */
   createFragment: function(modelName, props) {
     Ember.assert("The '" + modelName + "' model must be a subclass of MF.Fragment", this.isFragment(modelName));
-    
+
     var type = this.modelFor(modelName);
     var internalModel = new InternalModel(type, null, this, getOwner(this).container);
 
@@ -296,7 +296,14 @@ function getFragmentTransform(owner, store, attributeType) {
   var polymorphicTypeProp = match[3];
 
   if (!owner.hasRegistration(containerKey)) {
-    var transformClass = owner._lookupFactory('transform:' + transformName);
+    var transformClass;
+    if (owner.factoryFor) {
+      transformClass = owner.factoryFor('transform:' + transformName);
+      transformClass = transformClass && transformClass.class;
+    } else {
+      // BACKWARDS_COMPAT: <= Ember 2.11
+      transformClass = owner._lookupFactory('transform:' + transformName);
+    }
 
     owner.register(containerKey, transformClass.extend({
       store: store,
