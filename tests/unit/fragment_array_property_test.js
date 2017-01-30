@@ -6,11 +6,11 @@ import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
 import Address from 'dummy/models/address';
 
-var owner, store, people;
-var all = Ember.RSVP.all;
+let owner, store, people;
+let all = Ember.RSVP.all;
 
-moduleForAcceptance("unit - `MF.fragmentArray` property", {
-  beforeEach: function(assert) {
+moduleForAcceptance('unit - `MF.fragmentArray` property', {
+  beforeEach(assert) {
     owner = getOwner(this);
 
     store = owner.lookup('service:store');
@@ -20,43 +20,43 @@ moduleForAcceptance("unit - `MF.fragmentArray` property", {
     people = [
       {
         id: 1,
-        nickName: "Tyrion Lannister",
+        nickName: 'Tyrion Lannister',
         addresses: [
           {
-            street: "1 Sky Cell",
-            city: "Eyre",
-            region: "Vale of Arryn",
-            country: "Westeros"
+            street: '1 Sky Cell',
+            city: 'Eyre',
+            region: 'Vale of Arryn',
+            country: 'Westeros'
           },
           {
-            street: "1 Tower of the Hand",
-            city: "King's Landing",
-            region: "Crownlands",
-            country: "Westeros"
+            street: '1 Tower of the Hand',
+            city: 'King\'s Landing',
+            region: 'Crownlands',
+            country: 'Westeros'
           }
         ]
       },
       {
         id: 2,
-        nickName: "Eddard Stark",
+        nickName: 'Eddard Stark',
         addresses: [
           {
-            street: "1 Great Keep",
-            city: "Winterfell",
-            region: "North",
-            country: "Westeros"
+            street: '1 Great Keep',
+            city: 'Winterfell',
+            region: 'North',
+            country: 'Westeros'
           }
         ]
       },
       {
         id: 3,
-        nickName: "Jojen Reed",
+        nickName: 'Jojen Reed',
         addresses: null
       }
     ];
   },
 
-  teardown: function() {
+  teardown() {
     owner = null;
     store = null;
     people = null;
@@ -73,73 +73,73 @@ function pushPerson(id) {
   });
 }
 
-test("properties are instances of `MF.FragmentArray`", function(assert) {
+test('properties are instances of `MF.FragmentArray`', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
 
-      assert.ok(Ember.isArray(addresses), "property is array-like");
-      assert.ok(addresses instanceof MF.FragmentArray, "property is an instance of `MF.FragmentArray`");
+      assert.ok(Ember.isArray(addresses), 'property is array-like');
+      assert.ok(addresses instanceof MF.FragmentArray, 'property is an instance of `MF.FragmentArray`');
     });
   });
 });
 
-test("arrays of object literals are converted into instances of `MF.Fragment`", function(assert) {
+test('arrays of object literals are converted into instances of `MF.Fragment`', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
 
-      assert.ok(addresses.every(function(address) {
+      assert.ok(addresses.every(address => {
         return address instanceof Address;
-      }), "each fragment is a `MF.Fragment` instance");
+      }), 'each fragment is a `MF.Fragment` instance');
     });
   });
 });
 
-test("fragments created through the store can be added to the fragment array", function(assert) {
+test('fragments created through the store can be added to the fragment array', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
-      var length = addresses.get('length');
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
+      let length = addresses.get('length');
 
-      var address = store.createFragment('address', {
-        street: "1 Dungeon Cell",
-        city: "King's Landing",
-        region: "Crownlands",
-        country: "Westeros"
+      let address = store.createFragment('address', {
+        street: '1 Dungeon Cell',
+        city: 'King\'s Landing',
+        region: 'Crownlands',
+        country: 'Westeros'
       });
 
       addresses.addFragment(address);
 
-      assert.equal(addresses.get('length'), length + 1, "address property size is correct");
-      assert.equal(addresses.indexOf(address), length, "new fragment is in correct location");
+      assert.equal(addresses.get('length'), length + 1, 'address property size is correct');
+      assert.equal(addresses.indexOf(address), length, 'new fragment is in correct location');
     });
   });
 });
 
-test("adding a non-fragment model or object literal throws an error", function(assert) {
+test('adding a non-fragment model or object literal throws an error', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
 
-      assert.throws(function() {
-        var otherPerson = store.createRecord('person');
+      assert.throws(() => {
+        let otherPerson = store.createRecord('person');
 
         addresses.addFragment(otherPerson);
-      }, "error is thrown when adding a DS.Model instance");
+      }, 'error is thrown when adding a DS.Model instance');
     });
   });
 });
 
-test("adding fragments from other records throws an error", function(assert) {
+test('adding fragments from other records throws an error', function(assert) {
   Ember.run(() => {
     pushPerson(1);
     pushPerson(2);
@@ -147,40 +147,40 @@ test("adding fragments from other records throws an error", function(assert) {
     return all([
       store.find('person', 1),
       store.find('person', 2)
-    ]).then(function(people) {
-      var address = people[0].get('addresses.firstObject');
+    ]).then(people => {
+      let address = people[0].get('addresses.firstObject');
 
-      assert.throws(function() {
+      assert.throws(() => {
         people[1].get('addresses').addFragment(address);
-      }, "error is thrown when adding a fragment from another record");
+      }, 'error is thrown when adding a fragment from another record');
     });
   });
 });
 
-test("setting to an array of fragments is allowed", function(assert) {
+test('setting to an array of fragments is allowed', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
 
-      var address = store.createFragment('address', {
-        street: "1 Dungeon Cell",
-        city: "King's Landing",
-        region: "Crownlands",
-        country: "Westeros"
+      let address = store.createFragment('address', {
+        street: '1 Dungeon Cell',
+        city: 'King\'s Landing',
+        region: 'Crownlands',
+        country: 'Westeros'
       });
 
       person.set('addresses', [ address ]);
 
-      assert.equal(person.get('addresses'), addresses, "fragment array is the same object");
-      assert.equal(person.get('addresses.length'), 1, "fragment array has the correct length");
-      assert.equal(person.get('addresses.firstObject'), address, "fragment array contains the new fragment");
+      assert.equal(person.get('addresses'), addresses, 'fragment array is the same object');
+      assert.equal(person.get('addresses.length'), 1, 'fragment array has the correct length');
+      assert.equal(person.get('addresses.firstObject'), address, 'fragment array contains the new fragment');
     });
   });
 });
 
-test("defaults to an empty array", function(assert) {
+test('defaults to an empty array', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -198,68 +198,68 @@ test("defaults to an empty array", function(assert) {
       }
     });
 
-    return store.find('person', 1).then(function(person) {
-      assert.ok(Ember.isArray(person.get('addresses')), "defaults to an array");
-      assert.ok(Ember.isEmpty(person.get('addresses')), "default array is empty");
+    return store.find('person', 1).then(person => {
+      assert.ok(Ember.isArray(person.get('addresses')), 'defaults to an array');
+      assert.ok(Ember.isEmpty(person.get('addresses')), 'default array is empty');
 
-      store.find('person', 2).then(function(person2) {
-        assert.ok(person.get('addresses') !== person2.get('addresses'), "default array is unique");
+      store.find('person', 2).then(person2 => {
+        assert.ok(person.get('addresses') !== person2.get('addresses'), 'default array is unique');
       });
     });
   });
 });
 
-test("default value can be null", function(assert) {
+test('default value can be null', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      assert.equal(person.get('hobbies'), null, "defaults to null");
+    return store.find('person', 1).then(person => {
+      assert.equal(person.get('hobbies'), null, 'defaults to null');
 
-      var hobbies = [
+      let hobbies = [
         store.createFragment('hobby', {
           name: 'guitar'
         })
       ];
 
       person.set('hobbies', hobbies);
-      assert.equal(person.get('hobbies.length'), 1, "can be set to an array");
+      assert.equal(person.get('hobbies.length'), 1, 'can be set to an array');
     });
   });
 });
 
-test("null values are allowed", function(assert) {
+test('null values are allowed', function(assert) {
   Ember.run(() => {
     pushPerson(3);
 
-    return store.find('person', 3).then(function(person) {
-      assert.equal(person.get('addresses'), null, "property is null");
+    return store.find('person', 3).then(person => {
+      assert.equal(person.get('addresses'), null, 'property is null');
     });
   });
 });
 
-test("setting to null is allowed", function(assert) {
+test('setting to null is allowed', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
+    return store.find('person', 1).then(person => {
       person.set('addresses', null);
 
-      assert.equal(person.get('addresses'), null, "property is null");
+      assert.equal(person.get('addresses'), null, 'property is null');
     });
   });
 });
 
-test("fragments are created from an array of object literals when creating a record", function(assert) {
-  Ember.run(function() {
-    var address = {
+test('fragments are created from an array of object literals when creating a record', function(assert) {
+  Ember.run(() => {
+    let address = {
       street: '1 Sea Tower',
       city: 'Pyke',
       region: 'Iron Islands',
       country: 'Westeros'
     };
 
-    var person = store.createRecord('person', {
+    let person = store.createRecord('person', {
       name: {
         first: 'Balon',
         last: 'Greyjoy'
@@ -267,13 +267,13 @@ test("fragments are created from an array of object literals when creating a rec
       addresses: [ address ]
     });
 
-    assert.ok(person.get('addresses.firstObject') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-    assert.equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
+    assert.ok(person.get('addresses.firstObject') instanceof MF.Fragment, 'a `MF.Fragment` instance is created');
+    assert.equal(person.get('addresses.firstObject.street'), address.street, 'fragment has correct values');
   });
 });
 
-test("setting a fragment array to an array of to an object literals creates new fragments", function(assert) {
-  var address = {
+test('setting a fragment array to an array of to an object literals creates new fragments', function(assert) {
+  let address = {
     street: '1 Great Keep',
     city: 'Pyke',
     region: 'Iron Islands',
@@ -295,17 +295,17 @@ test("setting a fragment array to an array of to an object literals creates new 
       }
     });
 
-    return store.find('person', 1).then(function(person) {
+    return store.find('person', 1).then(person => {
       person.set('addresses', [ address ]);
 
-      assert.ok(person.get('addresses.firstObject') instanceof MF.Fragment, "a `MF.Fragment` instance is created");
-      assert.equal(person.get('addresses.firstObject.street'), address.street, "fragment has correct values");
+      assert.ok(person.get('addresses.firstObject') instanceof MF.Fragment, 'a `MF.Fragment` instance is created');
+      assert.equal(person.get('addresses.firstObject.street'), address.street, 'fragment has correct values');
     });
   });
 });
 
-test("setting a fragment array to an array of object literals reuses an existing fragments", function(assert) {
-  var newAddress = {
+test('setting a fragment array to an array of object literals reuses an existing fragments', function(assert) {
+  let newAddress = {
     street: '1 Great Keep',
     city: 'Winterfell',
     region: 'North',
@@ -334,123 +334,123 @@ test("setting a fragment array to an array of object literals reuses an existing
       }
     });
 
-    return store.find('person', 1).then(function(person) {
-      var address = person.get('addresses.firstObject');
+    return store.find('person', 1).then(person => {
+      let address = person.get('addresses.firstObject');
 
       person.set('addresses', [ newAddress ]);
 
-      assert.equal(address, person.get('addresses.firstObject'), "fragment instances are reused");
-      assert.equal(person.get('addresses.firstObject.street'), newAddress.street, "fragment has correct values");
+      assert.equal(address, person.get('addresses.firstObject'), 'fragment instances are reused');
+      assert.equal(person.get('addresses.firstObject.street'), newAddress.street, 'fragment has correct values');
     });
   });
 });
 
 
-test("setting to an array of non-fragments throws an error", function(assert) {
+test('setting to an array of non-fragments throws an error', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      assert.throws(function() {
+    return store.find('person', 1).then(person => {
+      assert.throws(() => {
         person.set('addresses', [ 'address' ]);
-      }, "error is thrown when setting to an array of non-fragments");
+      }, 'error is thrown when setting to an array of non-fragments');
     });
   });
 });
 
-test("fragments can have default values", function(assert) {
-  Ember.run(function() {
-    var defaultValue = [
+test('fragments can have default values', function(assert) {
+  Ember.run(() => {
+    let defaultValue = [
       {
-        street: "1 Throne Room",
-        city: "King's Landing",
-        region: "Crownlands",
-        country: "Westeros"
+        street: '1 Throne Room',
+        city: 'King\'s Landing',
+        region: 'Crownlands',
+        country: 'Westeros'
       }
     ];
 
-    var Throne = DS.Model.extend({
+    let Throne = DS.Model.extend({
       name: DS.attr('string'),
       addresses: MF.fragmentArray('address', { defaultValue: defaultValue })
     });
 
     owner.register('model:throne', Throne);
 
-    var throne = store.createRecord('throne', { name: 'Iron' });
+    let throne = store.createRecord('throne', { name: 'Iron' });
 
-    assert.equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is used when the value has not been specified");
+    assert.equal(throne.get('addresses.firstObject.street'), defaultValue[0].street, 'the default value is used when the value has not been specified');
 
     throne.set('addresses', null);
-    assert.equal(throne.get('addresses'), null, "the default value is not used when the value is set to null");
+    assert.equal(throne.get('addresses'), null, 'the default value is not used when the value is set to null');
 
     throne = store.createRecord('throne', { name: 'Iron', addresses: null });
-    assert.equal(throne.get('addresses'), null, "the default value is not used when the value is initialized to null");
+    assert.equal(throne.get('addresses'), null, 'the default value is not used when the value is initialized to null');
   });
 });
 
-test("fragment default values can be functions", function(assert) {
-  Ember.run(function() {
-    var defaultValue = [
+test('fragment default values can be functions', function(assert) {
+  Ember.run(() => {
+    let defaultValue = [
       {
-        street: "1 Great Keep",
-        city: "Winterfell",
-        region: "North",
-        country: "Westeros"
+        street: '1 Great Keep',
+        city: 'Winterfell',
+        region: 'North',
+        country: 'Westeros'
       }
     ];
 
-    var Sword = DS.Model.extend({
+    let Sword = DS.Model.extend({
       name: DS.attr('string'),
-      addresses: MF.fragmentArray('address', { defaultValue: function() { return defaultValue; } })
+      addresses: MF.fragmentArray('address', { defaultValue() { return defaultValue; } })
     });
 
     owner.register('model:sword', Sword);
 
-    var sword = store.createRecord('sword', { name: 'Ice' });
+    let sword = store.createRecord('sword', { name: 'Ice' });
 
-    assert.equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, "the default value is correct");
+    assert.equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, 'the default value is correct');
   });
 });
 
-test("destroy a fragment array which was set to null", function(assert) {
+test('destroy a fragment array which was set to null', function(assert) {
   return Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
-      var firstAddress = addresses.objectAt(0);
-      var secondAddress = addresses.objectAt(1);
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
+      let firstAddress = addresses.objectAt(0);
+      let secondAddress = addresses.objectAt(1);
       person.set('addresses', null);
 
       person.destroy();
 
-      Ember.run.schedule('destroy', function() {
-        assert.ok(person.get('isDestroying'), "the model is being destroyed");
-        assert.ok(addresses.get('isDestroying'), "the fragment array is being destroyed");
-        assert.ok(firstAddress.get('isDestroying'), "the first fragment is being destroyed");
-        assert.ok(secondAddress.get('isDestroying'), "the second fragment is being destroyed");
+      Ember.run.schedule('destroy', () => {
+        assert.ok(person.get('isDestroying'), 'the model is being destroyed');
+        assert.ok(addresses.get('isDestroying'), 'the fragment array is being destroyed');
+        assert.ok(firstAddress.get('isDestroying'), 'the first fragment is being destroyed');
+        assert.ok(secondAddress.get('isDestroying'), 'the second fragment is being destroyed');
       });
     });
   });
 });
 
-test("destroy a fragment which was removed from the fragment array", function(assert) {
+test('destroy a fragment which was removed from the fragment array', function(assert) {
   return Ember.run(() => {
     pushPerson(1);
 
-    return store.find('person', 1).then(function(person) {
-      var addresses = person.get('addresses');
-      var firstAddress = addresses.objectAt(0);
-      var secondAddress = addresses.objectAt(1);
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
+      let firstAddress = addresses.objectAt(0);
+      let secondAddress = addresses.objectAt(1);
       addresses.removeAt(0);
 
       person.destroy();
 
-      Ember.run.schedule('destroy', function() {
-        assert.ok(person.get('isDestroying'), "the model is being destroyed");
-        assert.ok(addresses.get('isDestroying'), "the fragment array is being destroyed");
-        assert.ok(firstAddress.get('isDestroying'), "the removed fragment is being destroyed");
-        assert.ok(secondAddress.get('isDestroying'), "the remaining fragment is being destroyed");
+      Ember.run.schedule('destroy', () => {
+        assert.ok(person.get('isDestroying'), 'the model is being destroyed');
+        assert.ok(addresses.get('isDestroying'), 'the fragment array is being destroyed');
+        assert.ok(firstAddress.get('isDestroying'), 'the removed fragment is being destroyed');
+        assert.ok(secondAddress.get('isDestroying'), 'the remaining fragment is being destroyed');
       });
     });
   });

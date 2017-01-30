@@ -8,26 +8,26 @@ import Order from 'dummy/models/order';
 import Product from 'dummy/models/product';
 import Pretender from 'pretender';
 
-var store, owner, server;
+let store, owner, server;
 
-moduleForAcceptance("integration - Nested fragments", {
-  beforeEach: function(assert) {
+moduleForAcceptance('integration - Nested fragments', {
+  beforeEach(assert) {
     owner = getOwner(this);
     store = owner.lookup('service:store');
     server = new Pretender();
-    
+
     assert.expectNoDeprecation();
   },
 
-  afterEach: function() {
+  afterEach() {
     store = null;
     owner = null;
     server.shutdown();
   }
 });
 
-test("`DS.hasManyFragment` properties can be nested", function(assert) {
-  var data = {
+test('`DS.hasManyFragment` properties can be nested', function(assert) {
+  let data = {
     info: {
       name: 'Tyrion Lannister',
       notes: [ 'smart', 'short' ]
@@ -70,42 +70,42 @@ test("`DS.hasManyFragment` properties can be nested", function(assert) {
       }
     });
 
-    var payload = {
+    let payload = {
       user: Ember.copy(data, true)
     };
     payload.user.id = 1;
     payload.user.orders[0].products.splice(0, 1);
 
-    server.put('/users/1', function() {
-      return [ 200, {"Content-Type": "application/json"}, JSON.stringify(payload) ];
+    server.put('/users/1', () => {
+      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
     });
 
-    return store.find('user', 1).then(function(user) {
-      assert.equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', "nested fragment array properties are converted properly");
+    return store.find('user', 1).then(user => {
+      assert.equal(user.get('orders.firstObject.products.firstObject.name'), 'Tears of Lys', 'nested fragment array properties are converted properly');
 
-      var product = user.get('orders.firstObject.products.firstObject');
+      let product = user.get('orders.firstObject.products.firstObject');
 
       product.set('price', '1.99');
-      assert.ok(user.get('hasDirtyAttributes'), "dirty state propagates to owner");
+      assert.ok(user.get('hasDirtyAttributes'), 'dirty state propagates to owner');
 
       user.rollbackAttributes();
-      assert.equal(product.get('price'), '499.99', "rollbackAttributes cascades to nested fragments");
-      assert.ok(!user.get('hasDirtyAttributes'), "dirty state is reset");
+      assert.equal(product.get('price'), '499.99', 'rollbackAttributes cascades to nested fragments');
+      assert.ok(!user.get('hasDirtyAttributes'), 'dirty state is reset');
 
       user.get('orders.firstObject.products').removeAt(0);
-      assert.ok(user.get('hasDirtyAttributes'), "dirty state propagates to owner");
+      assert.ok(user.get('hasDirtyAttributes'), 'dirty state propagates to owner');
 
       return user.save();
-    }).then(function(user) {
-      assert.ok(!user.get('hasDirtyAttributes'), "owner record is clean");
-      assert.equal(user.get('orders.firstObject.products.length'), 1, "fragment array length is correct");
+    }).then(user => {
+      assert.ok(!user.get('hasDirtyAttributes'), 'owner record is clean');
+      assert.equal(user.get('orders.firstObject.products.length'), 1, 'fragment array length is correct');
     });
   });
 });
 
-test("Fragments can be created with nested object literals", function(assert) {
-  Ember.run(function() {
-    var data = {
+test('Fragments can be created with nested object literals', function(assert) {
+  Ember.run(() => {
+    let data = {
       info: {
         name: 'Tyrion Lannister',
         notes: [ 'smart', 'short' ]
@@ -139,24 +139,24 @@ test("Fragments can be created with nested object literals", function(assert) {
       ]
     };
 
-    var user = store.createRecord('user', data);
-    var orders = user.get('orders');
+    let user = store.createRecord('user', data);
+    let orders = user.get('orders');
 
-    assert.equal(orders.get('length'), 2, "fragment array length is correct");
-    assert.ok(orders.get('firstObject') instanceof Order, "fragment instances are created");
-    assert.equal(orders.get('firstObject.amount'), data.orders[0].amount, "fragment properties are correct");
-    assert.equal(orders.get('firstObject.products.length'), 2, "nested fragment array length is correct");
-    assert.ok(orders.get('firstObject.products.firstObject') instanceof Product, "nested fragment instances are created");
-    assert.equal(orders.get('firstObject.products.firstObject.name'), data.orders[0].products[0].name, "nested fragment properties are correct");
+    assert.equal(orders.get('length'), 2, 'fragment array length is correct');
+    assert.ok(orders.get('firstObject') instanceof Order, 'fragment instances are created');
+    assert.equal(orders.get('firstObject.amount'), data.orders[0].amount, 'fragment properties are correct');
+    assert.equal(orders.get('firstObject.products.length'), 2, 'nested fragment array length is correct');
+    assert.ok(orders.get('firstObject.products.firstObject') instanceof Product, 'nested fragment instances are created');
+    assert.equal(orders.get('firstObject.products.firstObject.name'), data.orders[0].products[0].name, 'nested fragment properties are correct');
   });
 });
 
-test("Nested fragments can have default values", function(assert) {
-  Ember.run(function() {
-    var defaultInfo = {
+test('Nested fragments can have default values', function(assert) {
+  Ember.run(() => {
+    let defaultInfo = {
       notes: [ 'dangerous', 'sorry' ]
     };
-    var defaultOrders = [
+    let defaultOrders = [
       {
         amount   : '1499.99',
         products : [
@@ -169,25 +169,25 @@ test("Nested fragments can have default values", function(assert) {
       },
     ];
 
-    var Assassin = DS.Model.extend({
-      info   : MF.fragment("info", { defaultValue: defaultInfo }),
-      orders : MF.fragmentArray("order", { defaultValue: defaultOrders })
+    let Assassin = DS.Model.extend({
+      info   : MF.fragment('info', { defaultValue: defaultInfo }),
+      orders : MF.fragmentArray('order', { defaultValue: defaultOrders })
     });
 
     owner.register('model:assassin', Assassin);
 
-    var user = store.createRecord('assassin');
+    let user = store.createRecord('assassin');
 
-    assert.ok(user.get('info'), "a nested fragment is created with the default value");
-    assert.deepEqual(user.get('info.notes').toArray(), defaultInfo.notes, "a doubly nested fragment array is created with the default value");
-    assert.ok(user.get('orders.firstObject'), "a nested fragment array is created with the default value");
-    assert.equal(user.get('orders.firstObject.amount'), defaultOrders[0].amount, "a nested fragment is created with the default value");
-    assert.equal(user.get('orders.firstObject.products.firstObject.name'), defaultOrders[0].products[0].name, "a nested fragment is created with the default value");
+    assert.ok(user.get('info'), 'a nested fragment is created with the default value');
+    assert.deepEqual(user.get('info.notes').toArray(), defaultInfo.notes, 'a doubly nested fragment array is created with the default value');
+    assert.ok(user.get('orders.firstObject'), 'a nested fragment array is created with the default value');
+    assert.equal(user.get('orders.firstObject.amount'), defaultOrders[0].amount, 'a nested fragment is created with the default value');
+    assert.equal(user.get('orders.firstObject.products.firstObject.name'), defaultOrders[0].products[0].name, 'a nested fragment is created with the default value');
   });
 });
 
-test("Nested fragments can be copied", function(assert) {
-  var data = {
+test('Nested fragments can be copied', function(assert) {
+  let data = {
     info: {
       name: 'Petyr Baelish',
       notes: [ 'smart', 'despicable' ]
@@ -213,19 +213,19 @@ test("Nested fragments can be copied", function(assert) {
       }
     });
 
-    return store.find('user', 1).then(function(user) {
-      var info = user.get('info').copy();
+    return store.find('user', 1).then(user => {
+      let info = user.get('info').copy();
 
       assert.deepEqual(info.get('notes').toArray(), data.info.notes, 'nested fragment arrays are copied');
       assert.ok(info.get('notes') !== user.get('info.notes'), 'nested fragment array copies are new fragment arrays');
 
-      var orders = user.get('orders').copy();
-      var order = orders.objectAt(0);
+      let orders = user.get('orders').copy();
+      let order = orders.objectAt(0);
 
       assert.equal(order.get('recurring'), data.orders[0].recurring, 'nested fragments are copied');
       assert.ok(order !== user.get('orders.firstObject'), 'nested fragment copies are new fragments');
 
-      var product = order.get('product');
+      let product = order.get('product');
 
       assert.equal(product.get('name'), data.orders[0].product.name, 'nested fragments are copied');
       assert.ok(product !== user.get('orders.firstObject.product'), 'nested fragment copies are new fragments');
@@ -233,7 +233,7 @@ test("Nested fragments can be copied", function(assert) {
   });
 });
 
-test("Nested fragments are destroyed when the owner record is destroyed", function(assert) {
+test('Nested fragments are destroyed when the owner record is destroyed', function(assert) {
   return Ember.run(() => {
     store.push({
       data: {
@@ -260,24 +260,24 @@ test("Nested fragments are destroyed when the owner record is destroyed", functi
       }
     });
 
-    return store.find('user', 1).then(function(user) {
-      var info = user.get('info');
-      var notes = info.get('notes');
-      var orders = user.get('orders');
-      var order = orders.get('firstObject');
-      var products = order.get('products');
-      var product = products.get('firstObject');
+    return store.find('user', 1).then(user => {
+      let info = user.get('info');
+      let notes = info.get('notes');
+      let orders = user.get('orders');
+      let order = orders.get('firstObject');
+      let products = order.get('products');
+      let product = products.get('firstObject');
 
       user.destroy();
 
-      Ember.run.schedule('destroy', function() {
-        assert.ok(user.get('isDestroying'), "the user is being destroyed");
-        assert.ok(info.get('isDestroying'), "the info is being destroyed");
-        assert.ok(notes.get('isDestroying'), "the notes are being destroyed");
-        assert.ok(orders.get('isDestroying'), "the orders are being destroyed");
-        assert.ok(order.get('isDestroying'), "the order is being destroyed");
-        assert.ok(products.get('isDestroying'), "the products are being destroyed");
-        assert.ok(product.get('isDestroying'), "the product is being destroyed");
+      Ember.run.schedule('destroy', () => {
+        assert.ok(user.get('isDestroying'), 'the user is being destroyed');
+        assert.ok(info.get('isDestroying'), 'the info is being destroyed');
+        assert.ok(notes.get('isDestroying'), 'the notes are being destroyed');
+        assert.ok(orders.get('isDestroying'), 'the orders are being destroyed');
+        assert.ok(order.get('isDestroying'), 'the order is being destroyed');
+        assert.ok(products.get('isDestroying'), 'the products are being destroyed');
+        assert.ok(product.get('isDestroying'), 'the product is being destroyed');
       });
     });
   });

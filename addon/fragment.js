@@ -6,9 +6,9 @@ import { Model } from './ext';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
-var create = Object.create || Ember.create;
-var copy = Ember.copy;
+const get = Ember.get;
+const create = Object.create || Ember.create;
+const copy = Ember.copy;
 
 /**
   The class that all nested object structures, or 'fragments', descend from.
@@ -36,17 +36,17 @@ var copy = Ember.copy;
 
   ```json
   {
-    "id": "1",
-    "name": {
-      "first": "Robert",
-      "last": "Jackson"
+    'id': '1',
+    'name': {
+      'first': 'Robert',
+      'last': 'Jackson'
     }
   }
   ```
 
   ```javascript
-  var person = store.getbyid('person', '1');
-  var name = person.get('name');
+  let person = store.getbyid('person', '1');
+  let name = person.get('name');
 
   person.get('hasDirtyAttributes'); // false
   name.get('hasDirtyAttributes'); // false
@@ -68,7 +68,7 @@ var copy = Ember.copy;
   @uses Ember.Comparable
   @uses Ember.Copyable
 */
-var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
+const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
     Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 
@@ -77,7 +77,7 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     @param b {MF.Fragment} the second fragment to compare
     @return {Integer} the result of the comparison
   */
-  compare: function(f1, f2) {
+  compare(f1, f2) {
     return f1 === f2 ? 0 : 1;
   },
 
@@ -89,15 +89,15 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     @method copy
     @return {MF.Fragment} the newly created fragment
   */
-  copy: function() {
-    var type = this.constructor;
-    var props = create(null);
+  copy() {
+    let type = this.constructor;
+    let props = create(null);
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
-    type.eachAttribute(function(name) {
+    type.eachAttribute(name => {
       props[name] = copy(get(this, name));
-    }, this);
+    });
 
     return this.store.createFragment(type.modelName, props);
   },
@@ -105,14 +105,14 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
     @method _flushChangedAttributes
   */
-  _flushChangedAttributes: function() {
+  _flushChangedAttributes() {
     internalModelFor(this).flushChangedAttributes();
   },
 
   /**
     @method _adapterDidCommit
   */
-  _adapterDidCommit: function(data) {
+  _adapterDidCommit(data) {
     internalModelFor(this).adapterDidCommit({
       attributes: data || create(null)
     });
@@ -121,24 +121,25 @@ var Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
     @method _adapterDidCommit
   */
-  _adapterDidError: function(/*error*/) {
+  _adapterDidError(/*error*/) {
     internalModelFor(this)._saveWasRejected();
   },
 
-  toStringExtension: function() {
+  toStringExtension() {
     let internalModel = internalModelFor(this);
     let owner = internalModel && internalModel._owner;
     if (owner) {
-      return 'owner(' + get(owner, 'id') + ')';
+      let ownerId = get(owner, 'id');
+      return `owner(${ownerId})`;
     } else {
       return '';
     }
   }
 }).reopenClass({
   fragmentOwnerProperties: Ember.computed(function() {
-    var props = [];
+    let props = [];
 
-    this.eachComputedProperty(function(name, meta) {
+    this.eachComputedProperty((name, meta) => {
       if (meta.isFragmentOwner) {
         props.push(name);
       }
@@ -163,15 +164,15 @@ export function getActualFragmentType(declaredType, options, data) {
     return declaredType;
   }
 
-  var typeKey = options.typeKey || 'type';
-  var actualType = data[typeKey];
+  let typeKey = options.typeKey || 'type';
+  let actualType = data[typeKey];
 
   return actualType || declaredType;
 }
 
 // Returns the internal model for the given record/fragment
 export function internalModelFor(record) {
-  var internalModel = record._internalModel;
+  let internalModel = record._internalModel;
 
   // Ensure the internal model has a fragments hash, since we can't override the
   // constructor function anymore
@@ -184,15 +185,15 @@ export function internalModelFor(record) {
 
 // Sets the owner/key values on a fragment
 export function setFragmentOwner(fragment, record, key) {
-  var internalModel = internalModelFor(fragment);
+  let internalModel = internalModelFor(fragment);
 
-  Ember.assert("To preserve rollback semantics, fragments can only belong to one owner. Try copying instead", !internalModel._owner || internalModel._owner === record);
+  Ember.assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._owner || internalModel._owner === record);
 
   internalModel._owner = record;
   internalModel._name = key;
 
   // Notify any observers of `fragmentOwner` properties
-  get(fragment.constructor, 'fragmentOwnerProperties').forEach(function(name) {
+  get(fragment.constructor, 'fragmentOwnerProperties').forEach(name => {
     fragment.notifyPropertyChange(name);
   });
 
@@ -208,8 +209,8 @@ export function setFragmentData(fragment, data) {
 
 // Creates a fragment and sets its owner to the given record
 export function createFragment(store, declaredModelName, record, key, options, data) {
-  var actualModelName = getActualFragmentType(declaredModelName, options, data);
-  var fragment = store.createFragment(actualModelName);
+  let actualModelName = getActualFragmentType(declaredModelName, options, data);
+  let fragment = store.createFragment(actualModelName);
 
   setFragmentOwner(fragment, record, key);
   setFragmentData(fragment, data);

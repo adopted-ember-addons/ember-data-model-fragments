@@ -6,10 +6,10 @@ import FragmentArrayTransform from 'model-fragments/transforms/fragment-array';
 import ArrayTransform from 'model-fragments/transforms/array';
 
 export default {
-  name: "fragmentTransform",
-  before: "ember-data",
+  name: 'fragmentTransform',
+  before: 'ember-data',
 
-  initialize: function(application) {
+  initialize(application) {
     application.register('transform:fragment', FragmentTransform);
     application.register('transform:fragment-array', FragmentArrayTransform);
     application.register('transform:array', ArrayTransform);

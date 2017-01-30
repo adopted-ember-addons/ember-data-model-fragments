@@ -18,20 +18,20 @@ import isInstanceOfType from './util/instance-of-type';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
-var setProperties = Ember.setProperties;
-var isArray = Ember.isArray;
-var typeOf = Ember.typeOf;
-var copy = Ember.copy;
-var computed = Ember.computed;
+const get = Ember.get;
+const setProperties = Ember.setProperties;
+const isArray = Ember.isArray;
+const typeOf = Ember.typeOf;
+const copy = Ember.copy;
+const computed = Ember.computed;
 
 // Create a unique type string for the combination of fragment property type,
 // transform type (or fragment model), and polymorphic type key
 function metaTypeFor(name, type, options) {
-  var metaType = '-mf-' + name;
+  let metaType = `-mf-${name}`;
 
   if (type) {
-    metaType += '$' + type;
+    metaType += `$${type}`;
   }
 
   if (options && options.polymorphic) {
@@ -80,12 +80,12 @@ function metaTypeFor(name, type, options) {
 function fragment(declaredModelName, options) {
   options = options || {};
 
-  var metaType = metaTypeFor('fragment', declaredModelName, options);
+  let metaType = metaTypeFor('fragment', declaredModelName, options);
 
   function setupFragment(store, record, key) {
-    var internalModel = internalModelFor(record);
-    var data = getWithDefault(internalModel, key, options, 'object');
-    var fragment = internalModel._fragments[key];
+    let internalModel = internalModelFor(record);
+    let data = getWithDefault(internalModel, key, options, 'object');
+    let fragment = internalModel._fragments[key];
 
     // Regardless of whether being called as a setter or getter, the fragment
     // may not be initialized yet, in which case the data will contain a
@@ -114,10 +114,10 @@ function fragment(declaredModelName, options) {
   }
 
   function setFragmentValue(record, key, fragment, value) {
-    var store = record.store;
-    var internalModel = internalModelFor(record);
+    let store = record.store;
+    let internalModel = internalModelFor(record);
 
-    Ember.assert("You can only assign `null`, an object literal or a '" + declaredModelName + "' fragment instance to this property", value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
+    Ember.assert(`You can only assign \`null\`, an object literal or a '${declaredModelName}' fragment instance to this property`, value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
 
     if (!value) {
       fragment = null;
@@ -191,7 +191,7 @@ function fragment(declaredModelName, options) {
 function fragmentArray(modelName, options) {
   options || (options = {});
 
-  var metaType = metaTypeFor('fragment-array', modelName, options);
+  let metaType = metaTypeFor('fragment-array', modelName, options);
 
   return fragmentArrayProperty(metaType, options, function createFragmentArray(record, key) {
     return FragmentArray.create({
@@ -239,7 +239,7 @@ function array(type, options) {
     options || (options = {});
   }
 
-  var metaType = metaTypeFor('array', type);
+  let metaType = metaTypeFor('array', type);
 
   return fragmentArrayProperty(metaType, options, function createStatefulArray(record, key) {
     return StatefulArray.create({
@@ -253,7 +253,7 @@ function array(type, options) {
 function fragmentProperty(type, options, setupFragment, setFragmentValue) {
   options = options || {};
 
-  var meta = {
+  let meta = {
     type: type,
     isAttribute: true,
     isFragment: true,
@@ -261,15 +261,15 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
   };
 
   return computed({
-    get: function(key) {
-      var internalModel = internalModelFor(this);
-      var fragment = setupFragment(this.store, this, key);
+    get(key) {
+      let internalModel = internalModelFor(this);
+      let fragment = setupFragment(this.store, this, key);
 
       return internalModel._fragments[key] = fragment;
     },
-    set: function(key, value) {
-      var internalModel = internalModelFor(this);
-      var fragment = setupFragment(this.store, this, key);
+    set(key, value) {
+      let internalModel = internalModelFor(this);
+      let fragment = setupFragment(this.store, this, key);
 
       fragment = setFragmentValue(this, key, fragment, value);
 
@@ -280,9 +280,9 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
 
 function fragmentArrayProperty(metaType, options, createArray) {
   function setupFragmentArray(store, record, key) {
-    var internalModel = internalModelFor(record);
-    var data = getWithDefault(internalModel, key, options, 'array');
-    var fragments = internalModel._fragments[key] || null;
+    let internalModel = internalModelFor(record);
+    let data = getWithDefault(internalModel, key, options, 'array');
+    let fragments = internalModel._fragments[key] || null;
 
     // If we already have a processed fragment in _data and our current fragment is
     // null simply reuse the one from data. We can be in this state after a rollback
@@ -303,7 +303,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
   }
 
   function setFragmentValue(record, key, fragments, value) {
-    var internalModel = internalModelFor(record);
+    let internalModel = internalModelFor(record);
 
     if (isArray(value)) {
       fragments || (fragments = createArray(record, key));
@@ -311,7 +311,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
     } else if (value === null) {
       fragments = null;
     } else {
-      Ember.assert("A fragment array property can only be assigned an array or null");
+      Ember.assert('A fragment array property can only be assigned an array or null');
     }
 
     if (internalModel._data[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
@@ -351,7 +351,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
 */
 function fragmentOwner() {
   return computed(function() {
-    Ember.assert("Fragment owner properties can only be used on fragments.", isFragment(this));
+    Ember.assert('Fragment owner properties can only be used on fragments.', isFragment(this));
 
     return internalModelFor(this)._owner;
   }).meta({
@@ -362,7 +362,7 @@ function fragmentOwner() {
 // The default value of a fragment is either an array or an object,
 // which should automatically get deep copied
 function getDefaultValue(record, options, type) {
-  var value;
+  let value;
 
   if (typeof options.defaultValue === 'function') {
     value = options.defaultValue();
@@ -374,7 +374,7 @@ function getDefaultValue(record, options, type) {
     return null;
   }
 
-  Ember.assert("The fragment's default value must be an " + type, (typeOf(value) == type) || (value === null));
+  Ember.assert(`The fragment's default value must be an ${type}`, (typeOf(value) == type) || (value === null));
 
   // Create a deep copy of the resulting value to avoid shared reference errors
   return copy(value, true);

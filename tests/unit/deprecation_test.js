@@ -1,10 +1,10 @@
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 
-moduleForAcceptance("unit - Deprecations", {
-  setup: function() {
+moduleForAcceptance('unit - Deprecations', {
+  setup() {
   },
 
-  teardown: function() {
+  teardown() {
   }
 });
 

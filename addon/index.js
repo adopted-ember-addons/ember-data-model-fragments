@@ -18,7 +18,7 @@ import {
   @module ember-data-model-fragments
   @main ember-data-model-fragments
 */
-var MF = Ember.Namespace.create({
+const MF = Ember.Namespace.create({
   VERSION: VERSION,
   Fragment: Fragment,
   FragmentArray: FragmentArray,

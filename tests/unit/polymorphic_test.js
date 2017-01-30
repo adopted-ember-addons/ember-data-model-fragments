@@ -5,10 +5,10 @@ import getOwner from '../helpers/get-owner';
 import Animal from 'dummy/models/animal';
 import Lion from 'dummy/models/lion';
 import Elephant from 'dummy/models/elephant';
-var store, zoo;
+let store, zoo;
 
-moduleForAcceptance("unit - Polymorphism", {
-  beforeEach: function(assert) {
+moduleForAcceptance('unit - Polymorphism', {
+  beforeEach(assert) {
     store = getOwner(this).lookup('service:store');
 
     assert.expectNoDeprecation();
@@ -36,12 +36,12 @@ moduleForAcceptance("unit - Polymorphism", {
     };
   },
 
-  afterEach: function() {
+  afterEach() {
     store = null;
   }
 });
 
-test("fragment properties support polymorphism", function(assert) {
+test('fragment properties support polymorphism', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -51,20 +51,20 @@ test("fragment properties support polymorphism", function(assert) {
       }
     });
 
-    return store.find('zoo', 1).then(function(zoo) {
-      assert.equal(zoo.get("name"), "Chilly Zoo", "zoo name is correct");
-      assert.equal(zoo.get("city"), "Winterfell", "zoo city is correct");
+    return store.find('zoo', 1).then(zoo => {
+      assert.equal(zoo.get('name'), 'Chilly Zoo', 'zoo name is correct');
+      assert.equal(zoo.get('city'), 'Winterfell', 'zoo city is correct');
 
-      var star = zoo.get("star");
-      assert.ok(star instanceof Animal, "zoo's star is an animal");
-      assert.equal(star.get("name"), "Mittens", "animal name is correct");
-      assert.ok(star instanceof Lion, "zoo's star is a lion");
-      assert.ok(star.get("hasManes"), "lion has manes");
+      let star = zoo.get('star');
+      assert.ok(star instanceof Animal, 'zoo\'s star is an animal');
+      assert.equal(star.get('name'), 'Mittens', 'animal name is correct');
+      assert.ok(star instanceof Lion, 'zoo\'s star is a lion');
+      assert.ok(star.get('hasManes'), 'lion has manes');
     });
   });
 });
 
-test("fragment array properties support polymorphism", function(assert) {
+test('fragment array properties support polymorphism', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -74,27 +74,27 @@ test("fragment array properties support polymorphism", function(assert) {
       }
     });
 
-    return store.find('zoo', 1).then(function(zoo) {
-      var animals = zoo.get("animals");
-      assert.equal(animals.get("length"), 2);
+    return store.find('zoo', 1).then(zoo => {
+      let animals = zoo.get('animals');
+      assert.equal(animals.get('length'), 2);
 
-      var first = animals.objectAt(0);
+      let first = animals.objectAt(0);
       assert.ok(first instanceof Animal);
-      assert.equal(first.get("name"), "Mittens", "first animal's name is correct");
+      assert.equal(first.get('name'), 'Mittens', 'first animal\'s name is correct');
       assert.ok(first instanceof Lion);
-      assert.ok(first.get("hasManes"), "lion has manes");
+      assert.ok(first.get('hasManes'), 'lion has manes');
 
-      var second = animals.objectAt(1);
+      let second = animals.objectAt(1);
       assert.ok(second instanceof Animal);
-      assert.equal(second.get("name"), "Snuitje", "second animal's name is correct");
+      assert.equal(second.get('name'), 'Snuitje', 'second animal\'s name is correct');
       assert.ok(second instanceof Elephant);
-      assert.equal(second.get("trunkLength"), 4, "elephant's trunk length is correct");
+      assert.equal(second.get('trunkLength'), 4, 'elephant\'s trunk length is correct');
     });
   });
 });
 
-test("fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function(assert) {
-  var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+test('fragment property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled', function(assert) {
+  let injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
   try {
@@ -108,7 +108,7 @@ test("fragment property type-checks check the superclass when MODEL_FACTORY_INJE
       });
 
       zoo = store.createRecord('zoo', { name: 'The World' });
-      var animal = store.createFragment('elephant', { name: 'Mr. Pink' });
+      let animal = store.createFragment('elephant', { name: 'Mr. Pink' });
 
       zoo.set('star', animal);
 
@@ -119,7 +119,7 @@ test("fragment property type-checks check the superclass when MODEL_FACTORY_INJE
   }
 });
 
-test("rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled", function(assert) {
+test('rolling back a fragment property that was set to null checks the superclass when MODEL_FACTORY_INJECTIONS is enabled', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -129,30 +129,30 @@ test("rolling back a fragment property that was set to null checks the superclas
       }
     });
 
-    var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+    let injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
     Ember.MODEL_FACTORY_INJECTIONS = true;
 
-    return store.find('zoo', 1).then(function(zoo) {
-      var animal = zoo.get('star');
+    return store.find('zoo', 1).then(zoo => {
+      let animal = zoo.get('star');
 
       zoo.set('star', null);
       zoo.rollbackAttributes();
 
       assert.equal(zoo.get('star.name'), animal.get('name'), 'The type check succeeded');
-    }).finally(function() {
+    }).finally(() => {
       Ember.MODEL_FACTORY_INJECTIONS = injectionValue;
     });
   });
 });
 
-test("fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled", function(assert) {
-  var injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
+test('fragment array property type-checks check the superclass when MODEL_FACTORY_INJECTIONS is enabled', function(assert) {
+  let injectionValue = Ember.MODEL_FACTORY_INJECTIONS;
   Ember.MODEL_FACTORY_INJECTIONS = true;
 
   try {
     Ember.run(() => {
-      var zoo = store.createRecord('zoo', { name: 'The World' });
-      var animal = store.createFragment('elephant', { name: 'Whitey' });
+      let zoo = store.createRecord('zoo', { name: 'The World' });
+      let animal = store.createFragment('elephant', { name: 'Whitey' });
 
       zoo.get('animals').pushObject(animal);
 

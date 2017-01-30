@@ -2,7 +2,7 @@
 //   https://github.com/emberjs/data/blob/master/tests/helpers/setup-ember-dev.js
 /* globals QUnit */
 import Ember from 'ember';
-import EmberTestHelpers from "ember-dev/test-helper/index";
+import EmberTestHelpers from 'ember-dev/test-helper/index';
 var debugModule = Ember.__loader.require('ember-metal/debug');
 
 const AVAILABLE_ASSERTIONS = ['expectAssertion', 'expectDeprecation', 'expectNoDeprecation', 'expectWarning', 'expectNoWarning'];

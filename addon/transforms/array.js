@@ -6,10 +6,10 @@ import map from '../util/map';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
-var makeArray = Ember.makeArray;
-var computed = Ember.computed;
-var getOwner = Ember.getOwner;
+const get = Ember.get;
+const makeArray = Ember.makeArray;
+const computed = Ember.computed;
+const getOwner = Ember.getOwner;
 
 /**
   Transform for `MF.array` that transforms array data with the given transform
@@ -19,7 +19,7 @@ var getOwner = Ember.getOwner;
   @namespace MF
   @extends DS.Transform
 */
-var ArrayTransform = Transform.extend({
+const ArrayTransform = Transform.extend({
   store: null,
   type: null,
 
@@ -28,7 +28,7 @@ var ArrayTransform = Transform.extend({
       return null;
     }
 
-    var transform = get(this, 'transform');
+    let transform = get(this, 'transform');
 
     data = makeArray(data);
 
@@ -44,7 +44,7 @@ var ArrayTransform = Transform.extend({
       return null;
     }
 
-    var transform = get(this, 'transform');
+    let transform = get(this, 'transform');
 
     array = array.toArray ? array.toArray() : array;
 
@@ -56,14 +56,14 @@ var ArrayTransform = Transform.extend({
   },
 
   transform: computed('type', function() {
-    var attributeType = this.get('type');
+    let attributeType = this.get('type');
 
     if (!attributeType) {
       return null;
     }
 
-    var transform = getOwner(this).lookup('transform:' + attributeType);
-    Ember.assert("Unable to find transform for '" + attributeType + "'", !!transform);
+    let transform = getOwner(this).lookup(`transform:${attributeType}`);
+    Ember.assert(`Unable to find transform for '${attributeType}'`, !!transform);
 
     return transform;
   })

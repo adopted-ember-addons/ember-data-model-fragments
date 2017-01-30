@@ -15,12 +15,12 @@ import FragmentArray from './array/fragment';
   @module ember-data-model-fragments
 */
 
-var keys = Object.keys || Ember.keys;
-var create = Object.create || Ember.create;
-var getOwner = Ember.getOwner;
+const keys = Object.keys || Ember.keys;
+const create = Object.create || Ember.create;
+const getOwner = Ember.getOwner;
 
-var InternalModelPrototype = InternalModel.prototype;
-var internalModelExpectsModelName = InternalModelPrototype.hasOwnProperty('modelClass');
+let InternalModelPrototype = InternalModel.prototype;
+const internalModelExpectsModelName = InternalModelPrototype.hasOwnProperty('modelClass');
 
 
 /**
@@ -37,8 +37,8 @@ Store.reopen({
 
     ```js
     store.createFragment('name', {
-      first: "Alex",
-      last: "Routé"
+      first: 'Alex',
+      last: 'Routé'
     });
     ```
 
@@ -48,16 +48,16 @@ Store.reopen({
       newly created fragment.
     @return {MF.Fragment} fragment
   */
-  createFragment: function(modelName, props) {
-    Ember.assert("The '" + modelName + "' model must be a subclass of MF.Fragment", this.isFragment(modelName));
+  createFragment(modelName, props) {
+    Ember.assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
 
-    var internalModel;
+    let internalModel;
     if (internalModelExpectsModelName) {
       internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
     } else {
       // BACKWARDS_COMPAT: <= Ember 2.11 the `InternalModel` expected the class,
       // rather than the modelName, as it's first argument.
-      var type = this.modelFor(modelName);
+      let type = this.modelFor(modelName);
       internalModel = new InternalModel(type, null, this, getOwner(this).container);
     }
 
@@ -69,7 +69,7 @@ Store.reopen({
 
     internalModel.loadedData();
 
-    var fragment = internalModel.getRecord();
+    let fragment = internalModel.getRecord();
 
     if (props) {
       fragment.setProperties(props);
@@ -90,7 +90,7 @@ Store.reopen({
     @return {boolean}
   */
   isFragment(modelName) {
-    var type = this.modelFor(modelName);
+    let type = this.modelFor(modelName);
     return Fragment.detect(type);
   }
 });
@@ -118,7 +118,7 @@ Model.reopen({
       last  : DS.attr('string')
     });
 
-    var person = store.createRecord('person');
+    let person = store.createRecord('person');
     person.changedAttributes(); // {}
     person.get('name').set('first', 'Tomster');
     person.set('type', 'Hamster');
@@ -129,26 +129,26 @@ Model.reopen({
     @return {Object} an object, whose keys are changed properties,
       and value is an [oldProp, newProp] array.
   */
-  changedAttributes: function() {
-    var diffData = this._super();
-    var internalModel = internalModelFor(this);
+  changedAttributes() {
+    let diffData = this._super(...arguments);
+    let internalModel = internalModelFor(this);
 
-    keys(internalModel._fragments).forEach(function(name) {
+    keys(internalModel._fragments).forEach(name => {
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
       if (name in internalModel._attributes) {
         diffData[name] = true;
       }
-    }, this);
+    });
 
     return diffData;
   },
 
-  willDestroy: function() {
-    this._super.apply(this, arguments);
+  willDestroy() {
+    this._super(...arguments);
 
-    var internalModel = internalModelFor(this);
-    var key, fragment;
+    let internalModel = internalModelFor(this);
+    let key, fragment;
 
     // destroy the current state
     for (key in internalModel._fragments) {
@@ -171,10 +171,10 @@ Model.reopen({
 // Replace a method on an object with a new one that calls the original and then
 // invokes a function with the result
 function decorateMethod(obj, name, fn) {
-  var originalFn = obj[name];
+  let originalFn = obj[name];
 
   obj[name] = function() {
-    var value = originalFn.apply(this, arguments);
+    let value = originalFn.apply(this, arguments);
 
     return fn.call(this, value, arguments);
   };
@@ -188,10 +188,10 @@ function decorateMethod(obj, name, fn) {
   @private
 */
 decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
-  var attrs = snapshot._attributes;
+  let attrs = snapshot._attributes;
 
-  keys(attrs).forEach(function(key) {
-    var attr = attrs[key];
+  keys(attrs).forEach(key => {
+    let attr = attrs[key];
 
     // If the attribute has a `_createSnapshot` method, invoke it before the
     // snapshot gets passed to the serializer
@@ -220,7 +220,7 @@ decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragment
   @method rollbackAttributes
 */
 decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
-  for (var key in this._fragments) {
+  for (let key in this._fragments) {
     if (this._fragments[key]) {
       this._fragments[key].rollbackAttributes();
     }
@@ -234,10 +234,10 @@ decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFr
   @method flushChangedAttributes
 */
 decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushChangedAttributesFragments() {
-  var fragment;
+  let fragment;
 
   // Notify fragments that the record was committed
-  for (var key in this._fragments) {
+  for (let key in this._fragments) {
     if (fragment = this._fragments[key]) {
       fragment._flushChangedAttributes();
     }
@@ -252,11 +252,11 @@ decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushC
   @method adapterDidCommit
 */
 decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
-  var attributes = (args[0] && args[0].attributes) || create(null);
-  var fragment;
+  let attributes = (args[0] && args[0].attributes) || create(null);
+  let fragment;
 
   // Notify fragments that the record was committed
-  for (var key in this._fragments) {
+  for (let key in this._fragments) {
     if (fragment = this._fragments[key]) {
       fragment._adapterDidCommit(attributes[key]);
     }
@@ -264,11 +264,11 @@ decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCo
 });
 
 decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
-  var error = args[0] || create(null);
-  var fragment;
+  let error = args[0] || create(null);
+  let fragment;
 
   // Notify fragments that the record was committed
-  for (var key in this._fragments) {
+  for (let key in this._fragments) {
     if (fragment = this._fragments[key]) {
       fragment._adapterDidError(error);
     }
@@ -287,31 +287,31 @@ JSONSerializer.reopen({
     @method transformFor
     @private
   */
-  transformFor: function(attributeType) {
+  transformFor(attributeType) {
     if (attributeType.indexOf('-mf-') === 0) {
       return getFragmentTransform(getOwner(this), this.store, attributeType);
     }
 
-    return this._super.apply(this, arguments);
+    return this._super(...arguments);
   }
 });
 
 // Retrieve or create a transform for the specific fragment type
 function getFragmentTransform(owner, store, attributeType) {
-  var containerKey = 'transform:' + attributeType;
-  var match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-  var transformName = match[1];
-  var transformType = match[2];
-  var polymorphicTypeProp = match[3];
+  let containerKey = `transform:${attributeType}`;
+  let match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+  let transformName = match[1];
+  let transformType = match[2];
+  let polymorphicTypeProp = match[3];
 
   if (!owner.hasRegistration(containerKey)) {
-    var transformClass;
+    let transformClass;
     if (owner.factoryFor) {
-      transformClass = owner.factoryFor('transform:' + transformName);
+      transformClass = owner.factoryFor(`transform:${transformName}`);
       transformClass = transformClass && transformClass.class;
     } else {
       // BACKWARDS_COMPAT: <= Ember 2.11
-      transformClass = owner._lookupFactory('transform:' + transformName);
+      transformClass = owner._lookupFactory(`transform:${transformName}`);
     }
 
     owner.register(containerKey, transformClass.extend({
@@ -332,11 +332,11 @@ function getFragmentTransform(owner, store, attributeType) {
   See: https://github.com/lytics/ember-data-model-fragments/issues/224
 */
 (function patchContainerInstanceCache(instanceCache) {
-  var ContainerInstanceCachePrototype = ContainerInstanceCache.prototype;
-  var _super = ContainerInstanceCachePrototype._fallbacksFor;
+  let ContainerInstanceCachePrototype = ContainerInstanceCache.prototype;
+  let _super = ContainerInstanceCachePrototype._fallbacksFor;
   ContainerInstanceCachePrototype._fallbacksFor = function _modelFragmentsPatchedFallbacksFor(namespace, preferredKey) {
     if (namespace === 'serializer') {
-      var model = this._store.modelFactoryFor(preferredKey);
+      let model = this._store.modelFactoryFor(preferredKey);
       if (model && Fragment.detect(model)) {
         return [
           '-fragment',
