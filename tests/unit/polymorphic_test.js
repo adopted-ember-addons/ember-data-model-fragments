@@ -19,18 +19,18 @@ moduleForAcceptance('unit - Polymorphism', {
       star: {
         $type: 'lion',
         name: 'Mittens',
-        hasManes: 'true',
+        hasManes: 'true'
       },
       animals: [
         {
           $type: 'lion',
           name: 'Mittens',
-          hasManes: 'true',
+          hasManes: 'true'
         },
         {
           $type: 'elephant',
           name: 'Snuitje',
-          trunkLength: 4,
+          trunkLength: 4
         }
       ]
     };

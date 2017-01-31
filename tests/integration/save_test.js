@@ -42,7 +42,7 @@ test('persisting the owner record changes the fragment state to non-new', functi
     payload.person.id = 3;
 
     server.post('/people', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return person.save().then(person => {
@@ -75,7 +75,7 @@ test('persisting the owner record in a clean state maintains clean state', funct
     });
 
     server.put('/people/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, '{}' ];
+      return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
     return store.find('person', 1).then(person => {
@@ -116,7 +116,7 @@ test('persisting the owner record when a fragment is dirty moves owner record, f
     });
 
     server.put('/people/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, '{}' ];
+      return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
     return store.find('person', 1).then(person => {
@@ -169,7 +169,7 @@ test('persisting a new owner record moves the owner record, fragment array, and 
     payload.person.id = 3;
 
     server.post('/people', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return person.save().then(person => {
@@ -198,7 +198,7 @@ test('a new record can be persisted with null fragments', function(assert) {
     };
 
     server.post('/people', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return person.save().then(person => {
@@ -242,7 +242,7 @@ test('the adapter can update fragments on save', function(assert) {
     payload.person.addresses[0].street = '1 Godswood';
 
     server.put('/people/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return store.find('person', 1).then(person => {
@@ -301,7 +301,7 @@ test('existing fragments are updated on save', function(assert) {
     });
 
     server.put('/people/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     let name, addresses, address;
@@ -352,7 +352,7 @@ test('newly created fragments are updated on save', function(assert) {
 
   return Ember.run(() => {
     server.post('/people', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     let person = store.createRecord('person');
@@ -360,7 +360,7 @@ test('newly created fragments are updated on save', function(assert) {
     let address = store.createFragment('address', Ember.copy(data.addresses[0]));
 
     person.set('name', name);
-    person.set('addresses', [ address ]);
+    person.set('addresses', [address]);
 
     let addresses = person.get('addresses');
 
@@ -407,7 +407,7 @@ test('the adapter can update fragments on reload', function(assert) {
     payload.person.addresses[0].street = '1 Broken Tower';
 
     server.get('/people/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return store.find('person', 1).then(person => {
@@ -512,7 +512,7 @@ test('fragment array properties are notified on save', function(assert) {
     payload.person.id = 1;
 
     server.put('/people/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return store.find('person', 1).then(person => {
@@ -527,8 +527,8 @@ test('fragment array properties are notifed on reload', function(assert) {
   // assert.expect(2);
 
   let Army = DS.Model.extend({
-    name     : DS.attr('string'),
-    soldiers : MF.array()
+    name: DS.attr('string'),
+    soldiers: MF.array()
   });
 
   owner.register('model:army', Army);
@@ -565,7 +565,7 @@ test('fragment array properties are notifed on reload', function(assert) {
     payload.army.soldiers.shift();
 
     server.get('/armies/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return store.find('army', 1).then(army => {
@@ -576,7 +576,7 @@ test('fragment array properties are notifed on reload', function(assert) {
 });
 
 test('string array can be rolled back on failed save', function(assert) {
-  //assert.expect(3);
+  // assert.expect(3);
 
   let data = {
     name: 'Golden Company',
@@ -588,8 +588,8 @@ test('string array can be rolled back on failed save', function(assert) {
   };
 
   let Army = DS.Model.extend({
-    name     : DS.attr('string'),
-    soldiers : MF.array()
+    name: DS.attr('string'),
+    soldiers: MF.array()
   });
 
   owner.register('model:army', Army);
@@ -604,7 +604,7 @@ test('string array can be rolled back on failed save', function(assert) {
     });
 
     server.get('/armies', () => {
-      return [ 500, {'Content-Type': 'application/json'} ];
+      return [500, { 'Content-Type': 'application/json' }];
     });
 
     let army, soliders;
@@ -626,7 +626,7 @@ test('string array can be rolled back on failed save', function(assert) {
 });
 
 test('existing fragments can be rolled back on failed save', function(assert) {
-  //assert.expect(3);
+  // assert.expect(3);
 
   let data = {
     name: {
@@ -653,7 +653,7 @@ test('existing fragments can be rolled back on failed save', function(assert) {
     });
 
     server.put('/armies/1', () => {
-      return [ 500, {'Content-Type': 'application/json'} ];
+      return [500, { 'Content-Type': 'application/json' }];
     });
 
     let mrStark, name, address;
@@ -672,7 +672,7 @@ test('existing fragments can be rolled back on failed save', function(assert) {
     }).catch(() => {
       mrStark.rollbackAttributes();
 
-      assert.equal(name.get('first') + ' ' + name.get('last'), 'Eddard Stark', 'fragment name rolled back');
+      assert.equal(`${name.get('first')} ${name.get('last')}`, 'Eddard Stark', 'fragment name rolled back');
       assert.equal(address.get('street'), '1 Great Keep', 'fragment array fragment correctly rolled back');
     });
   });

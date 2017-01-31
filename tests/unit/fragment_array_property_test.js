@@ -171,7 +171,7 @@ test('setting to an array of fragments is allowed', function(assert) {
         country: 'Westeros'
       });
 
-      person.set('addresses', [ address ]);
+      person.set('addresses', [address]);
 
       assert.equal(person.get('addresses'), addresses, 'fragment array is the same object');
       assert.equal(person.get('addresses.length'), 1, 'fragment array has the correct length');
@@ -264,7 +264,7 @@ test('fragments are created from an array of object literals when creating a rec
         first: 'Balon',
         last: 'Greyjoy'
       },
-      addresses: [ address ]
+      addresses: [address]
     });
 
     assert.ok(person.get('addresses.firstObject') instanceof MF.Fragment, 'a `MF.Fragment` instance is created');
@@ -296,7 +296,7 @@ test('setting a fragment array to an array of to an object literals creates new 
     });
 
     return store.find('person', 1).then(person => {
-      person.set('addresses', [ address ]);
+      person.set('addresses', [address]);
 
       assert.ok(person.get('addresses.firstObject') instanceof MF.Fragment, 'a `MF.Fragment` instance is created');
       assert.equal(person.get('addresses.firstObject.street'), address.street, 'fragment has correct values');
@@ -337,7 +337,7 @@ test('setting a fragment array to an array of object literals reuses an existing
     return store.find('person', 1).then(person => {
       let address = person.get('addresses.firstObject');
 
-      person.set('addresses', [ newAddress ]);
+      person.set('addresses', [newAddress]);
 
       assert.equal(address, person.get('addresses.firstObject'), 'fragment instances are reused');
       assert.equal(person.get('addresses.firstObject.street'), newAddress.street, 'fragment has correct values');
@@ -345,14 +345,13 @@ test('setting a fragment array to an array of object literals reuses an existing
   });
 });
 
-
 test('setting to an array of non-fragments throws an error', function(assert) {
   Ember.run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
       assert.throws(() => {
-        person.set('addresses', [ 'address' ]);
+        person.set('addresses', ['address']);
       }, 'error is thrown when setting to an array of non-fragments');
     });
   });

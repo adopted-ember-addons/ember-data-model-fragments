@@ -242,7 +242,7 @@ test('fragments can have default values', function(assert) {
     };
 
     let Ship = DS.Model.extend({
-      name: MF.fragment('name', { defaultValue: defaultValue }),
+      name: MF.fragment('name', { defaultValue: defaultValue })
     });
 
     owner.register('model:ship', Ship);
@@ -267,7 +267,7 @@ test('fragment default values can be functions', function(assert) {
     };
 
     let Sword = DS.Model.extend({
-      name: MF.fragment('name', { defaultValue() { return defaultValue; } }),
+      name: MF.fragment('name', { defaultValue() { return defaultValue; } })
     });
 
     owner.register('model:sword', Sword);

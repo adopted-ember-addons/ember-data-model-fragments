@@ -121,7 +121,7 @@ const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   /**
     @method _adapterDidCommit
   */
-  _adapterDidError(/*error*/) {
+  _adapterDidError(/* error */) {
     internalModelFor(this)._saveWasRejected();
   },
 

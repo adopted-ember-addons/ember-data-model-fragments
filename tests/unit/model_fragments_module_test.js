@@ -1,3 +1,4 @@
+/* global require */
 import { test } from 'ember-qunit';
 import { module } from 'qunit';
 
@@ -19,16 +20,16 @@ module('model-fragments shim module');
 test('test the shim modules', function(assert) {
   assert.expectDeprecation();
 
-  assert.equal(require('model-fragments')['default'], MF);
-  assert.equal(require('model-fragments/array/fragment')['default'], FragmentArray);
-  assert.equal(require('model-fragments/array/stateful')['default'], StatefulArray);
-  assert.equal(require('model-fragments/transforms/array')['default'], ArrayTransform);
-  assert.equal(require('model-fragments/transforms/fragment-array')['default'], FragmentArrayTransform);
-  assert.equal(require('model-fragments/transforms/fragment')['default'], FragmentTransform);
-  assert.equal(require('model-fragments/attributes')['fragment'], fragment);
-  assert.equal(require('model-fragments/attributes')['fragmentArray'], fragmentArray);
-  assert.equal(require('model-fragments/attributes')['array'], array);
-  assert.equal(require('model-fragments/attributes')['fragmentOwner'], fragmentOwner);
-  assert.equal(require('model-fragments/fragment')['default'], Fragment);
-  assert.equal(require('model-fragments/version')['default'], version);
+  assert.equal(require('model-fragments').default, MF);
+  assert.equal(require('model-fragments/array/fragment').default, FragmentArray);
+  assert.equal(require('model-fragments/array/stateful').default, StatefulArray);
+  assert.equal(require('model-fragments/transforms/array').default, ArrayTransform);
+  assert.equal(require('model-fragments/transforms/fragment-array').default, FragmentArrayTransform);
+  assert.equal(require('model-fragments/transforms/fragment').default, FragmentTransform);
+  assert.equal(require('model-fragments/attributes').fragment, fragment);
+  assert.equal(require('model-fragments/attributes').fragmentArray, fragmentArray);
+  assert.equal(require('model-fragments/attributes').array, array);
+  assert.equal(require('model-fragments/attributes').fragmentOwner, fragmentOwner);
+  assert.equal(require('model-fragments/fragment').default, Fragment);
+  assert.equal(require('model-fragments/version').default, version);
 });

@@ -28,19 +28,19 @@ moduleForAcceptance('unit - Serialization', {
 test('fragment properties are snapshotted as normal attributes on the owner record snapshot', function(assert) {
   let person = {
     name: {
-      first : 'Catelyn',
-      last  : 'Stark'
+      first: 'Catelyn',
+      last: 'Stark'
     },
     houses: [
       {
-        name   : 'Tully',
-        region : 'Riverlands',
-        exiled : true
+        name: 'Tully',
+        region: 'Riverlands',
+        exiled: true
       },
       {
-        name   : 'Stark',
-        region : 'North',
-        exiled : true
+        name: 'Stark',
+        region: 'North',
+        exiled: true
       }
     ],
     children: [
@@ -203,7 +203,7 @@ test('normalizing data can handle `null` fragment values', function(assert) {
 });
 
 test('array properties use the specified transform to normalize data', function(assert) {
-  let values = [ 1, 0, true, false, 'true', '' ];
+  let values = [1, 0, true, false, 'true', ''];
 
   let normalized = store.normalize('person', {
     strings: values,
@@ -221,7 +221,7 @@ test('array properties use the specified transform to normalize data', function(
 });
 
 test('array properties use the specified transform to serialize data', function(assert) {
-  let values = [ 1, 0, true, false, 'true', '' ];
+  let values = [1, 0, true, false, 'true', ''];
 
   Ember.run(() => {
     store.push({

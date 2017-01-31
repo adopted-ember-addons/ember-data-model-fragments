@@ -101,7 +101,7 @@ test('setting a fragment property to an object literal dirties the fragment and 
       let name = person.get('name');
 
       person.set('name', {
-        first: 'Rhaenys',
+        first: 'Rhaenys'
       });
 
       assert.ok(name.get('hasDirtyAttributes'), 'fragment is dirty');
@@ -663,7 +663,6 @@ test('rolling back the owner record returns all values in an array property, the
   });
 });
 
-
 test('rolling back a fragment array returns all fragments, the fragment array, and the owner record to a clean state', function(assert) {
   Ember.run(() => {
     pushPerson(1);
@@ -888,7 +887,7 @@ test('pushing a fragment array update doesn\'t cause it to become dirty', functi
               // Yeah, this is pretty weird...
               {},
               {
-                street: '1 Dungeon Cell',
+                street: '1 Dungeon Cell'
               }
             ]
           }

@@ -86,11 +86,13 @@ let FragmentRootState = {
         let key = internalModel._name;
 
         // Abort if fragment is still initializing
-        if (!record._internalModel._fragments[key]) { return; }
+        if (!record._internalModel._fragments[key]) {
+          return;
+        }
 
         // Reset the property on the owner record if no other siblings
         // are dirty (or there are no siblings)
-        if (!get(record, key + '.hasDirtyAttributes')) {
+        if (!get(record, `${key}.hasDirtyAttributes`)) {
           fragmentDidReset(record, key, internalModel);
         }
       },
