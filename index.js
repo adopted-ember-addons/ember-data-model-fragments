@@ -5,7 +5,7 @@ var merge = require('broccoli-merge-trees');
 var version = require('./lib/version');
 
 module.exports = {
-  name: 'model-fragments',
+  name: 'ember-data-model-fragments',
 
   init: function() {
     this._super.init && this._super.init.apply(this, arguments);
@@ -21,6 +21,12 @@ module.exports = {
         this.ui.writeLine(message);
       }
     }
+  },
+
+  included: function() {
+    this._super.included.apply(this, arguments);
+
+    this.import('vendor/model-fragments-shim.js');
   },
 
   treeForAddon: function(tree) {

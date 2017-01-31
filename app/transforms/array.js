@@ -1,2 +1,2 @@
-import ArrayTransform from 'model-fragments/transforms/array';
+import ArrayTransform from 'ember-data-model-fragments/transforms/array';
 export default ArrayTransform;
