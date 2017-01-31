@@ -125,8 +125,8 @@ With a JSON payload of:
 The `name` attribute can be treated similar to a `belongsTo` relationship:
 
 ```javascript
-var person = store.getById('person', '1');
-var name = person.get('name');
+let person = store.getById('person', '1');
+let name = person.get('name');
 
 person.get('isDirty'); // false
 name.get('first'); // 'Tyrion'
@@ -155,9 +155,9 @@ person.get('isDirty'); // false
 The `addresses` attribute can be treated similar to a `hasMany` relationship:
 
 ```javascript
-var person = store.getById('person', '1');
-var addresses = person.get('addresses');
-var address = addresses.get('lastObject');
+let person = store.getById('person', '1');
+let addresses = person.get('addresses');
+let address = addresses.get('lastObject');
 
 person.get('isDirty'); // false
 address.get('country'); // 'Westeros'
@@ -193,8 +193,8 @@ person.set('addresses', [
 The `titles` attribute can be treated as an `Ember.Array`:
 
 ```javascript
-var person = store.getById('person', '1');
-var titles = person.get('titles');
+let person = store.getById('person', '1');
+let titles = person.get('titles');
 
 person.get('isDirty'); // false
 titles.get('length'); // 2
@@ -230,8 +230,8 @@ export default Model.extend({
 Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `fragment` properties default to `null` and `fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `fragmentArray` property:
 
 ```javascript
-var person = store.createRecord('person');
-var addresses = person.get('addresses'); // null
+let person = store.createRecord('person');
+let addresses = person.get('addresses'); // null
 
 // Fails with "Cannot read property 'createFragment' of null"
 addresses.createFragment({
@@ -248,7 +248,7 @@ import { fragment } from 'model-fragments/attributes';
 
 export default Model.extend({
   name: fragment('name', {
-    defaultValue: function() {
+    defaultValue() {
       return {
         first: 'Unsullied',
         last: Ember.uuid()
@@ -320,23 +320,23 @@ If custom serialization of the owner record is needed, fragment [snapshots](http
 import JSONSerializer from 'ember-data/serializers/json';
 
 export default JSONSerializer.extend({
-  serialize: function(snapshot, options) {
-    var json = this._super(snapshot, options);
+  serialize(snapshot, options) {
+    let json = this._super(...arguments);
 
     // Returns a `Snapshot` instance of the fragment
-    var nameSnapshot = snapshot.attr('name');
+    let nameSnapshot = snapshot.attr('name');
 
     json.full_name = nameSnapshot.attr('given') + ' ' + nameSnapshot.attr('family');
 
     // Returns a plain array of `Snapshot` instances
-    var addressSnapshots = snapshot.attr('addresses');
+    let addressSnapshots = snapshot.attr('addresses');
 
     json.countries = addressSnapshots.map(function(addressSnapshot) {
       return addressSnapshot.attr('country');
     });
 
     // Returns a plain array of primitives
-    var titlesSnapshot = snapshot.attr('titles');
+    let titlesSnapshot = snapshot.attr('titles');
 
     json.title_count = titlesSnapshot.length;
 
@@ -424,8 +424,8 @@ With a JSON payload of:
 Dirty state propagates up to the parent record, rollback cascades down:
 
 ```javascript
-var user = store.getById('user', '1');
-var product = user.get('orders.firstObject.products.lastObject');
+let user = store.getById('user', '1');
+let product = user.get('orders.firstObject.products.lastObject');
 
 user.get('isDirty'); // false
 product.get('price'); // '299.99'
@@ -534,8 +534,8 @@ Serializing the fragment type back to JSON is not currently supported out of the
 import JSONSerializer from 'ember-data/serializers/json';
 
 export default JSONSerializer.extend({
-  serialize: function(record, options) {
-    var json = this._super(record, options);
+  serialize(record, options) {
+    let json = this._super(...arguments);
 
     if (record instanceof App.Elephant) {
       json.$type = 'elephant';

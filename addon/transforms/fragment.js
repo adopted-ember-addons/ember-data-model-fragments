@@ -6,7 +6,7 @@ import JSONAPISerializer from 'ember-data/serializers/json-api';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
+const get = Ember.get;
 
 /**
   Transform for `MF.fragment` fragment attribute which delegates work to
@@ -16,7 +16,7 @@ var get = Ember.get;
   @namespace MF
   @extends DS.Transform
 */
-var FragmentTransform = Transform.extend({
+const FragmentTransform = Transform.extend({
   store: null,
   type: null,
   polymorphicTypeProp: null,
@@ -34,15 +34,15 @@ var FragmentTransform = Transform.extend({
       return null;
     }
 
-    var store = this.store;
-    var serializer = store.serializerFor(snapshot.modelName);
+    let store = this.store;
+    let serializer = store.serializerFor(snapshot.modelName);
 
     return serializer.serialize(snapshot);
   },
 
-  modelNameFor: function modelNameFor(data) {
-    var modelName = get(this, 'type');
-    var polymorphicTypeProp = get(this, 'polymorphicTypeProp');
+  modelNameFor(data) {
+    let modelName = get(this, 'type');
+    let polymorphicTypeProp = get(this, 'polymorphicTypeProp');
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
       modelName = data[polymorphicTypeProp];
@@ -51,15 +51,15 @@ var FragmentTransform = Transform.extend({
     return modelName;
   },
 
-  deserializeSingle: function deserializeSingle(data) {
-    var store = this.store;
-    var modelName = this.modelNameFor(data);
-    var serializer = store.serializerFor(modelName);
+  deserializeSingle(data) {
+    let store = this.store;
+    let modelName = this.modelNameFor(data);
+    let serializer = store.serializerFor(modelName);
 
-    Ember.assert("The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`", !(serializer instanceof JSONAPISerializer));
+    Ember.assert('The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`', !(serializer instanceof JSONAPISerializer));
 
-    var typeClass = store.modelFor(modelName);
-    var serialized = serializer.normalize(typeClass, data);
+    let typeClass = store.modelFor(modelName);
+    let serialized = serializer.normalize(typeClass, data);
 
     // `JSONSerializer#normalize` returns a full JSON API document, but we only
     // need the attributes hash

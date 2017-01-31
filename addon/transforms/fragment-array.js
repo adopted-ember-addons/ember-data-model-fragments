@@ -13,13 +13,13 @@ import map from '../util/map';
   @namespace MF
   @extends DS.Transform
 */
-var FragmentArrayTransform = FragmentTransform.extend({
+const FragmentArrayTransform = FragmentTransform.extend({
   deserialize: function deserializeFragmentArray(data) {
     if (data == null) {
       return null;
     }
 
-    return map(data, function(datum) {
+    return map(data, datum => {
       return this.deserializeSingle(datum);
     }, this);
   },
@@ -29,11 +29,10 @@ var FragmentArrayTransform = FragmentTransform.extend({
       return null;
     }
 
-    var store = this.store;
+    let store = this.store;
 
-    return map(snapshots, function(snapshot) {
-      var serializer = store.serializerFor(snapshot.modelName);
-
+    return map(snapshots, snapshot => {
+      let serializer = store.serializerFor(snapshot.modelName);
       return serializer.serialize(snapshot);
     });
   }

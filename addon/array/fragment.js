@@ -14,30 +14,31 @@ import map from '../util/map';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
-var setProperties = Ember.setProperties;
-var computed = Ember.computed;
-var typeOf = Ember.typeOf;
+const get = Ember.get;
+const setProperties = Ember.setProperties;
+const computed = Ember.computed;
+const typeOf = Ember.typeOf;
 
 // Normalizes an array of object literals or fragments into fragment instances,
 // reusing fragments from a source content array when possible
 function normalizeFragmentArray(array, content, objs, canonical) {
-  var record = get(array, 'owner');
-  var store = get(record, 'store');
-  var declaredModelName = get(array, 'type');
-  var options = get(array, 'options');
-  var key = get(array, 'name');
-  var fragment;
+  let record = get(array, 'owner');
+  let store = get(record, 'store');
+  let declaredModelName = get(array, 'type');
+  let options = get(array, 'options');
+  let key = get(array, 'name');
+  let fragment;
 
-  return map(objs, function(data, index) {
-    Ember.assert("You can only add '" + get(array, 'type') + "' fragments or object literals to this property", typeOf(data) === 'object' || isInstanceOfType(store.modelFor(get(array, 'type')), data));
+  return map(objs, (data, index) => {
+    let type = get(array, 'type');
+    Ember.assert(`You can only add '${type}' fragments or object literals to this property`, typeOf(data) === 'object' || isInstanceOfType(store.modelFor(type), data));
 
     if (isFragment(data)) {
       fragment = data;
 
-      var owner = internalModelFor(fragment)._owner;
+      let owner = internalModelFor(fragment)._owner;
 
-      Ember.assert("Fragments can only belong to one owner, try copying instead", !owner || owner === record);
+      Ember.assert('Fragments can only belong to one owner, try copying instead', !owner || owner === record);
 
       if (!owner) {
         setFragmentOwner(fragment, record, key);
@@ -72,7 +73,7 @@ function normalizeFragmentArray(array, content, objs, canonical) {
   @namespace MF
   @extends StatefulArray
 */
-var FragmentArray = StatefulArray.extend({
+const FragmentArray = StatefulArray.extend({
   /**
     The type of fragments the array contains
 
@@ -89,8 +90,8 @@ var FragmentArray = StatefulArray.extend({
     @private
     @param {Object} data
   */
-  _normalizeData: function(data) {
-    var content = get(this, 'content');
+  _normalizeData(data) {
+    let content = get(this, 'content');
 
     return normalizeFragmentArray(this, content, data, true);
   },
@@ -99,9 +100,9 @@ var FragmentArray = StatefulArray.extend({
     @method _createSnapshot
     @private
   */
-  _createSnapshot: function() {
+  _createSnapshot() {
     // Snapshot each fragment
-    return this.map(function(fragment) {
+    return this.map(fragment => {
       return fragment._createSnapshot();
     });
   },
@@ -109,8 +110,8 @@ var FragmentArray = StatefulArray.extend({
   /**
     @method _flushChangedAttributes
   */
-  _flushChangedAttributes: function() {
-    this.map(function(fragment) {
+  _flushChangedAttributes() {
+    this.map(fragment => {
       fragment._flushChangedAttributes();
     });
   },
@@ -119,12 +120,12 @@ var FragmentArray = StatefulArray.extend({
     @method _adapterDidCommit
     @private
   */
-  _adapterDidCommit: function(data) {
-    this._super(data);
+  _adapterDidCommit(data) {
+    this._super(...arguments);
 
     // Notify all records of commit; if the adapter update did not contain new
     // data, just notify each fragment so it can transition to a clean state
-    this.forEach(function(fragment, index) {
+    this.forEach((fragment, index) => {
       fragment._adapterDidCommit(data && data[index]);
     });
   },
@@ -133,12 +134,12 @@ var FragmentArray = StatefulArray.extend({
     @method _adapterDidError
     @private
   */
-  _adapterDidError: function(error) {
-    this._super(error);
+  _adapterDidError(error) {
+    this._super(...arguments);
 
     // Notify all records of the error; if the adapter update did not contain new
     // data, just notify each fragment so it can transition to a clean state
-    this.forEach(function(fragment) {
+    this.forEach(fragment => {
       fragment._adapterDidError(error);
     });
   },
@@ -161,7 +162,7 @@ var FragmentArray = StatefulArray.extend({
     @readOnly
   */
   hasDirtyAttributes: computed('@each.hasDirtyAttributes', '_originalState', function() {
-    return this._super() || this.isAny('hasDirtyAttributes');
+    return this._super(...arguments) || this.isAny('hasDirtyAttributes');
   }),
 
   /**
@@ -180,8 +181,8 @@ var FragmentArray = StatefulArray.extend({
 
     @method rollbackAttributes
   */
-  rollbackAttributes: function() {
-    this._super();
+  rollbackAttributes() {
+    this._super(...arguments);
     this.invoke('rollbackAttributes');
   },
 
@@ -192,7 +193,7 @@ var FragmentArray = StatefulArray.extend({
     @method serialize
     @return {Array}
   */
-  serialize: function() {
+  serialize() {
     return this.invoke('serialize');
   },
 
@@ -202,10 +203,10 @@ var FragmentArray = StatefulArray.extend({
     @method replaceContent
     @private
   */
-  replaceContent: function(index, amount, objs) {
-    var content = get(this, 'content');
-    var replacedContent = content.slice(index, index + amount);
-    var fragments = normalizeFragmentArray(this, replacedContent, objs);
+  replaceContent(index, amount, objs) {
+    let content = get(this, 'content');
+    let replacedContent = content.slice(index, index + amount);
+    let fragments = normalizeFragmentArray(this, replacedContent, objs);
 
     return content.replace(index, amount, fragments);
   },
@@ -218,7 +219,7 @@ var FragmentArray = StatefulArray.extend({
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the newly added fragment
   */
-  addFragment: function(fragment) {
+  addFragment(fragment) {
     return this.addObject(fragment);
   },
 
@@ -229,7 +230,7 @@ var FragmentArray = StatefulArray.extend({
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the removed fragment
   */
-  removeFragment: function(fragment) {
+  removeFragment(fragment) {
     return this.removeObject(fragment);
   },
 
@@ -241,25 +242,25 @@ var FragmentArray = StatefulArray.extend({
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the newly added fragment
     */
-  createFragment: function(props) {
-    var record = get(this, 'owner');
-    var store = get(record, 'store');
-    var type = get(this, 'type');
-    var fragment = store.createFragment(type, props);
+  createFragment(props) {
+    let record = get(this, 'owner');
+    let store = get(record, 'store');
+    let type = get(this, 'type');
+    let fragment = store.createFragment(type, props);
 
     return this.pushObject(fragment);
   },
 
-  willDestroy: function() {
-    this._super.apply(this, arguments);
+  willDestroy() {
+    this._super(...arguments);
 
     // destroy the current state
-    this.forEach(function(fragment) {
+    this.forEach(fragment => {
       fragment.destroy();
     });
 
     // destroy the original state
-    this._originalState.forEach(function(fragment) {
+    this._originalState.forEach(fragment => {
       fragment.destroy();
     });
   }

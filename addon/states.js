@@ -5,15 +5,15 @@ import RootState from 'ember-data/-private/system/model/states';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
-var create = Object.create || Ember.create;
+const get = Ember.get;
+const create = Object.create || Ember.create;
 
-var didSetProperty = RootState.loaded.saved.didSetProperty;
-var propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
+const didSetProperty = RootState.loaded.saved.didSetProperty;
+const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
 
-var dirtySetup = function(internalModel) {
-  var record = internalModel._owner;
-  var key = internalModel._name;
+const dirtySetup = function(internalModel) {
+  let record = internalModel._owner;
+  let key = internalModel._name;
 
   // A newly created fragment may not have an owner yet
   if (record) {
@@ -44,7 +44,7 @@ var dirtySetup = function(internalModel) {
 
   @class FragmentRootState
 */
-var FragmentRootState = {
+let FragmentRootState = {
   // Include all `DS.Model` state booleans for consistency
   isEmpty: false,
   isLoading: false,
@@ -66,24 +66,24 @@ var FragmentRootState = {
   empty: {
     isEmpty: true,
 
-    loadedData: function(internalModel) {
+    loadedData(internalModel) {
       internalModel.transitionTo('loaded.created');
     },
 
-    pushedData: function(internalModel) {
+    pushedData(internalModel) {
       internalModel.transitionTo('loaded.saved');
     }
   },
 
   loaded: {
-    pushedData: function(internalModel) {
+    pushedData(internalModel) {
       internalModel.transitionTo('saved');
     },
 
     saved: {
-      setup: function(internalModel) {
-        var record = internalModel._owner;
-        var key = internalModel._name;
+      setup(internalModel) {
+        let record = internalModel._owner;
+        let key = internalModel._name;
 
         // Abort if fragment is still initializing
         if (!record._internalModel._fragments[key]) { return; }
@@ -99,7 +99,7 @@ var FragmentRootState = {
 
       didCommit() {},
 
-      becomeDirty: function(internalModel) {
+      becomeDirty(internalModel) {
         internalModel.transitionTo('updated');
       }
     },
@@ -111,7 +111,7 @@ var FragmentRootState = {
 
       setup: dirtySetup,
 
-      didCommit: function(internalModel) {
+      didCommit(internalModel) {
         internalModel.transitionTo('saved');
       }
     },
@@ -123,11 +123,11 @@ var FragmentRootState = {
 
       propertyWasReset: propertyWasReset,
 
-      didCommit: function(internalModel) {
+      didCommit(internalModel) {
         internalModel.transitionTo('saved');
       },
 
-      rolledBack: function(internalModel) {
+      rolledBack(internalModel) {
         internalModel.transitionTo('saved');
       }
     }
@@ -135,7 +135,7 @@ var FragmentRootState = {
 };
 
 function mixin(original, hash) {
-  for (var prop in hash) {
+  for (let prop in hash) {
     original[prop] = hash[prop];
   }
 
@@ -148,12 +148,12 @@ function wireState(object, parent, name) {
   object.parentState = parent;
   object.stateName = name;
 
-  for (var prop in object) {
+  for (let prop in object) {
     if (!object.hasOwnProperty(prop) || prop === 'parentState' || prop === 'stateName') {
       continue;
     }
     if (typeof object[prop] === 'object') {
-      object[prop] = wireState(object[prop], object, name + "." + prop);
+      object[prop] = wireState(object[prop], object, `${name}.${prop}`);
     }
   }
 

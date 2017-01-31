@@ -3,28 +3,28 @@ import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
 
-var store;
-var all = Ember.RSVP.all;
+let store;
+let all = Ember.RSVP.all;
 
-moduleForAcceptance("unit - `MF.Fragment`", {
-  beforeEach: function() {
+moduleForAcceptance('unit - `MF.Fragment`', {
+  beforeEach() {
     store = getOwner(this).lookup('service:store');
   },
 
-  afterEach: function() {
+  afterEach() {
     store = null;
   }
 });
 
-test("fragments are `Ember.Copyable`", function(assert) {
+test('fragments are `Ember.Copyable`', function(assert) {
   Ember.run(() => {
-    var fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
 
-    assert.ok(Ember.Copyable.detect(fragment), "fragments are copyable");
+    assert.ok(Ember.Copyable.detect(fragment), 'fragments are copyable');
   });
 });
 
-test("copied fragments can be added to any record", function(assert) {
+test('copied fragments can be added to any record', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -32,8 +32,8 @@ test("copied fragments can be added to any record", function(assert) {
         id: 1,
         attributes: {
           name: {
-            first: "Jon",
-            last: "Snow"
+            first: 'Jon',
+            last: 'Snow'
           }
         }
       }
@@ -50,17 +50,17 @@ test("copied fragments can be added to any record", function(assert) {
     return all([
       store.find('person', 1),
       store.find('person', 2)
-    ]).then(function(people) {
-      var copy = people[0].get('name').copy();
+    ]).then(people => {
+      let copy = people[0].get('name').copy();
 
       people[1].set('name', copy);
 
-      assert.ok(true, "fragment copies can be assigned to other records");
+      assert.ok(true, 'fragment copies can be assigned to other records');
     });
   });
 });
 
-test("copying a fragment copies the fragment's properties", function(assert) {
+test('copying a fragment copies the fragment\'s properties', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -68,55 +68,55 @@ test("copying a fragment copies the fragment's properties", function(assert) {
         id: 1,
         attributes: {
           name: {
-            first: "Jon",
-            last: "Snow"
+            first: 'Jon',
+            last: 'Snow'
           }
         }
       }
     });
 
-    return store.find('person', 1).then(function(person) {
-      var copy = person.get('name').copy();
+    return store.find('person', 1).then(person => {
+      let copy = person.get('name').copy();
 
-      assert.ok(copy.get('first'), "Jon");
-      assert.ok(copy.get('last'), "Snow");
+      assert.ok(copy.get('first'), 'Jon');
+      assert.ok(copy.get('last'), 'Snow');
     });
   });
 });
 
-test("fragments are `Ember.Comparable`", function(assert) {
+test('fragments are `Ember.Comparable`', function(assert) {
   Ember.run(() => {
-    var fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
 
-    assert.ok(Ember.Comparable.detect(fragment), "fragments are comparable");
+    assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
   });
 });
 
-test("fragments are compared by reference", function(assert) {
+test('fragments are compared by reference', function(assert) {
   Ember.run(() => {
-    var fragment1 = store.createFragment('name', {
-      first: "Jon",
-      last: "Arryn"
+    let fragment1 = store.createFragment('name', {
+      first: 'Jon',
+      last: 'Arryn'
     });
-    var fragment2 = store.createFragment('name', {
-      first: "Jon",
-      last: "Arryn"
+    let fragment2 = store.createFragment('name', {
+      first: 'Jon',
+      last: 'Arryn'
     });
 
-    assert.ok(fragment1.compare(fragment1, fragment2) !== 0, "deeply equal objects are not the same");
-    assert.ok(fragment1.compare(fragment1, fragment1) === 0, "identical objects are the same");
+    assert.ok(fragment1.compare(fragment1, fragment2) !== 0, 'deeply equal objects are not the same');
+    assert.ok(fragment1.compare(fragment1, fragment1) === 0, 'identical objects are the same');
   });
 });
 
-test("newly create fragments start in the new state", function(assert) {
+test('newly create fragments start in the new state', function(assert) {
   Ember.run(() => {
-    var fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
 
-    assert.ok(fragment.get('isNew'), "fragments start as new");
+    assert.ok(fragment.get('isNew'), 'fragments start as new');
   });
 });
 
-test("changes to fragments are indicated in the owner record's `changedAttributes`", function(assert) {
+test('changes to fragments are indicated in the owner record\'s `changedAttributes`', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -124,24 +124,24 @@ test("changes to fragments are indicated in the owner record's `changedAttribute
         id: 1,
         attributes: {
           name: {
-            first: "Loras",
-            last: "Tyrell"
+            first: 'Loras',
+            last: 'Tyrell'
           }
         }
       }
     });
 
-    return store.find('person', 1).then(function(person) {
-      var name = person.get('name');
+    return store.find('person', 1).then(person => {
+      let name = person.get('name');
 
       name.set('last', 'Baratheon');
 
-      assert.equal(person.changedAttributes().name, true, "changed fragments are indicated in the diff object");
+      assert.equal(person.changedAttributes().name, true, 'changed fragments are indicated in the diff object');
     });
   });
 });
 
-test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function(assert) {
+test('fragment properties that are set to null are indicated in the owner record\'s `changedAttributes`', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -149,22 +149,22 @@ test("fragment properties that are set to null are indicated in the owner record
         id: 1,
         attributes: {
           name: {
-            first: "Rob",
-            last: "Stark"
+            first: 'Rob',
+            last: 'Stark'
           }
         }
       }
     });
 
-    return store.find('person', 1).then(function(person) {
+    return store.find('person', 1).then(person => {
       person.set('name', null);
 
-      assert.equal(person.changedAttributes().name, true, "null fragments are indicated in the diff object");
+      assert.equal(person.changedAttributes().name, true, 'null fragments are indicated in the diff object');
     });
   });
 });
 
-test("changes to attributes can be rolled back", function(assert) {
+test('changes to attributes can be rolled back', function(assert) {
   Ember.run(() => {
     store.push({
       data: {
@@ -172,29 +172,29 @@ test("changes to attributes can be rolled back", function(assert) {
         id: 1,
         attributes: {
           name: {
-            first: "Ramsay",
-            last: "Snow"
+            first: 'Ramsay',
+            last: 'Snow'
           }
         }
       }
     });
 
-    return store.find('person', 1).then(function(person) {
-      var name = person.get('name');
+    return store.find('person', 1).then(person => {
+      let name = person.get('name');
 
       name.set('last', 'Bolton');
       name.rollbackAttributes();
 
-      assert.ok(name.get('last', 'Snow'), "fragment properties are restored");
-      assert.ok(!name.get('hasDirtyAttributes'), "fragment is in clean state");
+      assert.ok(name.get('last', 'Snow'), 'fragment properties are restored');
+      assert.ok(!name.get('hasDirtyAttributes'), 'fragment is in clean state');
     });
   });
 });
 
-test("fragments without an owner can be destroyed", function(assert) {
+test('fragments without an owner can be destroyed', function(assert) {
   Ember.run(() => {
-    var fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
     fragment.destroy();
-    assert.ok(fragment.get('isDestroying'), "the fragment is being destroyed");
+    assert.ok(fragment.get('isDestroying'), 'the fragment is being destroyed');
   });
 });

@@ -11,6 +11,7 @@ cache:
     - $HOME/.cache # includes bowers cache
 
 env:
+  - EMBER_TRY_SCENARIO=ember-2-11
   - EMBER_TRY_SCENARIO=ember-release
   - EMBER_TRY_SCENARIO=ember-beta
   - EMBER_TRY_SCENARIO=ember-canary

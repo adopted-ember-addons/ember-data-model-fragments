@@ -5,11 +5,11 @@ import { fragmentDidDirty, fragmentDidReset } from '../states';
   @module ember-data-model-fragments
 */
 
-var get = Ember.get;
-var set = Ember.set;
-var computed = Ember.computed;
-var copy = Ember.copy;
-var makeArray = Ember.makeArray;
+const get = Ember.get;
+const set = Ember.set;
+const computed = Ember.computed;
+const copy = Ember.copy;
+const makeArray = Ember.makeArray;
 
 /**
   A state-aware array that is tied to an attribute of a `DS.Model` instance.
@@ -18,7 +18,7 @@ var makeArray = Ember.makeArray;
   @namespace MF
   @extends Ember.ArrayProxy
 */
-var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
+const StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   /**
     A reference to the array's owner record.
 
@@ -36,8 +36,8 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   */
   name: null,
 
-  init: function() {
-    this._super();
+  init() {
+    this._super(...arguments);
     this._pendingData = undefined;
     set(this, '_originalState', []);
   },
@@ -52,7 +52,7 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     @method copy
     @return {array} a new array
   */
-  copy: function() {
+  copy() {
     return this.map(copy);
   },
 
@@ -61,7 +61,7 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     @private
     @param {Object} data
   */
-  setupData: function(data) {
+  setupData(data) {
     // Since replacing the contents of the array can trigger changes to fragment
     // array properties, this method can get invoked recursively with the same
     // data, so short circuit here once it's been setup the first time
@@ -71,8 +71,8 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
 
     this._pendingData = data;
 
-    var processedData = this._normalizeData(makeArray(data));
-    var content = get(this, 'content');
+    let processedData = this._normalizeData(makeArray(data));
+    let content = get(this, 'content');
 
     // This data is canonical, so create rollback point
     set(this, '_originalState', processedData);
@@ -88,7 +88,7 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     @private
     @param {Object} data
   */
-  _normalizeData: function(data) {
+  _normalizeData(data) {
     return data;
   },
 
@@ -96,7 +96,7 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     @method _createSnapshot
     @private
   */
-  _createSnapshot: function() {
+  _createSnapshot() {
     // Since elements are not models, a snapshot is simply a mapping of raw values
     return this.toArray();
   },
@@ -104,13 +104,13 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   /**
     @method _flushChangedAttributes
   */
-  _flushChangedAttributes: function() {},
+  _flushChangedAttributes() {},
 
   /**
     @method _adapterDidCommit
     @private
   */
-  _adapterDidCommit: function(data) {
+  _adapterDidCommit(data) {
     if (data) {
       this.setupData(data);
     } else {
@@ -119,7 +119,7 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     }
   },
 
-  _adapterDidError: function(/*error*/) {
+  _adapterDidError(/*error*/) {
     // No-Op
   },
 
@@ -161,7 +161,7 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
 
     @method rollbackAttributes
   */
-  rollbackAttributes: function() {
+  rollbackAttributes() {
     this.setObjects(get(this, '_originalState'));
   },
 
@@ -171,15 +171,15 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     @method serialize
     @return {Array}
   */
-  serialize: function() {
+  serialize() {
     return this.toArray();
   },
 
-  arrayContentDidChange: function() {
-    this._super.apply(this, arguments);
+  arrayContentDidChange() {
+    this._super(...arguments);
 
-    var record = get(this, 'owner');
-    var key = get(this, 'name');
+    let record = get(this, 'owner');
+    let key = get(this, 'name');
 
     // Any change to the size of the fragment array means a potential state change
     if (get(this, 'hasDirtyAttributes')) {
@@ -189,8 +189,9 @@ var StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     }
   },
 
-  toStringExtension: function() {
-    return 'owner(' + get(this, 'owner.id') + ')';
+  toStringExtension() {
+    let ownerId = get(this, 'owner.id');
+    return `owner(${ownerId})`;
   }
 });
 
