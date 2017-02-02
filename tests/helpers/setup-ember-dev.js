@@ -3,11 +3,11 @@
 /* globals QUnit */
 import Ember from 'ember';
 import EmberTestHelpers from 'ember-dev/test-helper/index';
-var debugModule = Ember.__loader.require('ember-metal/debug');
+let debugModule = Ember.__loader.require('ember-metal/debug');
 
 const AVAILABLE_ASSERTIONS = ['expectAssertion', 'expectDeprecation', 'expectNoDeprecation', 'expectWarning', 'expectNoWarning'];
 
-var originalModule = QUnit.module;
+let originalModule = QUnit.module;
 
 /**
  * We patch QUnit.module here so we can setup and teardown the helpers from
@@ -18,20 +18,20 @@ var originalModule = QUnit.module;
  * make the corresponding test fail.
  */
 QUnit.module = function(name, options = {}) {
-  var testHelpers = new EmberTestHelpers({
+  let testHelpers = new EmberTestHelpers({
     Ember,
     getDebugFunction: debugModule.getDebugFunction,
     setDebugFunction: debugModule.setDebugFunction
   });
 
-  var originalBeforeEach = options.beforeEach || function() { };
-  var originalAfterEach = options.afterEach || function() { };
+  let originalBeforeEach = options.beforeEach || function() { };
+  let originalAfterEach = options.afterEach || function() { };
 
   options.beforeEach = function(assert) {
     testHelpers.reset();
     testHelpers.inject();
 
-    AVAILABLE_ASSERTIONS.forEach((name) => assert[name] = window[name] );
+    AVAILABLE_ASSERTIONS.forEach((name) => assert[name] = window[name]);
 
     originalBeforeEach.apply(this, arguments);
   };
@@ -42,7 +42,7 @@ QUnit.module = function(name, options = {}) {
     testHelpers.assert();
     testHelpers.restore();
 
-    AVAILABLE_ASSERTIONS.forEach((name) => assert[name] = null );
+    AVAILABLE_ASSERTIONS.forEach((name) => assert[name] = null);
   };
 
   return originalModule(name, options);

@@ -22,7 +22,6 @@ const getOwner = Ember.getOwner;
 let InternalModelPrototype = InternalModel.prototype;
 const internalModelExpectsModelName = InternalModelPrototype.hasOwnProperty('modelClass');
 
-
 /**
   @class Store
   @namespace DS
@@ -152,17 +151,17 @@ Model.reopen({
 
     // destroy the current state
     for (key in internalModel._fragments) {
-      if (fragment = internalModel._fragments[key]) {
+      fragment = internalModel._fragments[key];
+      if (fragment) {
         fragment.destroy();
       }
     }
 
     // destroy the original state
     for (key in internalModel._data) {
-      if (fragment = internalModel._data[key]) {
-        if (fragment instanceof Fragment || fragment instanceof FragmentArray) {
-          fragment.destroy();
-        }
+      fragment = internalModel._data[key];
+      if (fragment instanceof Fragment || fragment instanceof FragmentArray) {
+        fragment.destroy();
       }
     }
   }
@@ -238,7 +237,8 @@ decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushC
 
   // Notify fragments that the record was committed
   for (let key in this._fragments) {
-    if (fragment = this._fragments[key]) {
+    fragment = this._fragments[key];
+    if (fragment) {
       fragment._flushChangedAttributes();
     }
   }
@@ -257,7 +257,8 @@ decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCo
 
   // Notify fragments that the record was committed
   for (let key in this._fragments) {
-    if (fragment = this._fragments[key]) {
+    fragment = this._fragments[key];
+    if (fragment) {
       fragment._adapterDidCommit(attributes[key]);
     }
   }
@@ -269,7 +270,8 @@ decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErr
 
   // Notify fragments that the record was committed
   for (let key in this._fragments) {
-    if (fragment = this._fragments[key]) {
+    fragment = this._fragments[key];
+    if (fragment) {
       fragment._adapterDidError(error);
     }
   }
@@ -331,7 +333,7 @@ function getFragmentTransform(owner, store, attributeType) {
   however an ember-data improved their implementation, so we followed suite.
   See: https://github.com/lytics/ember-data-model-fragments/issues/224
 */
-(function patchContainerInstanceCache(instanceCache) {
+(function patchContainerInstanceCache() {
   let ContainerInstanceCachePrototype = ContainerInstanceCache.prototype;
   let _super = ContainerInstanceCachePrototype._fallbacksFor;
   ContainerInstanceCachePrototype._fallbacksFor = function _modelFragmentsPatchedFallbacksFor(namespace, preferredKey) {

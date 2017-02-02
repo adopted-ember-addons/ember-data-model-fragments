@@ -35,7 +35,8 @@ function metaTypeFor(name, type, options) {
   }
 
   if (options && options.polymorphic) {
-    metaType += '$' + (options.typeKey || 'type');
+    let typeKey = options.typeKey || 'type';
+    metaType += `$${typeKey}`;
   }
 
   return metaType;

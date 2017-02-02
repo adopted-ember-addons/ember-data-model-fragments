@@ -20,7 +20,7 @@ moduleForAcceptance('unit - `MF.array` property', {
 });
 
 test('array properties are converted to an array-ish containing original values', function(assert) {
-  let values = [ 'Hand of the King', 'Master of Coin' ];
+  let values = ['Hand of the King', 'Master of Coin'];
 
   Ember.run(() => {
     store.push({
@@ -73,7 +73,7 @@ test('setting to null is allowed', function(assert) {
         id: 1,
         attributes: {
           nickName: 'R\'hllor',
-          titles: [ 'Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow' ]
+          titles: ['Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow']
         }
       }
     });
@@ -99,7 +99,7 @@ test('array properties default to an empty array-ish', function(assert) {
 test('array properties can have default values', function(assert) {
   Ember.run(() => {
     Person.reopen({
-      titles: MF.array({ defaultValue: [ 'Ser' ] })
+      titles: MF.array({ defaultValue: ['Ser'] })
     });
 
     let person = store.createRecord('person', {
@@ -114,7 +114,7 @@ test('array properties can have default values', function(assert) {
 test('default values can be functions', function(assert) {
   Ember.run(() => {
     Person.reopen({
-      titles: MF.array({ defaultValue() { return [ 'Viper' ]; } })
+      titles: MF.array({ defaultValue() { return ['Viper']; } })
     });
 
     let person = store.createRecord('person', {

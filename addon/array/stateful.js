@@ -119,7 +119,7 @@ const StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     }
   },
 
-  _adapterDidError(/*error*/) {
+  _adapterDidError(/* error */) {
     // No-Op
   },
 

@@ -30,21 +30,21 @@ test('`DS.hasManyFragment` properties can be nested', function(assert) {
   let data = {
     info: {
       name: 'Tyrion Lannister',
-      notes: [ 'smart', 'short' ]
+      notes: ['smart', 'short']
     },
     orders: [
       {
-        amount   : '799.98',
-        products : [
+        amount: '799.98',
+        products: [
           {
-            name   : 'Tears of Lys',
-            sku    : 'poison-bd-32',
-            price  : '499.99'
+            name: 'Tears of Lys',
+            sku: 'poison-bd-32',
+            price: '499.99'
           },
           {
-            name   : 'The Strangler',
-            sku    : 'poison-md-24',
-            price  : '299.99'
+            name: 'The Strangler',
+            sku: 'poison-md-24',
+            price: '299.99'
           }
         ]
       },
@@ -52,9 +52,9 @@ test('`DS.hasManyFragment` properties can be nested', function(assert) {
         amount: '10999.99',
         products: [
           {
-            name  : 'Lives of Four Kings',
-            sku   : 'old-book-32',
-            price : '10999.99'
+            name: 'Lives of Four Kings',
+            sku: 'old-book-32',
+            price: '10999.99'
           }
         ]
       }
@@ -77,7 +77,7 @@ test('`DS.hasManyFragment` properties can be nested', function(assert) {
     payload.user.orders[0].products.splice(0, 1);
 
     server.put('/users/1', () => {
-      return [ 200, {'Content-Type': 'application/json'}, JSON.stringify(payload) ];
+      return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     return store.find('user', 1).then(user => {
@@ -108,21 +108,21 @@ test('Fragments can be created with nested object literals', function(assert) {
     let data = {
       info: {
         name: 'Tyrion Lannister',
-        notes: [ 'smart', 'short' ]
+        notes: ['smart', 'short']
       },
       orders: [
         {
-          amount   : '799.98',
-          products : [
+          amount: '799.98',
+          products: [
             {
-              name   : 'Tears of Lys',
-              sku    : 'poison-bd-32',
-              price  : '499.99'
+              name: 'Tears of Lys',
+              sku: 'poison-bd-32',
+              price: '499.99'
             },
             {
-              name   : 'The Strangler',
-              sku    : 'poison-md-24',
-              price  : '299.99'
+              name: 'The Strangler',
+              sku: 'poison-md-24',
+              price: '299.99'
             }
           ]
         },
@@ -130,9 +130,9 @@ test('Fragments can be created with nested object literals', function(assert) {
           amount: '10999.99',
           products: [
             {
-              name  : 'Lives of Four Kings',
-              sku   : 'old-book-32',
-              price : '10999.99'
+              name: 'Lives of Four Kings',
+              sku: 'old-book-32',
+              price: '10999.99'
             }
           ]
         }
@@ -154,24 +154,24 @@ test('Fragments can be created with nested object literals', function(assert) {
 test('Nested fragments can have default values', function(assert) {
   Ember.run(() => {
     let defaultInfo = {
-      notes: [ 'dangerous', 'sorry' ]
+      notes: ['dangerous', 'sorry']
     };
     let defaultOrders = [
       {
-        amount   : '1499.99',
-        products : [
+        amount: '1499.99',
+        products: [
           {
-            name  : 'Live Manticore',
-            sku   : 'manticore-lv-2',
-            price : '1499.99',
+            name: 'Live Manticore',
+            sku: 'manticore-lv-2',
+            price: '1499.99'
           }
         ]
-      },
+      }
     ];
 
     let Assassin = DS.Model.extend({
-      info   : MF.fragment('info', { defaultValue: defaultInfo }),
-      orders : MF.fragmentArray('order', { defaultValue: defaultOrders })
+      info: MF.fragment('info', { defaultValue: defaultInfo }),
+      orders: MF.fragmentArray('order', { defaultValue: defaultOrders })
     });
 
     owner.register('model:assassin', Assassin);
@@ -190,15 +190,15 @@ test('Nested fragments can be copied', function(assert) {
   let data = {
     info: {
       name: 'Petyr Baelish',
-      notes: [ 'smart', 'despicable' ]
+      notes: ['smart', 'despicable']
     },
     orders: [
       {
-        recurring : true,
-        product   : {
-          name   : 'City Watch',
-          sku    : 'bribe-3452',
-          price  : '11099.99'
+        recurring: true,
+        product: {
+          name: 'City Watch',
+          sku: 'bribe-3452',
+          price: '11099.99'
         }
       }
     ]
@@ -242,16 +242,16 @@ test('Nested fragments are destroyed when the owner record is destroyed', functi
         attributes: {
           info: {
             name: 'Tyrion Lannister',
-            notes: [ 'smart', 'short' ]
+            notes: ['smart', 'short']
           },
           orders: [
             {
               amount: '10999.99',
               products: [
                 {
-                  name  : 'Lives of Four Kings',
-                  sku   : 'old-book-32',
-                  price : '10999.99'
+                  name: 'Lives of Four Kings',
+                  sku: 'old-book-32',
+                  price: '10999.99'
                 }
               ]
             }
