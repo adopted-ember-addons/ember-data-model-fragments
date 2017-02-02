@@ -1,9 +1,9 @@
 // Import the full module to ensure monkey-patchs are applied before any store
 // instances are created. Sad face for side-effects :(
-import 'model-fragments';
-import FragmentTransform from 'model-fragments/transforms/fragment';
-import FragmentArrayTransform from 'model-fragments/transforms/fragment-array';
-import ArrayTransform from 'model-fragments/transforms/array';
+import 'ember-data-model-fragments';
+import FragmentTransform from 'ember-data-model-fragments/transforms/fragment';
+import FragmentArrayTransform from 'ember-data-model-fragments/transforms/fragment-array';
+import ArrayTransform from 'ember-data-model-fragments/transforms/array';
 
 export default {
   name: 'fragmentTransform',

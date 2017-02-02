@@ -4,7 +4,7 @@ import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
 import JSONSerializer from 'ember-data/serializers/json';
 import Person from 'dummy/models/person';
-import MF from 'model-fragments';
+import MF from 'ember-data-model-fragments';
 import DS from 'ember-data';
 let store, owner;
 

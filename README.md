@@ -60,7 +60,7 @@ import {
   fragment,
   fragmentArray,
   array
-} from 'model-fragments/attributes';
+} from 'ember-data-model-fragments/attributes';
 
 export default Model.extend({
   name      : fragment('name'),
@@ -72,7 +72,7 @@ export default Model.extend({
 ```javascript
 // app/models/name.js
 import attr from 'ember-data/attr';
-import Fragment from 'model-fragments/fragment';
+import Fragment from 'ember-data-model-fragments/fragment';
 
 export default Fragment.extend({
   first : attr('string'),
@@ -83,7 +83,7 @@ export default Fragment.extend({
 ```javascript
 // app/models/address.js
 import attr from 'ember-data/attr';
-import Fragment from 'model-fragments/fragment';
+import Fragment from 'ember-data-model-fragments/fragment';
 
 export default Fragment.extend({
   street  : attr('string'),
@@ -218,7 +218,7 @@ import {
   fragment,
   fragmentArray,
   array
-} from 'model-fragments/attributes';
+} from 'ember-data-model-fragments/attributes';
 
 export default Model.extend({
   name      : fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
@@ -244,7 +244,7 @@ Like `attr`, the `defaultValue` option can be a function that is invoked to gene
 ```javascript
 // app/models/person.js
 import Model from 'ember-data/model';
-import { fragment } from 'model-fragments/attributes';
+import { fragment } from 'ember-data-model-fragments/attributes';
 
 export default Model.extend({
   name: fragment('name', {
@@ -264,7 +264,7 @@ Serializing records with fragment attributes works using a special `Transform` t
 ```javascript
 // app/models/name.js
 import attr from 'ember-data/attr';
-import Fragment from 'model-fragments/fragment';
+import Fragment from 'ember-data-model-fragments/fragment';
 
 export default Fragment.extend({
   given  : attr('string'),
@@ -353,7 +353,7 @@ Nesting of fragments is fully supported:
 // app/models/user.js
 import Model from 'ember-data/model';
 import attr from 'ember-data/attr';
-import { fragmentArray } from 'model-fragments/attributes';
+import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
 export default Model.extend({
   name   : attr('string'),
@@ -364,8 +364,8 @@ export default Model.extend({
 ```javascript
 // app/models/order.js
 import attr from 'ember-data/attr';
-import Fragment from 'model-fragments/fragment';
-import { fragmentArray } from 'model-fragments/attributes';
+import Fragment from 'ember-data-model-fragments/fragment';
+import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
 export default Fragment.extend({
   amount   : attr('string'),
@@ -376,7 +376,7 @@ export default Fragment.extend({
 ```javascript
 // app/models/product.js
 import attr from 'ember-data/attr';
-import Fragment from 'model-fragments/fragment';
+import Fragment from 'ember-data-model-fragments/fragment';
 
 export default Fragment.extend({
   name  : attr('string'),
@@ -454,7 +454,7 @@ so to `typeKey`'s value can be `'animal'`, `'elephant'` or `'lion'`.
 // app/models/zoo.js
 import Model from 'ember-data/model';
 import attr from 'ember-data/attr';
-import { fragmentArray } from 'model-fragments/attributes';
+import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
 export default Model.extend({
   name: attr('string'),
@@ -465,7 +465,7 @@ export default Model.extend({
 
 ```javascript
 // app/models/animal.js
-import Fragment from 'model-fragments/fragment';
+import Fragment from 'ember-data-model-fragments/fragment';
 import attr from 'ember-data/attr';
 
 App.Animal = Fragment.extend({
