@@ -7,6 +7,7 @@ import RootState from 'ember-data/-private/system/model/states';
 
 const get = Ember.get;
 const create = Object.create || Ember.create;
+const assign = Ember.assign;
 
 const didSetProperty = RootState.loaded.saved.didSetProperty;
 const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
@@ -168,9 +169,9 @@ export default FragmentRootState;
 
 export function fragmentDidDirty(record, key, fragment) {
   if (!get(record, 'isDeleted')) {
-    // Add the fragment as a placeholder in the owner record's
+    // Add the fragment data as a placeholder in the owner record's
     // `_attributes` hash to indicate it is dirty
-    record._internalModel._attributes[key] = fragment;
+    record._internalModel._attributes[key] = fragment && assign({}, fragment._data, fragment._attributes);
 
     record.send('becomeDirty');
   }
