@@ -1,5 +1,15 @@
 # Changelog
 
+### v2.11.1 (February 19th, 2017)
+
+* Fixed max call stack error aka Alias Loop (@kobsy, Rob Riebau `<github handle unknown>`)
+* Replaced JSHint with ESLint (@workmanw)
+* Renamed the ES6 module from `model-fragments` to `ember-data-model-fragments` (@workmanw)
+* ES6-ified the addon. Utilized ES6 conveniences more throughout the codebase (@workmanw)
+* Fixed an Ember-Data 2.12 compatibility issue (@workmanw)
+* Removed deprecation from upcoming Ember 2.12 release (@workmanw)
+* Updated to ember-cli 2.11.0 (@jakesjews)
+
 ### v2.11.0 (January 19th, 2017)
 
 * Fixed infinite loop issue caused by deprecation of `store.lookupSerializer` (@runspired, @workmanw)
