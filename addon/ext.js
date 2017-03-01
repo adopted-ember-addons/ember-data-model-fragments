@@ -368,12 +368,18 @@ function getFragmentTransform(owner, store, attributeType) {
   let _super = ContainerInstanceCachePrototype._fallbacksFor;
   ContainerInstanceCachePrototype._fallbacksFor = function _modelFragmentsPatchedFallbacksFor(namespace, preferredKey) {
     if (namespace === 'serializer') {
-      let model = this._store.modelFactoryFor(preferredKey);
-      if (model && Fragment.detect(model)) {
-        return [
-          '-fragment',
-          '-default'
-        ];
+      // ember-data-v2.11.2 changed `modelFactoryFor` to return a "factory manager".
+      // Test for that accordingly.
+      let maybeFactory = this._store.modelFactoryFor(preferredKey);
+      if (maybeFactory) {
+        // BACKWARDS_COMPAT: <= Ember 2.11.2
+        let model = maybeFactory.class ? maybeFactory.class : maybeFactory;
+        if (Fragment.detect(model)) {
+          return [
+            '-fragment',
+            '-default'
+          ];
+        }
       }
     }
 
