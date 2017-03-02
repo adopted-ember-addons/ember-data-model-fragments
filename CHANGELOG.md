@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.11.2 (March 1st, 2017)
+
+* Fixed Ember-Data 2.11.2 issue caused by `modelFactoryFor` change (@workmanw)
+
 ### v2.11.1 (February 19th, 2017)
 
 * Fixed max call stack error aka Alias Loop (@kobsy, Rob Riebau `<github handle unknown>`)
