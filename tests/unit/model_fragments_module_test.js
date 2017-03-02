@@ -18,8 +18,6 @@ import version from 'ember-data-model-fragments/version';
 module('model-fragments shim module');
 
 test('test the shim modules', function(assert) {
-  assert.expectDeprecation();
-
   assert.equal(require('model-fragments').default, MF);
   assert.equal(require('model-fragments/array/fragment').default, FragmentArray);
   assert.equal(require('model-fragments/array/stateful').default, StatefulArray);
@@ -32,4 +30,6 @@ test('test the shim modules', function(assert) {
   assert.equal(require('model-fragments/attributes').fragmentOwner, fragmentOwner);
   assert.equal(require('model-fragments/fragment').default, Fragment);
   assert.equal(require('model-fragments/version').default, version);
+
+  assert.expectDeprecation();
 });
