@@ -49,7 +49,7 @@ $ ember generate fragment foo someAttr:string anotherAttr:boolean
 
 Which will create the module `app/models/foo.js` which exports a `Fragment` class with the given attributes.
 
-You might also want to take a look at [FEDITOR.IO's Ember Data model generator](http://feditor.io/content/gist/6478b5134893399879c0), which can generate `Model` and `Fragment` classes based on your API's JSON response.
+You might also want to take a look at [FEDITOR's Ember Data model generator](http://feditor.tech/content/gist/6478b5134893399879c0), which can generate `Model` and `Fragment` classes based on your API's JSON response.
 
 ## Example
 
