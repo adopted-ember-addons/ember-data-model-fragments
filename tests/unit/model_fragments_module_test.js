@@ -1,4 +1,4 @@
-/* global require */
+/* global window */
 import { test } from 'ember-qunit';
 import { module } from 'qunit';
 
@@ -18,6 +18,9 @@ import version from 'ember-data-model-fragments/version';
 module('model-fragments shim module');
 
 test('test the shim modules', function(assert) {
+  // Using `require` directly seems to cause Babel 6 weirdness.
+  const require = window.require;
+
   assert.equal(require('model-fragments').default, MF);
   assert.equal(require('model-fragments/array/fragment').default, FragmentArray);
   assert.equal(require('model-fragments/array/stateful').default, StatefulArray);

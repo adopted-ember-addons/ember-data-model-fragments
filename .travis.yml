@@ -8,10 +8,10 @@ sudo: false
 cache:
   directories:
     - $HOME/.npm
-    - $HOME/.cache # includes bowers cache
 
 env:
   - EMBER_TRY_SCENARIO=ember-2-11
+  - EMBER_TRY_SCENARIO=ember-2-12
   - EMBER_TRY_SCENARIO=ember-release
   - EMBER_TRY_SCENARIO=ember-beta
   - EMBER_TRY_SCENARIO=ember-canary
@@ -25,13 +25,11 @@ matrix:
 
 before_install:
   - npm config set spin false
-  - npm install -g bower phantomjs-prebuilt
-  - bower --version
+  - npm install -g phantomjs-prebuilt
   - phantomjs --version
 
 install:
   - npm install
-  - bower install
 
 script:
   - ember try:one $EMBER_TRY_SCENARIO test --skip-cleanup
