@@ -198,3 +198,90 @@ test('fragments without an owner can be destroyed', function(assert) {
     assert.ok(fragment.get('isDestroying'), 'the fragment is being destroyed');
   });
 });
+
+test('fragments unloaded/reload w/ relationship', function(assert) {
+  // Related to: https://github.com/lytics/ember-data-model-fragments/issues/261
+
+  function isUnloaded(recordOrFragment) {
+    // BACKWARDS_COMPAT: <= Ember 2.12.1
+    // Ember-2.13 and newer uses `recordOrFragment.isDestroyed`
+    // Ember-2.12 and older uses `zoo.get('currentState.stateName')`
+    return recordOrFragment.isDestroyed || recordOrFragment.get('currentState.stateName') === 'root.deleted.saved';
+  }
+
+  function pushPerson() {
+    Ember.run(() => {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            title: 'Zoo Manager'
+          }
+        }
+      });
+    });
+    return store.peekRecord('person', 1);
+  }
+
+  function pushZoo() {
+    Ember.run(() => {
+      store.push({
+        data: {
+          type: 'zoo',
+          id: 1,
+          attributes: {
+            name: 'Cincinnati Zoo',
+            star: {
+              $type: 'elephant',
+              name: 'Sabu'
+            }
+          },
+          relationships: {
+            manager: {
+              data: { type: 'person', id: 1 }
+            }
+          }
+        }
+      });
+    });
+    return store.peekRecord('zoo', 1);
+  }
+
+  let person = pushPerson();
+  let zoo = pushZoo();
+
+  // Prime the relationship and fragment
+  Ember.run(() => zoo.get('manager'));
+  Ember.run(() => zoo.get('star'));
+
+  assert.equal(person.get('title'), 'Zoo Manager', 'Person has the right title');
+  assert.equal(zoo.get('manager.content'), person, 'Manager relationship was correctly loaded');
+  assert.equal(zoo.get('star.name'), 'Sabu', 'Elephant fragment has the right name.');
+  assert.notOk(isUnloaded(person), 'Person is no destroyed');
+  assert.notOk(isUnloaded(zoo), 'Zoo is not destroyed');
+  assert.notOk(isUnloaded(zoo.get('star')), 'Fragment is not destroyed');
+
+  // Unload the record
+  Ember.run(() => zoo.unloadRecord());
+
+  assert.notOk(isUnloaded(person), 'Person was not unloaded');
+  // We'd like to test that the records are unloaded, but the hueristics for that
+  // are different between ember-data-2.11, ember-data-2.12, and ember-data-2.13.
+  // assert.ok(isUnloaded(zoo), 'Zoo was unloaded');
+  // assert.ok(isUnloaded(zoo.get('star')), 'Fragment is now unloaded');
+
+  // Load a new record
+  let origZoo = zoo;
+  zoo = pushZoo();
+  Ember.run(() => zoo.get('star')); // Prime the fragment on the new model
+
+  // Make sure the reloaded record is new and has the right data
+  assert.notOk(isUnloaded(zoo), 'Zoo was unloaded');
+  assert.notOk(isUnloaded(zoo.get('star')), 'Fragment is now unloaded');
+  assert.equal(zoo.get('manager.content'), person, 'Manager relationship was correctly loaded');
+  assert.equal(zoo.get('star.name'), 'Sabu', 'Elephant fragment has the right name.');
+
+  assert.ok(zoo !== origZoo, 'A different instance of the zoo model was loaded');
+  assert.ok(zoo.get('star') !== origZoo.get('star'), 'Fragments were not reused');
+});
