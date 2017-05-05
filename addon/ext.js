@@ -156,6 +156,7 @@ Model.reopen({
       fragment = internalModel._fragments[key];
       if (fragment) {
         fragment.destroy();
+        delete internalModel._fragments[key];
       }
     }
 
@@ -164,6 +165,7 @@ Model.reopen({
       fragment = internalModel._data[key];
       if (fragment instanceof Fragment || fragment instanceof FragmentArray) {
         fragment.destroy();
+        delete internalModel._data[key];
       }
     }
   }
