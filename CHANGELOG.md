@@ -1,5 +1,11 @@
 # Changelog
 
+### v2.11.3 (May 5th, 2017)
+
+* Upgrade to Ember 2.13 (@workmanw)
+* Fixed Ember-Data 2.13.0 issue related to internalModel caching change. (@workmanw)
+* Upgrade to Ember 2.12 (@jakesjews)
+
 ### v2.11.2 (March 1st, 2017)
 
 * Fixed Ember-Data 2.11.2 issue caused by `modelFactoryFor` change (@workmanw)
