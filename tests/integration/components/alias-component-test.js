@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import { moduleForComponent, test } from 'ember-qunit';
+import { moduleForComponent, skip } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import Pretender from 'pretender';
 let owner, store, server;
@@ -19,7 +19,7 @@ moduleForComponent('alias-component', 'Integration | Component | alias component
   }
 });
 
-test('the adapter can update fragments without infinite loops when CPs are aliased more than once', function(assert) {
+skip('the adapter can update fragments without infinite loops when CPs are aliased more than once', function(assert) {
   let payloadBefore = {
     vehicle: {
       id: 1,

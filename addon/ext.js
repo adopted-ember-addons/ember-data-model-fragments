@@ -18,8 +18,6 @@ import FragmentArray from './array/fragment';
 const keys = Object.keys || Ember.keys;
 const create = Object.create || Ember.create;
 const getOwner = Ember.getOwner;
-const assign = Ember.assign;
-const typeOf = Ember.typeOf;
 
 let InternalModelPrototype = InternalModel.prototype;
 const internalModelExpectsModelName = InternalModelPrototype.hasOwnProperty('modelClass');
@@ -279,34 +277,6 @@ decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErr
       fragment._adapterDidError(error);
     }
   }
-});
-
-/**
-  Ember Data may return false positives when working with fragments,
-  since our changed keys may be Javascript objects, and equality
-  between normal Javascript objects cannot be tested with `===`.
-
-  @method _changedKeys
-  @private
-*/
-decorateMethod(InternalModelPrototype, '_changedKeys', function changedKeysFragments(changedKeys, args) {
-  let updates = args[0];
-  let original = assign({}, this._data);
-  original = assign(original, this._inFlightAttributes);
-
-  let i = 0;
-  while (i < changedKeys.length) {
-    let changedKey = changedKeys[i];
-    if (typeOf(original[changedKey]) === 'object' || typeOf(original[changedKey]) === 'array') {
-      if (JSON.stringify(original[changedKey]) === JSON.stringify(updates[changedKey])) {
-        changedKeys.splice(i, 1);
-        continue;
-      }
-    }
-    i += 1;
-  }
-
-  return changedKeys;
 });
 
 /**
