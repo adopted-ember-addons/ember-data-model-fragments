@@ -285,3 +285,18 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   assert.ok(zoo !== origZoo, 'A different instance of the zoo model was loaded');
   assert.ok(zoo.get('star') !== origZoo.get('star'), 'Fragments were not reused');
 });
+
+test('fragments call ready callback when they are created', function(assert) {
+  Ember.run(() => {
+    let name = store.createFragment('name');
+    assert.ok(name.get('readyWasCalled'), 'when making fragment directly with store.createFragment');
+
+    let person = store.createRecord('person', {
+      name: { first: 'dan' },
+      names: [{ first: 'eric' }]
+    });
+
+    assert.ok(person.get('name.readyWasCalled'), 'when creating model that has fragment');
+    assert.ok(person.get('names').isEvery('readyWasCalled'), 'when creating model that has fragmentArray');
+  });
+});
