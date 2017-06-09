@@ -74,6 +74,9 @@ Store.reopen({
       fragment.setProperties(props);
     }
 
+    // invoke the ready callback ( to mimic DS.Model behaviour )
+    fragment.ready();
+
     // Add brand to reduce usages of `instanceof`
     fragment._isFragment = true;
 
