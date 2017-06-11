@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.11.4 (June 10th, 2017)
+* Fixed bug with fragments invoking ready callback (@danielspaniel)
+* Reverting prior bugfix. Unfortunately the fix resulted in infinite loop in for some users. (@jakesjews) 
+
 ### v2.11.3 (May 5th, 2017)
 
 * Upgrade to Ember 2.13 (@workmanw)
