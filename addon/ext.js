@@ -1,8 +1,8 @@
 import Ember from 'ember';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
-import InternalModel from 'ember-data/-private/system/model/internal-model';
-import ContainerInstanceCache from 'ember-data/-private/system/store/container-instance-cache';
+import { InternalModel } from 'ember-data/-private';
+import { ContainerInstanceCache } from 'ember-data/-private';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
 import {
@@ -20,7 +20,6 @@ const create = Object.create || Ember.create;
 const getOwner = Ember.getOwner;
 
 let InternalModelPrototype = InternalModel.prototype;
-const internalModelExpectsModelName = InternalModelPrototype.hasOwnProperty('modelClass');
 
 /**
   @class Store
@@ -50,15 +49,7 @@ Store.reopen({
   createFragment(modelName, props) {
     Ember.assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
 
-    let internalModel;
-    if (internalModelExpectsModelName) {
-      internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
-    } else {
-      // BACKWARDS_COMPAT: <= Ember 2.11 the `InternalModel` expected the class,
-      // rather than the modelName, as it's first argument.
-      let type = this.modelFor(modelName);
-      internalModel = new InternalModel(type, null, this, getOwner(this).container);
-    }
+    let internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
 
     // Re-wire the internal model to use the fragment state machine
     internalModel.currentState = FragmentRootState.empty;
@@ -75,7 +66,7 @@ Store.reopen({
     }
 
     // invoke the ready callback ( to mimic DS.Model behaviour )
-    fragment.ready();
+    fragment.trigger('ready');
 
     // Add brand to reduce usages of `instanceof`
     fragment._isFragment = true;
@@ -312,14 +303,8 @@ function getFragmentTransform(owner, store, attributeType) {
   let polymorphicTypeProp = match[3];
 
   if (!owner.hasRegistration(containerKey)) {
-    let transformClass;
-    if (owner.factoryFor) {
-      transformClass = owner.factoryFor(`transform:${transformName}`);
-      transformClass = transformClass && transformClass.class;
-    } else {
-      // BACKWARDS_COMPAT: <= Ember 2.11
-      transformClass = owner._lookupFactory(`transform:${transformName}`);
-    }
+    let transformClass = owner.factoryFor(`transform:${transformName}`);
+    transformClass = transformClass && transformClass.class;
 
     owner.register(containerKey, transformClass.extend({
       store: store,
@@ -343,18 +328,12 @@ function getFragmentTransform(owner, store, attributeType) {
   let _super = ContainerInstanceCachePrototype._fallbacksFor;
   ContainerInstanceCachePrototype._fallbacksFor = function _modelFragmentsPatchedFallbacksFor(namespace, preferredKey) {
     if (namespace === 'serializer') {
-      // ember-data-v2.11.2 changed `modelFactoryFor` to return a "factory manager".
-      // Test for that accordingly.
-      let maybeFactory = this._store.modelFactoryFor(preferredKey);
-      if (maybeFactory) {
-        // BACKWARDS_COMPAT: <= Ember 2.11.2
-        let model = maybeFactory.class ? maybeFactory.class : maybeFactory;
-        if (Fragment.detect(model)) {
-          return [
-            '-fragment',
-            '-default'
-          ];
-        }
+      let factory = this._store.modelFactoryFor(preferredKey);
+      if (factory && Fragment.detect(factory.class)) {
+        return [
+          '-fragment',
+          '-default'
+        ];
       }
     }
 

@@ -10,8 +10,7 @@ cache:
     - $HOME/.npm
 
 env:
-  - EMBER_TRY_SCENARIO=ember-2-11
-  - EMBER_TRY_SCENARIO=ember-2-12
+  # - EMBER_TRY_SCENARIO=ember-2-14
   - EMBER_TRY_SCENARIO=ember-release
   - EMBER_TRY_SCENARIO=ember-beta
   - EMBER_TRY_SCENARIO=ember-canary
