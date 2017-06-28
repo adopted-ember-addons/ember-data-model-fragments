@@ -203,10 +203,8 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   // Related to: https://github.com/lytics/ember-data-model-fragments/issues/261
 
   function isUnloaded(recordOrFragment) {
-    // BACKWARDS_COMPAT: <= Ember 2.12.1
     // Ember-2.13 and newer uses `recordOrFragment.isDestroyed`
-    // Ember-2.12 and older uses `zoo.get('currentState.stateName')`
-    return recordOrFragment.isDestroyed || recordOrFragment.get('currentState.stateName') === 'root.deleted.saved';
+    return recordOrFragment.isDestroyed;
   }
 
   function pushPerson() {
