@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.14.0 (June 27th, 2017)
+
+* Added support for Ember-Data 2.14 (@workmanw)
+
 ### v2.11.5 (June 19th, 2017)
 
 * Fixed bug with fragments invoking ready callback (@danielspaniel)
