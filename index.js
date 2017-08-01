@@ -3,6 +3,7 @@
 
 var merge = require('broccoli-merge-trees');
 var version = require('./lib/version');
+var calculateCacheKeyForTree = require('calculate-cache-key-for-tree');
 
 module.exports = {
   name: 'ember-data-model-fragments',
@@ -33,5 +34,9 @@ module.exports = {
     var versioned = merge([ version(), tree ]);
 
     return this._super.treeForAddon.call(this, versioned);
+  },
+
+  cacheKeyForTree(treeType) {
+    return calculateCacheKeyForTree(treeType, this);
   }
 };

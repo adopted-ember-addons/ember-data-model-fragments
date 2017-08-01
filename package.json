@@ -27,6 +27,7 @@
   "dependencies": {
     "broccoli-file-creator": "^1.1.1",
     "broccoli-merge-trees": "^2.0.0",
+    "calculate-cache-key-for-tree": "^1.1.0",
     "ember-cli-babel": "^6.0.0",
     "exists-sync": "^0.0.4",
     "git-repo-info": "^1.4.1",
