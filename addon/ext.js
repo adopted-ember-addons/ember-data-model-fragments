@@ -129,8 +129,20 @@ Model.reopen({
     keys(internalModel._fragments).forEach(name => {
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
-      if (name in internalModel._attributes) {
+      let record = internalModel._fragments[name];
+      let dirty;
+      if (record instanceof FragmentArray) {
+        dirty = record.any(x => x.currentState.isDirty);
+      } else if (record instanceof Fragment) {
+        dirty = record.currentState.isDirty;
+      } else {
+        dirty = !!diffData[name];
+      }
+
+      if (dirty) {
         diffData[name] = true;
+      } else {
+        delete diffData[name];
       }
     });
 
