@@ -588,13 +588,13 @@ Currently, fragments cannot have normal `belongsTo` or `hasMany` relationships. 
 Building requires [Ember CLI](http://www.ember-cli.com/) and running tests requires [Test 'Em](https://github.com/airportyh/testem), which can all be installed globally with:
 
 ```sh
-$ npm install --global ember-cli
+$ yarn global add ember-cli
 ```
 
 Then install NPM packages and start the development test server:
 
 ```sh
-$ npm install
+$ yarn
 $ ember test --server
 ```
 
@@ -603,9 +603,9 @@ It is also possible to run the tests in a headless fashion. This requires [Phant
 ```sh
 $ ember test
 
-# Using `npm test` will invoke `ember try:testall`.
+# Using `yarn test` will invoke `ember try:testall`.
 # This will test each version of ember supported by this addon.
-$ npm test
+$ yarn test
 ```
 
 ## Contributing
