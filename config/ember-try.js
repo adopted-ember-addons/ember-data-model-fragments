@@ -13,7 +13,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-data': 'emberjs/data#release'
         }
       }
     },
@@ -29,7 +30,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-data': 'emberjs/data#beta'
         }
       }
     },
@@ -45,7 +47,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-data': 'emberjs/data#master'
         }
       }
     },
