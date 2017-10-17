@@ -11,6 +11,10 @@ import {
 } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
 
+/**
+  @module ember-data-model-fragments
+*/
+
 // Normalizes an array of object literals or fragments into fragment instances,
 // reusing fragments from a source content array when possible
 function normalizeFragmentArray(array, content, objs, canonical) {

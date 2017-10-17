@@ -4,6 +4,10 @@ import Transform from 'ember-data/transform';
 import JSONAPISerializer from 'ember-data/serializers/json-api';
 
 /**
+  @module ember-data-model-fragments
+*/
+
+/**
   Transform for `MF.fragment` fragment attribute which delegates work to
   the fragment type's serializer
 

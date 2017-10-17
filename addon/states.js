@@ -1,6 +1,10 @@
 import { get } from '@ember/object';
 import { RootState } from 'ember-data/-private';
 
+/**
+  @module ember-data-model-fragments
+*/
+
 const didSetProperty = RootState.loaded.saved.didSetProperty;
 const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
 

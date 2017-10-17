@@ -5,6 +5,10 @@ import { get, computed } from '@ember/object';
 import Transform from 'ember-data/transform';
 
 /**
+  @module ember-data-model-fragments
+*/
+
+/**
   Transform for `MF.array` that transforms array data with the given transform
   type.
 

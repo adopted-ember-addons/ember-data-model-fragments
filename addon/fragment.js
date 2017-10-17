@@ -6,6 +6,10 @@ import Ember from 'ember';
 import { Model } from './ext';
 
 /**
+  @module ember-data-model-fragments
+*/
+
+/**
   The class that all nested object structures, or 'fragments', descend from.
   Fragments are bound to a single 'owner' record (an instance of `DS.Model`)
   and cannot change owners once set. They behave like models, but they have

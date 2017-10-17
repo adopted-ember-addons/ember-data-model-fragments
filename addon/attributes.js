@@ -18,6 +18,10 @@ import {
 } from './fragment';
 import isInstanceOfType from './util/instance-of-type';
 
+/**
+  @module ember-data-model-fragments
+*/
+
 // Create a unique type string for the combination of fragment property type,
 // transform type (or fragment model), and polymorphic type key
 function metaTypeFor(name, type, options) {

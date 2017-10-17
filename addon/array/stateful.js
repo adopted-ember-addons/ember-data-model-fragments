@@ -7,6 +7,10 @@ import Ember from 'ember';
 import { fragmentDidDirty, fragmentDidReset } from '../states';
 
 /**
+  @module ember-data-model-fragments
+*/
+
+/**
   A state-aware array that is tied to an attribute of a `DS.Model` instance.
 
   @class StatefulArray
