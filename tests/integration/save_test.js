@@ -1,4 +1,8 @@
-import Ember from 'ember';
+import EmberObject, { observer } from '@ember/object';
+import { addObserver } from '@ember/object/observers';
+import ObjectProxy from '@ember/object/proxy';
+import { copy } from '@ember/object/internals';
+import { run } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
 import DS from 'ember-data';
 import { test } from 'qunit';
@@ -31,13 +35,13 @@ test('persisting the owner record changes the fragment state to non-new', functi
     }
   };
 
-  return Ember.run(() => {
+  return run(() => {
     let person = store.createRecord('person');
 
     person.set('name', store.createFragment('name', data.name));
 
     let payload = {
-      person: Ember.copy(data, true)
+      person: copy(data, true)
     };
     payload.person.id = 3;
 
@@ -52,7 +56,7 @@ test('persisting the owner record changes the fragment state to non-new', functi
 });
 
 test('persisting the owner record in a clean state maintains clean state', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -93,7 +97,7 @@ test('persisting the owner record in a clean state maintains clean state', funct
 });
 
 test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -143,7 +147,7 @@ test('persisting the owner record when a fragment is dirty moves owner record, f
 });
 
 test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     let data = {
       name: {
         first: 'Daenerys',
@@ -164,7 +168,7 @@ test('persisting a new owner record moves the owner record, fragment array, and 
     person.set('addresses', data.addresses);
 
     let payload = {
-      person: Ember.copy(data, true)
+      person: copy(data, true)
     };
     payload.person.id = 3;
 
@@ -185,7 +189,7 @@ test('persisting a new owner record moves the owner record, fragment array, and 
 });
 
 test('a new record can be persisted with null fragments', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     let person = store.createRecord('person');
 
     assert.equal(person.get('name'), null, 'fragment property is null');
@@ -225,7 +229,7 @@ test('the adapter can update fragments on save', function(assert) {
     ]
   };
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -235,7 +239,7 @@ test('the adapter can update fragments on save', function(assert) {
     });
 
     let payload = {
-      person: Ember.copy(data, true)
+      person: copy(data, true)
     };
     payload.person.id = 1;
     payload.person.name.first = 'Ned';
@@ -277,7 +281,7 @@ test('existing fragments are updated on save', function(assert) {
     ]
   };
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -287,7 +291,7 @@ test('existing fragments are updated on save', function(assert) {
     });
 
     let payload = {
-      person: Ember.copy(data, true)
+      person: copy(data, true)
     };
 
     payload.person.id = 1;
@@ -337,7 +341,7 @@ test('newly created fragments are updated on save', function(assert) {
   };
 
   let payload = {
-    person: Ember.copy(data, true)
+    person: copy(data, true)
   };
 
   payload.person.id = 1;
@@ -350,14 +354,14 @@ test('newly created fragments are updated on save', function(assert) {
     country: 'Westeros'
   });
 
-  return Ember.run(() => {
+  return run(() => {
     server.post('/people', () => {
       return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
     });
 
     let person = store.createRecord('person');
-    let name = store.createFragment('name', Ember.copy(data.name));
-    let address = store.createFragment('address', Ember.copy(data.addresses[0]));
+    let name = store.createFragment('name', copy(data.name));
+    let address = store.createFragment('address', copy(data.addresses[0]));
 
     person.set('name', name);
     person.set('addresses', [address]);
@@ -389,7 +393,7 @@ test('the adapter can update fragments on reload', function(assert) {
     ]
   };
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -399,7 +403,7 @@ test('the adapter can update fragments on reload', function(assert) {
     });
 
     let payload = {
-      person: Ember.copy(data, true)
+      person: copy(data, true)
     };
 
     payload.person.id = 1;
@@ -439,7 +443,7 @@ test('the adapter can update fragments without infinite loops when CPs are eager
     }
   };
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -449,9 +453,9 @@ test('the adapter can update fragments without infinite loops when CPs are eager
     });
 
     return store.find('person', 1).then(person => {
-      let personProxy = Ember.ObjectProxy.create({ content: person });
+      let personProxy = ObjectProxy.create({ content: person });
 
-      Ember.addObserver(personProxy, 'name.first', function() {});
+      addObserver(personProxy, 'name.first', function() {});
       personProxy.get('name.first');
 
       store.push({
@@ -490,14 +494,14 @@ test('fragment array properties are notified on save', function(assert) {
     ]
   };
 
-  let PersonObserver = Ember.Object.extend({
+  let PersonObserver = EmberObject.extend({
     person: null,
-    observer: Ember.observer('person.addresses.[]', function() {
+    observer: observer('person.addresses.[]', function() {
       assert.ok(true, 'The array change was observed');
     })
   });
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -507,7 +511,7 @@ test('fragment array properties are notified on save', function(assert) {
     });
 
     let payload = {
-      person: Ember.copy(data, true)
+      person: copy(data, true)
     };
     payload.person.id = 1;
 
@@ -542,14 +546,14 @@ test('fragment array properties are notifed on reload', function(assert) {
     ]
   };
 
-  let ArmyObserver = Ember.Object.extend({
+  let ArmyObserver = EmberObject.extend({
     army: null,
-    observer: Ember.observer('army.soldiers.[]', function() {
+    observer: observer('army.soldiers.[]', function() {
       assert.equal(this.get('army.soldiers.length'), 2, 'The array change to was observed');
     })
   });
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'army',
@@ -559,7 +563,7 @@ test('fragment array properties are notifed on reload', function(assert) {
     });
 
     let payload = {
-      army: Ember.copy(data, true)
+      army: copy(data, true)
     };
     payload.army.id = 1;
     payload.army.soldiers.shift();
@@ -594,7 +598,7 @@ test('string array can be rolled back on failed save', function(assert) {
 
   owner.register('model:army', Army);
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'army',
@@ -643,7 +647,7 @@ test('existing fragments can be rolled back on failed save', function(assert) {
     ]
   };
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',

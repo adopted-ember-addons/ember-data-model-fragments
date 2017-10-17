@@ -1,10 +1,11 @@
+import { run } from '@ember/runloop';
+import { all } from 'rsvp';
 import Ember from 'ember';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
 
 let store;
-let all = Ember.RSVP.all;
 
 moduleForAcceptance('unit - `MF.Fragment`', {
   beforeEach() {
@@ -17,7 +18,7 @@ moduleForAcceptance('unit - `MF.Fragment`', {
 });
 
 test('fragments are `Ember.Copyable`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let fragment = store.createFragment('name');
 
     assert.ok(Ember.Copyable.detect(fragment), 'fragments are copyable');
@@ -25,7 +26,7 @@ test('fragments are `Ember.Copyable`', function(assert) {
 });
 
 test('copied fragments can be added to any record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -61,7 +62,7 @@ test('copied fragments can be added to any record', function(assert) {
 });
 
 test('copying a fragment copies the fragment\'s properties', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -85,7 +86,7 @@ test('copying a fragment copies the fragment\'s properties', function(assert) {
 });
 
 test('fragments are `Ember.Comparable`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let fragment = store.createFragment('name');
 
     assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
@@ -93,7 +94,7 @@ test('fragments are `Ember.Comparable`', function(assert) {
 });
 
 test('fragments are compared by reference', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let fragment1 = store.createFragment('name', {
       first: 'Jon',
       last: 'Arryn'
@@ -109,7 +110,7 @@ test('fragments are compared by reference', function(assert) {
 });
 
 test('newly create fragments start in the new state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let fragment = store.createFragment('name');
 
     assert.ok(fragment.get('isNew'), 'fragments start as new');
@@ -117,7 +118,7 @@ test('newly create fragments start in the new state', function(assert) {
 });
 
 test('changes to fragments are indicated in the owner record\'s `changedAttributes`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -142,7 +143,7 @@ test('changes to fragments are indicated in the owner record\'s `changedAttribut
 });
 
 test('fragment properties that are set to null are indicated in the owner record\'s `changedAttributes`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -165,7 +166,7 @@ test('fragment properties that are set to null are indicated in the owner record
 });
 
 test('changes to attributes can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -192,7 +193,7 @@ test('changes to attributes can be rolled back', function(assert) {
 });
 
 test('fragments without an owner can be destroyed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let fragment = store.createFragment('name');
     fragment.destroy();
     assert.ok(fragment.get('isDestroying'), 'the fragment is being destroyed');
@@ -208,7 +209,7 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   }
 
   function pushPerson() {
-    Ember.run(() => {
+    run(() => {
       store.push({
         data: {
           type: 'person',
@@ -223,7 +224,7 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   }
 
   function pushZoo() {
-    Ember.run(() => {
+    run(() => {
       store.push({
         data: {
           type: 'zoo',
@@ -250,8 +251,8 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   let zoo = pushZoo();
 
   // Prime the relationship and fragment
-  Ember.run(() => zoo.get('manager'));
-  Ember.run(() => zoo.get('star'));
+  run(() => zoo.get('manager'));
+  run(() => zoo.get('star'));
 
   assert.equal(person.get('title'), 'Zoo Manager', 'Person has the right title');
   assert.equal(zoo.get('manager.content'), person, 'Manager relationship was correctly loaded');
@@ -261,7 +262,7 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   assert.notOk(isUnloaded(zoo.get('star')), 'Fragment is not destroyed');
 
   // Unload the record
-  Ember.run(() => zoo.unloadRecord());
+  run(() => zoo.unloadRecord());
 
   assert.notOk(isUnloaded(person), 'Person was not unloaded');
   // We'd like to test that the records are unloaded, but the hueristics for that
@@ -272,7 +273,7 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
   // Load a new record
   let origZoo = zoo;
   zoo = pushZoo();
-  Ember.run(() => zoo.get('star')); // Prime the fragment on the new model
+  run(() => zoo.get('star')); // Prime the fragment on the new model
 
   // Make sure the reloaded record is new and has the right data
   assert.notOk(isUnloaded(zoo), 'Zoo was unloaded');
@@ -285,7 +286,7 @@ test('fragments unloaded/reload w/ relationship', function(assert) {
 });
 
 test('fragments call ready callback when they are created', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let name = store.createFragment('name');
     assert.ok(name.get('readyWasCalled'), 'when making fragment directly with store.createFragment');
 

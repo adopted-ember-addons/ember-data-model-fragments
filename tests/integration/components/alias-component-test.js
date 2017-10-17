@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { run } from '@ember/runloop';
+import { getOwner } from '@ember/application';
 import { moduleForComponent, skip } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 import Pretender from 'pretender';
@@ -7,7 +8,7 @@ let owner, store, server;
 moduleForComponent('alias-component', 'Integration | Component | alias component', {
   integration: true,
   beforeEach() {
-    owner = Ember.getOwner(this);
+    owner = getOwner(this);
     store = owner.lookup('service:store');
     server = new Pretender();
   },
@@ -46,7 +47,7 @@ skip('the adapter can update fragments without infinite loops when CPs are alias
 
   let done = assert.async();
 
-  Ember.run(() => {
+  run(() => {
     server.get('/vehicles/:id', function() {
       return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payloadBefore)];
     });

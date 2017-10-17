@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import { run, schedule } from '@ember/runloop';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
@@ -22,7 +22,7 @@ moduleForAcceptance('unit - `DS.Store`', {
 });
 
 test('a fragment can be created that starts in a dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let address = store.createFragment('name');
 
     assert.ok(address instanceof Name, 'fragment is correct type');
@@ -31,7 +31,7 @@ test('a fragment can be created that starts in a dirty state', function(assert) 
 });
 
 test('attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     assert.throws(() => {
       store.createFragment('person');
     }, 'an error is thrown when given a bad type');
@@ -74,7 +74,7 @@ test('the default serializer can be looked up', function(assert) {
 });
 
 test('unloadAll destroys fragments', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let person = store.createRecord('person', {
       name: {
         first: 'Catelyn',
@@ -85,7 +85,7 @@ test('unloadAll destroys fragments', function(assert) {
 
     store.unloadAll();
 
-    Ember.run.schedule('destroy', () => {
+    schedule('destroy', () => {
       assert.ok(person.get('isDestroying'), 'the model is being destroyed');
       assert.ok(name.get('isDestroying'), 'the fragment is being destroyed');
     });

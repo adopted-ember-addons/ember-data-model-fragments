@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { isArray } from '@ember/array';
+import { run } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
@@ -22,7 +23,7 @@ moduleForAcceptance('unit - `MF.array` property', {
 test('array properties are converted to an array-ish containing original values', function(assert) {
   let values = ['Hand of the King', 'Master of Coin'];
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -37,7 +38,7 @@ test('array properties are converted to an array-ish containing original values'
     return store.find('person', 1).then(person => {
       let titles = person.get('titles');
 
-      assert.ok(Ember.isArray(titles), 'property is array-like');
+      assert.ok(isArray(titles), 'property is array-like');
 
       assert.ok(titles.every((title, index) => {
         return title === values[index];
@@ -47,7 +48,7 @@ test('array properties are converted to an array-ish containing original values'
 });
 
 test('null values are allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -66,7 +67,7 @@ test('null values are allowed', function(assert) {
 });
 
 test('setting to null is allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -87,7 +88,7 @@ test('setting to null is allowed', function(assert) {
 });
 
 test('array properties default to an empty array-ish', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let person = store.createRecord('person', {
       nickName: 'Boros Blount'
     });
@@ -97,7 +98,7 @@ test('array properties default to an empty array-ish', function(assert) {
 });
 
 test('array properties can have default values', function(assert) {
-  Ember.run(() => {
+  run(() => {
     Person.reopen({
       titles: MF.array({ defaultValue: ['Ser'] })
     });
@@ -112,7 +113,7 @@ test('array properties can have default values', function(assert) {
 });
 
 test('default values can be functions', function(assert) {
-  Ember.run(() => {
+  run(() => {
     Person.reopen({
       titles: MF.array({ defaultValue() { return ['Viper']; } })
     });

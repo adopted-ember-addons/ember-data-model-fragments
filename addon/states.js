@@ -1,12 +1,5 @@
-import Ember from 'ember';
+import { get } from '@ember/object';
 import { RootState } from 'ember-data/-private';
-
-/**
-  @module ember-data-model-fragments
-*/
-
-const get = Ember.get;
-const create = Object.create || Ember.create;
 
 const didSetProperty = RootState.loaded.saved.didSetProperty;
 const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
@@ -146,7 +139,7 @@ function mixin(original, hash) {
 
 // Wouldn't it be awesome if this was public?
 function wireState(object, parent, name) {
-  object = mixin(parent ? create(parent) : {}, object);
+  object = mixin(parent ? Object.create(parent) : {}, object);
   object.parentState = parent;
   object.stateName = name;
 

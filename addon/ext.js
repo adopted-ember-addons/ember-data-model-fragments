@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { assert } from '@ember/debug';
+import { getOwner } from '@ember/application';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
 import { InternalModel } from 'ember-data/-private';
@@ -14,10 +15,6 @@ import FragmentArray from './array/fragment';
 /**
   @module ember-data-model-fragments
 */
-
-const keys = Object.keys || Ember.keys;
-const create = Object.create || Ember.create;
-const getOwner = Ember.getOwner;
 
 let InternalModelPrototype = InternalModel.prototype;
 
@@ -47,7 +44,7 @@ Store.reopen({
     @return {MF.Fragment} fragment
   */
   createFragment(modelName, props) {
-    Ember.assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
+    assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
 
     let internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
 
@@ -126,7 +123,7 @@ Model.reopen({
     let diffData = this._super(...arguments);
     let internalModel = internalModelFor(this);
 
-    keys(internalModel._fragments).forEach(name => {
+    Object.keys(internalModel._fragments).forEach(name => {
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
       if (name in internalModel._attributes) {
@@ -185,7 +182,7 @@ function decorateMethod(obj, name, fn) {
 decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
   let attrs = snapshot._attributes;
 
-  keys(attrs).forEach(key => {
+  Object.keys(attrs).forEach(key => {
     let attr = attrs[key];
 
     // If the attribute has a `_createSnapshot` method, invoke it before the
@@ -248,7 +245,7 @@ decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushC
   @method adapterDidCommit
 */
 decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
-  let attributes = (args[0] && args[0].attributes) || create(null);
+  let attributes = (args[0] && args[0].attributes) || Object.create(null);
   let fragment;
 
   // Notify fragments that the record was committed
@@ -261,7 +258,7 @@ decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCo
 });
 
 decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
-  let error = args[0] || create(null);
+  let error = args[0] || Object.create(null);
   let fragment;
 
   // Notify fragments that the record was committed

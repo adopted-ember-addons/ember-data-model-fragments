@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { copy } from '@ember/object/internals';
+import { run, schedule } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
 import DS from 'ember-data';
 import { test } from 'qunit';
@@ -61,17 +62,17 @@ test('`DS.hasManyFragment` properties can be nested', function(assert) {
     ]
   };
 
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'user',
         id: 1,
-        attributes: Ember.copy(data, true)
+        attributes: copy(data, true)
       }
     });
 
     let payload = {
-      user: Ember.copy(data, true)
+      user: copy(data, true)
     };
     payload.user.id = 1;
     payload.user.orders[0].products.splice(0, 1);
@@ -104,7 +105,7 @@ test('`DS.hasManyFragment` properties can be nested', function(assert) {
 });
 
 test('Fragments can be created with nested object literals', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let data = {
       info: {
         name: 'Tyrion Lannister',
@@ -152,7 +153,7 @@ test('Fragments can be created with nested object literals', function(assert) {
 });
 
 test('Nested fragments can have default values', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let defaultInfo = {
       notes: ['dangerous', 'sorry']
     };
@@ -204,12 +205,12 @@ test('Nested fragments can be copied', function(assert) {
     ]
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'user',
         id: 1,
-        attributes: Ember.copy(data, true)
+        attributes: copy(data, true)
       }
     });
 
@@ -234,7 +235,7 @@ test('Nested fragments can be copied', function(assert) {
 });
 
 test('Nested fragments are destroyed when the owner record is destroyed', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'user',
@@ -270,7 +271,7 @@ test('Nested fragments are destroyed when the owner record is destroyed', functi
 
       user.destroy();
 
-      Ember.run.schedule('destroy', () => {
+      schedule('destroy', () => {
         assert.ok(user.get('isDestroying'), 'the user is being destroyed');
         assert.ok(info.get('isDestroying'), 'the info is being destroyed');
         assert.ok(notes.get('isDestroying'), 'the notes are being destroyed');

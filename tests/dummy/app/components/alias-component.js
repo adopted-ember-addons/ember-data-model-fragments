@@ -1,8 +1,9 @@
-import Ember from 'ember';
+import { alias } from '@ember/object/computed';
+import Component from '@ember/component';
 
-export default Ember.Component.extend({
+export default Component.extend({
   model: null,
 
-  firstAlias: Ember.computed.alias('model.passenger'),
-  secondAlias: Ember.computed.alias('firstAlias.name')
+  firstAlias: alias('model.passenger'),
+  secondAlias: alias('firstAlias.name')
 });

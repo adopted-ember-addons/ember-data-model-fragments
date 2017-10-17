@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import { run } from '@ember/runloop';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
@@ -42,7 +42,7 @@ moduleForAcceptance('unit - Polymorphism', {
 });
 
 test('fragment properties support polymorphism', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'zoo',
@@ -65,7 +65,7 @@ test('fragment properties support polymorphism', function(assert) {
 });
 
 test('fragment array properties support polymorphism', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'zoo',

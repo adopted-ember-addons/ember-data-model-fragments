@@ -1,14 +1,9 @@
+import { assert } from '@ember/debug';
+import { copy } from '@ember/object/internals';
+import { get, computed } from '@ember/object';
 import Ember from 'ember';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
-
-/**
-  @module ember-data-model-fragments
-*/
-
-const get = Ember.get;
-const create = Object.create || Ember.create;
-const copy = Ember.copy;
 
 /**
   The class that all nested object structures, or 'fragments', descend from.
@@ -91,7 +86,7 @@ const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   */
   copy() {
     let type = this.constructor;
-    let props = create(null);
+    let props = Object.create(null);
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
@@ -114,7 +109,7 @@ const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
   */
   _adapterDidCommit(data) {
     internalModelFor(this).adapterDidCommit({
-      attributes: data || create(null)
+      attributes: data || Object.create(null)
     });
   },
 
@@ -136,7 +131,7 @@ const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
     }
   }
 }).reopenClass({
-  fragmentOwnerProperties: Ember.computed(function() {
+  fragmentOwnerProperties: computed(function() {
     let props = [];
 
     this.eachComputedProperty((name, meta) => {
@@ -177,7 +172,7 @@ export function internalModelFor(record) {
   // Ensure the internal model has a fragments hash, since we can't override the
   // constructor function anymore
   if (internalModel && !internalModel._fragments) {
-    internalModel._fragments = create(null);
+    internalModel._fragments = Object.create(null);
   }
 
   return internalModel;
@@ -187,7 +182,7 @@ export function internalModelFor(record) {
 export function setFragmentOwner(fragment, record, key) {
   let internalModel = internalModelFor(fragment);
 
-  Ember.assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._owner || internalModel._owner === record);
+  assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._owner || internalModel._owner === record);
 
   internalModel._owner = record;
   internalModel._name = key;

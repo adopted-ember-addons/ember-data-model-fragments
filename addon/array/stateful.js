@@ -1,15 +1,10 @@
+import { compare } from '@ember/utils';
+import ArrayProxy from '@ember/array/proxy';
+import { makeArray, A } from '@ember/array';
+import { copy } from '@ember/object/internals';
+import { get, set, computed } from '@ember/object';
 import Ember from 'ember';
 import { fragmentDidDirty, fragmentDidReset } from '../states';
-
-/**
-  @module ember-data-model-fragments
-*/
-
-const get = Ember.get;
-const set = Ember.set;
-const computed = Ember.computed;
-const copy = Ember.copy;
-const makeArray = Ember.makeArray;
 
 /**
   A state-aware array that is tied to an attribute of a `DS.Model` instance.
@@ -18,7 +13,7 @@ const makeArray = Ember.makeArray;
   @namespace MF
   @extends Ember.ArrayProxy
 */
-const StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
+const StatefulArray = ArrayProxy.extend(Ember.Copyable, {
   /**
     A reference to the array's owner record.
 
@@ -43,7 +38,7 @@ const StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
   },
 
   content: computed(function() {
-    return Ember.A();
+    return A();
   }),
 
   /**
@@ -142,7 +137,7 @@ const StatefulArray = Ember.ArrayProxy.extend(Ember.Copyable, {
     @readOnly
   */
   hasDirtyAttributes: computed('[]', '_originalState', function() {
-    return Ember.compare(this.toArray(), get(this, '_originalState')) !== 0;
+    return compare(this.toArray(), get(this, '_originalState')) !== 0;
   }),
 
   /**

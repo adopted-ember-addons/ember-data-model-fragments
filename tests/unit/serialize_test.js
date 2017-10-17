@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { isEmpty } from '@ember/utils';
+import { run } from '@ember/runloop';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
@@ -52,7 +53,7 @@ test('fragment properties are snapshotted as normal attributes on the owner reco
     ]
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -85,7 +86,7 @@ test('fragment properties are snapshotted as normal attributes on the owner reco
 });
 
 test('fragment properties are serialized as normal attributes using their own serializers', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -129,7 +130,7 @@ test('serializing a fragment array creates a new array with contents the result 
     }
   ];
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -179,7 +180,7 @@ test('normalizing data can handle `null` fragment values', function(assert) {
 
   owner.register('model:nullDefaultPerson', NullDefaultPerson);
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'NullDefaultPerson',
@@ -215,7 +216,7 @@ test('array properties use the specified transform to normalize data', function(
 
   assert.ok(values.every((value, index) => {
     return attributes.strings[index] === String(value) &&
-      attributes.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
+      attributes.numbers[index] === (isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
       attributes.booleans[index] === Boolean(value);
   }), 'fragment property values are normalized');
 });
@@ -223,7 +224,7 @@ test('array properties use the specified transform to normalize data', function(
 test('array properties use the specified transform to serialize data', function(assert) {
   let values = [1, 0, true, false, 'true', ''];
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -241,7 +242,7 @@ test('array properties use the specified transform to serialize data', function(
 
       assert.ok(values.every((value, index) => {
         return serialized.strings[index] === String(value) &&
-          serialized.numbers[index] === (Ember.isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
+          serialized.numbers[index] === (isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
           serialized.booleans[index] === Boolean(value);
       }), 'fragment property values are normalized');
     });

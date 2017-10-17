@@ -1,5 +1,4 @@
 import FragmentTransform from './fragment';
-import map from '../util/map';
 
 /**
   @module ember-data-model-fragments
@@ -19,7 +18,7 @@ const FragmentArrayTransform = FragmentTransform.extend({
       return null;
     }
 
-    return map(data, datum => {
+    return data.map(datum => {
       return this.deserializeSingle(datum);
     }, this);
   },
@@ -31,7 +30,7 @@ const FragmentArrayTransform = FragmentTransform.extend({
 
     let store = this.store;
 
-    return map(snapshots, snapshot => {
+    return snapshots.map(snapshot => {
       let serializer = store.serializerFor(snapshot.modelName);
       return serializer.serialize(snapshot);
     });

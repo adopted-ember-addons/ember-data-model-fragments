@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { run, schedule } from '@ember/runloop';
+import { all } from 'rsvp';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { test } from 'qunit';
@@ -7,7 +8,6 @@ import getOwner from '../helpers/get-owner';
 import Name from 'dummy/models/name';
 
 let store, owner;
-let all = Ember.RSVP.all;
 
 moduleForAcceptance('unit - `MF.fragment` property', {
   beforeEach(assert) {
@@ -24,7 +24,7 @@ moduleForAcceptance('unit - `MF.fragment` property', {
 });
 
 test('object literals are converted to instances of `MF.Fragment`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -47,7 +47,7 @@ test('object literals are converted to instances of `MF.Fragment`', function(ass
 });
 
 test('a fragment can be created through the store and set', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -70,7 +70,7 @@ test('a fragment can be created through the store and set', function(assert) {
 });
 
 test('setting to a non-fragment or object literal throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -88,7 +88,7 @@ test('setting to a non-fragment or object literal throws an error', function(ass
 });
 
 test('setting fragments from other records throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -122,7 +122,7 @@ test('setting fragments from other records throws an error', function(assert) {
 });
 
 test('null values are allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -140,7 +140,7 @@ test('null values are allowed', function(assert) {
 });
 
 test('setting to null is allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -162,7 +162,7 @@ test('setting to null is allowed', function(assert) {
 });
 
 test('fragments are created from object literals when creating a record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let name = {
       first: 'Balon',
       last: 'Greyjoy'
@@ -183,7 +183,7 @@ test('setting a fragment to an object literal creates a new fragment', function(
     last: 'Greyjoy'
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -209,7 +209,7 @@ test('setting a fragment to an object literal reuses an existing fragment', func
     last: null
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -235,7 +235,7 @@ test('setting a fragment to an object literal reuses an existing fragment', func
 });
 
 test('fragments can have default values', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let defaultValue = {
       first: 'Iron',
       last: 'Victory'
@@ -260,7 +260,7 @@ test('fragments can have default values', function(assert) {
 });
 
 test('fragment default values can be functions', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let defaultValue = {
       first: 'Oath',
       last: 'Keeper'
@@ -279,7 +279,7 @@ test('fragment default values can be functions', function(assert) {
 });
 
 test('destroy a fragment which was set to null', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -299,7 +299,7 @@ test('destroy a fragment which was set to null', function(assert) {
 
       person.destroy();
 
-      Ember.run.schedule('destroy', () => {
+      schedule('destroy', () => {
         assert.ok(person.get('isDestroying'), 'the model is being destroyed');
         assert.ok(name.get('isDestroying'), 'the fragment is being destroyed');
       });
@@ -308,7 +308,7 @@ test('destroy a fragment which was set to null', function(assert) {
 });
 
 test('destroy the old and new fragment value', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     store.push({
       data: {
         type: 'person',
@@ -331,7 +331,7 @@ test('destroy the old and new fragment value', function(assert) {
 
       person.destroy();
 
-      Ember.run.schedule('destroy', () => {
+      schedule('destroy', () => {
         assert.ok(person.get('isDestroying'), 'the model is being destroyed');
         assert.ok(oldName.get('isDestroying'), 'the old fragment is being destroyed');
         assert.ok(newName.get('isDestroying'), 'the new fragment is being destroyed');

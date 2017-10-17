@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import { run } from '@ember/runloop';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
@@ -32,7 +32,7 @@ test('fragment arrays can be copied', function(assert) {
     ]
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -52,7 +52,7 @@ test('fragment arrays can be copied', function(assert) {
 });
 
 test('fragments can be created and added through the fragment array', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -84,7 +84,7 @@ test('fragments can be created and added through the fragment array', function(a
 });
 
 test('fragments can be added to the fragment array', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -117,7 +117,7 @@ test('fragments can be added to the fragment array', function(assert) {
 });
 
 test('fragments can be removed from the fragment array', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -147,7 +147,7 @@ test('fragments can be removed from the fragment array', function(assert) {
 });
 
 test('changes to array contents change the fragment array `hasDirtyAttributes` property', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -207,7 +207,7 @@ test('changes to array contents change the fragment array `hasDirtyAttributes` p
 });
 
 test('changes to array contents change the fragment array `hasDirtyAttributes` property', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -241,7 +241,7 @@ test('changes to array contents change the fragment array `hasDirtyAttributes` p
 });
 
 test('changes to array contents and fragments can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
