@@ -1,4 +1,6 @@
-import Ember from 'ember';
+import { assert } from '@ember/debug';
+import { typeOf } from '@ember/utils';
+import { get, setProperties, computed } from '@ember/object';
 import StatefulArray from './stateful';
 import {
   internalModelFor,
@@ -8,16 +10,10 @@ import {
   isFragment
 } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
-import map from '../util/map';
 
 /**
   @module ember-data-model-fragments
 */
-
-const get = Ember.get;
-const setProperties = Ember.setProperties;
-const computed = Ember.computed;
-const typeOf = Ember.typeOf;
 
 // Normalizes an array of object literals or fragments into fragment instances,
 // reusing fragments from a source content array when possible
@@ -29,16 +25,16 @@ function normalizeFragmentArray(array, content, objs, canonical) {
   let key = get(array, 'name');
   let fragment;
 
-  return map(objs, (data, index) => {
+  return objs.map((data, index) => {
     let type = get(array, 'type');
-    Ember.assert(`You can only add '${type}' fragments or object literals to this property`, typeOf(data) === 'object' || isInstanceOfType(store.modelFor(type), data));
+    assert(`You can only add '${type}' fragments or object literals to this property`, typeOf(data) === 'object' || isInstanceOfType(store.modelFor(type), data));
 
     if (isFragment(data)) {
       fragment = data;
 
       let owner = internalModelFor(fragment)._owner;
 
-      Ember.assert('Fragments can only belong to one owner, try copying instead', !owner || owner === record);
+      assert('Fragments can only belong to one owner, try copying instead', !owner || owner === record);
 
       if (!owner) {
         setFragmentOwner(fragment, record, key);

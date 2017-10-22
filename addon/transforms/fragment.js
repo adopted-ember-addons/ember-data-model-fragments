@@ -1,12 +1,11 @@
-import Ember from 'ember';
+import { assert } from '@ember/debug';
+import { get } from '@ember/object';
 import Transform from 'ember-data/transform';
 import JSONAPISerializer from 'ember-data/serializers/json-api';
 
 /**
   @module ember-data-model-fragments
 */
-
-const get = Ember.get;
 
 /**
   Transform for `MF.fragment` fragment attribute which delegates work to
@@ -56,7 +55,7 @@ const FragmentTransform = Transform.extend({
     let modelName = this.modelNameFor(data);
     let serializer = store.serializerFor(modelName);
 
-    Ember.assert('The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`', !(serializer instanceof JSONAPISerializer));
+    assert('The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`', !(serializer instanceof JSONAPISerializer));
 
     let typeClass = store.modelFor(modelName);
     let serialized = serializer.normalize(typeClass, data);

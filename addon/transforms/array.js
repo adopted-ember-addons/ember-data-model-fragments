@@ -1,15 +1,12 @@
-import Ember from 'ember';
+import { assert } from '@ember/debug';
+import { getOwner } from '@ember/application';
+import { makeArray } from '@ember/array';
+import { get, computed } from '@ember/object';
 import Transform from 'ember-data/transform';
-import map from '../util/map';
 
 /**
   @module ember-data-model-fragments
 */
-
-const get = Ember.get;
-const makeArray = Ember.makeArray;
-const computed = Ember.computed;
-const getOwner = Ember.getOwner;
 
 /**
   Transform for `MF.array` that transforms array data with the given transform
@@ -36,7 +33,7 @@ const ArrayTransform = Transform.extend({
       return data;
     }
 
-    return map(data, transform.deserialize, transform);
+    return data.map(transform.deserialize, transform);
   },
 
   serialize: function serializeArray(array) {
@@ -52,7 +49,7 @@ const ArrayTransform = Transform.extend({
       return array;
     }
 
-    return map(array, transform.serialize, transform);
+    return array.map(transform.serialize, transform);
   },
 
   transform: computed('type', function() {
@@ -63,7 +60,7 @@ const ArrayTransform = Transform.extend({
     }
 
     let transform = getOwner(this).lookup(`transform:${attributeType}`);
-    Ember.assert(`Unable to find transform for '${attributeType}'`, !!transform);
+    assert(`Unable to find transform for '${attributeType}'`, !!transform);
 
     return transform;
   })

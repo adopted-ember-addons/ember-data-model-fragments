@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import { run } from '@ember/runloop';
+import { all } from 'rsvp';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { test } from 'qunit';
@@ -6,7 +7,6 @@ import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
 
 let store, owner;
-let all = Ember.RSVP.all;
 
 moduleForAcceptance('unit - `MF.fragmentOwner` property', {
   beforeEach(assert) {
@@ -23,7 +23,7 @@ moduleForAcceptance('unit - `MF.fragmentOwner` property', {
 });
 
 test('fragments can reference their owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -46,7 +46,7 @@ test('fragments can reference their owner record', function(assert) {
 });
 
 test('using a fragment owner property on a non-fragment throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let InvalidModel = DS.Model.extend({
       owner: MF.fragmentOwner()
     });
@@ -62,7 +62,7 @@ test('using a fragment owner property on a non-fragment throws an error', functi
 });
 
 test('attempting to change a fragment\'s owner record throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -103,7 +103,7 @@ test('attempting to change a fragment\'s owner record throws an error', function
 });
 
 test('fragment owner properties are notified of change', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',

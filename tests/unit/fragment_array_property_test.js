@@ -1,4 +1,7 @@
-import Ember from 'ember';
+import { isEmpty } from '@ember/utils';
+import { run, schedule } from '@ember/runloop';
+import { A, isArray } from '@ember/array';
+import { all } from 'rsvp';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { test } from 'qunit';
@@ -7,7 +10,6 @@ import getOwner from '../helpers/get-owner';
 import Address from 'dummy/models/address';
 
 let owner, store, people;
-let all = Ember.RSVP.all;
 
 moduleForAcceptance('unit - `MF.fragmentArray` property', {
   beforeEach(assert) {
@@ -68,26 +70,26 @@ function pushPerson(id) {
     data: {
       type: 'person',
       id: id,
-      attributes: Ember.A(people).findBy('id', id)
+      attributes: A(people).findBy('id', id)
     }
   });
 }
 
 test('properties are instances of `MF.FragmentArray`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
       let addresses = person.get('addresses');
 
-      assert.ok(Ember.isArray(addresses), 'property is array-like');
+      assert.ok(isArray(addresses), 'property is array-like');
       assert.ok(addresses instanceof MF.FragmentArray, 'property is an instance of `MF.FragmentArray`');
     });
   });
 });
 
 test('arrays of object literals are converted into instances of `MF.Fragment`', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -101,7 +103,7 @@ test('arrays of object literals are converted into instances of `MF.Fragment`', 
 });
 
 test('fragments created through the store can be added to the fragment array', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -124,7 +126,7 @@ test('fragments created through the store can be added to the fragment array', f
 });
 
 test('adding a non-fragment model or object literal throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -140,7 +142,7 @@ test('adding a non-fragment model or object literal throws an error', function(a
 });
 
 test('adding fragments from other records throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
     pushPerson(2);
 
@@ -158,7 +160,7 @@ test('adding fragments from other records throws an error', function(assert) {
 });
 
 test('setting to an array of fragments is allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -181,7 +183,7 @@ test('setting to an array of fragments is allowed', function(assert) {
 });
 
 test('defaults to an empty array', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -199,8 +201,8 @@ test('defaults to an empty array', function(assert) {
     });
 
     return store.find('person', 1).then(person => {
-      assert.ok(Ember.isArray(person.get('addresses')), 'defaults to an array');
-      assert.ok(Ember.isEmpty(person.get('addresses')), 'default array is empty');
+      assert.ok(isArray(person.get('addresses')), 'defaults to an array');
+      assert.ok(isEmpty(person.get('addresses')), 'default array is empty');
 
       store.find('person', 2).then(person2 => {
         assert.ok(person.get('addresses') !== person2.get('addresses'), 'default array is unique');
@@ -210,7 +212,7 @@ test('defaults to an empty array', function(assert) {
 });
 
 test('default value can be null', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -229,7 +231,7 @@ test('default value can be null', function(assert) {
 });
 
 test('null values are allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(3);
 
     return store.find('person', 3).then(person => {
@@ -239,7 +241,7 @@ test('null values are allowed', function(assert) {
 });
 
 test('setting to null is allowed', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -251,7 +253,7 @@ test('setting to null is allowed', function(assert) {
 });
 
 test('fragments are created from an array of object literals when creating a record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let address = {
       street: '1 Sea Tower',
       city: 'Pyke',
@@ -280,7 +282,7 @@ test('setting a fragment array to an array of to an object literals creates new 
     country: 'Westeros'
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -312,7 +314,7 @@ test('setting a fragment array to an array of object literals reuses an existing
     country: 'Westeros'
   };
 
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -346,7 +348,7 @@ test('setting a fragment array to an array of object literals reuses an existing
 });
 
 test('setting to an array of non-fragments throws an error', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -358,7 +360,7 @@ test('setting to an array of non-fragments throws an error', function(assert) {
 });
 
 test('fragments can have default values', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let defaultValue = [
       {
         street: '1 Throne Room',
@@ -388,7 +390,7 @@ test('fragments can have default values', function(assert) {
 });
 
 test('fragment default values can be functions', function(assert) {
-  Ember.run(() => {
+  run(() => {
     let defaultValue = [
       {
         street: '1 Great Keep',
@@ -412,7 +414,7 @@ test('fragment default values can be functions', function(assert) {
 });
 
 test('destroy a fragment array which was set to null', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -423,7 +425,7 @@ test('destroy a fragment array which was set to null', function(assert) {
 
       person.destroy();
 
-      Ember.run.schedule('destroy', () => {
+      schedule('destroy', () => {
         assert.ok(person.get('isDestroying'), 'the model is being destroyed');
         assert.ok(addresses.get('isDestroying'), 'the fragment array is being destroyed');
         assert.ok(firstAddress.get('isDestroying'), 'the first fragment is being destroyed');
@@ -434,7 +436,7 @@ test('destroy a fragment array which was set to null', function(assert) {
 });
 
 test('destroy a fragment which was removed from the fragment array', function(assert) {
-  return Ember.run(() => {
+  return run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -445,7 +447,7 @@ test('destroy a fragment which was removed from the fragment array', function(as
 
       person.destroy();
 
-      Ember.run.schedule('destroy', () => {
+      schedule('destroy', () => {
         assert.ok(person.get('isDestroying'), 'the model is being destroyed');
         assert.ok(addresses.get('isDestroying'), 'the fragment array is being destroyed');
         assert.ok(firstAddress.get('isDestroying'), 'the removed fragment is being destroyed');

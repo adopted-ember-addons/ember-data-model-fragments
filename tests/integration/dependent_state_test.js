@@ -1,4 +1,6 @@
-import Ember from 'ember';
+import { isEmpty } from '@ember/utils';
+import { run } from '@ember/runloop';
+import { A, isArray } from '@ember/array';
 import { test } from 'qunit';
 import moduleForAcceptance from '../helpers/module-for-acceptance';
 import getOwner from '../helpers/get-owner';
@@ -51,13 +53,13 @@ function pushPerson(id) {
     data: {
       type: 'person',
       id: id,
-      attributes: Ember.A(people).findBy('id', id)
+      attributes: A(people).findBy('id', id)
     }
   });
 }
 
 test('changing a fragment property dirties the fragment and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -83,7 +85,7 @@ test('changing a fragment property dirties the fragment and owner record', funct
 });
 
 test('setting a fragment property to an object literal dirties the fragment and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -111,7 +113,7 @@ test('setting a fragment property to an object literal dirties the fragment and 
 });
 
 test('setting a fragment property with an object literal to the same value does not dirty the fragment or owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -140,7 +142,7 @@ test('setting a fragment property with an object literal to the same value does 
 });
 
 test('restoring a fragment property to its original state returns the fragment and owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -167,7 +169,7 @@ test('restoring a fragment property to its original state returns the fragment a
 });
 
 test('restoring a fragment property to its original state when the owner record was dirty returns the fragment to a clean state maintains the owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -197,7 +199,7 @@ test('restoring a fragment property to its original state when the owner record 
 });
 
 test('rolling back the owner record returns fragment and owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -225,7 +227,7 @@ test('rolling back the owner record returns fragment and owner record to a clean
 });
 
 test('a record can be rolled back multiple times', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -260,7 +262,7 @@ test('a record can be rolled back multiple times', function(assert) {
 });
 
 test('rolling back a fragment returns the fragment and the owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -289,7 +291,7 @@ test('rolling back a fragment returns the fragment and the owner record to a cle
 });
 
 test('changing a fragment property then rolling back the owner record preserves the fragment\'s owner', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -316,7 +318,7 @@ test('changing a fragment property then rolling back the owner record preserves 
 });
 
 test('rolling back a fragment when the owner record is dirty returns the fragment to a clean state and maintains the owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -346,7 +348,7 @@ test('rolling back a fragment when the owner record is dirty returns the fragmen
 });
 
 test('a fragment property that is set to null can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -366,7 +368,7 @@ test('a fragment property that is set to null can be rolled back', function(asse
 });
 
 test('a fragment property that is null can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -393,7 +395,7 @@ test('a fragment property that is null can be rolled back', function(assert) {
 });
 
 test('changing a fragment array property with object literals dirties the fragment and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -421,7 +423,7 @@ test('changing a fragment array property with object literals dirties the fragme
 });
 
 test('adding to a fragment array property with object literals dirties the fragment and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -441,7 +443,7 @@ test('adding to a fragment array property with object literals dirties the fragm
 });
 
 test('setting a fragment property with object literals to the same values does not dirty the fragment or owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -456,7 +458,7 @@ test('setting a fragment property with object literals to the same values does n
 });
 
 test('adding a fragment to a fragment array dirties the fragment array and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -476,7 +478,7 @@ test('adding a fragment to a fragment array dirties the fragment array and owner
 });
 
 test('removing a fragment from a fragment array dirties the fragment array and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -491,7 +493,7 @@ test('removing a fragment from a fragment array dirties the fragment array and o
 });
 
 test('reordering a fragment array dirties the fragment array and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -509,7 +511,7 @@ test('reordering a fragment array dirties the fragment array and owner record', 
 });
 
 test('restoring a fragment array to its original order returns the fragment array owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -525,7 +527,7 @@ test('restoring a fragment array to its original order returns the fragment arra
 });
 
 test('restoring a fragment array to its original order when the owner record was dirty returns the fragment array to a clean state and maintains the owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -544,7 +546,7 @@ test('restoring a fragment array to its original order when the owner record was
 });
 
 test('changing a fragment property in a fragment array dirties the fragment, fragment array, and owner record', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -561,7 +563,7 @@ test('changing a fragment property in a fragment array dirties the fragment, fra
 });
 
 test('restoring a fragment in a fragment array property to its original state returns the fragment, fragment array, and owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -579,7 +581,7 @@ test('restoring a fragment in a fragment array property to its original state re
 });
 
 test('restoring a fragment in a fragment array property to its original state when the fragment array was dirty returns the fragment to a clean state and maintains the fragment array and owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -600,7 +602,7 @@ test('restoring a fragment in a fragment array property to its original state wh
 });
 
 test('restoring a fragment in a fragment array property to its original state when the owner record was dirty returns the fragment and fragment array to a clean state maintains the owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -621,7 +623,7 @@ test('restoring a fragment in a fragment array property to its original state wh
 });
 
 test('rolling back the owner record returns all fragments in a fragment array property, the fragment array, and owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -643,7 +645,7 @@ test('rolling back the owner record returns all fragments in a fragment array pr
 });
 
 test('rolling back the owner record returns all values in an array property, the array, and the owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -664,7 +666,7 @@ test('rolling back the owner record returns all values in an array property, the
 });
 
 test('rolling back a fragment array returns all fragments, the fragment array, and the owner record to a clean state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -685,7 +687,7 @@ test('rolling back a fragment array returns all fragments, the fragment array, a
 });
 
 test('rolling back a fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retain\'s the owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -707,7 +709,7 @@ test('rolling back a fragment array when the owner record is dirty returns all f
 });
 
 test('rolling back a fragment in a fragment array property returns the fragment, fragment array, and owner record to a clean states', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -727,7 +729,7 @@ test('rolling back a fragment in a fragment array property returns the fragment,
 });
 
 test('rolling back a fragment in a fragment array property when the fragment array is dirty returns the fragment to a clean state and maintains the fragment array and owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -748,7 +750,7 @@ test('rolling back a fragment in a fragment array property when the fragment arr
 });
 
 test('rolling back a fragment in a fragment array property when the owner record is dirty returns the fragment and fragment array to a clean state and maintains the owner record\'s dirty state', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -769,7 +771,7 @@ test('rolling back a fragment in a fragment array property when the owner record
 });
 
 test('a fragment array property that is set to null can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -789,7 +791,7 @@ test('a fragment array property that is set to null can be rolled back', functio
 });
 
 test('a fragment array property that is null can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -814,7 +816,7 @@ test('a fragment array property that is null can be rolled back', function(asser
 });
 
 test('a fragment array property that is empty can be rolled back', function(assert) {
-  Ember.run(() => {
+  run(() => {
     store.push({
       data: {
         type: 'person',
@@ -826,7 +828,7 @@ test('a fragment array property that is empty can be rolled back', function(asse
     return store.find('person', 1).then(person => {
       let addresses = person.get('addresses');
 
-      assert.ok(Ember.isArray(addresses) && Ember.isEmpty(addresses), 'property is an empty array');
+      assert.ok(isArray(addresses) && isEmpty(addresses), 'property is an empty array');
 
       person.set('addresses', [
         store.createFragment('address', {
@@ -841,14 +843,14 @@ test('a fragment array property that is empty can be rolled back', function(asse
 
       person.rollbackAttributes();
 
-      assert.ok(Ember.isArray(person.get('addresses')) && Ember.isEmpty(person.get('addresses')), 'property is an empty array again');
+      assert.ok(isArray(person.get('addresses')) && isEmpty(person.get('addresses')), 'property is an empty array again');
       assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
     });
   });
 });
 
 test('pushing a fragment update doesn\'t cause it to become dirty', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -872,7 +874,7 @@ test('pushing a fragment update doesn\'t cause it to become dirty', function(ass
 });
 
 test('pushing a fragment array update doesn\'t cause it to become dirty', function(assert) {
-  Ember.run(() => {
+  run(() => {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {

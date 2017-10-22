@@ -1,4 +1,8 @@
-import Ember from 'ember';
+import { assert } from '@ember/debug';
+import { copy } from '@ember/object/internals';
+import { typeOf } from '@ember/utils';
+import { isArray } from '@ember/array';
+import { get, setProperties, computed } from '@ember/object';
 import StatefulArray from './array/stateful';
 import FragmentArray from './array/fragment';
 import {
@@ -17,13 +21,6 @@ import isInstanceOfType from './util/instance-of-type';
 /**
   @module ember-data-model-fragments
 */
-
-const get = Ember.get;
-const setProperties = Ember.setProperties;
-const isArray = Ember.isArray;
-const typeOf = Ember.typeOf;
-const copy = Ember.copy;
-const computed = Ember.computed;
 
 // Create a unique type string for the combination of fragment property type,
 // transform type (or fragment model), and polymorphic type key
@@ -118,7 +115,7 @@ function fragment(declaredModelName, options) {
     let store = record.store;
     let internalModel = internalModelFor(record);
 
-    Ember.assert(`You can only assign \`null\`, an object literal or a '${declaredModelName}' fragment instance to this property`, value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
+    assert(`You can only assign \`null\`, an object literal or a '${declaredModelName}' fragment instance to this property`, value === null || typeOf(value) === 'object' || isInstanceOfType(store.modelFor(declaredModelName), value));
 
     if (!value) {
       fragment = null;
@@ -312,7 +309,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
     } else if (value === null) {
       fragments = null;
     } else {
-      Ember.assert('A fragment array property can only be assigned an array or null');
+      assert('A fragment array property can only be assigned an array or null');
     }
 
     if (internalModel._data[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
@@ -352,7 +349,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
 */
 function fragmentOwner() {
   return computed(function() {
-    Ember.assert('Fragment owner properties can only be used on fragments.', isFragment(this));
+    assert('Fragment owner properties can only be used on fragments.', isFragment(this));
 
     return internalModelFor(this)._owner;
   }).meta({
@@ -375,7 +372,7 @@ function getDefaultValue(record, options, type) {
     return null;
   }
 
-  Ember.assert(`The fragment's default value must be an ${type}`, (typeOf(value) == type) || (value === null));
+  assert(`The fragment's default value must be an ${type}`, (typeOf(value) == type) || (value === null));
 
   // Create a deep copy of the resulting value to avoid shared reference errors
   return copy(value, true);

@@ -1,4 +1,4 @@
-// Import the full module to ensure monkey-patchs are applied before any store
+// Import the full module to ensure monkey-patches are applied before any store
 // instances are created. Sad face for side-effects :(
 import 'ember-data-model-fragments';
 import FragmentTransform from 'ember-data-model-fragments/transforms/fragment';
