@@ -77,7 +77,6 @@ const StatefulArray = ArrayProxy.extend(Copyable, {
 
     // Completely replace the contents with the new data
     content.replace(0, get(content, 'length'), processedData);
-
     this._pendingData = undefined;
   },
 
@@ -105,10 +104,10 @@ const StatefulArray = ArrayProxy.extend(Copyable, {
   _flushChangedAttributes() {},
 
   /**
-    @method _adapterDidCommit
+    @method _didCommit
     @private
   */
-  _adapterDidCommit(data) {
+  _didCommit(data) {
     if (data) {
       this.setupData(data);
     } else {
@@ -140,6 +139,7 @@ const StatefulArray = ArrayProxy.extend(Copyable, {
     @readOnly
   */
   hasDirtyAttributes: computed('[]', '_originalState', function() {
+
     return compare(this.toArray(), get(this, '_originalState')) !== 0;
   }),
 

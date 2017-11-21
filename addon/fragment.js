@@ -110,16 +110,16 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
   },
 
   /**
-    @method _adapterDidCommit
+    @method _didCommit
   */
-  _adapterDidCommit(data) {
+  _didCommit(data) {
     internalModelFor(this).adapterDidCommit({
       attributes: data || Object.create(null)
     });
   },
 
   /**
-    @method _adapterDidCommit
+    @method _didCommit
   */
   _adapterDidError() {
     internalModelFor(this)._recordData.commitWasRejected();
@@ -127,7 +127,7 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
 
   toStringExtension() {
     let internalModel = internalModelFor(this);
-    let owner = internalModel && internalModel._recordData.getOwner();
+    let owner = internalModel && internalModel._recordData._owner;
     if (owner) {
       let ownerId = get(owner, 'id');
       return `owner(${ownerId})`;
@@ -179,10 +179,10 @@ export function internalModelFor(record) {
 export function setFragmentOwner(fragment, record, key) {
   let internalModel = internalModelFor(fragment);
 
-  assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._recordData.getOwner() || internalModel._recordData.getOwner() === record);
+  assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._recordData._owner || internalModel._recordData._owner === record);
 
-  internalModel._recordData.setOwner(record);
-  internalModel._recordData.setName(key);
+  internalModel._recordData._owner = record;
+  internalModel._recordData._name = key;
 
   // Notify any observers of `fragmentOwner` properties
   get(fragment.constructor, 'fragmentOwnerProperties').forEach(name => {

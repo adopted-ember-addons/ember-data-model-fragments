@@ -4,15 +4,16 @@ import Model from 'ember-data/model';
 import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
+import FragmentRecordData from './record-data';
 import {
   internalModelFor,
   default as Fragment
 } from './fragment';
-import FragmentArray from './array/fragment';
 import { isPresent } from '@ember/utils';
 import { computed } from '@ember/object';
 import { getOwner } from '@ember/application';
 import { assign } from '@ember/polyfills';
+import { lte, gte } from 'ember-compatibility-helpers';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -96,9 +97,9 @@ assign(RecordDataPrototype, {
       data = data.attributes;
 
       // Notify fragments that the record was committed
-      this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidCommit(data[key]));
+      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit(data[key]));
     } else {
-      this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidCommit());
+      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit());
     }
 
     const changedKeys = this._changedKeys(data);
@@ -117,6 +118,19 @@ assign(RecordDataPrototype, {
   @namespace DS
 */
 Store.reopen({
+  createRecordDataFor(type, id, lid, storeWrapper) {
+    let identifier;
+    if (lte('ember-data', '3.13.0')) {
+      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.13. See matrix at https://github.com/lytics/ember-data-model-fragments#compatibility for details.');
+    }
+    if (gte('ember-data', '3.15.0')) {
+      identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
+    } else {
+      identifier = { type, id, clientId: lid };
+    }
+    return new FragmentRecordData(identifier, storeWrapper);
+  },
+
   /**
     Create a new fragment that does not yet have an owner record.
     The properties passed to this method are set on the newly created
@@ -139,14 +153,20 @@ Store.reopen({
   */
   createFragment(modelName, props) {
     assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
-
-    let internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
+    let internalModel;
+    if (gte('ember-data', '3.15.0')) {
+      const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
+      internalModel = this._internalModelForResource(identifier);
+    } else {
+      let identifier =  { type: modelName, id: `${  Math.random()}`, lid: `${ Math.random()}` };
+      internalModel = this._internalModelForResource(identifier);
+    }
 
     // Re-wire the internal model to use the fragment state machine
     internalModel.currentState = FragmentRootState.empty;
 
     internalModel._recordData._name = null;
-    internalModel._recordData.setOwner(null);
+    internalModel._recordData._owner = null;
 
     internalModel.loadedData();
 
@@ -203,29 +223,14 @@ Store.reopen({
   @namespace DS
   */
 Model.reopen({
+
   willDestroy() {
     this._super(...arguments);
 
     let internalModel = internalModelFor(this);
-    let key, fragment;
 
     // destroy the current state
-    for (key in internalModel._recordData._fragments) {
-      fragment = internalModel._recordData._fragments[key];
-      if (fragment) {
-        fragment.destroy();
-        delete internalModel._recordData._fragments[key];
-      }
-    }
-
-    // destroy the original state
-    for (key in internalModel._recordData._data) {
-      fragment = internalModel._recordData._data[key];
-      if (fragment instanceof Fragment || fragment instanceof FragmentArray) {
-        fragment.destroy();
-        delete internalModel._recordData._data[key];
-      }
-    }
+    internalModel._recordData.resetFragments();
   }
 });
 
@@ -260,14 +265,6 @@ function decorateMethod(obj, name, fn) {
   };
 }
 
-function decorateMethodBefore(obj, name, fn) {
-  const originalFn = obj[name];
-  obj[name] = function() {
-    fn.apply(this, arguments);
-    return originalFn.apply(this, arguments);
-  };
-}
-
 /**
   Override parent method to snapshot fragment attributes before they are
   passed to the `DS.Model#serialize`.
@@ -282,44 +279,12 @@ decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragment
     // If the attribute has a `_createSnapshot` method, invoke it before the
     // snapshot gets passed to the serializer
     if (attr && typeof attr._createSnapshot === 'function') {
+
       attrs[key] = attr._createSnapshot();
     }
   });
 
   return snapshot;
-});
-
-decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
-  const error = args[0] || Object.create(null);
-  this._recordData.eachFragmentKeyValue((key, value) => {
-    value._adapterDidError(error);
-  });
-});
-
-decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
-  this._recordData.eachFragmentKeyValue((key, value) => {
-    value.rollbackAttributes();
-  });
-});
-
-decorateMethod(RecordDataPrototype, 'changedAttributes', function changedAttributes(diffData) {
-  this.eachFragmentKey((name) => {
-    if (name in this._attributes) {
-      diffData[name] = [
-        diffData[name][0],
-        diffData[name][1] ? diffData[name][1]._record : diffData[name][1]
-      ];
-    }
-  });
-  return diffData;
-});
-
-decorateMethodBefore(RecordDataPrototype, 'willCommit', function willCommit() {
-  this.eachFragmentKeyValue((key, fragment) => fragment._flushChangedAttributes());
-});
-
-decorateMethodBefore(RecordDataPrototype, 'commitWasRejected', function commitWasRejected() {
-  this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidError());
 });
 
 /**

@@ -66,6 +66,7 @@ module('unit - Serialization', function(hooks) {
         serialize(snapshot) {
           let name = snapshot.attr('name');
           assert.ok(name instanceof DS.Snapshot, 'fragment snapshot attribute is a snapshot');
+
           assert.equal(name.attr('first'), person.name.first, 'fragment attributes are snapshoted correctly');
 
           let houses = snapshot.attr('houses');

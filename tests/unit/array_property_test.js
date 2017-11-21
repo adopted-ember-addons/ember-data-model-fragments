@@ -3,17 +3,33 @@ import { run } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
+import DS from 'ember-data';
+
 import { setupApplicationTest } from 'ember-qunit';
-import Person from 'dummy/models/person';
+// import Person from 'dummy/models/person';
 
 let store;
+let Person = DS.Model.extend({
+  title: DS.attr('string'),
+  nickName: DS.attr('string'),
+  name: MF.fragment('name'),
+  names: MF.fragmentArray('name'),
+  addresses: MF.fragmentArray('address'),
+  titles: MF.array(),
+  hobbies: MF.fragmentArray('hobby', { defaultValue: null }),
+  houses: MF.fragmentArray('house'),
+  children: MF.array(),
+  strings: MF.array('string'),
+  numbers: MF.array('number'),
+  booleans: MF.array('boolean')
+});
 
 module('unit - `MF.array` property', function(hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function(assert) {
     store = this.owner.lookup('service:store');
-
+    this.owner.register('model:person', Person);
     assert.expectNoDeprecation();
   });
 
@@ -142,4 +158,5 @@ module('unit - `MF.array` property', function(hooks) {
       assert.equal(person.get('titles.firstObject'), 'Viper', 'default value is correct');
     });
   });
+
 });

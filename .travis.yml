@@ -3,7 +3,7 @@ language: node_js
 node_js:
   # we recommend testing addons with the same minimum supported node version as Ember CLI
   # so that your addon works for all apps
-  - "8"
+  - "10"
 
 sudo: false
 dist: trusty
@@ -23,16 +23,10 @@ env:
   matrix:
     # we recommend new addons test the current and previous LTS
     # we recommend testing LTS's and latest stable release (bonus points to beta/canary)
-    - EMBER_TRY_SCENARIO=ember-3.5.0
-    - EMBER_TRY_SCENARIO=ember-3.6.0
-    - EMBER_TRY_SCENARIO=ember-3.7.0
-    - EMBER_TRY_SCENARIO=ember-3.8.0
-    - EMBER_TRY_SCENARIO=ember-3.9.0
-    - EMBER_TRY_SCENARIO=ember-3.10.0
-    - EMBER_TRY_SCENARIO=ember-3.11.0
-    - EMBER_TRY_SCENARIO=ember-3.12.0
-    - EMBER_TRY_SCENARIO=ember-3.13.0
+    - EMBER_TRY_SCENARIO=ember-3.16.0
+    - EMBER_TRY_SCENARIO=ember-3.15.0
     - EMBER_TRY_SCENARIO=ember-3.14.0
+    - EMBER_TRY_SCENARIO=ember-3.13.0
     - EMBER_TRY_SCENARIO=ember-release
     - EMBER_TRY_SCENARIO=ember-beta
     - EMBER_TRY_SCENARIO=ember-canary
