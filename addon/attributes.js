@@ -373,7 +373,7 @@ function getDefaultValue(record, options, type) {
   }
 
   assert(`The fragment's default value must be an ${type}`, (typeOf(value) == type) || (value === null));
-  
+
   // No need to copy value if it was a function
   if (typeof options.defaultValue === 'function') {
     return value;
