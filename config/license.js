@@ -1,4 +1,4 @@
-/*!
+/* !
  * @overview  Ember Data Model Fragments
  * @copyright Copyright 2015 Lytics Inc. and contributors
  * @license   Licensed under MIT license
