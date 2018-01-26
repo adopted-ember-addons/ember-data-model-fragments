@@ -100,6 +100,9 @@ test('`DS.hasManyFragment` properties can be nested', function(assert) {
     }).then(user => {
       assert.ok(!user.get('hasDirtyAttributes'), 'owner record is clean');
       assert.equal(user.get('orders.firstObject.products.length'), 1, 'fragment array length is correct');
+    }).catch((err)=>{
+      console.error(err); //eslint-disable-line
+      assert.ok(false, 'User was not found');
     });
   });
 });
