@@ -1,9 +1,7 @@
 import { assert } from '@ember/debug';
-import { getOwner } from '@ember/application';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
-import { InternalModel } from 'ember-data/-private';
-import { ContainerInstanceCache } from 'ember-data/-private';
+import { InternalModel, normalizeModelName, getOwner } from 'ember-data/-private';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
 import {
@@ -11,7 +9,27 @@ import {
   default as Fragment
 } from './fragment';
 import FragmentArray from './array/fragment';
+import { isPresent } from '@ember/utils';
 
+function serializerForFragment(owner, normalizedModelName) {
+  let serializer = owner.lookup(`serializer:${normalizedModelName}`);
+
+  if (serializer !== undefined) {
+    return serializer;
+  }
+
+  // no serializer found for the specific model, fallback and check for application serializer
+  serializer = owner.lookup('serializer:-fragment');
+  if (serializer !== undefined) {
+    return serializer;
+  }
+
+  // final fallback, no model specific serializer, no application serializer, no
+  // `serializer` property on store: use json-api serializer
+  serializer = owner.lookup('serializer:-default');
+
+  return serializer;
+}
 /**
   @module ember-data-model-fragments
 */
@@ -80,8 +98,27 @@ Store.reopen({
     @return {boolean}
   */
   isFragment(modelName) {
+    if (modelName === 'application' || modelName === '-default') {
+      return false;
+    }
+
     let type = this.modelFor(modelName);
     return Fragment.detect(type);
+  },
+
+  serializerFor(modelName) {
+    // this assertion is cargo-culted from ember-data TODO: update comment
+    assert('You need to pass a model name to the store\'s serializerFor method', isPresent(modelName));
+    assert(`Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`, typeof modelName === 'string');
+
+    let owner = getOwner(this);
+    let normalizedModelName = normalizeModelName(modelName);
+
+    if (this.isFragment(normalizedModelName)) {
+      return serializerForFragment(owner, normalizedModelName);
+    } else  {
+      return this._super(...arguments);
+    }
   }
 });
 
@@ -312,30 +349,5 @@ function getFragmentTransform(owner, store, attributeType) {
 
   return owner.lookup(containerKey);
 }
-
-/*
-  Patch ember-data's ContainerInstanceCache. Changes fallbacks for fragments
-  to use `serializer:-fragment` if registered, then uses the default serializer.
-  Previously this was implemented by overriding the `serializerFor` on the store,
-  however an ember-data improved their implementation, so we followed suite.
-  See: https://github.com/lytics/ember-data-model-fragments/issues/224
-*/
-(function patchContainerInstanceCache() {
-  let ContainerInstanceCachePrototype = ContainerInstanceCache.prototype;
-  let _super = ContainerInstanceCachePrototype._fallbacksFor;
-  ContainerInstanceCachePrototype._fallbacksFor = function _modelFragmentsPatchedFallbacksFor(namespace, preferredKey) {
-    if (namespace === 'serializer') {
-      let factory = this._store.modelFactoryFor(preferredKey);
-      if (factory && Fragment.detect(factory.class)) {
-        return [
-          '-fragment',
-          '-default'
-        ];
-      }
-    }
-
-    return _super.apply(this, [namespace, preferredKey]);
-  };
-})();
 
 export { Store, Model, JSONSerializer };
