@@ -165,6 +165,40 @@ test('fragment properties that are set to null are indicated in the owner record
   });
 });
 
+test('changedAttributes should stay in sync with hasDirtyAttributes', function(assert) {
+  Ember.run(() => {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Rob',
+            last: 'Stark'
+          }
+        }
+      }
+    });
+
+    return store.find('person', 1).then(function(person) {
+      // side effect for the observer to work
+      person.get('name.hasDirtyAttributes');
+
+      person.addObserver('name.hasDirtyAttributes', function() {
+        let dirty = person.get('name.hasDirtyAttributes');
+        let changed = person.changedAttributes();
+        assert.equal(dirty, 'name' in changed, 'changedAttributes should agree with hasDirtyAttributes');
+      });
+
+      // make dirty
+      person.set('name.first', 'Sansa');
+
+      // make clean again
+      person.set('name.first', 'Rob');
+    });
+  });
+});
+
 test('changes to attributes can be rolled back', function(assert) {
   run(() => {
     store.push({
