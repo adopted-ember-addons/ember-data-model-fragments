@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "broccoli-file-creator": "^1.1.1",
-    "broccoli-merge-trees": "^3.0.0",
+    "broccoli-merge-trees": "^2.0.0",
     "calculate-cache-key-for-tree": "^1.1.0",
     "ember-cli-babel": "^6.8.0",
     "eslint-plugin-ember": "^5.0.3",
