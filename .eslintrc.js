@@ -58,15 +58,6 @@ module.exports = {
         // add your custom rules and overrides for node files here
         'camelcase': 'off'
       })
-    },
-
-    // test files
-    {
-      files: ['tests/**/*.js'],
-      excludedFiles: ['tests/dummy/**/*.js'],
-      env: {
-        embertest: true
-      }
     }
   ]
 };
