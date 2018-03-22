@@ -1,11 +1,14 @@
-import moduleForAcceptance from '../helpers/module-for-acceptance';
+import { setupApplicationTest } from 'ember-qunit';
+import { module } from 'qunit';
 
-moduleForAcceptance('unit - Deprecations', {
-  setup() {
-  },
+module('unit - Deprecations', function(hooks) {
+  setupApplicationTest(hooks);
 
-  teardown() {
-  }
+  hooks.beforeEach(function() {
+    this.setup = function() {
+    };
+
+    this.teardown = function() {
+    };
+  });
 });
-
-// Yay, no deprecations!
