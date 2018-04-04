@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.0.0 (April 4th, 2018)
+
+* Upgrade to Ember 3.0 (@jakesjews)
+
 ### v3.0.0-beta.1 (February 7th, 2018)
 
 * Added support for Ember-Data 3.0 (@rondale-sc, @jakesjews)
