@@ -1,10 +1,12 @@
-import { test } from 'qunit';
-import moduleForAcceptance from '../helpers/module-for-acceptance';
+import { module, test } from 'qunit';
+import { setupApplicationTest } from 'ember-qunit';
 
-moduleForAcceptance('Integration | Application');
+module('Integration | Application', function(hooks) {
+  setupApplicationTest(hooks);
 
-test('the model fragments initializer causes no deprecations', function(assert) {
-  assert.expectNoDeprecation();
+  test('the model fragments initializer causes no deprecations', function(assert) {
+    assert.expectNoDeprecation();
 
-  assert.ok(this.application.hasRegistration('transform:fragment'), 'the model fragments initilizer ran');
+    assert.ok(this.owner.hasRegistration('transform:fragment'), 'the model fragments initilizer ran');
+  });
 });
