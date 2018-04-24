@@ -1,6 +1,7 @@
 import { isEmpty } from '@ember/utils';
 import { run, schedule } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
+import EmberObject from '@ember/object';
 import { all } from 'rsvp';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
@@ -399,6 +400,31 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
           city: 'Winterfell',
           region: 'North',
           country: 'Westeros'
+        }
+      ];
+
+      let Sword = DS.Model.extend({
+        name: DS.attr('string'),
+        addresses: MF.fragmentArray('address', { defaultValue() { return defaultValue; } })
+      });
+
+      owner.register('model:sword', Sword);
+
+      let sword = store.createRecord('sword', { name: 'Ice' });
+
+      assert.equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, 'the default value is correct');
+    });
+  });
+
+  test('fragment default values that are functions are not deep copied', function(assert) {
+    run(() => {
+      let defaultValue = [
+        {
+          street: '1 Great Keep',
+          city: 'Winterfell',
+          region: 'North',
+          country: 'Westeros',
+          uncopyableObject: EmberObject.create({ item: 'Iron Throne' })  // Will throw an error if copied
         }
       ];
 
