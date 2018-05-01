@@ -108,7 +108,7 @@ module('unit - `MF.array` property', function(hooks) {
         nickName: 'Barristan Selmy'
       });
 
-      assert.ok(person.get('titles.length'), 1, 'default value length is correct');
+      assert.equal(person.get('titles.length'), 1, 'default value length is correct');
       assert.equal(person.get('titles.firstObject'), 'Ser', 'default value is correct');
     });
   });
@@ -123,7 +123,7 @@ module('unit - `MF.array` property', function(hooks) {
         nickName: 'Oberyn Martell'
       });
 
-      assert.ok(person.get('titles.length'), 1, 'default value length is correct');
+      assert.equal(person.get('titles.length'), 1, 'default value length is correct');
       assert.equal(person.get('titles.firstObject'), 'Viper', 'default value is correct');
     });
   });
@@ -138,7 +138,7 @@ module('unit - `MF.array` property', function(hooks) {
         nickName: 'Oberyn Martell'
       });
 
-      assert.ok(person.get('titles.length'), 1, 'default value length is correct');
+      assert.equal(person.get('titles.length'), 2, 'default value length is correct');
       assert.equal(person.get('titles.firstObject'), 'Viper', 'default value is correct');
     });
   });
