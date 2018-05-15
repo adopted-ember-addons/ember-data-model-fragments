@@ -97,12 +97,13 @@ function fragment(declaredModelName, options) {
     // Else initialize the fragment
     } else if (data && data !== fragment) {
       if (fragment) {
+        internalModel._data[key] = fragment;
         setFragmentData(fragment, data);
       } else {
         fragment = createFragment(store, declaredModelName, record, key, options, data);
+        internalModel._data[key] = fragment;
       }
 
-      internalModel._data[key] = fragment;
     } else {
       // Handle the adapter setting the fragment to null
       fragment = data;
