@@ -681,4 +681,52 @@ module('integration - Persistence', function(hooks) {
       });
     });
   });
+
+  test('persisting change in nested fragment array', function(assert) {
+    let Soldier = MF.Fragment.extend({
+      name: DS.attr('string')
+    });
+    owner.register('model:soldier', Soldier);
+    let Battalion = MF.Fragment.extend({
+      soldiers: MF.fragmentArray('soldier')
+    });
+    owner.register('model:battalion', Battalion);
+    let ArmyList = MF.Fragment.extend({
+      battalion: MF.fragment('battalion')
+    });
+    owner.register('model:army-list', ArmyList);
+    let Army = DS.Model.extend({
+      armyList: MF.fragment('army-list')
+    });
+    owner.register('model:army', Army);
+
+    let data = {
+      armyList: {
+        battalion: {
+          soldiers: []
+        }
+      }
+    };
+
+    return run(() => {
+      let army = store.createRecord('army', data);
+      assert.ok(army.get('armyList.battalion.soldiers') instanceof MF.FragmentArray, 'fragment array is initialized');
+      assert.equal(army.get('armyList.battalion.soldiers.length'), 0, 'fragment array is empty');
+      army.get('armyList.battalion.soldiers').createFragment({ name: 'Joe' });
+      assert.equal(army.get('armyList.battalion.soldiers.length'), 1, 'fragment array is not empty');
+
+      let payload = { army: copy(data, true) };
+      payload.army.id = 3;
+      payload.army.armyList.battalion.soldiers.push({ name: 'Joe 2' });
+
+      server.post('/armies', () => {
+        return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
+      });
+
+      return army.save().then(function() {
+        assert.equal(army.get('armyList.battalion.soldiers.length'), 1, 'fragment array has a single element');
+        assert.equal(army.get('armyList.battalion.soldiers.firstObject.name'), 'Joe 2', 'element has been updated');
+      });
+    });
+  });
 });
