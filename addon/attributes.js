@@ -97,6 +97,11 @@ function fragment(declaredModelName, options) {
     // Else initialize the fragment
     } else if (data && data !== fragment) {
       if (fragment) {
+        // It's important to update internal model data to fragment before calling
+        // setFragmentData since updating the fragment can trigger calls to
+        // notifyPropertyChange which can in turn call setupFragment again, creating
+        // an infinite recursion loop. Since it's a reference anyway doing the
+        // assignation sooner has no side effect
         internalModel._data[key] = fragment;
         setFragmentData(fragment, data);
       } else {
