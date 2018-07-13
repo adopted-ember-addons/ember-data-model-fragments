@@ -98,7 +98,8 @@ const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
       props[name] = copy(get(this, name));
     });
 
-    return this.store.createFragment(type.modelName, props);
+    let modelName = type.modelName || this._internalModel.modelName;
+    return this.store.createFragment(modelName, props);
   },
 
   /**
