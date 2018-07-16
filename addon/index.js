@@ -5,6 +5,7 @@ import FragmentArray from './array/fragment';
 import FragmentTransform from './transforms/fragment';
 import FragmentArrayTransform from './transforms/fragment-array';
 import ArrayTransform from './transforms/array';
+import Namespace from '@ember/application/namespace';
 import {
   fragment,
   fragmentArray,
@@ -18,7 +19,7 @@ import {
   @module ember-data-model-fragments
   @main ember-data-model-fragments
 */
-const MF = Ember.Namespace.create({
+const MF = Namespace.create({
   VERSION: VERSION,
   Fragment: Fragment,
   FragmentArray: FragmentArray,
