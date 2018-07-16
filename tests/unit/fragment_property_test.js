@@ -1,4 +1,5 @@
 import { run, schedule } from '@ember/runloop';
+import EmberObject from '@ember/object';
 import { all } from 'rsvp';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
@@ -264,6 +265,26 @@ module('unit - `MF.fragment` property', function(hooks) {
       let defaultValue = {
         first: 'Oath',
         last: 'Keeper'
+      };
+
+      let Sword = DS.Model.extend({
+        name: MF.fragment('name', { defaultValue() { return defaultValue; } })
+      });
+
+      owner.register('model:sword', Sword);
+
+      let sword = store.createRecord('sword');
+
+      assert.equal(sword.get('name.first'), defaultValue.first, 'the default value is correct');
+    });
+  });
+
+  test('fragment default values that are functions are not deep copied', function(assert) {
+    run(() => {
+      let defaultValue = {
+        first: 'Oath',
+        last: 'Keeper',
+        uncopyableObject: EmberObject.create({ item: 'Longclaw' })  // Will throw an error if copied
       };
 
       let Sword = DS.Model.extend({

@@ -1,5 +1,6 @@
 import { isArray } from '@ember/array';
 import { run } from '@ember/runloop';
+import EmberObject from '@ember/object';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
@@ -107,7 +108,7 @@ module('unit - `MF.array` property', function(hooks) {
         nickName: 'Barristan Selmy'
       });
 
-      assert.ok(person.get('titles.length'), 1, 'default value length is correct');
+      assert.equal(person.get('titles.length'), 1, 'default value length is correct');
       assert.equal(person.get('titles.firstObject'), 'Ser', 'default value is correct');
     });
   });
@@ -122,7 +123,22 @@ module('unit - `MF.array` property', function(hooks) {
         nickName: 'Oberyn Martell'
       });
 
-      assert.ok(person.get('titles.length'), 1, 'default value length is correct');
+      assert.equal(person.get('titles.length'), 1, 'default value length is correct');
+      assert.equal(person.get('titles.firstObject'), 'Viper', 'default value is correct');
+    });
+  });
+
+  test('default values that are functions are not deep copied', function(assert) {
+    run(() => {
+      Person.reopen({
+        titles: MF.array({ defaultValue() { return ['Viper', EmberObject.create({ item: 'Longclaw' })]; } })
+      });
+
+      let person = store.createRecord('person', {
+        nickName: 'Oberyn Martell'
+      });
+
+      assert.equal(person.get('titles.length'), 2, 'default value length is correct');
       assert.equal(person.get('titles.firstObject'), 'Viper', 'default value is correct');
     });
   });
