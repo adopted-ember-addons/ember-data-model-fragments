@@ -1,4 +1,4 @@
-import { copy } from '@ember/object/internals';
+import { copy } from 'ember-copy';
 import { run, schedule } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
 import DS from 'ember-data';

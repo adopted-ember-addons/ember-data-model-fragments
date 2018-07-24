@@ -1,5 +1,6 @@
 import { run } from '@ember/runloop';
 import { all } from 'rsvp';
+import { Copyable } from 'ember-copy';
 import Ember from 'ember';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
@@ -17,11 +18,11 @@ module('unit - `MF.Fragment`', function(hooks) {
     store = null;
   });
 
-  test('fragments are `Ember.Copyable`', function(assert) {
+  test('fragments are `Copyable`', function(assert) {
     run(() => {
       let fragment = store.createFragment('name');
 
-      assert.ok(Ember.Copyable.detect(fragment), 'fragments are copyable');
+      assert.ok(Copyable.detect(fragment), 'fragments are copyable');
     });
   });
 

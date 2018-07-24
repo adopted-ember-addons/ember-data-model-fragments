@@ -1,5 +1,5 @@
 import { assert } from '@ember/debug';
-import { copy } from '@ember/object/internals';
+import { copy, Copyable } from 'ember-copy';
 import { get, computed } from '@ember/object';
 import Ember from 'ember';
 // DS.Model gets munged to add fragment support, which must be included first
@@ -65,9 +65,9 @@ import { Model } from './ext';
   @namespace MF
   @extends CoreModel
   @uses Ember.Comparable
-  @uses Ember.Copyable
+  @uses Copyable
 */
-const Fragment = Model.extend(Ember.Comparable, Ember.Copyable, {
+const Fragment = Model.extend(Ember.Comparable, Copyable, {
   /**
     Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 
