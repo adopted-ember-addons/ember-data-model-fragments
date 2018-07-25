@@ -1,7 +1,7 @@
 import { run, schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
-import { copy } from '@ember/object/internals';
+import { copy } from 'ember-copy';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
