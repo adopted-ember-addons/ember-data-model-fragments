@@ -23,12 +23,6 @@ module.exports = {
     }
   },
 
-  included() {
-    this._super.included.apply(this, arguments);
-
-    this.import('vendor/model-fragments-shim.js');
-  },
-
   treeForAddon(tree) {
     let versioned = merge([version(), tree]);
 
