@@ -1,9 +1,8 @@
 import { compare } from '@ember/utils';
 import ArrayProxy from '@ember/array/proxy';
 import { makeArray, A } from '@ember/array';
-import { copy } from '@ember/object/internals';
+import { copy, Copyable } from 'ember-copy';
 import { get, set, computed } from '@ember/object';
-import Ember from 'ember';
 import { fragmentDidDirty, fragmentDidReset } from '../states';
 
 /**
@@ -17,7 +16,7 @@ import { fragmentDidDirty, fragmentDidReset } from '../states';
   @namespace MF
   @extends Ember.ArrayProxy
 */
-const StatefulArray = ArrayProxy.extend(Ember.Copyable, {
+const StatefulArray = ArrayProxy.extend(Copyable, {
   /**
     A reference to the array's owner record.
 

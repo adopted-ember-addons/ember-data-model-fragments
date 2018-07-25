@@ -1,5 +1,5 @@
 import { assert } from '@ember/debug';
-import { copy } from '@ember/object/internals';
+import { copy } from 'ember-copy';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { get, setProperties, computed } from '@ember/object';
