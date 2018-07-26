@@ -318,7 +318,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
       assert('A fragment array property can only be assigned an array or null');
     }
 
-    if (internalModel._data[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
+    if (internalModel._data[key] !== fragments || (fragments && get(fragments, 'hasDirtyAttributes'))) {
       fragmentDidDirty(record, key, fragments);
     } else {
       fragmentDidReset(record, key);

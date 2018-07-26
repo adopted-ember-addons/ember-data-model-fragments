@@ -1,13 +1,15 @@
 import { run, schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
+import { copy } from 'ember-copy';
 import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import Name from 'dummy/models/name';
+import Pretender from 'pretender';
 
-let store, owner;
+let store, owner, server;
 
 module('unit - `MF.fragment` property', function(hooks) {
   setupApplicationTest(hooks);
@@ -15,6 +17,7 @@ module('unit - `MF.fragment` property', function(hooks) {
   hooks.beforeEach(function(assert) {
     owner = this.owner;
     store = owner.lookup('service:store');
+    server = new Pretender();
 
     assert.expectNoDeprecation();
   });
@@ -22,6 +25,7 @@ module('unit - `MF.fragment` property', function(hooks) {
   hooks.afterEach(function() {
     owner = null;
     store = null;
+    server.shutdown();
   });
 
   test('object literals are converted to instances of `MF.Fragment`', function(assert) {
@@ -232,6 +236,40 @@ module('unit - `MF.fragment` property', function(hooks) {
         assert.equal(name, person.get('name'), 'fragment instances are reused');
         assert.equal(person.get('name.first'), newName.first, 'fragment has correct values');
       });
+    });
+  });
+
+  test('fragments can be saved with values, then have a value set to null without causing error', function(assert) {
+    run(() => {
+      let defaultValue = {
+        first: 'Iron',
+        last: 'Victory'
+      };
+
+      let Ship = DS.Model.extend({
+        name: MF.fragment('name', { defaultValue: defaultValue })
+      });
+
+      owner.register('model:ship', Ship);
+
+      let ship = store.createRecord('ship');
+
+      let payload = {
+        ship: copy(defaultValue, true)
+      };
+      payload.ship.id = 3;
+
+      server.post('/ships', () => {
+        return [200, { 'Content-Type': 'application/json' }, JSON.stringify(payload)];
+      });
+
+      return ship.save().then(ship => {
+        assert.equal(ship.get('name.first'), defaultValue.first, 'the value is set as it was saved');
+
+        ship.set('name.first', null);
+        assert.equal(ship.get('name.first'), null, 'the value is successfully set to null');
+      });
+
     });
   });
 
