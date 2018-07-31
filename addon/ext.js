@@ -10,6 +10,7 @@ import {
 } from './fragment';
 import FragmentArray from './array/fragment';
 import { isPresent } from '@ember/utils';
+import { computed } from '@ember/object';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -195,6 +196,25 @@ Model.reopen({
       }
     }
   }
+});
+
+Model.reopenClass({
+  fields: computed(function() {
+    let map = new Map();
+
+    this.eachComputedProperty((name, meta) => {
+      if (meta.isFragment) {
+        map.set(name, 'fragment');
+      } else if (meta.isRelationship) {
+        map.set(name, meta.kind);
+      } else if (meta.isAttribute) {
+        map.set(name, 'attribute');
+      }
+    });
+
+    return map;
+  }).readOnly()
+
 });
 
 // Replace a method on an object with a new one that calls the original and then
