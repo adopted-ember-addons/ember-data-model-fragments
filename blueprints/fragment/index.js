@@ -1,4 +1,4 @@
-var path = require('path');
+const path = require('path');
 
 module.exports = {
   description: 'Generates an ember-data-model-fragments model.',
@@ -8,9 +8,9 @@ module.exports = {
     'attr:type'
   ],
 
-  fileMapTokens: function() {
+  fileMapTokens() {
     return {
-      __name__: function(options) {
+      __name__(options) {
         // The name defaults to the blueprint name, which is 'fragment', but
         // it needs to be named 'model' for the resolver to find it
         if (options.pod) {
@@ -18,7 +18,7 @@ module.exports = {
         }
         return options.dasherizedModuleName;
       },
-      __path__: function(options) {
+      __path__(options) {
         if (options.pod) {
           return path.join(options.podPath, options.dasherizedModuleName);
         }
@@ -28,7 +28,7 @@ module.exports = {
     };
   },
 
-  locals: function(options) {
+  locals(options) {
     return this.lookupBlueprint('model').locals(options);
   }
 };
