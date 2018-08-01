@@ -13,7 +13,8 @@
 .travis.yml
 bower.json
 ember-cli-build.js
-testem.json
+testem.js
+yarn.lock
 
 # ember-try
 .node_modules.ember-try/

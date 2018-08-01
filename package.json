@@ -9,60 +9,61 @@
     "ember-cli",
     "fragments"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lytics/ember-data-model-fragments.git"
+  },
   "license": "MIT",
   "author": "Steven Lindberg <steven@lytics.io>",
   "directories": {
     "doc": "doc",
     "test": "tests"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lytics/ember-data-model-fragments.git"
-  },
   "scripts": {
     "build": "ember build",
-    "lint:js": "eslint ./*.js addon addon-test-support app config lib server test-support tests",
+    "lint:js": "eslint .",
     "start": "ember serve",
-    "test": "ember try:each"
+    "test": "ember test",
+    "test:all": "ember try:each"
   },
   "dependencies": {
-    "broccoli-file-creator": "^1.1.1",
-    "broccoli-merge-trees": "^2.0.0",
+    "broccoli-file-creator": "^2.1.1",
+    "broccoli-merge-trees": "^3.0.0",
     "calculate-cache-key-for-tree": "^1.1.0",
     "ember-cli-babel": "^6.8.0",
     "ember-copy": "1.0.0",
-    "eslint-plugin-ember": "^5.0.3",
-    "eslint-plugin-node": "^6.0.1",
-    "git-repo-info": "^1.4.1",
+    "git-repo-info": "^2.0.0",
     "npm-git-info": "^1.0.3"
   },
   "devDependencies": {
-    "broccoli-asset-rev": "^2.2.5",
-    "ember-cli": "~3.0.0",
-    "ember-cli-dependency-checker": "^2.0.0",
+    "broccoli-asset-rev": "^2.7.0",
+    "ember-cli": "~3.3.0",
+    "ember-cli-dependency-checker": "^3.0.0",
     "ember-cli-eslint": "^4.2.1",
-    "ember-cli-htmlbars": "^2.0.1",
+    "ember-cli-htmlbars": "^3.0.0",
     "ember-cli-htmlbars-inline-precompile": "^1.0.0",
     "ember-cli-inject-live-reload": "^1.4.1",
     "ember-cli-pretender": "^1.0.1",
-    "ember-cli-qunit": "^4.1.1",
+    "ember-cli-qunit": "^4.3.2",
     "ember-cli-shims": "^1.2.0",
     "ember-cli-uglify": "^2.0.0",
-    "ember-cli-update": "^0.14.0",
-    "ember-data": "~3.0.0-beta.1",
+    "ember-data": "~3.3.1",
     "ember-disable-prototype-extensions": "^1.1.2",
-    "ember-load-initializers": "^1.0.0",
+    "ember-load-initializers": "^1.1.0",
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-qunit-assert-helpers": "^0.2.0",
-    "ember-resolver": "^4.0.0",
-    "ember-source": "~3.0.0",
+    "ember-resolver": "^5.0.1",
+    "ember-source": "~3.3.0",
     "ember-source-channel-url": "^1.0.1",
     "ember-try": "^0.2.23",
+    "eslint-plugin-ember": "^5.0.3",
     "eslint-plugin-ember-suave": "^1.0.0",
-    "loader.js": "^4.2.3"
+    "eslint-plugin-node": "^7.0.1",
+    "loader.js": "^4.2.3",
+    "qunit-dom": "^0.7.1"
   },
   "engines": {
-    "node": "^4.5 || 6.* || >= 7.*"
+    "node": "6.* || 8.* || >= 10.*"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
