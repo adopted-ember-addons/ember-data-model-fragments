@@ -1,5 +1,17 @@
 # Changelog
 
+### v3.3.0 (August 2nd, 2018)
+
+* Update Ember to 3.3.0 (@jakesjews)
+* Fixed ember-data compatibility the `fields` property on ember-data model class (@rondale-sc)
+* Fixed bug with setting array fragment attr to null (@Techn1x)
+* Use `ember-copy` instead of `Ember.copy`/`Ember.Copyable` (@pauln)
+* Removed deprecated exports (@jakesjews)
+* Replace `exists-sync` package with `fs.existsSync` (@jakesjews)
+* Fix ember-data compatibility with `type.modelName` and `_internalModel.modelName` (@JosephHalter)
+* Prevent infinite recursion on save with fragmentArray (@JosephHalter)
+* When `defaultValue` is a function, don't copy (@Techn1x)
+
 ### v3.0.0 (April 4th, 2018)
 
 * Upgrade to Ember 3.0 (@jakesjews)
