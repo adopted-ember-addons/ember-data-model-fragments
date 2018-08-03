@@ -24,8 +24,9 @@ Use the following table to decide which version of this project to use with your
 | >= v2.1.x < v2.3.x | v2.1.x |
 | >= v2.3.x < v2.11.x | v2.3.x |
 | >= v2.11.x < v2.13.x | v2.11.x |
-| >= v2.14.x | v2.14.x | v2.18.x |
-| >= v3.0.x | v3.0.x-beta.1 | |
+| >= v2.14.x < v3.0.x | v2.14.x |
+| >= v3.0.x < v3.2.x | v3.0.x-beta.1 |
+| >= v3.2.x | v3.3.x |
 
 #### Notes
 
@@ -36,7 +37,7 @@ Use the following table to decide which version of this project to use with your
 - Ember Data 2.11 changed the implementation of their `ContainerInstanceCache`. We had to follow suite with our patches so that we could continue offering fragments their own default serializer. See [#224](https://github.com/lytics/ember-data-model-fragments/issues/224).
 - Ember Data 2.14 changed `-private` import paths. See [#266](https://github.com/lytics/ember-data-model-fragments/issues/266).
 - Ember Data 3.0 changed `ContainerInstanceCache` import paths. See [e4749c10](https://github.com/lytics/ember-data-model-fragments/pull/287/commits/e4749c107610a6d0dd6032a58c66356e6064562a).
-
+- Ember Data 3.2 changed `InternalModel#fields`. See: [#310](https://github.com/lytics/ember-data-model-fragments/pull/310).
 
 ## Installation
 
