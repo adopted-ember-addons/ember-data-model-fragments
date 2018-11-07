@@ -25,7 +25,7 @@ module('integration - Nested Polymorphic fragments with custom type normalizer',
     server.shutdown();
   });
 
-  test('when all levels types are normalized', function(assert) {
+  test('when outter array is normalized and inner array is normalized', function(assert) {
     let data = {
       id: 1,
       name: 'Nested Zoo',
@@ -76,7 +76,7 @@ module('integration - Nested Polymorphic fragments with custom type normalizer',
     });
   });
 
-  test('when only inner level types are normalized', function(assert) {
+  test('when outter array has $type and inner array is normalized', function(assert) {
     let data = {
       id: 1,
       name: 'Nested Zoo',
@@ -126,7 +126,7 @@ module('integration - Nested Polymorphic fragments with custom type normalizer',
     });
   });
 
-  test('when only outer level types are normalized', function(assert) {
+  test('when outter array is normalized and inner array has $type', function(assert) {
     let data = {
       id: 1,
       name: 'Nested Zoo',
