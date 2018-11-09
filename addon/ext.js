@@ -165,7 +165,10 @@ Model.reopen({
       // An actual diff of the fragment or fragment array is outside the scope
       // of this method, so just indicate that there is a change instead
       if (name in internalModel._attributes) {
-        diffData[name] = true;
+        diffData[name] = [
+          diffData[name][0],
+          diffData[name][1] ? diffData[name][1]._record : diffData[name][1] // avoids returning the internalModel of the new attributes
+        ];
       }
     });
 
