@@ -9,8 +9,8 @@ const didSetProperty = RootState.loaded.saved.didSetProperty;
 const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
 
 const dirtySetup = function(internalModel) {
-  let record = internalModel._owner;
-  let key = internalModel._name;
+  let record = internalModel._recordData._owner;
+  let key = internalModel._recordData._name;
 
   // A newly created fragment may not have an owner yet
   if (record) {
@@ -79,11 +79,11 @@ let FragmentRootState = {
 
     saved: {
       setup(internalModel) {
-        let record = internalModel._owner;
-        let key = internalModel._name;
+        let record = internalModel._recordData._owner;
+        let key = internalModel._recordData._name;
 
         // Abort if fragment is still initializing
-        if (!record._internalModel._fragments[key]) {
+        if (!record._internalModel._recordData.getFragment(key)) {
           return;
         }
 
@@ -167,7 +167,7 @@ export function fragmentDidDirty(record, key, fragment) {
   if (!get(record, 'isDeleted')) {
     // Add the fragment as a placeholder in the owner record's
     // `_attributes` hash to indicate it is dirty
-    record._internalModel._attributes[key] = fragment;
+    record._internalModel._recordData._attributes[key] = fragment;
 
     record.send('becomeDirty');
   }
@@ -176,7 +176,7 @@ export function fragmentDidDirty(record, key, fragment) {
 export function fragmentDidReset(record, key) {
   // Make sure there's no entry in the owner record's
   // `_attributes` hash to indicate the fragment is dirty
-  delete record._internalModel._attributes[key];
+  delete record._internalModel._recordData._attributes[key];
 
   // Don't reset if the record is new, otherwise it will enter the 'deleted' state
   // NOTE: This case almost never happens with attributes because their initial value
