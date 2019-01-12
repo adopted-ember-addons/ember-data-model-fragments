@@ -39,6 +39,20 @@ const InternalModelPrototype = InternalModel.prototype;
 const RecordDataPrototype = RecordData.prototype;
 
 Object.assign(RecordDataPrototype, {
+  eachFragmentKey(fn) {
+    this._fragments = this._fragments || Object.create({});
+    Object.keys(this._fragments).forEach(fn);
+  },
+
+  eachFragmentKeyValue(fn) {
+    this.eachFragmentKey((key) => {
+      const value = this.getFragment(key);
+      if (value) {
+        fn(key, value);
+      }
+    });
+  },
+
   getFragment(name) {
     this._fragments = this._fragments || Object.create({});
     return this._fragments[name];
@@ -63,34 +77,11 @@ Object.assign(RecordDataPrototype, {
       let key = newDataKeys[i];
       diffData[key] = [
         oldData[key],
-        fragmentNames.includes(key) ? newData[key]._record : newData[key] // avoids returning the internalModel of the new attributes
+        (fragmentNames.includes(key) && newData[key]) ? newData[key]._record : newData[key] // avoids returning the internalModel of the new attributes
       ];
     }
 
     return diffData;
-  },
-
-  rollbackAttributes() {
-    let dirtyKeys;
-
-    for (let key in this._fragments) {
-      if (this._fragments[key]) {
-        this._fragments[key].rollbackAttributes();
-      }
-    }
-
-    if (this.hasChangedAttributes()) {
-      dirtyKeys = Object.keys(this._attributes);
-      this._attributes = null;
-    }
-
-    if (this.isNew()) {
-      this.removeFromInverseRelationships(true);
-    }
-
-    this._inFlightAttributes = null;
-
-    return dirtyKeys;
   },
 
   didCommit(data) {
@@ -107,53 +98,30 @@ Object.assign(RecordDataPrototype, {
       data = data.attributes;
 
       // Notify fragments that the record was committed
-      const fragments = this._fragments;
-      for (let key in fragments) {
-        if (fragments[key]) {
-          fragments[key]._adapterDidCommit(data[key]);
-        }
-      }
+      this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidCommit(data[key]));
     } else {
-      const fragments = this._fragments;
-      for (let key in fragments) {
-        if (fragments[key]) {
-          fragments[key]._adapterDidCommit();
-        }
-      }
+      this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidCommit());
     }
-    let changedKeys = this._changedKeys(data);
+
+    const changedKeys = this._changedKeys(data);
 
     Object.assign(this._data, this.__inFlightAttributes, this._attributes, data);
-
     this._attributes = null;
     this._inFlightAttributes = null;
-
     this._updateChangedAttributes();
+
     return changedKeys;
   },
+
   willCommit() {
     // Notify fragments that the record was committed
-    const fragments = this._fragments;
-    for (let key in fragments) {
-      if (fragments[key]) {
-        fragments[key]._flushChangedAttributes();
-      }
-    }
+    this.eachFragmentKeyValue((key, fragment) => fragment._flushChangedAttributes());
     this._inFlightAttributes = this._attributes;
     this._attributes = null;
   },
 
   commitWasRejected() {
-    const fragments = this._fragments;
-
-    if (fragments) {
-      for (let key in fragments) {
-        if (fragments[key]) {
-          fragments[key]._adapterDidError();
-        }
-      }
-    }
-
+    this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidError());
     let keys = Object.keys(this._inFlightAttributes);
     if (keys.length > 0) {
       let attrs = this._attributes;
@@ -343,6 +311,15 @@ decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErr
   for (let key in fragments) {
     if (fragments[key] && fragments[key]._internalModel) {
       fragments[key]._adapterDidError(error);
+    }
+  }
+});
+
+decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
+  const fragments = this._recordData._fragments;
+  for (let key in fragments) {
+    if (fragments[key]) {
+      fragments[key].rollbackAttributes();
     }
   }
 });
