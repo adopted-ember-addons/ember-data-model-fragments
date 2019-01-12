@@ -121,8 +121,8 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
   /**
     @method _adapterDidCommit
   */
-  _adapterDidError(/* error */) {
-    internalModelFor(this)._saveWasRejected();
+  _adapterDidError() {
+    internalModelFor(this)._recordData.commitWasRejected();
   },
 
   toStringExtension() {

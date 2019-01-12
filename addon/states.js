@@ -8,15 +8,15 @@ import { RootState } from 'ember-data/-private';
 const didSetProperty = RootState.loaded.saved.didSetProperty;
 const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
 
-const dirtySetup = function(internalModel) {
-  let record = internalModel._recordData._owner;
-  let key = internalModel._recordData._name;
+function dirtySetup(internalModel) {
+  const record = internalModel._recordData._owner;
+  const key = internalModel._recordData._name;
 
   // A newly created fragment may not have an owner yet
   if (record) {
     fragmentDidDirty(record, key, internalModel);
   }
-};
+}
 
 /**
   Like `DS.Model` instances, all fragments have a `currentState` property

@@ -50,22 +50,6 @@ Object.assign(RecordDataPrototype, {
     return this._fragments[name];
   },
 
-  /**
-    If the model `hasDirtyAttributes` this function will discard any unsaved
-    changes, recursively doing the same for all fragment properties.
-
-    Example
-
-    ```javascript
-    record.get('name'); // 'Untitled Document'
-    record.set('name', 'Doc 1');
-    record.get('name'); // 'Doc 1'
-    record.rollbackAttributes();
-    record.get('name'); // 'Untitled Document'
-    ```
-
-    @method rollbackAttributes
-  */
   rollbackAttributes() {
     let dirtyKeys;
 
@@ -109,11 +93,19 @@ Object.assign(RecordDataPrototype, {
           fragments[key]._adapterDidCommit(data[key]);
         }
       }
+    } else {
+      const fragments = this._fragments;
+      for (let key in fragments) {
+        if (fragments[key]) {
+          fragments[key]._adapterDidCommit();
+        }
+      }
     }
     let changedKeys = this._changedKeys(data);
 
-    Object.assign(this._data, this.__inFlightAttributes, data);
+    Object.assign(this._data, this.__inFlightAttributes, this._attributes, data);
 
+    this._attributes = null;
     this._inFlightAttributes = null;
 
     this._updateChangedAttributes();
@@ -129,6 +121,29 @@ Object.assign(RecordDataPrototype, {
     }
     this._inFlightAttributes = this._attributes;
     this._attributes = null;
+  },
+
+  commitWasRejected() {
+    const fragments = this._fragments;
+
+    if (fragments) {
+      for (let key in fragments) {
+        if (fragments[key]) {
+          fragments[key]._adapterDidError();
+        }
+      }
+    }
+
+    let keys = Object.keys(this._inFlightAttributes);
+    if (keys.length > 0) {
+      let attrs = this._attributes;
+      for (let i = 0; i < keys.length; i++) {
+        if (attrs[keys[i]] === undefined) {
+          attrs[keys[i]] = this._inFlightAttributes[keys[i]];
+        }
+      }
+    }
+    this._inFlightAttributes = null;
   }
 });
 
@@ -303,10 +318,10 @@ decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragment
 
 decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
   const fragments = this._recordData._fragments;
-  let error = args[0] || Object.create(null);
+  const error = args[0] || Object.create(null);
   // Notify fragments that the record was committed
   for (let key in fragments) {
-    if (fragments[key]) {
+    if (fragments[key] && fragments[key]._internalModel) {
       fragments[key]._adapterDidError(error);
     }
   }
@@ -325,34 +340,29 @@ JSONSerializer.reopen({
     @private
   */
   transformFor(attributeType) {
-    if (attributeType.indexOf('-mf-') === 0) {
-      return getFragmentTransform(getOwner(this), this.store, attributeType);
+    if (attributeType.indexOf('-mf-') !== 0) {
+      return this._super(...arguments);
     }
 
-    return this._super(...arguments);
+    const owner = getOwner(this);
+    const containerKey = `transform:${attributeType}`;
+
+    if (!owner.hasRegistration(containerKey)) {
+      const match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+      const transformName = match[1];
+      const type = match[2];
+      const polymorphicTypeProp = match[3];
+      let transformClass = owner.factoryFor(`transform:${transformName}`);
+      transformClass = transformClass && transformClass.class;
+      transformClass = transformClass.extend({
+        type,
+        polymorphicTypeProp,
+        store: this.store
+      });
+      owner.register(containerKey, transformClass);
+    }
+    return owner.lookup(containerKey);
   }
 });
-
-// Retrieve or create a transform for the specific fragment type
-function getFragmentTransform(owner, store, attributeType) {
-  let containerKey = `transform:${attributeType}`;
-  let match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-  let transformName = match[1];
-  let transformType = match[2];
-  let polymorphicTypeProp = match[3];
-
-  if (!owner.hasRegistration(containerKey)) {
-    let transformClass = owner.factoryFor(`transform:${transformName}`);
-    transformClass = transformClass && transformClass.class;
-
-    owner.register(containerKey, transformClass.extend({
-      store: store,
-      type: transformType,
-      polymorphicTypeProp: polymorphicTypeProp
-    }));
-  }
-
-  return owner.lookup(containerKey);
-}
 
 export { Store, Model, JSONSerializer };
