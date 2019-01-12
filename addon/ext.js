@@ -50,6 +50,26 @@ Object.assign(RecordDataPrototype, {
     return this._fragments[name];
   },
 
+  changedAttributes() {
+    let oldData = this._data;
+    let currentData = this._attributes;
+    let inFlightData = this._inFlightAttributes;
+    let newData = Object.assign({}, inFlightData, currentData);
+    let diffData = Object.create(null);
+    let newDataKeys = Object.keys(newData);
+
+    const fragmentNames = Object.keys(this._fragments || Object.create(null));
+    for (let i = 0, length = newDataKeys.length; i < length; i++) {
+      let key = newDataKeys[i];
+      diffData[key] = [
+        oldData[key],
+        fragmentNames.includes(key) ? newData[key]._record : newData[key] // avoids returning the internalModel of the new attributes
+      ];
+    }
+
+    return diffData;
+  },
+
   rollbackAttributes() {
     let dirtyKeys;
 
