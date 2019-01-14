@@ -164,11 +164,10 @@ FragmentRootState = wireState(FragmentRootState, null, 'root');
 export default FragmentRootState;
 
 export function fragmentDidDirty(record, key, fragment) {
-  if (!get(record, 'isDeleted')) {
+  if (!record.currentState.isDeleted) {
     // Add the fragment as a placeholder in the owner record's
     // `_attributes` hash to indicate it is dirty
-    record._internalModel._recordData._attributes[key] = fragment;
-
+    record._internalModel._recordData.setDirtyAttribute(key, fragment);
     record.send('becomeDirty');
   }
 }
@@ -181,7 +180,7 @@ export function fragmentDidReset(record, key) {
   // Don't reset if the record is new, otherwise it will enter the 'deleted' state
   // NOTE: This case almost never happens with attributes because their initial value
   // is always undefined, which is *usually* not what attributes get 'reset' to
-  if (!get(record, 'isNew')) {
+  if (!record.currentState.isNew) {
     record.send('propertyWasReset', key);
   }
 }
