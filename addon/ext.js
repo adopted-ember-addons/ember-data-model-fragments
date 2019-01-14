@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
-import { coerceId, RecordData, InternalModel, normalizeModelName, getOwner } from 'ember-data/-private';
+import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
 import {
@@ -11,6 +11,7 @@ import {
 import FragmentArray from './array/fragment';
 import { isPresent } from '@ember/utils';
 import { computed } from '@ember/object';
+import { getOwner } from '@ember/application';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);

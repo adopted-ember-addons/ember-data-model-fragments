@@ -13,17 +13,44 @@ module.exports = function() {
       scenarios: [
         {
           name: 'ember-lts-2.16',
-          npm: {
-            devDependencies: {
+           npm: {
+             devDependencies: {
               'ember-source': '~2.16.0'
+             }
+           }
+         },
+         {
+          name: 'ember-lts-2.18',
+           npm: {
+             devDependencies: {
+              'ember-source': '~2.18.0'
             }
           }
         },
         {
-          name: 'ember-lts-2.18',
+          name: 'ember-3.5.0',
           npm: {
             devDependencies: {
-              'ember-source': '~2.18.0'
+              'ember-source': '3.5.0',
+              'ember-data': '3.5.0'
+            }
+          }
+        },
+        {
+          name: 'ember-3.6.0',
+          npm: {
+            devDependencies: {
+              'ember-source': '3.6.0',
+              'ember-data': '3.6.0'
+            }
+          }
+        },
+        {
+          name: 'ember-3.7.0',
+          npm: {
+            devDependencies: {
+              'ember-source': '3.7.0',
+              'ember-data': '3.7.0'
             }
           }
         },
