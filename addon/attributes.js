@@ -357,7 +357,7 @@ function fragmentOwner() {
   return computed(function() {
     assert('Fragment owner properties can only be used on fragments.', isFragment(this));
 
-    return internalModelFor(this)._recordData._owner;
+    return internalModelFor(this)._recordData.getOwner();
   }).meta({
     isFragmentOwner: true
   }).readOnly();

@@ -9,8 +9,8 @@ const didSetProperty = RootState.loaded.saved.didSetProperty;
 const propertyWasReset = RootState.loaded.updated.uncommitted.propertyWasReset;
 
 function dirtySetup(internalModel) {
-  const record = internalModel._recordData._owner;
-  const key = internalModel._recordData._name;
+  const record = internalModel._recordData.getOwner();
+  const key = internalModel._recordData.getName();
 
   // A newly created fragment may not have an owner yet
   if (record) {
@@ -79,8 +79,8 @@ let FragmentRootState = {
 
     saved: {
       setup(internalModel) {
-        let record = internalModel._recordData._owner;
-        let key = internalModel._recordData._name;
+        let record = internalModel._recordData.getOwner();
+        let key = internalModel._recordData.getName();
 
         // Abort if fragment is still initializing
         if (!record._internalModel._recordData.getFragment(key)) {

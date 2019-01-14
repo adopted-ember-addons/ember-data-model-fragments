@@ -53,6 +53,22 @@ Object.assign(RecordDataPrototype, {
     });
   },
 
+  getOwner() {
+    return this._owner;
+  },
+
+  setOwner(value) {
+    this._owner = value;
+  },
+
+  setName(value) {
+    this._name = value;
+  },
+
+  getName() {
+    return this._name;
+  },
+
   getFragment(name) {
     this._fragments = this._fragments || Object.create({});
     return this._fragments[name];
@@ -62,26 +78,6 @@ Object.assign(RecordDataPrototype, {
     this._fragments = this._fragments || Object.create({});
     this._fragments[name] = fragment;
     return this._fragments[name];
-  },
-
-  changedAttributes() {
-    let oldData = this._data;
-    let currentData = this._attributes;
-    let inFlightData = this._inFlightAttributes;
-    let newData = Object.assign({}, inFlightData, currentData);
-    let diffData = Object.create(null);
-    let newDataKeys = Object.keys(newData);
-
-    const fragmentNames = Object.keys(this._fragments || Object.create(null));
-    for (let i = 0, length = newDataKeys.length; i < length; i++) {
-      let key = newDataKeys[i];
-      diffData[key] = [
-        oldData[key],
-        (fragmentNames.includes(key) && newData[key]) ? newData[key]._record : newData[key] // avoids returning the internalModel of the new attributes
-      ];
-    }
-
-    return diffData;
   },
 
   didCommit(data) {
@@ -111,27 +107,6 @@ Object.assign(RecordDataPrototype, {
     this._updateChangedAttributes();
 
     return changedKeys;
-  },
-
-  willCommit() {
-    // Notify fragments that the record was committed
-    this.eachFragmentKeyValue((key, fragment) => fragment._flushChangedAttributes());
-    this._inFlightAttributes = this._attributes;
-    this._attributes = null;
-  },
-
-  commitWasRejected() {
-    this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidError());
-    let keys = Object.keys(this._inFlightAttributes);
-    if (keys.length > 0) {
-      let attrs = this._attributes;
-      for (let i = 0; i < keys.length; i++) {
-        if (attrs[keys[i]] === undefined) {
-          attrs[keys[i]] = this._inFlightAttributes[keys[i]];
-        }
-      }
-    }
-    this._inFlightAttributes = null;
   }
 });
 
@@ -169,7 +144,7 @@ Store.reopen({
     internalModel.currentState = FragmentRootState.empty;
 
     internalModel._recordData._name = null;
-    internalModel._recordData._owner = null;
+    internalModel._recordData.setOwner(null);
 
     internalModel.loadedData();
 
@@ -283,6 +258,14 @@ function decorateMethod(obj, name, fn) {
   };
 }
 
+function decorateMethodBefore(obj, name, fn) {
+  const originalFn = obj[name];
+  obj[name] = function() {
+    fn.apply(this, arguments);
+    return originalFn.apply(this, arguments);
+  };
+}
+
 /**
   Override parent method to snapshot fragment attributes before they are
   passed to the `DS.Model#serialize`.
@@ -305,23 +288,36 @@ decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragment
 });
 
 decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
-  const fragments = this._recordData._fragments;
   const error = args[0] || Object.create(null);
-  // Notify fragments that the record was committed
-  for (let key in fragments) {
-    if (fragments[key] && fragments[key]._internalModel) {
-      fragments[key]._adapterDidError(error);
-    }
-  }
+  this._recordData.eachFragmentKeyValue((key, value) => {
+    value._adapterDidError(error);
+  });
 });
 
 decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
-  const fragments = this._recordData._fragments;
-  for (let key in fragments) {
-    if (fragments[key]) {
-      fragments[key].rollbackAttributes();
+  this._recordData.eachFragmentKeyValue((key, value) => {
+    value.rollbackAttributes();
+  });
+});
+
+decorateMethod(RecordDataPrototype, 'changedAttributes', function changedAttributes(diffData) {
+  this.eachFragmentKey((name) => {
+    if (name in this._attributes) {
+      diffData[name] = [
+        diffData[name][0],
+        diffData[name][1] ? diffData[name][1]._record : diffData[name][1]
+      ];
     }
-  }
+  });
+  return diffData;
+});
+
+decorateMethodBefore(RecordDataPrototype, 'willCommit', function willCommit() {
+  this.eachFragmentKeyValue((key, fragment) => fragment._flushChangedAttributes());
+});
+
+decorateMethodBefore(RecordDataPrototype, 'commitWasRejected', function commitWasRejected() {
+  this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidError());
 });
 
 /**
