@@ -106,7 +106,7 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
     @method _flushChangedAttributes
   */
   _flushChangedAttributes() {
-    internalModelFor(this).flushChangedAttributes();
+    internalModelFor(this)._recordData.willCommit();
   },
 
   /**
@@ -121,13 +121,13 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
   /**
     @method _adapterDidCommit
   */
-  _adapterDidError(/* error */) {
-    internalModelFor(this)._saveWasRejected();
+  _adapterDidError() {
+    internalModelFor(this)._recordData.commitWasRejected();
   },
 
   toStringExtension() {
     let internalModel = internalModelFor(this);
-    let owner = internalModel && internalModel._owner;
+    let owner = internalModel && internalModel._recordData.getOwner();
     if (owner) {
       let ownerId = get(owner, 'id');
       return `owner(${ownerId})`;
@@ -172,25 +172,17 @@ export function getActualFragmentType(declaredType, options, data) {
 
 // Returns the internal model for the given record/fragment
 export function internalModelFor(record) {
-  let internalModel = record._internalModel;
-
-  // Ensure the internal model has a fragments hash, since we can't override the
-  // constructor function anymore
-  if (internalModel && !internalModel._fragments) {
-    internalModel._fragments = Object.create(null);
-  }
-
-  return internalModel;
+  return record._internalModel;
 }
 
 // Sets the owner/key values on a fragment
 export function setFragmentOwner(fragment, record, key) {
   let internalModel = internalModelFor(fragment);
 
-  assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._owner || internalModel._owner === record);
+  assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._recordData.getOwner() || internalModel._recordData.getOwner() === record);
 
-  internalModel._owner = record;
-  internalModel._name = key;
+  internalModel._recordData.setOwner(record);
+  internalModel._recordData.setName(key);
 
   // Notify any observers of `fragmentOwner` properties
   get(fragment.constructor, 'fragmentOwnerProperties').forEach(name => {

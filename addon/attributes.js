@@ -83,7 +83,7 @@ function fragment(declaredModelName, options) {
   function setupFragment(store, record, key) {
     let internalModel = internalModelFor(record);
     let data = getWithDefault(internalModel, key, options, 'object');
-    let fragment = internalModel._fragments[key];
+    let fragment = internalModel._recordData.getFragment(key);
 
     // Regardless of whether being called as a setter or getter, the fragment
     // may not be initialized yet, in which case the data will contain a
@@ -102,11 +102,11 @@ function fragment(declaredModelName, options) {
         // notifyPropertyChange which can in turn call setupFragment again, creating
         // an infinite recursion loop. Since it's a reference anyway doing the
         // assignation sooner has no side effect
-        internalModel._data[key] = fragment;
+        internalModel._recordData._data[key] = fragment;
         setFragmentData(fragment, data);
       } else {
         fragment = createFragment(store, declaredModelName, record, key, options, data);
-        internalModel._data[key] = fragment;
+        internalModel._recordData._data[key] = fragment;
       }
 
     } else {
@@ -140,7 +140,7 @@ function fragment(declaredModelName, options) {
       return fragment;
     }
 
-    if (internalModel._data[key] !== fragment) {
+    if (internalModel._recordData._data[key] !== fragment) {
       fragmentDidDirty(record, key, fragment);
     } else {
       fragmentDidReset(record, key);
@@ -269,7 +269,7 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
       let internalModel = internalModelFor(this);
       let fragment = setupFragment(this.store, this, key);
 
-      return internalModel._fragments[key] = fragment;
+      return internalModel._recordData.setFragment(key, fragment);
     },
     set(key, value) {
       let internalModel = internalModelFor(this);
@@ -277,7 +277,7 @@ function fragmentProperty(type, options, setupFragment, setFragmentValue) {
 
       fragment = setFragmentValue(this, key, fragment, value);
 
-      return internalModel._fragments[key] = fragment;
+      return internalModel._recordData.setFragment(key, fragment);
     }
   }).meta(meta);
 }
@@ -286,7 +286,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
   function setupFragmentArray(store, record, key) {
     let internalModel = internalModelFor(record);
     let data = getWithDefault(internalModel, key, options, 'array');
-    let fragments = internalModel._fragments[key] || null;
+    let fragments = internalModel._recordData.getFragment(key) || null;
 
     // If we already have a processed fragment in _data and our current fragment is
     // null simply reuse the one from data. We can be in this state after a rollback
@@ -296,7 +296,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
     // Create a fragment array and initialize with data
     } else if (data && data !== fragments) {
       fragments || (fragments = createArray(record, key));
-      internalModel._data[key] = fragments;
+      internalModel._recordData._data[key] = fragments;
       fragments.setupData(data);
     } else {
       // Handle the adapter setting the fragment array to null
@@ -318,7 +318,7 @@ function fragmentArrayProperty(metaType, options, createArray) {
       assert('A fragment array property can only be assigned an array or null');
     }
 
-    if (internalModel._data[key] !== fragments || (fragments && get(fragments, 'hasDirtyAttributes'))) {
+    if (internalModel._recordData._data[key] !== fragments || (fragments && get(fragments, 'hasDirtyAttributes'))) {
       fragmentDidDirty(record, key, fragments);
     } else {
       fragmentDidReset(record, key);
@@ -357,7 +357,7 @@ function fragmentOwner() {
   return computed(function() {
     assert('Fragment owner properties can only be used on fragments.', isFragment(this));
 
-    return internalModelFor(this)._owner;
+    return internalModelFor(this)._recordData.getOwner();
   }).meta({
     isFragmentOwner: true
   }).readOnly();
@@ -391,8 +391,8 @@ function getDefaultValue(record, options, type) {
 
 // Returns the value of the property or the default propery
 function getWithDefault(internalModel, key, options, type) {
-  if (key in internalModel._data) {
-    return internalModel._data[key];
+  if (key in internalModel._recordData._data) {
+    return internalModel._recordData._data[key];
   } else {
     return getDefaultValue(internalModel, options, type);
   }

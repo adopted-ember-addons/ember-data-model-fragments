@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
-import { InternalModel, normalizeModelName, getOwner } from 'ember-data/-private';
+import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
 import {
@@ -11,6 +11,7 @@ import {
 import FragmentArray from './array/fragment';
 import { isPresent } from '@ember/utils';
 import { computed } from '@ember/object';
+import { getOwner } from '@ember/application';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -35,7 +36,80 @@ function serializerForFragment(owner, normalizedModelName) {
   @module ember-data-model-fragments
 */
 
-let InternalModelPrototype = InternalModel.prototype;
+const InternalModelPrototype = InternalModel.prototype;
+const RecordDataPrototype = RecordData.prototype;
+
+Object.assign(RecordDataPrototype, {
+  eachFragmentKey(fn) {
+    this._fragments = this._fragments || Object.create({});
+    Object.keys(this._fragments).forEach(fn);
+  },
+
+  eachFragmentKeyValue(fn) {
+    this.eachFragmentKey((key) => {
+      const value = this.getFragment(key);
+      if (value) {
+        fn(key, value);
+      }
+    });
+  },
+
+  getOwner() {
+    return this._owner;
+  },
+
+  setOwner(value) {
+    this._owner = value;
+  },
+
+  setName(value) {
+    this._name = value;
+  },
+
+  getName() {
+    return this._name;
+  },
+
+  getFragment(name) {
+    this._fragments = this._fragments || Object.create({});
+    return this._fragments[name];
+  },
+
+  setFragment(name, fragment) {
+    this._fragments = this._fragments || Object.create({});
+    this._fragments[name] = fragment;
+    return this._fragments[name];
+  },
+
+  didCommit(data) {
+    this._isNew = false;
+    if (data) {
+      if (data.relationships) {
+        this._setupRelationships(data);
+      }
+      if (data.id) {
+        // didCommit provided an ID, notify the store of it
+        this.storeWrapper.setRecordId(this.modelName, data.id, this.clientId);
+        this.id = coerceId(data.id);
+      }
+      data = data.attributes;
+
+      // Notify fragments that the record was committed
+      this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidCommit(data[key]));
+    } else {
+      this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidCommit());
+    }
+
+    const changedKeys = this._changedKeys(data);
+
+    Object.assign(this._data, this.__inFlightAttributes, this._attributes, data);
+    this._attributes = null;
+    this._inFlightAttributes = null;
+    this._updateChangedAttributes();
+
+    return changedKeys;
+  }
+});
 
 /**
   @class Store
@@ -70,8 +144,8 @@ Store.reopen({
     // Re-wire the internal model to use the fragment state machine
     internalModel.currentState = FragmentRootState.empty;
 
-    internalModel._name = null;
-    internalModel._owner = null;
+    internalModel._recordData._name = null;
+    internalModel._recordData.setOwner(null);
 
     internalModel.loadedData();
 
@@ -128,53 +202,6 @@ Store.reopen({
   @namespace DS
   */
 Model.reopen({
-  /**
-    Returns an object, whose keys are changed properties, and value is
-    an [oldProp, newProp] array. When the model has fragments that have
-    changed, the property value is simply `true`.
-
-    Example
-
-    ```javascript
-    App.Mascot = DS.Model.extend({
-      type: DS.attr('string'),
-      name: MF.fragment('name')
-    });
-
-    App.Name = DS.Model.extend({
-      first : DS.attr('string'),
-      last  : DS.attr('string')
-    });
-
-    let person = store.createRecord('person');
-    person.changedAttributes(); // {}
-    person.get('name').set('first', 'Tomster');
-    person.set('type', 'Hamster');
-    person.changedAttributes(); // { name: true, type: [undefined, 'Hamster'] }
-    ```
-
-    @method changedAttributes
-    @return {Object} an object, whose keys are changed properties,
-      and value is an [oldProp, newProp] array.
-  */
-  changedAttributes() {
-    let diffData = this._super(...arguments);
-    let internalModel = internalModelFor(this);
-
-    Object.keys(internalModel._fragments).forEach(name => {
-      // An actual diff of the fragment or fragment array is outside the scope
-      // of this method, so just indicate that there is a change instead
-      if (name in internalModel._attributes) {
-        diffData[name] = [
-          diffData[name][0],
-          diffData[name][1] ? diffData[name][1]._record : diffData[name][1] // avoids returning the internalModel of the new attributes
-        ];
-      }
-    });
-
-    return diffData;
-  },
-
   willDestroy() {
     this._super(...arguments);
 
@@ -182,20 +209,20 @@ Model.reopen({
     let key, fragment;
 
     // destroy the current state
-    for (key in internalModel._fragments) {
-      fragment = internalModel._fragments[key];
+    for (key in internalModel._recordData._fragments) {
+      fragment = internalModel._recordData._fragments[key];
       if (fragment) {
         fragment.destroy();
-        delete internalModel._fragments[key];
+        delete internalModel._recordData._fragments[key];
       }
     }
 
     // destroy the original state
-    for (key in internalModel._data) {
-      fragment = internalModel._data[key];
+    for (key in internalModel._recordData._data) {
+      fragment = internalModel._recordData._data[key];
       if (fragment instanceof Fragment || fragment instanceof FragmentArray) {
         fragment.destroy();
-        delete internalModel._data[key];
+        delete internalModel._recordData._data[key];
       }
     }
   }
@@ -232,6 +259,14 @@ function decorateMethod(obj, name, fn) {
   };
 }
 
+function decorateMethodBefore(obj, name, fn) {
+  const originalFn = obj[name];
+  obj[name] = function() {
+    fn.apply(this, arguments);
+    return originalFn.apply(this, arguments);
+  };
+}
+
 /**
   Override parent method to snapshot fragment attributes before they are
   passed to the `DS.Model#serialize`.
@@ -241,10 +276,8 @@ function decorateMethod(obj, name, fn) {
 */
 decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
   let attrs = snapshot._attributes;
-
-  Object.keys(attrs).forEach(key => {
+  Object.keys(attrs).forEach((key) => {
     let attr = attrs[key];
-
     // If the attribute has a `_createSnapshot` method, invoke it before the
     // snapshot gets passed to the serializer
     if (attr && typeof attr._createSnapshot === 'function') {
@@ -255,79 +288,37 @@ decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragment
   return snapshot;
 });
 
-/**
-  If the model `hasDirtyAttributes` this function will discard any unsaved
-  changes, recursively doing the same for all fragment properties.
-
-  Example
-
-  ```javascript
-  record.get('name'); // 'Untitled Document'
-  record.set('name', 'Doc 1');
-  record.get('name'); // 'Doc 1'
-  record.rollbackAttributes();
-  record.get('name'); // 'Untitled Document'
-  ```
-
-  @method rollbackAttributes
-*/
-decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
-  for (let key in this._fragments) {
-    if (this._fragments[key]) {
-      this._fragments[key].rollbackAttributes();
-    }
-  }
-});
-
-/**
-  Before saving a record, its attributes must be moved to in-flight, which must
-  happen for all fragments as well
-
-  @method flushChangedAttributes
-*/
-decorateMethod(InternalModelPrototype, 'flushChangedAttributes', function flushChangedAttributesFragments() {
-  let fragment;
-
-  // Notify fragments that the record was committed
-  for (let key in this._fragments) {
-    fragment = this._fragments[key];
-    if (fragment) {
-      fragment._flushChangedAttributes();
-    }
-  }
-});
-
-/**
-  If the adapter did not return a hash in response to a commit,
-  merge the changed attributes and relationships into the existing
-  saved data and notify all fragments of the commit.
-
-  @method adapterDidCommit
-*/
-decorateMethod(InternalModelPrototype, 'adapterDidCommit', function adapterDidCommitFragments(returnValue, args) {
-  let attributes = (args[0] && args[0].attributes) || Object.create(null);
-  let fragment;
-
-  // Notify fragments that the record was committed
-  for (let key in this._fragments) {
-    fragment = this._fragments[key];
-    if (fragment) {
-      fragment._adapterDidCommit(attributes[key]);
-    }
-  }
-});
-
 decorateMethod(InternalModelPrototype, 'adapterDidError', function adapterDidErrorFragments(returnValue, args) {
-  let error = args[0] || Object.create(null);
-  let fragment;
+  const error = args[0] || Object.create(null);
+  this._recordData.eachFragmentKeyValue((key, value) => {
+    value._adapterDidError(error);
+  });
+});
 
-  // Notify fragments that the record was committed
-  for (let key in this._fragments) {
-    fragment = this._fragments[key];
-    if (fragment) {
-      fragment._adapterDidError(error);
+decorateMethod(InternalModelPrototype, 'rollbackAttributes', function rollbackFragments() {
+  this._recordData.eachFragmentKeyValue((key, value) => {
+    value.rollbackAttributes();
+  });
+});
+
+decorateMethod(RecordDataPrototype, 'changedAttributes', function changedAttributes(diffData) {
+  this.eachFragmentKey((name) => {
+    if (name in this._attributes) {
+      diffData[name] = [
+        diffData[name][0],
+        diffData[name][1] ? diffData[name][1]._record : diffData[name][1]
+      ];
     }
-  }
+  });
+  return diffData;
+});
+
+decorateMethodBefore(RecordDataPrototype, 'willCommit', function willCommit() {
+  this.eachFragmentKeyValue((key, fragment) => fragment._flushChangedAttributes());
+});
+
+decorateMethodBefore(RecordDataPrototype, 'commitWasRejected', function commitWasRejected() {
+  this.eachFragmentKeyValue((key, fragment) => fragment._adapterDidError());
 });
 
 /**
@@ -343,34 +334,29 @@ JSONSerializer.reopen({
     @private
   */
   transformFor(attributeType) {
-    if (attributeType.indexOf('-mf-') === 0) {
-      return getFragmentTransform(getOwner(this), this.store, attributeType);
+    if (attributeType.indexOf('-mf-') !== 0) {
+      return this._super(...arguments);
     }
 
-    return this._super(...arguments);
+    const owner = getOwner(this);
+    const containerKey = `transform:${attributeType}`;
+
+    if (!owner.hasRegistration(containerKey)) {
+      const match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+      const transformName = match[1];
+      const type = match[2];
+      const polymorphicTypeProp = match[3];
+      let transformClass = owner.factoryFor(`transform:${transformName}`);
+      transformClass = transformClass && transformClass.class;
+      transformClass = transformClass.extend({
+        type,
+        polymorphicTypeProp,
+        store: this.store
+      });
+      owner.register(containerKey, transformClass);
+    }
+    return owner.lookup(containerKey);
   }
 });
-
-// Retrieve or create a transform for the specific fragment type
-function getFragmentTransform(owner, store, attributeType) {
-  let containerKey = `transform:${attributeType}`;
-  let match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-  let transformName = match[1];
-  let transformType = match[2];
-  let polymorphicTypeProp = match[3];
-
-  if (!owner.hasRegistration(containerKey)) {
-    let transformClass = owner.factoryFor(`transform:${transformName}`);
-    transformClass = transformClass && transformClass.class;
-
-    owner.register(containerKey, transformClass.extend({
-      store: store,
-      type: transformType,
-      polymorphicTypeProp: polymorphicTypeProp
-    }));
-  }
-
-  return owner.lookup(containerKey);
-}
 
 export { Store, Model, JSONSerializer };

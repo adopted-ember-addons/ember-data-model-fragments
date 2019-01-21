@@ -32,7 +32,7 @@ function normalizeFragmentArray(array, content, objs, canonical) {
     if (isFragment(data)) {
       fragment = data;
 
-      let owner = internalModelFor(fragment)._owner;
+      let owner = internalModelFor(fragment)._recordData.getOwner();
 
       assert('Fragments can only belong to one owner, try copying instead', !owner || owner === record);
 
