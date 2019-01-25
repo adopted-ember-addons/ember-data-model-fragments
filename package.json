@@ -1,6 +1,6 @@
 {
   "name": "ember-data-model-fragments",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "description": "Ember Data addon to support nested JSON documents",
   "keywords": [
     "ember-addon",
