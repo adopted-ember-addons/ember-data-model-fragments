@@ -1,6 +1,6 @@
 # Changelog
 
-### v4.0.0 (January 25, 2018)
+### v4.0.0 (January 25, 2019)
 
 * Ember 3.5.0 compatibility with breaking changes related to `RecordData`. (@cohitre)
 * Fixed `changedAtributes` with fragments (@Gorzas)
