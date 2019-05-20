@@ -12,6 +12,7 @@ import FragmentArray from './array/fragment';
 import { isPresent } from '@ember/utils';
 import { computed } from '@ember/object';
 import { getOwner } from '@ember/application';
+import { assign } from '@ember/polyfills';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -39,7 +40,7 @@ function serializerForFragment(owner, normalizedModelName) {
 const InternalModelPrototype = InternalModel.prototype;
 const RecordDataPrototype = RecordData.prototype;
 
-Object.assign(RecordDataPrototype, {
+assign(RecordDataPrototype, {
   eachFragmentKey(fn) {
     this._fragments = this._fragments || Object.create({});
     Object.keys(this._fragments).forEach(fn);
@@ -102,7 +103,7 @@ Object.assign(RecordDataPrototype, {
 
     const changedKeys = this._changedKeys(data);
 
-    Object.assign(this._data, this.__inFlightAttributes, this._attributes, data);
+    assign(this._data, this.__inFlightAttributes, this._attributes, data);
     this._attributes = null;
     this._inFlightAttributes = null;
     this._updateChangedAttributes();
