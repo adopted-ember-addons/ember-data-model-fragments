@@ -455,7 +455,7 @@ with `polymorphic` set to true. In addition the `typeKey` can be set, which defa
 
 The `typeKey`'s value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass. Additionally, the `typeKey`'s value must be a field on the parent class.
 
-In the following example the declared type of `animals` is `animal`, which corresponds to the class `App.Animal`. `App.Animal` has two subclasses: `App.Elephant` and `App.Lion`,
+In the following example the declared type of `animals` is `animal`, which corresponds to the class `Animal`. `Animal` has two subclasses: `Elephant` and `Lion`,
 so to `typeKey`'s value can be `'animal'`, `'elephant'` or `'lion'`.
 
 ```javascript
@@ -476,7 +476,7 @@ export default Model.extend({
 import Fragment from 'ember-data-model-fragments/fragment';
 import attr from 'ember-data/attr';
 
-App.Animal = Fragment.extend({
+export default Fragment.extend({
   $type: attr('string'),
   name: attr('string'),
 });
@@ -540,14 +540,16 @@ Serializing the fragment type back to JSON is not currently supported out of the
 ```javascript
 // app/serializers/animal.js
 import JSONSerializer from 'ember-data/serializers/json';
+import Elephant from 'app/models/elephant';
+import Lion from 'app/models/elephant';
 
 export default JSONSerializer.extend({
   serialize(record, options) {
     let json = this._super(...arguments);
 
-    if (record instanceof App.Elephant) {
+    if (record instanceof Elephant) {
       json.$type = 'elephant';
-    } else if (record instanceof App.Lion) {
+    } else if (record instanceof Lion) {
       json.$type = 'lion';
     } else {
       json.$type = 'animal';
