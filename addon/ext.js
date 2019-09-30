@@ -2,6 +2,7 @@ import { assert } from '@ember/debug';
 import Store from 'ember-data/store';
 import Model from 'ember-data/model';
 import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
+import { identifierCacheFor } from '@ember-data/store/-private';
 import JSONSerializer from 'ember-data/serializers/json';
 import FragmentRootState from './states';
 import {
@@ -140,7 +141,9 @@ Store.reopen({
   createFragment(modelName, props) {
     assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
 
-    let internalModel = new InternalModel(modelName, null, this, getOwner(this).container);
+    let identifierCache = identifierCacheFor(this);
+    let recordIdentifier = identifierCache.createIdentifierForNewRecord({ type: modelName });
+    let internalModel = new InternalModel(this, recordIdentifier);
 
     // Re-wire the internal model to use the fragment state machine
     internalModel.currentState = FragmentRootState.empty;
