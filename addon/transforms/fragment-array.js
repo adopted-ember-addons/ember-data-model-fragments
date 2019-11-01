@@ -33,7 +33,7 @@ const FragmentArrayTransform = FragmentTransform.extend({
     return snapshots.map(snapshot => {
       let serializer = store.serializerFor(snapshot.modelName);
       return serializer.serialize(snapshot);
-    });
+    }).compact();
   }
 });
 
