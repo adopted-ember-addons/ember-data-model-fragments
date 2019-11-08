@@ -2,7 +2,7 @@ import { run } from '@ember/runloop';
 import { module, skip } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import '@ember/test-helpers';
-import hbs from 'htmlbars-inline-precompile';
+import { hbs } from 'ember-cli-htmlbars';
 import Pretender from 'pretender';
 let owner, store, server;
 
