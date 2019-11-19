@@ -27,7 +27,7 @@ Use the following table to decide which version of this project to use with your
 | >= v2.14.x < v3.0.x | v2.14.x |
 | >= v3.0.x < v3.2.x | v3.0.x-beta.1 |
 | >= v3.2.x < v3.4.x | v3.3.x |
-| >= v3.12.x < v3.5.x | v4.0.x |
+| >= v3.5.x < v3.12.x | v4.0.x |
 
 #### Notes
 
