@@ -496,6 +496,7 @@ module('integration - Persistence', function(hooks) {
 
     let PersonObserver = EmberObject.extend({
       person: null,
+      // eslint-disable-next-line ember/no-observers
       observer: observer('person.addresses.[]', function() {
         assert.ok(true, 'The array change was observed');
       })
@@ -548,6 +549,7 @@ module('integration - Persistence', function(hooks) {
 
     let ArmyObserver = EmberObject.extend({
       army: null,
+      // eslint-disable-next-line ember/no-observers
       observer: observer('army.soldiers.[]', function() {
         assert.equal(this.get('army.soldiers.length'), 2, 'The array change to was observed');
       })
