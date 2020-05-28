@@ -128,6 +128,35 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
     });
   });
 
+  test('changing the fragment array is reflected in parent changedAttribtues', function(assert) {
+    pushPerson(1);
+
+    return store.find('person', 1).then(person => {
+      let addresses = person.get('addresses');
+
+      let address = store.createFragment('address', {
+        street: '1 Dungeon Cell',
+        city: 'King\'s Landing',
+        region: 'Crownlands',
+        country: 'Westeros'
+      });
+      assert.deepEqual(person.changedAttributes().addresses, undefined, 'a frehsly pushed object has no changes');
+      addresses.addFragment(address);
+
+      // This is the current behavior but seems not great, we should return a better diff objectt
+      assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changed arrays are indicated in the diff object');
+
+      addresses.rollbackAttributes();
+      assert.deepEqual(person.changedAttributes().addresses, undefined, 'there are no changes after a rollback');
+      addresses.objectAt(0).set('street', 'Changed Streett');
+
+      // This is the current behavior but seems not great, we should return a better diff objectt
+      assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changing a property on a element of the array marks the array as having changedAttribtuest');
+      addresses.rollbackAttributes();
+      assert.deepEqual(person.changedAttributes().addresses, undefined, 'there are no changes after a rollback');
+    });
+  });
+
   test('adding a non-fragment model or object literal throws an error', function(assert) {
     run(() => {
       pushPerson(1);

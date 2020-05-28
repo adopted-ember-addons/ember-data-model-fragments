@@ -2,6 +2,7 @@ import { assert } from '@ember/debug';
 import { get } from '@ember/object';
 import Transform from 'ember-data/transform';
 import JSONAPISerializer from 'ember-data/serializers/json-api';
+import { inject as service } from '@ember/service';
 
 /**
   @module ember-data-model-fragments
@@ -16,7 +17,7 @@ import JSONAPISerializer from 'ember-data/serializers/json-api';
   @extends DS.Transform
 */
 const FragmentTransform = Transform.extend({
-  store: null,
+  store: service(),
   type: null,
   polymorphicTypeProp: null,
 

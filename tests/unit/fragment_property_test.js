@@ -74,6 +74,37 @@ module('unit - `MF.fragment` property', function(hooks) {
     });
   });
 
+  test('a fragment set to null can be recreated through the store with a non null value', function(assert) {
+    run(() => {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attribtues: {
+            name: null
+          }
+        }
+      });
+      store.find('person', 1).then(() => {
+        store.push({
+          data: {
+            type: 'person',
+            id: 1,
+            attributes: {
+              name: {
+                first: 'Bob',
+                last: 'Smith'
+              }
+            }
+          }
+        });
+        return store.find('person', 1).then(person => {
+          assert.equal(person.get('name.first'), 'Bob', 'New name is set correctly');
+        });
+      });
+    });
+  });
+
   test('setting to a non-fragment or object literal throws an error', function(assert) {
     run(() => {
       store.push({

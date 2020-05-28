@@ -3,17 +3,26 @@ import { run } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
+import { copy } from '@ember/object/internals';
 
 let store, people;
+
+function pushPerson(id) {
+  store.push({
+    data: {
+      type: 'person',
+      id: id,
+      attributes: copy(A(people).findBy('id', id), true)
+    }
+  });
+}
 
 module('integration - Dependent State', function(hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function(assert) {
     store = this.owner.lookup('service:store');
-
     assert.expectNoDeprecation();
-
     people = [
       {
         id: 1,
@@ -35,10 +44,7 @@ module('integration - Dependent State', function(hooks) {
             country: 'Westeros'
           }
         ],
-        titles: [
-          'Hand of the King',
-          'Master of Coin'
-        ]
+        titles: ['Hand of the King', 'Master of Coin']
       }
     ];
   });
@@ -47,16 +53,6 @@ module('integration - Dependent State', function(hooks) {
     store = null;
     people = null;
   });
-
-  function pushPerson(id) {
-    store.push({
-      data: {
-        type: 'person',
-        id: id,
-        attributes: A(people).findBy('id', id)
-      }
-    });
-  }
 
   test('changing a fragment property dirties the fragment and owner record', function(assert) {
     run(() => {
@@ -193,7 +189,10 @@ module('integration - Dependent State', function(hooks) {
         name.set('first', 'Jorah');
 
         assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -342,7 +341,10 @@ module('integration - Dependent State', function(hooks) {
         name.rollbackAttributes();
 
         assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -382,7 +384,10 @@ module('integration - Dependent State', function(hooks) {
 
         assert.equal(name, undefined, 'property is null');
 
-        person.set('name', store.createFragment('name', { first: 'Rob', last: 'Stark' }));
+        person.set(
+          'name',
+          store.createFragment('name', { first: 'Rob', last: 'Stark' })
+        );
 
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
 
@@ -416,7 +421,10 @@ module('integration - Dependent State', function(hooks) {
           }
         ]);
 
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
@@ -436,13 +444,17 @@ module('integration - Dependent State', function(hooks) {
           country: 'Westeros'
         });
 
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
   });
 
   test('setting a fragment property with object literals to the same values does not dirty the fragment or owner record', function(assert) {
+
     run(() => {
       pushPerson(1);
 
@@ -471,7 +483,10 @@ module('integration - Dependent State', function(hooks) {
           country: 'Westeros'
         });
 
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
@@ -486,7 +501,10 @@ module('integration - Dependent State', function(hooks) {
 
         addresses.removeObject(addresses.get('firstObject'));
 
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
@@ -503,8 +521,15 @@ module('integration - Dependent State', function(hooks) {
         let address = addresses.popObject();
         addresses.unshiftObject(address);
 
-        assert.equal(addresses.get('length'), length, 'fragment array length is maintained');
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is dirty');
+        assert.equal(
+          addresses.get('length'),
+          length,
+          'fragment array length is maintained'
+        );
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
@@ -520,7 +545,10 @@ module('integration - Dependent State', function(hooks) {
         let address = addresses.popObject();
         addresses.pushObject(address);
 
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
@@ -539,8 +567,14 @@ module('integration - Dependent State', function(hooks) {
         let address = addresses.popObject();
         addresses.pushObject(address);
 
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -556,7 +590,10 @@ module('integration - Dependent State', function(hooks) {
         address.set('street', '2 Sky Cell');
 
         assert.ok(address.get('hasDirtyAttributes'), 'fragment is dirty');
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
@@ -574,7 +611,10 @@ module('integration - Dependent State', function(hooks) {
         address.set('street', '1 Sky Cell');
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
@@ -595,7 +635,10 @@ module('integration - Dependent State', function(hooks) {
         address.set('street', '1 Sky Cell');
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is still dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is still dirty'
+        );
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
       });
     });
@@ -616,8 +659,14 @@ module('integration - Dependent State', function(hooks) {
         person.set('title', 'Master of Coin');
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -638,7 +687,10 @@ module('integration - Dependent State', function(hooks) {
         person.rollbackAttributes();
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
@@ -658,7 +710,11 @@ module('integration - Dependent State', function(hooks) {
 
         person.rollbackAttributes();
 
-        assert.deepEqual(values, person.get('titles').toArray(), 'primitive values are reset');
+        assert.deepEqual(
+          values,
+          person.get('titles').toArray(),
+          'primitive values are reset'
+        );
         assert.ok(!titles.get('hasDirtyAttributes'), 'fragment array is clean');
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
@@ -680,13 +736,16 @@ module('integration - Dependent State', function(hooks) {
         addresses.rollbackAttributes();
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
   });
 
-  test('rolling back a fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retain\'s the owner record\'s dirty state', function(assert) {
+  test('rolling back a fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retains the owner record\'s dirty state', function(assert) {
     run(() => {
       pushPerson(1);
 
@@ -702,8 +761,14 @@ module('integration - Dependent State', function(hooks) {
         addresses.rollbackAttributes();
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -722,7 +787,10 @@ module('integration - Dependent State', function(hooks) {
         address.rollbackAttributes();
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
@@ -743,8 +811,14 @@ module('integration - Dependent State', function(hooks) {
         address.rollbackAttributes();
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(addresses.get('hasDirtyAttributes'), 'fragment array is still dirty');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is still dirty'
+        );
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -764,8 +838,14 @@ module('integration - Dependent State', function(hooks) {
         address.rollbackAttributes();
 
         assert.ok(!address.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
-        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'owner record is still dirty'
+        );
       });
     });
   });
@@ -783,8 +863,15 @@ module('integration - Dependent State', function(hooks) {
 
         person.rollbackAttributes();
 
-        assert.equal(person.get('addresses'), addresses, 'property is restored');
-        assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
+        assert.equal(
+          person.get('addresses'),
+          addresses,
+          'property is restored'
+        );
+        assert.ok(
+          !addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
@@ -828,7 +915,10 @@ module('integration - Dependent State', function(hooks) {
       return store.find('person', 1).then(person => {
         let addresses = person.get('addresses');
 
-        assert.ok(isArray(addresses) && isEmpty(addresses), 'property is an empty array');
+        assert.ok(
+          isArray(addresses) && isEmpty(addresses),
+          'property is an empty array'
+        );
 
         person.set('addresses', [
           store.createFragment('address', {
@@ -843,7 +933,10 @@ module('integration - Dependent State', function(hooks) {
 
         person.rollbackAttributes();
 
-        assert.ok(isArray(person.get('addresses')) && isEmpty(person.get('addresses')), 'property is an empty array again');
+        assert.ok(
+          isArray(person.get('addresses')) && isEmpty(person.get('addresses')),
+          'property is an empty array again'
+        );
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
@@ -854,7 +947,10 @@ module('integration - Dependent State', function(hooks) {
       pushPerson(1);
 
       return store.find('person', 1).then(person => {
-        assert.ok(!person.get('hasDirtyAttributes'), 'person record is not dirty');
+        assert.ok(
+          !person.get('hasDirtyAttributes'),
+          'person record is not dirty'
+        );
 
         store.push({
           data: {
@@ -867,18 +963,28 @@ module('integration - Dependent State', function(hooks) {
         });
 
         assert.equal(person.get('name.first'), 'Jamie', 'first name updated');
-        assert.equal(person.get('name.last'), 'Lannister', 'last name is the same');
-        assert.ok(!person.get('hasDirtyAttributes'), 'person record is not dirty');
+        assert.equal(
+          person.get('name.last'),
+          'Lannister',
+          'last name is the same'
+        );
+        assert.ok(
+          !person.get('hasDirtyAttributes'),
+          'person record is not dirty'
+        );
       });
     });
   });
 
-  test('pushing a fragment array update doesn\'t cause it to become dirty', function(assert) {
+  test('pushing a fragment array update doesnt cause it to become dirty', function(assert) {
     run(() => {
       pushPerson(1);
 
       return store.find('person', 1).then(person => {
-        assert.ok(!person.get('hasDirtyAttributes'), 'person record is not dirty');
+        assert.ok(
+          !person.get('hasDirtyAttributes'),
+          'person record is not dirty'
+        );
 
         store.push({
           data: {
@@ -896,9 +1002,20 @@ module('integration - Dependent State', function(hooks) {
           }
         });
 
-        assert.equal(person.get('addresses.lastObject.street'), '1 Dungeon Cell', 'street updated');
-        assert.equal(person.get('addresses.lastObject.city'), 'King\'s Landing', 'city is the same');
-        assert.ok(!person.get('hasDirtyAttributes'), 'person record is not dirty');
+        assert.equal(
+          person.get('addresses.lastObject.street'),
+          '1 Dungeon Cell',
+          'street updated'
+        );
+        assert.equal(
+          person.get('addresses.lastObject.city'),
+          'King\'s Landing',
+          'city is the same'
+        );
+        assert.ok(
+          !person.get('hasDirtyAttributes'),
+          'person record is not dirty'
+        );
       });
     });
   });

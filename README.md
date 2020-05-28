@@ -28,6 +28,7 @@ Use the following table to decide which version of this project to use with your
 | >= v3.0.x < v3.2.x | v3.0.x-beta.1 |
 | >= v3.2.x < v3.4.x | v3.3.x |
 | >= v3.5.x < v3.12.x | v4.0.x |
+| >= v3.13.x | v5.0.x |
 
 #### Notes
 
@@ -40,6 +41,7 @@ Use the following table to decide which version of this project to use with your
 - Ember Data 3.0 changed `ContainerInstanceCache` import paths. See [e4749c10](https://github.com/lytics/ember-data-model-fragments/pull/287/commits/e4749c107610a6d0dd6032a58c66356e6064562a).
 - Ember Data 3.2 changed `InternalModel#fields`. See: [#310](https://github.com/lytics/ember-data-model-fragments/pull/310).
 - Ember Data 3.5 added `RecordData` interfaces. See: [#324](https://github.com/lytics/ember-data-model-fragments/pull/324), [emberjs/rfcs#293](https://github.com/emberjs/rfcs/pull/293), and [emberjs/data#5616](https://github.com/emberjs/data/pull/5616).
+- Ember Data 3.13 changed `InternalModel` Private APIs. See: [#360] (https://github.com/lytics/ember-data-model-fragments/pull/360)
 
 ## Installation
 

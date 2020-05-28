@@ -3,6 +3,7 @@ import { getOwner } from '@ember/application';
 import { makeArray } from '@ember/array';
 import { get, computed } from '@ember/object';
 import Transform from 'ember-data/transform';
+import { inject as service } from '@ember/service';
 
 /**
   @module ember-data-model-fragments
@@ -17,7 +18,7 @@ import Transform from 'ember-data/transform';
   @extends DS.Transform
 */
 const ArrayTransform = Transform.extend({
-  store: null,
+  store: service(),
   type: null,
 
   deserialize: function deserializeArray(data) {
