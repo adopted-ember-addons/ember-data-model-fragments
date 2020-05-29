@@ -307,4 +307,41 @@ module('unit - `MF.Fragment`', function(hooks) {
       assert.ok(person.get('names').isEvery('readyWasCalled'), 'when creating model that has fragmentArray');
     });
   });
+
+  module('with store#push works', function() {
+    test('passing a fragment to a model with store#push works', function(assert) {
+      let store = this.owner.lookup('service:store');
+      let info = store.createFragment('info', {
+        name: 'Jon Snow'
+      });
+      store.push({
+        'data': {
+          'type': 'user',
+          'attributes': {
+            info
+          },
+          'id': 1
+        }
+      });
+      assert.equal(store.peekRecord('user', 1).info.name, 'Jon Snow');
+    });
+
+    test('passing a model to another model with store#push works', function(assert) {
+      let store = this.owner.lookup('service:store');
+      let manager = store.createRecord('person', {
+        nickName: 'The White Wolf',
+        title: 'Zoo Manager'
+      });
+      store.push({
+        'data': {
+          'type': 'zoo',
+          'attributes': {
+            manager
+          },
+          'id': 1
+        }
+      });
+      assert.equal(store.peekRecord('zoo', 1).manager.nickName, 'The White Wolf');
+    });
+  });
 });
