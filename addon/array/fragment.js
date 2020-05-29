@@ -259,8 +259,7 @@ const FragmentArray = StatefulArray.extend({
     this._originalState.forEach(fragment => {
       fragment.destroy();
     });
-  },
-  _isFragmentArray: true
+  }
 });
 
 export default FragmentArray;
