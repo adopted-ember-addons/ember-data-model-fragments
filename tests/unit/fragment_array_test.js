@@ -116,6 +116,37 @@ module('unit - `MF.fragmentArray`', function(hooks) {
     });
   });
 
+  test('fragment arrays can be added to fragments', function(assert) {
+    let order = store.createFragment('order', {
+      amount: '799.98',
+      products: [
+        {
+          name: 'Tears of Lys',
+          sku: 'poison-bd-32',
+          price: '499.99'
+        },
+        {
+          name: 'The Strangler',
+          sku: 'poison-md-24',
+          price: '299.99'
+        }
+      ]
+    });
+    let user = store.createRecord('user', {
+      info: {
+        name: 'Tyrion Lannister',
+        notes: ['smart', 'short']
+      },
+      orders: [
+        {
+          amount: '799.98',
+          products: order.products
+        }
+      ]
+    });
+    assert.equal(user.orders.firstObject.products.firstObject.name, 'Tears of Lys', 'No problems');
+  });
+
   test('fragments can be removed from the fragment array', function(assert) {
     run(() => {
       store.push({

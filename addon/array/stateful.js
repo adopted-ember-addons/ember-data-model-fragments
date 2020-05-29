@@ -69,7 +69,7 @@ const StatefulArray = ArrayProxy.extend(Copyable, {
 
     this._pendingData = data;
 
-    let processedData = this._normalizeData(makeArray(data));
+    let processedData = this._normalizeData(data._isFragmentArray ? copy(data) : makeArray(data));
     let content = get(this, 'content');
 
     // This data is canonical, so create rollback point
