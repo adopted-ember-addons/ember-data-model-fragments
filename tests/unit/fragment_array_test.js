@@ -145,6 +145,10 @@ module('unit - `MF.fragmentArray`', function(hooks) {
       ]
     });
     assert.equal(user.orders.firstObject.products.firstObject.name, 'Tears of Lys', 'No problems');
+
+    order.products.firstObject.set('name', 'Wolfsbane');
+    assert.equal(order.products.firstObject.name, 'Wolfsbane', 'Modifies the original fragment array');
+    assert.equal(user.orders.firstObject.products.firstObject.name, 'Tears of Lys', 'It does not modify the passed fragment array');
   });
 
   test('fragments can be removed from the fragment array', function(assert) {
