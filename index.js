@@ -23,6 +23,10 @@ module.exports = {
     }
   },
 
+  included() {
+    this._super.included.apply(this, arguments);
+  },
+
   treeForAddon(tree) {
     let versioned = merge([version(), tree]);
 
