@@ -1,6 +1,6 @@
-import DS from 'ember-data';
-import MF from 'ember-data-model-fragments';
+<%= importedModules.length ? `import { ${importedModules} } from '@ember-data/model';` : '' %>
+import Fragment from 'ember-data-model-fragments/fragment';
 
-export default MF.Fragment.extend({
-  <%= attrs %>
-});
+export default class <%= classifiedModuleName %> extends Fragment {
+<%= attrs %>
+}
