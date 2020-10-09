@@ -1019,4 +1019,40 @@ module('integration - Dependent State', function(hooks) {
       });
     });
   });
+
+  test('updating a fragment and a property then resetting the property', function(assert) {
+    run(() => {
+      pushPerson(1);
+
+      return store.find('person', 1).then(person => {
+        assert.ok(
+          !person.get('hasDirtyAttributes'),
+          'person record is not dirty'
+        );
+
+        person.name.set('first', 'Another firstname');
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'person record is dirty'
+        );
+
+        const oldTitle = person.title;
+        person.set('title', 'New title');
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'person record is dirty'
+        );
+
+        person.set('title', oldTitle);
+        assert.ok(
+          person.name.get('hasDirtyAttributes'),
+          'fragment name is dirty'
+        );
+        assert.ok(
+          person.get('hasDirtyAttributes'),
+          'person record is dirty'
+        );
+      });
+    });
+  });
 });
