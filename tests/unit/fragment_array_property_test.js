@@ -128,7 +128,7 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
     });
   });
 
-  test('changing the fragment array is reflected in parent changedAttribtues', function(assert) {
+  test('changing the fragment array is reflected in parent changedAttributes', function(assert) {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -140,20 +140,25 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         region: 'Crownlands',
         country: 'Westeros'
       });
-      assert.deepEqual(person.changedAttributes().addresses, undefined, 'a frehsly pushed object has no changes');
+      assert.deepEqual(person.changedAttributes().addresses, undefined, 'a freshly pushed object has no changes');
+      assert.ok(!person._internalModel.hasChangedAttributes(), 'a freshly pushed object has no changed attributes');
       addresses.addFragment(address);
 
-      // This is the current behavior but seems not great, we should return a better diff objectt
+      // This is the current behavior but seems not great, we should return a better diff object
       assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changed arrays are indicated in the diff object');
+      assert.ok(person._internalModel.hasChangedAttributes(), 'object has changed attributes');
 
       addresses.rollbackAttributes();
       assert.deepEqual(person.changedAttributes().addresses, undefined, 'there are no changes after a rollback');
-      addresses.objectAt(0).set('street', 'Changed Streett');
+      assert.ok(!person._internalModel.hasChangedAttributes(), 'no changed attributes after a rollback');
+      addresses.objectAt(0).set('street', 'Changed Street');
 
-      // This is the current behavior but seems not great, we should return a better diff objectt
-      assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changing a property on a element of the array marks the array as having changedAttribtuest');
+      // This is the current behavior but seems not great, we should return a better diff object
+      assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changing a property on a element of the array marks the array as having changedAttributes');
+      assert.ok(person._internalModel.hasChangedAttributes(), 'object has changed attributes');
       addresses.rollbackAttributes();
       assert.deepEqual(person.changedAttributes().addresses, undefined, 'there are no changes after a rollback');
+      assert.ok(!person._internalModel.hasChangedAttributes(), 'no changed attributes after a rollback');
     });
   });
 
