@@ -323,11 +323,13 @@ module('unit - `MF.fragmentArray`', function(hooks) {
       assert.deepEqual(person.names.toArray().map((f) => f.serialize()), [
         {
           'first': 'Catelyn',
-          'last': 'Tully'
+          'last': 'Tully',
+          prefixes: []
         },
         {
           'first': 'Catelyn',
-          'last': 'Stark'
+          'last': 'Stark',
+          prefixes: []
         }
       ]);
 
