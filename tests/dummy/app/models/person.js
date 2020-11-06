@@ -1,9 +1,9 @@
-import DS from 'ember-data';
+import Model, { attr } from '@ember-data/model';
 import MF from 'ember-data-model-fragments';
 
-export default DS.Model.extend({
-  title: DS.attr('string'),
-  nickName: DS.attr('string'),
+export default Model.extend({
+  title: attr('string'),
+  nickName: attr('string'),
   name: MF.fragment('name'),
   names: MF.fragmentArray('name'),
   addresses: MF.fragmentArray('address'),

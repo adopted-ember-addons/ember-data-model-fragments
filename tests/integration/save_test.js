@@ -1,10 +1,11 @@
+/* eslint-disable ember/no-observers */
+import Model, { attr } from '@ember-data/model';
 import EmberObject, { observer } from '@ember/object';
 import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
 import { copy } from 'ember-copy';
 import { run } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
-import DS from 'ember-data';
 import { module, test, skip } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import Pretender from 'pretender';
@@ -568,8 +569,8 @@ module('integration - Persistence', function(hooks) {
   skip('fragment array properties are notifed on reload', function(assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
-    let Army = DS.Model.extend({
-      name: DS.attr('string'),
+    let Army = Model.extend({
+      name: attr('string'),
       soldiers: MF.array()
     });
 
@@ -584,7 +585,7 @@ module('integration - Persistence', function(hooks) {
       army: null,
       observer: observer('army.soldiers.[]', function() {
         assert.equal(
-          this.get('army.soldiers').length, 2,
+          this.army.soldiers.length, 2,
           'The array change to was observed'
         );
       })
@@ -628,8 +629,8 @@ module('integration - Persistence', function(hooks) {
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
     };
 
-    let Army = DS.Model.extend({
-      name: DS.attr('string'),
+    let Army = Model.extend({
+      name: attr('string'),
       soldiers: MF.array()
     });
 
@@ -742,7 +743,7 @@ module('integration - Persistence', function(hooks) {
   });
 
   test('setting an array does not error on save', function() {
-    let Army = DS.Model.extend({
+    let Army = Model.extend({
       soldiers: MF.array('string')
     });
 

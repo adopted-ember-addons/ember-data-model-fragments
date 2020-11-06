@@ -1,6 +1,6 @@
-import DS from 'ember-data';
+import RESTAdapter from '@ember-data/adapter/rest';
 
-export default DS.RESTAdapter.extend({
+export default RESTAdapter.extend({
   shouldBackgroundReloadRecord() {
     return false;
   }

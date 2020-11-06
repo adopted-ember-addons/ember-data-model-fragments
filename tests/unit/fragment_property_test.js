@@ -1,8 +1,8 @@
+import Model from '@ember-data/model';
 import { run, schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
 import { copy } from 'ember-copy';
-import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
@@ -277,7 +277,7 @@ module('unit - `MF.fragment` property', function(hooks) {
         last: 'Victory'
       };
 
-      let Ship = DS.Model.extend({
+      let Ship = Model.extend({
         name: MF.fragment('name', { defaultValue: defaultValue })
       });
 
@@ -311,7 +311,7 @@ module('unit - `MF.fragment` property', function(hooks) {
         last: 'Victory'
       };
 
-      let Ship = DS.Model.extend({
+      let Ship = Model.extend({
         name: MF.fragment('name', { defaultValue: defaultValue })
       });
 
@@ -336,7 +336,7 @@ module('unit - `MF.fragment` property', function(hooks) {
         last: 'Keeper'
       };
 
-      let Sword = DS.Model.extend({
+      let Sword = Model.extend({
         name: MF.fragment('name', { defaultValue() { return defaultValue; } })
       });
 
@@ -356,7 +356,7 @@ module('unit - `MF.fragment` property', function(hooks) {
         uncopyableObject: EmberObject.create({ item: 'Longclaw' })  // Will throw an error if copied
       };
 
-      let Sword = DS.Model.extend({
+      let Sword = Model.extend({
         name: MF.fragment('name', { defaultValue() { return defaultValue; } })
       });
 

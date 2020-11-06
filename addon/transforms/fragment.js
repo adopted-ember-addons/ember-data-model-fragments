@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import { get } from '@ember/object';
-import Transform from 'ember-data/transform';
-import JSONAPISerializer from 'ember-data/serializers/json-api';
+import Transform from '@ember-data/serializer/transform';
+import JSONAPISerializer from '@ember-data/serializer/json-api';
 import { inject as service } from '@ember/service';
 
 /**
@@ -41,8 +41,8 @@ const FragmentTransform = Transform.extend({
   },
 
   modelNameFor(data) {
-    let modelName = get(this, 'type');
-    let polymorphicTypeProp = get(this, 'polymorphicTypeProp');
+    let modelName = this.type;
+    let polymorphicTypeProp = this.polymorphicTypeProp;
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
       modelName = data[polymorphicTypeProp];

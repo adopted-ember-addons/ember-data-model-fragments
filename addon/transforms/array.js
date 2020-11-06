@@ -1,8 +1,8 @@
 import { assert } from '@ember/debug';
 import { getOwner } from '@ember/application';
 import { makeArray } from '@ember/array';
-import { get, computed } from '@ember/object';
-import Transform from 'ember-data/transform';
+import { computed } from '@ember/object';
+import Transform from '@ember-data/serializer/transform';
 import { inject as service } from '@ember/service';
 
 /**
@@ -26,7 +26,7 @@ const ArrayTransform = Transform.extend({
       return null;
     }
 
-    let transform = get(this, 'transform');
+    let transform = this.transform;
 
     data = makeArray(data);
 
@@ -42,7 +42,7 @@ const ArrayTransform = Transform.extend({
       return null;
     }
 
-    let transform = get(this, 'transform');
+    let transform = this.transform;
 
     array = array.toArray ? array.toArray() : array;
 
@@ -54,7 +54,7 @@ const ArrayTransform = Transform.extend({
   },
 
   transform: computed('type', function() {
-    let attributeType = this.get('type');
+    let attributeType = this.type;
 
     if (!attributeType) {
       return null;

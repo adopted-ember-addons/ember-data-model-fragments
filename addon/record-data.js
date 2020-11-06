@@ -1,7 +1,8 @@
+// eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import { RecordData } from 'ember-data/-private';
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
-import { setProperties } from '@ember/object';
+import { setProperties, get } from '@ember/object';
 import { copy } from 'ember-copy';
 import isInstanceOfType from './util/instance-of-type';
 import { isArray } from '@ember/array';
@@ -14,7 +15,6 @@ import {
   isFragment
 } from './fragment';
 import { assign } from '@ember/polyfills';
-import { get } from '@ember/object';
 import { gte } from 'ember-compatibility-helpers';
 
 let fragmentRecordDatas = new WeakMap();

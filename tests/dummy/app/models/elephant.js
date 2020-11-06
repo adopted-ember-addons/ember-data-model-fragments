@@ -1,6 +1,6 @@
-import DS from 'ember-data';
+import { attr } from '@ember-data/model';
 import Animal from 'dummy/models/animal';
 
 export default Animal.extend({
-  trunkLength: DS.attr('number')
+  trunkLength: attr('number')
 });

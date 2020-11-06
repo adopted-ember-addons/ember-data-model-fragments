@@ -87,7 +87,7 @@ const FragmentArray = StatefulArray.extend({
     @param {Object} data
   */
   _normalizeData(data) {
-    let content = get(this, 'content');
+    let content = this.content;
 
     return normalizeFragmentArray(this, content, data, true);
   },
@@ -200,7 +200,7 @@ const FragmentArray = StatefulArray.extend({
     @private
   */
   replaceContent(index, amount, objs) {
-    let content = get(this, 'content');
+    let content = this.content;
     let replacedContent = content.slice(index, index + amount);
     let fragments = normalizeFragmentArray(this, replacedContent, objs);
 
@@ -239,9 +239,9 @@ const FragmentArray = StatefulArray.extend({
     @return {MF.Fragment} the newly added fragment
     */
   createFragment(props) {
-    let record = get(this, 'owner');
+    let record = this.owner;
     let store = get(record, 'store');
-    let type = get(this, 'type');
+    let type = this.type;
     let fragment = store.createFragment(type, props);
 
     return this.pushObject(fragment);
