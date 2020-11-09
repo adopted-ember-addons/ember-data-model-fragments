@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/lytics/ember-data-model-fragments.git"
+    "url": "https://github.com/adopted-ember-addons/ember-data-model-fragments.git"
   },
   "license": "MIT",
   "author": "Steven Lindberg <steven@lytics.io>",
