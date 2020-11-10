@@ -1,9 +1,9 @@
+import { attr } from '@ember-data/model';
 import MF from 'ember-data-model-fragments';
-import DS from 'ember-data';
 
 export default MF.Fragment.extend({
-  first: DS.attr('string'),
-  last: DS.attr('string'),
+  first: attr('string'),
+  last: attr('string'),
   person: MF.fragmentOwner(),
 
   ready() {

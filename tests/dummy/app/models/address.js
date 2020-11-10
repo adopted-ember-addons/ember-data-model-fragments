@@ -1,9 +1,9 @@
+import { attr } from '@ember-data/model';
 import MF from 'ember-data-model-fragments';
-import DS from 'ember-data';
 
 export default MF.Fragment.extend({
-  street: DS.attr('string'),
-  city: DS.attr('string'),
-  region: DS.attr('string'),
-  country: DS.attr('string')
+  street: attr('string'),
+  city: attr('string'),
+  region: attr('string'),
+  country: attr('string')
 });

@@ -1,8 +1,9 @@
 import { assert } from '@ember/debug';
-import Store from 'ember-data/store';
-import Model from 'ember-data/model';
+import Store from '@ember-data/store';
+import Model from '@ember-data/model';
+// eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
-import JSONSerializer from 'ember-data/serializers/json';
+import JSONSerializer from '@ember-data/serializer/json';
 import FragmentRootState from './states';
 import FragmentRecordData from './record-data';
 import {

@@ -2,8 +2,8 @@ import { run, schedule } from '@ember/runloop';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import Name from 'dummy/models/name';
-import JSONAPISerializer from 'ember-data/serializers/json-api';
-import JSONSerializer from 'ember-data/serializers/json';
+import JSONAPISerializer from '@ember-data/serializer/json-api';
+import JSONSerializer from '@ember-data/serializer/json';
 let store, owner;
 
 module('unit - `DS.Store`', function(hooks) {

@@ -1,7 +1,7 @@
+import Model from '@ember-data/model';
 import { copy } from 'ember-copy';
 import { run, schedule } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
-import DS from 'ember-data';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import Order from 'dummy/models/order';
@@ -173,7 +173,7 @@ module('integration - Nested fragments', function(hooks) {
         }
       ];
 
-      let Assassin = DS.Model.extend({
+      let Assassin = Model.extend({
         info: MF.fragment('info', { defaultValue: defaultInfo }),
         orders: MF.fragmentArray('order', { defaultValue: defaultOrders })
       });

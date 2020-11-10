@@ -1,17 +1,17 @@
+import Model, { attr } from '@ember-data/model';
 import { isArray } from '@ember/array';
 import { run } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
-import DS from 'ember-data';
 
 import { setupApplicationTest } from 'ember-qunit';
 // import Person from 'dummy/models/person';
 
 let store;
-let Person = DS.Model.extend({
-  title: DS.attr('string'),
-  nickName: DS.attr('string'),
+let Person = Model.extend({
+  title: attr('string'),
+  nickName: attr('string'),
   name: MF.fragment('name'),
   names: MF.fragmentArray('name'),
   addresses: MF.fragmentArray('address'),

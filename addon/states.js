@@ -1,4 +1,5 @@
 import { get } from '@ember/object';
+// eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import { RootState } from 'ember-data/-private';
 
 /**
@@ -152,6 +153,7 @@ function wireState(object, parent, name) {
   object.stateName = name;
 
   for (let prop in object) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!object.hasOwnProperty(prop) || prop === 'parentState' || prop === 'stateName') {
       continue;
     }

@@ -1,9 +1,9 @@
+import Model, { attr } from '@ember-data/model';
 import { isEmpty } from '@ember/utils';
 import { run, schedule } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
-import DS from 'ember-data';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
@@ -402,8 +402,8 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         }
       ];
 
-      let Throne = DS.Model.extend({
-        name: DS.attr('string'),
+      let Throne = Model.extend({
+        name: attr('string'),
         addresses: MF.fragmentArray('address', { defaultValue: defaultValue })
       });
 
@@ -432,8 +432,8 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         }
       ];
 
-      let Sword = DS.Model.extend({
-        name: DS.attr('string'),
+      let Sword = Model.extend({
+        name: attr('string'),
         addresses: MF.fragmentArray('address', { defaultValue() { return defaultValue; } })
       });
 
@@ -457,8 +457,8 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         }
       ];
 
-      let Sword = DS.Model.extend({
-        name: DS.attr('string'),
+      let Sword = Model.extend({
+        name: attr('string'),
         addresses: MF.fragmentArray('address', { defaultValue() { return defaultValue; } })
       });
 

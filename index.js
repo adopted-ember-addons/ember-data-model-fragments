@@ -5,7 +5,7 @@ const version = require('./lib/version');
 const calculateCacheKeyForTree = require('calculate-cache-key-for-tree');
 
 module.exports = {
-  name: 'ember-data-model-fragments',
+  name: require('./package').name,
 
   init() {
     this._super.init && this._super.init.apply(this, arguments);
