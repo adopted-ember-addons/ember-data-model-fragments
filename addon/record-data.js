@@ -302,9 +302,11 @@ export default class FragmentRecordData extends RecordData {
   }
 
   hasChangedAttributes() {
-    return (
-      this.__attributes !== null && Object.keys(this.__attributes).length > 0
-    );
+    return super.hasChangedAttributes() ||
+      this.fragmentNames.some(fragmentName => {
+        const fragment = this.getFragmentWithoutCreating(fragmentName);
+        return fragment && fragment.hasDirtyAttributes;
+      });
   }
 
   resetRecord() {
