@@ -1,5 +1,14 @@
 # Changelog
 
+### v5.0.0-beta.1 (November 12, 2020)
+
+* [#381](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/381) Fix `hasDirtyAttributes` when resetting a property (@VincentMolinie)
+* [#385](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/385) Upgrade to Ember 3.20 LTS (@patocallaghan)
+
+### v5.0.0-beta.0 (May 28, 2020)
+
+* [#360](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/360) Upgrade to work with Ember Data 3.16 (@richgt, @igorT)
+
 ### v4.0.0 (January 25, 2019)
 
 * Ember 3.5.0 compatibility with breaking changes related to `RecordData`. (@cohitre)
