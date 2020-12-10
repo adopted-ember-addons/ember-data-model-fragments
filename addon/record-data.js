@@ -231,15 +231,19 @@ export default class FragmentRecordData extends RecordData {
           this.fragmentData[name] = data.attributes[name];
           let serverFragment = this.serverFragments[name];
           if (serverFragment) {
-            let fragmentKeys = [];
-            if (serverFragment instanceof StatefulArray) {
-              serverFragment.setupData(data.attributes[name]);
+            if (data.attributes[name] === null) {
+              delete this.serverFragments[name];
             } else {
-              fragmentKeys = serverFragment._internalModel._recordData.pushData({ attributes: data.attributes[name] }, calculateChange);
-            }
-            if (calculateChange) {
-              // TODO (Custom Model Classes) cleanup this api usage
-              fragmentKeys.forEach((fragmentKey) => serverFragment.notifyPropertyChange(fragmentKey));
+              let fragmentKeys = [];
+              if (serverFragment instanceof StatefulArray) {
+                serverFragment.setupData(data.attributes[name]);
+              } else {
+                fragmentKeys = serverFragment._internalModel._recordData.pushData({ attributes: data.attributes[name] }, calculateChange);
+              }
+              if (calculateChange) {
+                // TODO (Custom Model Classes) cleanup this api usage
+                fragmentKeys.forEach((fragmentKey) => serverFragment.notifyPropertyChange(fragmentKey));
+              }
             }
           } else if (serverFragment === null) {
             // if we received data that set the fragment to null, but now we've received different data,

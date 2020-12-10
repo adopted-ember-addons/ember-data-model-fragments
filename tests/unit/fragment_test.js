@@ -307,4 +307,49 @@ module('unit - `MF.Fragment`', function(hooks) {
       assert.ok(person.get('names').isEvery('readyWasCalled'), 'when creating model that has fragmentArray');
     });
   });
+
+  test('fragments update on push with `null`', function(assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: { first: 'Jon' },
+          names: [{ first: 'Jon' }]
+        }
+      }
+    });
+
+    let person = store.peekRecord('person', 1);
+    assert.deepEqual(person.name.serialize(), { first: 'Jon', last: null }, 'name is correct');
+    assert.deepEqual(person.names.serialize(), [{ first: 'Jon', last: null }], 'names is correct');
+
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null,
+          names: null
+        }
+      }
+    });
+
+    assert.strictEqual(person.name, null);
+    assert.strictEqual(person.names, null);
+
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: { first: 'Jon!', last: 'Snow' },
+          names: [{ first: 'Jon!', last: 'Snow' }]
+        }
+      }
+    });
+
+    assert.deepEqual(person.name.serialize(), { first: 'Jon!', last: 'Snow' }, 'name is correct');
+    assert.deepEqual(person.names.serialize(), [{ first: 'Jon!', last: 'Snow' }], 'names is correct');
+  });
 });
