@@ -1,6 +1,6 @@
 # Ember Data Model Fragments
 
-[![Build Status](https://travis-ci.org/lytics/ember-data-model-fragments.svg)](https://travis-ci.org/lytics/ember-data-model-fragments)
+[![Build Status](https://github.com/adopted-ember-addons/ember-data-model-fragments/workflows/ci/badge.svg)](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml)
 [![NPM Version](https://badge.fury.io/js/ember-data-model-fragments.svg)](http://badge.fury.io/js/ember-data-model-fragments)
 [![Ember Observer Score](http://emberobserver.com/badges/ember-data-model-fragments.svg)](http://emberobserver.com/addons/ember-data-model-fragments)
 
