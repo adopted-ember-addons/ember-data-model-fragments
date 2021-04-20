@@ -159,7 +159,7 @@ Store.reopen({
       const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
       internalModel = this._internalModelForResource(identifier);
     } else {
-      let identifier =  { type: modelName, id: `${  Math.random()}`, lid: `${ Math.random()}` };
+      let identifier = { type: modelName, id: `${Math.random()}`, lid: `${Math.random()}` };
       internalModel = this._internalModelForResource(identifier);
     }
 
@@ -169,7 +169,7 @@ Store.reopen({
     internalModel._recordData._name = null;
     internalModel._recordData._owner = null;
 
-    internalModel.loadedData();
+    internalModel.send('loadedData');
 
     let fragment = internalModel.getRecord();
 
@@ -213,7 +213,7 @@ Store.reopen({
 
     if (this.isFragment(normalizedModelName)) {
       return serializerForFragment(owner, normalizedModelName);
-    } else  {
+    } else {
       return this._super(...arguments);
     }
   }
