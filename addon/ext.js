@@ -159,7 +159,7 @@ Store.reopen({
       const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
       internalModel = this._internalModelForResource(identifier);
     } else {
-      let identifier =  { type: modelName, id: `${  Math.random()}`, lid: `${ Math.random()}` };
+      let identifier = { type: modelName, id: `${Math.random()}`, lid: `${Math.random()}` };
       internalModel = this._internalModelForResource(identifier);
     }
 
@@ -169,7 +169,7 @@ Store.reopen({
     internalModel._recordData._name = null;
     internalModel._recordData._owner = null;
 
-    internalModel.loadedData();
+    internalModel.send('loadedData');
 
     let fragment = internalModel.getRecord();
 
@@ -213,7 +213,7 @@ Store.reopen({
 
     if (this.isFragment(normalizedModelName)) {
       return serializerForFragment(owner, normalizedModelName);
-    } else  {
+    } else {
       return this._super(...arguments);
     }
   }
@@ -236,7 +236,7 @@ Model.reopen({
 });
 
 Model.reopenClass({
-  fields: computed(function() {
+  fields: computed(function () {
     let map = new Map();
 
     this.eachComputedProperty((name, meta) => {
@@ -259,7 +259,7 @@ Model.reopenClass({
 function decorateMethod(obj, name, fn) {
   let originalFn = obj[name];
 
-  obj[name] = function() {
+  obj[name] = function () {
     let value = originalFn.apply(this, arguments);
 
     return fn.call(this, value, arguments);
