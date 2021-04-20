@@ -236,7 +236,7 @@ Model.reopen({
 });
 
 Model.reopenClass({
-  fields: computed(function () {
+  fields: computed(function() {
     let map = new Map();
 
     this.eachComputedProperty((name, meta) => {
@@ -259,7 +259,7 @@ Model.reopenClass({
 function decorateMethod(obj, name, fn) {
   let originalFn = obj[name];
 
-  obj[name] = function () {
+  obj[name] = function() {
     let value = originalFn.apply(this, arguments);
 
     return fn.call(this, value, arguments);
