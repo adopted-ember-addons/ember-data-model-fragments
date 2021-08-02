@@ -113,6 +113,53 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
+  test('overwrite current state with fragment attributes from the save response', function(assert) {
+    return run(() => {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            title: 'Lord',
+            name: {
+              first: 'Tyrion',
+              last: 'Lannister'
+            }
+          }
+        }
+      });
+
+      server.put('/people/1', (request) => {
+        const body = JSON.parse(request.requestBody);
+        assert.equal(body.person.title, 'modified');
+        assert.equal(body.person.name.first, 'modified');
+        assert.equal(body.person.name.last, 'modified');
+        body.person.title = 'Ser';
+        body.person.name.first = 'Tywin';
+        body.person.name.last = 'Lannister';
+        return [200, { 'Content-Type': 'application/json' }, JSON.stringify(body)];
+      });
+
+      return store
+        .find('person', 1)
+        .then(person => {
+          person.set('title', 'modified');
+          person.set('name.first', 'modified');
+          person.set('name.last', 'modified');
+          return person.save();
+        })
+        .then(person => {
+          assert.equal(person.get('title'), 'Ser', 'use person.title from the response');
+          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+
+          const name = person.get('name');
+          assert.equal(name.get('first'), 'Tywin', 'use person.name.first from the response');
+          assert.equal(name.get('last'), 'Lannister', 'use person.name.last from the response');
+          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
+        });
+    });
+  });
+
   test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', function(assert) {
     return run(() => {
       store.push({
