@@ -137,11 +137,11 @@ The `name` attribute can be treated similar to a `belongsTo` relationship:
 let person = store.getById('person', '1');
 let name = person.get('name');
 
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 name.get('first'); // 'Tyrion'
 
 name.set('first', 'Jamie');
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
 person.rollback();
 name.get('first'); // 'Tyrion'
@@ -151,14 +151,14 @@ person.set('name', store.createFragment('name', {
   first : 'Hugor',
   last  : 'Hill'
 }));
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
 // Fragments can also be set with hashes
 person.set('name', {
   'first' : 'Tyrion',
   'last'  : 'Lannister'
 });
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 ```
 
 The `addresses` attribute can be treated similar to a `hasMany` relationship:
@@ -168,11 +168,11 @@ let person = store.getById('person', '1');
 let addresses = person.get('addresses');
 let address = addresses.get('lastObject');
 
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 address.get('country'); // 'Westeros'
 
 address.set('country', 'Essos');
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
 person.rollback();
 address.get('country'); // 'Westeros'
@@ -186,7 +186,7 @@ addresses.createFragment({
   country : 'Essos'
 });
 addresses.get('length'); // 3
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
 // Or with arrays of objects
 person.set('addresses', [
@@ -205,12 +205,12 @@ The `titles` attribute can be treated as an `Ember.Array`:
 let person = store.getById('person', '1');
 let titles = person.get('titles');
 
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 titles.get('length'); // 2
 
 titles.pushObject('Halfman');
 titles.get('length'); // 3
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
 person.rollback();
 titles.get('length'); // 2
@@ -439,14 +439,14 @@ Dirty state propagates up to the parent record, rollback cascades down:
 let user = store.getById('user', '1');
 let product = user.get('orders.firstObject.products.lastObject');
 
-user.get('isDirty'); // false
+user.get('hasDirtyAttributes'); // false
 product.get('price'); // '299.99'
 
 product.set('price', '1.99');
-user.get('isDirty'); // true
+user.get('hasDirtyAttributes'); // true
 
 user.rollback();
-user.get('isDirty'); // false
+user.get('hasDirtyAttributes'); // false
 product.get('price'); // '299.99'
 ```
 
