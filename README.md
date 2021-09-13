@@ -143,7 +143,7 @@ name.get('first'); // 'Tyrion'
 name.set('first', 'Jamie');
 person.get('hasDirtyAttributes'); // true
 
-person.rollback();
+person.rollbackAttributes();
 name.get('first'); // 'Tyrion'
 
 // New fragments are created through the store and assigned directly
@@ -212,7 +212,7 @@ titles.pushObject('Halfman');
 titles.get('length'); // 3
 person.get('hasDirtyAttributes'); // true
 
-person.rollback();
+person.rollbackAttributes();
 titles.get('length'); // 2
 ```
 
@@ -445,7 +445,7 @@ product.get('price'); // '299.99'
 product.set('price', '1.99');
 user.get('hasDirtyAttributes'); // true
 
-user.rollback();
+user.rollbackAttributes();
 user.get('hasDirtyAttributes'); // false
 product.get('price'); // '299.99'
 ```
