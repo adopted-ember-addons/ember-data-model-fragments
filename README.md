@@ -65,42 +65,41 @@ You might also want to take a look at [FEDITOR's Ember Data model generator](htt
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
-import {
-  fragment,
-  fragmentArray,
-  array
-} from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name      : fragment('name'),
-  addresses : fragmentArray('address'),
-  titles    : array()
-});
+import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import { fragment, fragmentArray, array } from 'ember-data-model-fragments/attributes';
+
+export default class PersonModel extends Model {
+  @fragment('name') name;
+  @fragmentArray('address') addresses;
+  @array() titles;
+}
 ```
 
 ```javascript
 // app/models/name.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  first : attr('string'),
-  last  : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class NameFragment extends Fragment {
+  @attr('string') first;
+  @attr('string') last;
+}
 ```
 
 ```javascript
 // app/models/address.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  street  : attr('string'),
-  city    : attr('string'),
-  region  : attr('string'),
-  country : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class AddressFragment extends Fragment {
+  @attr('string') street;
+  @attr('string') city;
+  @attr('string') region;
+  @attr('string') country;
+}
 ```
 
 With a JSON payload of:
@@ -223,25 +222,22 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
-import {
-  fragment,
-  fragmentArray,
-  array
-} from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name      : fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : fragmentArray('address'),
-  titles    : array('string')
-});
+import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import { fragment, fragmentArray, array } from 'ember-data-model-fragments/attributes';
+
+export default class PersonModel extends Model {
+  @fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }) name;
+  @fragmentArray('address') addresses;
+  @array('string') titles;
+}
 ```
 
 Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `fragment` properties default to `null` and `fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `fragmentArray` property:
 
 ```javascript
 let person = store.createRecord('person');
-let addresses = person.get('addresses'); // null
+let addresses = person.addresses; // null
 
 // Fails with "Cannot read property 'createFragment' of null"
 addresses.createFragment({
@@ -253,19 +249,20 @@ Like `attr`, the `defaultValue` option can be a function that is invoked to gene
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
+
+import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
 import { fragment } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name: fragment('name', {
+export default class PersonModel extends Model {
+  @fragment('name', {
     defaultValue() {
       return {
         first: 'Unsullied',
-        last: Ember.uuid()
-      }
+        last: Ember.uuid(),
+      };
     }
-  })
-});
+  }) name;
+}
 ```
 ## Serializing
 
@@ -273,26 +270,28 @@ Serializing records with fragment attributes works using a special `Transform` t
 
 ```javascript
 // app/models/name.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  given  : attr('string'),
-  family : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class NameFragment extends Fragment {
+  @attr('string') given;
+  @attr('string') family;
+}
 ```
 
 ```javascript
 // apps/serializers/name.js
 // Serializers for fragments work just as with models
-import JSONSerializer from 'ember-data/serializers/json';
 
-export default JSONSerializer.extend({
-  attrs: {
-    given  : 'first',
-    family : 'last'
-  }
-});
+import JSONSerializer from '@ember-data/serializer/json';
+
+export default class NameSerializer extends JSONSerializer {
+  attrs = {
+    given: 'first',
+    family: 'last',
+  };
+}
 ```
 
 Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `JSONSerializer`.
@@ -301,11 +300,10 @@ If common logic must be added to auto-generated fragment serializers, apps can r
 
 ```javascript
 // app/serializers/fragment.js
-import JSONSerializer from 'ember-data/serializers/json';
 
-export default JSONSerializer.extend({
+import JSONSerializer from '@ember-data/serializer/json';
 
-});
+export default class FragmentSerializer extends JSONSerializer {}
 ```
 
 ```javascript
@@ -318,7 +316,7 @@ export function initialize(application) {
 
 export default {
 	name: 'fragment-serializer',
-	initialize: initialize
+	initialize: initialize,
 };
 ```
 
