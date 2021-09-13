@@ -134,7 +134,7 @@ With a JSON payload of:
 The `name` attribute can be treated similar to a `belongsTo` relationship:
 
 ```javascript
-let person = store.getById('person', '1');
+let person = store.peekRecord('person', '1');
 let name = person.get('name');
 
 person.get('hasDirtyAttributes'); // false
@@ -148,15 +148,15 @@ name.get('first'); // 'Tyrion'
 
 // New fragments are created through the store and assigned directly
 person.set('name', store.createFragment('name', {
-  first : 'Hugor',
-  last  : 'Hill'
+  first: 'Hugor',
+  last: 'Hill',
 }));
 person.get('hasDirtyAttributes'); // true
 
 // Fragments can also be set with hashes
 person.set('name', {
-  'first' : 'Tyrion',
-  'last'  : 'Lannister'
+  first: 'Tyrion',
+  last: 'Lannister',
 });
 person.get('hasDirtyAttributes'); // false
 ```
@@ -164,7 +164,7 @@ person.get('hasDirtyAttributes'); // false
 The `addresses` attribute can be treated similar to a `hasMany` relationship:
 
 ```javascript
-let person = store.getById('person', '1');
+let person = store.peekRecord('person', '1');
 let addresses = person.get('addresses');
 let address = addresses.get('lastObject');
 
@@ -180,10 +180,10 @@ address.get('country'); // 'Westeros'
 // Fragments can be created and added directly through the fragment array
 addresses.get('length'); // 2
 addresses.createFragment({
-  street  : '1 Shy Maid',
-  city    : 'Rhoyne River',
-  region  : 'Free Cities',
-  country : 'Essos'
+  street: '1 Shy Maid',
+  city: 'Rhoyne River',
+  region: 'Free Cities',
+  country: 'Essos',
 });
 addresses.get('length'); // 3
 person.get('hasDirtyAttributes'); // true
@@ -191,10 +191,10 @@ person.get('hasDirtyAttributes'); // true
 // Or with arrays of objects
 person.set('addresses', [
   {
-    street  : '1 Great Pyramid',
-    city    : 'Meereen',
-    region  : 'Slaver\'s Bay',
-    country : 'Essos'
+    street: '1 Great Pyramid',
+    city: 'Meereen',
+    region: 'Slaver\'s Bay',
+    country: 'Essos',
   }
 ]);
 ```
@@ -436,7 +436,7 @@ With a JSON payload of:
 Dirty state propagates up to the parent record, rollback cascades down:
 
 ```javascript
-let user = store.getById('user', '1');
+let user = store.peekRecord('user', '1');
 let product = user.get('orders.firstObject.products.lastObject');
 
 user.get('hasDirtyAttributes'); // false
