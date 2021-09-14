@@ -258,19 +258,15 @@ Like `attr`, the `defaultValue` option can be a function that is invoked to gene
 ```javascript
 // app/models/person.js
 
-// demo requires `uuid` from npm:
-// npm install uuid --save-dev
-
 import Model from '@ember-data/model';
 import { fragment } from 'ember-data-model-fragments/attributes';
-import { v4 as uuid } from 'uuid';
 
 export default class PersonModel extends Model {
   @fragment('name', {
     defaultValue() {
       return {
         first: 'Unsullied',
-        last: uuid(),
+        last: new Date().toString(),
       };
     }
   }) name;
