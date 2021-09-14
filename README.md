@@ -67,7 +67,11 @@ You might also want to take a look at [FEDITOR's Ember Data model generator](htt
 // app/models/person.js
 
 import Model from '@ember-data/model';
-import { fragment, fragmentArray, array } from 'ember-data-model-fragments/attributes';
+import {
+  fragment,
+  fragmentArray,
+  array
+} from 'ember-data-model-fragments/attributes';
 
 export default class PersonModel extends Model {
   @fragment('name') name;
@@ -224,7 +228,11 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 // app/models/person.js
 
 import Model from '@ember-data/model';
-import { fragment, fragmentArray, array } from 'ember-data-model-fragments/attributes';
+import {
+  fragment,
+  fragmentArray,
+  array
+} from 'ember-data-model-fragments/attributes';
 
 export default class PersonModel extends Model {
   @fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }) name;
