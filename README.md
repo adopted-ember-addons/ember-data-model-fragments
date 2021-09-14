@@ -66,7 +66,7 @@ You might also want to take a look at [FEDITOR's Ember Data model generator](htt
 ```javascript
 // app/models/person.js
 
-import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import Model from '@ember-data/model';
 import { fragment, fragmentArray, array } from 'ember-data-model-fragments/attributes';
 
 export default class PersonModel extends Model {
@@ -223,7 +223,7 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 ```javascript
 // app/models/person.js
 
-import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import Model from '@ember-data/model';
 import { fragment, fragmentArray, array } from 'ember-data-model-fragments/attributes';
 
 export default class PersonModel extends Model {
@@ -253,7 +253,7 @@ Like `attr`, the `defaultValue` option can be a function that is invoked to gene
 // demo requires `uuid` from npm:
 // npm install uuid --save-dev
 
-import Model, { attr, belongsTo, hasMany } from '@ember-data/model';
+import Model from '@ember-data/model';
 import { fragment } from 'ember-data-model-fragments/attributes';
 import { v4 as uuid } from 'uuid';
 
@@ -315,12 +315,12 @@ export default class FragmentSerializer extends JSONSerializer {}
 import FragmentSerializer from '../serializers/fragment';
 
 export function initialize(application) {
-	application.register('serializer:-fragment', FragmentSerializer);
+  application.register('serializer:-fragment', FragmentSerializer);
 }
 
 export default {
-	name: 'fragment-serializer',
-	initialize: initialize,
+  name: 'fragment-serializer',
+  initialize: initialize,
 };
 ```
 
