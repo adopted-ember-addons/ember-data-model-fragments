@@ -312,6 +312,7 @@ export default class FragmentSerializer extends JSONSerializer {}
 
 ```javascript
 // app/initializers/fragment-serializer.js
+
 import FragmentSerializer from '../serializers/fragment';
 
 export function initialize(application) {
@@ -329,11 +330,12 @@ If custom serialization of the owner record is needed, fragment [snapshots](http
 ```javascript
 // apps/serializers/person.js
 // Fragment snapshots are accessed using `snapshot.attr()`
-import JSONSerializer from 'ember-data/serializers/json';
 
-export default JSONSerializer.extend({
+import JSONSerializer from '@ember-data/serializer/json';
+
+export default class PersonSerializer extends JSONSerializer {
   serialize(snapshot, options) {
-    let json = this._super(...arguments);
+    let json = super.serialize(...arguments);
 
     // Returns a `Snapshot` instance of the fragment
     let nameSnapshot = snapshot.attr('name');
@@ -354,7 +356,7 @@ export default JSONSerializer.extend({
 
     return json;
   }
-});
+}
 ```
 
 ## Nesting
@@ -363,38 +365,40 @@ Nesting of fragments is fully supported:
 
 ```javascript
 // app/models/user.js
-import Model from 'ember-data/model';
-import attr from 'ember-data/attr';
+
+import Model, { attr } from '@ember-data/model';
 import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name   : attr('string'),
-  orders : fragmentArray('order')
-});
+export default class UserModel extends Model {
+  @attr('string') name;
+  @fragmentArray('order') orders;
+}
 ```
 
 ```javascript
 // app/models/order.js
-import attr from 'ember-data/attr';
+
 import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
 import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Fragment.extend({
-  amount   : attr('string'),
-  products : fragmentArray('product')
-});
+export default class OrderFragment extends Fragment {
+  @attr('string') amount;
+  @fragmentArray('product') products;
+}
 ```
 
 ```javascript
 // app/models/product.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  name  : attr('string'),
-  sku   : attr('string'),
-  price : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class ProductFragment extends Fragment {
+  @attr('string') name;
+  @attr('string') sku;
+  @attr('string') price;
+}
 ```
 
 With a JSON payload of:
@@ -464,46 +468,49 @@ so to `typeKey`'s value can be `'animal'`, `'elephant'` or `'lion'`.
 
 ```javascript
 // app/models/zoo.js
-import Model from 'ember-data/model';
-import attr from 'ember-data/attr';
+
+import Model, { attr } from '@ember-data/model';
 import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name: attr('string'),
-  city: attr('string'),
-  animals: fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
-});
+export default class UserModel extends Model {
+  @attr('string') name;
+  @attr('string') city;
+  @fragmentArray('animal', { polymorphic: true, typeKey: '$type' }) animals;
+}
 ```
 
 ```javascript
 // app/models/animal.js
-import Fragment from 'ember-data-model-fragments/fragment';
-import attr from 'ember-data/attr';
 
-export default Fragment.extend({
-  $type: attr('string'),
-  name: attr('string'),
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class AnimalFragment extends Fragment {
+  @attr('string') $type;
+  @attr('string') name;
+}
 ```
 
 ```javascript
 // app/models/elephant.js
-import Animal from './Animal';
-import attr from 'ember-data/attr';
 
-export default Animal.extend({
-  trunkLength: attr('number'),
-});
+import AnimalFragment from './animal';
+import { attr } from '@ember-data/model';
+
+export default class ElephantFragment extends AnimalFragment {
+  @attr('number') trunkLength;
+}
 ```
 
 ```javascript
 // app/models/lion.js
-import Animal from './Animal';
-import attr from 'ember-data/attr';
 
-export default Animal.extend({
-  hasManes: attr('boolean'),
-});
+import AnimalFragment from './animal';
+import { attr } from '@ember-data/model';
+
+export default class LionFragment extends AnimalFragment {
+  @attr('boolean') hasManes;
+}
 ```
 
 The expected JSON payload is as follows:
@@ -543,13 +550,14 @@ Serializing the fragment type back to JSON is not currently supported out of the
 
 ```javascript
 // app/serializers/animal.js
-import JSONSerializer from 'ember-data/serializers/json';
-import Elephant from 'app/models/elephant';
-import Lion from 'app/models/elephant';
 
-export default JSONSerializer.extend({
+import JSONSerializer from '@ember-data/serializer/json';
+import Elephant from '../models/elephant';
+import Lion from '../models/lion';
+
+export default class AnimalSerializer extends JSONSerializer {
   serialize(record, options) {
-    let json = this._super(...arguments);
+    let json = super.serialize(...arguments);
 
     if (record instanceof Elephant) {
       json.$type = 'elephant';
@@ -561,7 +569,7 @@ export default JSONSerializer.extend({
 
     return json;
   }
-});
+}
 ```
 
 ```javascript
