@@ -458,7 +458,7 @@ export default class FragmentRecordData extends RecordData {
         }
       }
     }
-    return super.commitWasRejected();
+    return super.commitWasRejected(...arguments);
   }
 
   setAttr(key, value) {
