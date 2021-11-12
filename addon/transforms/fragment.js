@@ -35,9 +35,10 @@ const FragmentTransform = Transform.extend({
     }
 
     let store = this.store;
-    let serializer = store.serializerFor(snapshot.modelName || snapshot.constructor.modelName);
+    const realSnapshot = snapshot._createSnapshot ? snapshot._createSnapshot() : snapshot;
+    let serializer = store.serializerFor(realSnapshot.modelName || realSnapshot.constructor.modelName);
 
-    return serializer.serialize(snapshot);
+    return serializer.serialize(realSnapshot);
   },
 
   modelNameFor(data) {
