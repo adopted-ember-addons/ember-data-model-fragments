@@ -80,7 +80,7 @@ module('unit - `MF.fragment` property', function(hooks) {
         data: {
           type: 'person',
           id: 1,
-          attribtues: {
+          attributes: {
             name: null
           }
         }
@@ -368,6 +368,27 @@ module('unit - `MF.fragment` property', function(hooks) {
     });
   });
 
+  test('fragment default value function returning Fragment instances', function(assert) {
+    const defaultValue = {
+      first: 'Oath',
+      last: 'Keeper'
+    };
+
+    const Sword = Model.extend({
+      name: MF.fragment('name', {
+        defaultValue(record) {
+          return record.store.createFragment('name', defaultValue);
+        }
+      })
+    });
+
+    owner.register('model:sword', Sword);
+
+    const sword = store.createRecord('sword');
+
+    assert.equal(sword.get('name.first'), defaultValue.first, 'the default value is correct');
+  });
+
   test('destroy a fragment which was set to null', function(assert) {
     return run(() => {
       store.push({
@@ -387,7 +408,7 @@ module('unit - `MF.fragment` property', function(hooks) {
         let name = person.get('name');
         person.set('name', null);
 
-        person.destroy();
+        person.unloadRecord();
 
         schedule('destroy', () => {
           assert.ok(person.get('isDestroying'), 'the model is being destroyed');
@@ -419,7 +440,7 @@ module('unit - `MF.fragment` property', function(hooks) {
 
         assert.ok(!oldName.get('isDestroying'), 'don\'t destroy the old fragment yet because we could rollback');
 
-        person.destroy();
+        person.unloadRecord();
 
         schedule('destroy', () => {
           assert.ok(person.get('isDestroying'), 'the model is being destroyed');

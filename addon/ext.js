@@ -2,18 +2,12 @@ import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
+import { InternalModel, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentRootState from './states';
 import FragmentRecordData from './record-data';
-import {
-  internalModelFor,
-  default as Fragment
-} from './fragment';
+import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
-import { computed } from '@ember/object';
 import { getOwner } from '@ember/application';
-import { assign } from '@ember/polyfills';
 import { lte, gte } from 'ember-compatibility-helpers';
 
 function serializerForFragment(owner, normalizedModelName) {
@@ -40,80 +34,6 @@ function serializerForFragment(owner, normalizedModelName) {
 */
 
 const InternalModelPrototype = InternalModel.prototype;
-const RecordDataPrototype = RecordData.prototype;
-
-assign(RecordDataPrototype, {
-  eachFragmentKey(fn) {
-    this._fragments = this._fragments || Object.create({});
-    Object.keys(this._fragments).forEach(fn);
-  },
-
-  eachFragmentKeyValue(fn) {
-    this.eachFragmentKey((key) => {
-      const value = this.getFragment(key);
-      if (value) {
-        fn(key, value);
-      }
-    });
-  },
-
-  getOwner() {
-    return this._owner;
-  },
-
-  setOwner(value) {
-    this._owner = value;
-  },
-
-  setName(value) {
-    this._name = value;
-  },
-
-  getName() {
-    return this._name;
-  },
-
-  getFragment(name) {
-    this._fragments = this._fragments || Object.create({});
-    return this._fragments[name];
-  },
-
-  setFragment(name, fragment) {
-    this._fragments = this._fragments || Object.create({});
-    this._fragments[name] = fragment;
-    return this._fragments[name];
-  },
-
-  didCommit(data) {
-    this._isNew = false;
-    if (data) {
-      if (data.relationships) {
-        this._setupRelationships(data);
-      }
-      if (data.id) {
-        // didCommit provided an ID, notify the store of it
-        this.storeWrapper.setRecordId(this.modelName, data.id, this.clientId);
-        this.id = coerceId(data.id);
-      }
-      data = data.attributes;
-
-      // Notify fragments that the record was committed
-      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit(data[key]));
-    } else {
-      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit());
-    }
-
-    const changedKeys = this._changedKeys(data);
-
-    assign(this._data, this.__inFlightAttributes, this._attributes, data);
-    this._attributes = null;
-    this._inFlightAttributes = null;
-    this._updateChangedAttributes();
-
-    return changedKeys;
-  }
-});
-
 /**
   @class Store
   @namespace DS
@@ -162,28 +82,9 @@ Store.reopen({
       let identifier = { type: modelName, id: `${Math.random()}`, lid: `${Math.random()}` };
       internalModel = this._internalModelForResource(identifier);
     }
-
-    // Re-wire the internal model to use the fragment state machine
-    internalModel.currentState = FragmentRootState.empty;
-
-    internalModel._recordData._name = null;
-    internalModel._recordData._owner = null;
-
     internalModel.send('loadedData');
-
-    let fragment = internalModel.getRecord();
-
-    if (props) {
-      fragment.setProperties(props);
-    }
-
-    // invoke the ready callback ( to mimic DS.Model behaviour )
-    fragment.trigger('ready');
-
-    // Add brand to reduce usages of `instanceof`
-    fragment._isFragment = true;
-
-    return fragment;
+    internalModel.didCreateRecord();
+    return internalModel.getRecord(props);
   },
 
   /**
@@ -217,41 +118,6 @@ Store.reopen({
       return this._super(...arguments);
     }
   }
-});
-
-/**
-  @class Model
-  @namespace DS
-  */
-Model.reopen({
-
-  willDestroy() {
-    this._super(...arguments);
-
-    let internalModel = internalModelFor(this);
-
-    // destroy the current state
-    internalModel._recordData.resetFragments();
-  }
-});
-
-Model.reopenClass({
-  fields: computed(function() {
-    let map = new Map();
-
-    this.eachComputedProperty((name, meta) => {
-      if (meta.isFragment) {
-        map.set(name, 'fragment');
-      } else if (meta.isRelationship) {
-        map.set(name, meta.kind);
-      } else if (meta.isAttribute) {
-        map.set(name, 'attribute');
-      }
-    });
-
-    return map;
-  }).readOnly()
-
 });
 
 // Replace a method on an object with a new one that calls the original and then

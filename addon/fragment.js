@@ -4,6 +4,7 @@ import { get, computed } from '@ember/object';
 import Ember from 'ember';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
+import { recordDataFor } from '@ember-data/store/-private';
 
 /**
   @module ember-data-model-fragments
@@ -102,29 +103,6 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
     return this.store.createFragment(modelName, props);
   },
 
-  /**
-    @method _flushChangedAttributes
-  */
-  _flushChangedAttributes() {
-    internalModelFor(this)._recordData.willCommit();
-  },
-
-  /**
-    @method _didCommit
-  */
-  _didCommit(data) {
-    internalModelFor(this).adapterDidCommit({
-      attributes: data || Object.create(null)
-    });
-  },
-
-  /**
-    @method _didCommit
-  */
-  _adapterDidError() {
-    internalModelFor(this)._recordData.commitWasRejected();
-  },
-
   toStringExtension() {
     let internalModel = internalModelFor(this);
     let owner = internalModel && internalModel._recordData._owner;
@@ -177,12 +155,8 @@ export function internalModelFor(record) {
 
 // Sets the owner/key values on a fragment
 export function setFragmentOwner(fragment, record, key) {
-  let internalModel = internalModelFor(fragment);
-
-  assert('To preserve rollback semantics, fragments can only belong to one owner. Try copying instead', !internalModel._recordData._owner || internalModel._recordData._owner === record);
-
-  internalModel._recordData._owner = record;
-  internalModel._recordData._name = key;
+  const recordData = recordDataFor(fragment);
+  recordData.setFragmentOwner(record, key);
 
   // Notify any observers of `fragmentOwner` properties
   get(fragment.constructor, 'fragmentOwnerProperties').forEach(name => {
@@ -213,7 +187,7 @@ export function createFragment(store, declaredModelName, record, key, options, d
 // Determine whether an object is a fragment instance using a stamp to reduce
 // the number of instanceof checks
 export function isFragment(obj) {
-  return obj && obj._isFragment;
+  return obj instanceof Fragment;
 }
 
 export default Fragment;

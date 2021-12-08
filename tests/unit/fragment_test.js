@@ -135,13 +135,12 @@ module('unit - `MF.Fragment`', function(hooks) {
 
       return store.find('person', 1).then(person => {
         let name = person.get('name');
-        const expectedChanges = [];
 
-        expectedChanges.push(name);
         name.set('last', 'Baratheon');
-        expectedChanges.push(person.get('name'));
 
-        assert.deepEqual(person.changedAttributes().name, expectedChanges, 'changed fragments are indicated in the diff object');
+        const [oldName, newName] = person.changedAttributes().name;
+        assert.deepEqual(oldName, { first: 'Loras', last: 'Tyrell' }, 'old fragment is indicated in the diff object');
+        assert.deepEqual(newName, { first: 'Loras', last: 'Baratheon' }, 'new fragment is indicated in the diff object');
       });
     });
   });
@@ -162,13 +161,11 @@ module('unit - `MF.Fragment`', function(hooks) {
       });
 
       return store.find('person', 1).then(person => {
-        const expectedChanges = [];
-
-        expectedChanges.push(person.get('name'));
         person.set('name', null);
-        expectedChanges.push(person.get('name'));
 
-        assert.deepEqual(person.changedAttributes().name, expectedChanges, 'null fragments are indicated in the diff object');
+        const [oldName, newName] = person.changedAttributes().name;
+        assert.deepEqual(oldName, { first: 'Rob', last: 'Stark' }, 'old fragment is indicated in the diff object');
+        assert.deepEqual(newName, null, 'new fragment is indicated in the diff object');
       });
     });
   });
