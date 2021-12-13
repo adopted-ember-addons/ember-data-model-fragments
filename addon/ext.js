@@ -85,6 +85,11 @@ assign(RecordDataPrototype, {
   },
 
   didCommit(data) {
+    if (this._attributes) {
+      // willCommit was never called
+      this._inFlightAttributes = this._attributes;
+      this._attributes = null;
+    }
     this._isNew = false;
     if (data) {
       if (data.relationships) {
@@ -105,8 +110,7 @@ assign(RecordDataPrototype, {
 
     const changedKeys = this._changedKeys(data);
 
-    assign(this._data, this.__inFlightAttributes, this._attributes, data);
-    this._attributes = null;
+    assign(this._data, this._inFlightAttributes, data);
     this._inFlightAttributes = null;
     this._updateChangedAttributes();
 
