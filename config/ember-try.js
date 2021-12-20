@@ -34,6 +34,16 @@ module.exports = async function() {
         }
       },
       {
+        name: 'ember-lts-3.24',
+        npm: {
+          devDependencies: {
+            'ember-source': '~3.24.6',
+            'ember-data': '~3.24.0'
+          }
+        }
+      },
+      // @patocallaghan - Allow ember-release to fail release until we resolve https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406
+      {
         name: 'ember-release',
         npm: {
           devDependencies: {
