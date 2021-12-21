@@ -4,6 +4,7 @@ import { Copyable } from 'ember-copy';
 import Ember from 'ember';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
+import Pretender from 'pretender';
 
 let store;
 
@@ -352,6 +353,70 @@ module('unit - `MF.Fragment`', function(hooks) {
       });
 
       assert.equal(person.name, null);
+    });
+  });
+
+  module('fragment bug when initially set to `null`', function() {
+    let server;
+    hooks.beforeEach(function() {
+      server = new Pretender();
+      server.post('/people', () => {
+        return [
+          200,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify({
+            person: {
+              id: 1,
+              title: 'Mr.',
+              nickName: 'Johnner',
+              names: [{ first: 'John', last: 'Doe' }],
+              name: {
+                first: 'John',
+                last: 'Doe',
+                prefixes: [{ name: 'Mr.' }, { name: 'Sir' }]
+              }
+            }
+          })
+        ];
+      });
+    });
+
+    hooks.afterEach(function() {
+      server.shutdown();
+    });
+
+    test('`person` fragments/fragment arrays are not initially `null`', async function(assert) {
+      let person = store.createRecord('person', {
+        title: 'Mr.',
+        name: {}
+      });
+
+      assert.ok(person.name, 'name is not null');
+      assert.ok(person.names, 'names is not null');
+      assert.notOk(person.nickName, 'nickName is not set');
+
+      await person.save();
+
+      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
+      assert.deepEqual(person.name.serialize(), { first: 'John', last: 'Doe', prefixes: [{ name: 'Mr.' }, { name: 'Sir' }] }, 'name is correctly loaded');
+      assert.deepEqual(person.names.serialize(), [{ first: 'John', last: 'Doe', prefixes: [] }], 'names is correct');
+    });
+
+    test('`person` fragments/fragment arrays are initially `null`', async function(assert) {
+      let person = store.createRecord('person', {
+        title: 'Mr.',
+        name: null,
+        names: null
+      });
+
+      assert.notOk(person.names, 'names is null');
+      assert.notOk(person.nickName, 'nickName is not set');
+
+      await person.save();
+
+      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
+      assert.deepEqual(person.name.serialize(), { first: 'John', last: 'Doe', prefixes: [{ name: 'Mr.' }, { name: 'Sir' }] }, 'name is correctly loaded');
+      assert.deepEqual(person.names.serialize(), [{ first: 'John', last: 'Doe', prefixes: [] }], 'names is correct');
     });
   });
 });

@@ -120,15 +120,18 @@ module('unit - Serialization', function(hooks) {
     let names = [
       {
         first: 'Rhaegar',
-        last: 'Targaryen'
+        last: 'Targaryen',
+        prefixes: []
       },
       {
         first: 'Viserys',
-        last: 'Targaryen'
+        last: 'Targaryen',
+        prefixes: []
       },
       {
         first: 'Daenerys',
-        last: 'Targaryen'
+        last: 'Targaryen',
+        prefixes: []
       }
     ];
 
