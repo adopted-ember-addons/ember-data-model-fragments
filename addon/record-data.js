@@ -232,7 +232,11 @@ export default class FragmentRecordData extends RecordData {
           let serverFragment = this.serverFragments[name];
           if (serverFragment) {
             let fragmentKeys = [];
-            if (serverFragment instanceof StatefulArray) {
+            if (data.attributes[name] === null) {
+              // if we have data with a Fragment set up, but now we've received null,
+              // delete the null fragment from serverFragments.
+              delete this.serverFragments[name];
+            } else if (serverFragment instanceof StatefulArray) {
               serverFragment.setupData(data.attributes[name]);
             } else {
               fragmentKeys = serverFragment._internalModel._recordData.pushData({ attributes: data.attributes[name] }, calculateChange);

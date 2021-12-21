@@ -282,4 +282,66 @@ module('unit - `MF.fragmentArray`', function(hooks) {
       });
     });
   });
+
+  test('can be created with null', function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: null
+        }
+      }
+    });
+
+    run(() => {
+      assert.strictEqual(person.names, null);
+    });
+  });
+
+  test('can be updated to null', function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Catelyn',
+              last: 'Tully'
+            },
+            {
+              first: 'Catelyn',
+              last: 'Stark'
+            }
+          ]
+        }
+      }
+    });
+
+    run(() => {
+      assert.deepEqual(person.names.toArray().map((f) => f.serialize()), [
+        {
+          'first': 'Catelyn',
+          'last': 'Tully'
+        },
+        {
+          'first': 'Catelyn',
+          'last': 'Stark'
+        }
+      ]);
+
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: null
+          }
+        }
+      });
+
+      assert.strictEqual(person.names, null);
+    });
+  });
 });

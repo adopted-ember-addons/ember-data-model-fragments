@@ -307,4 +307,51 @@ module('unit - `MF.Fragment`', function(hooks) {
       assert.ok(person.get('names').isEvery('readyWasCalled'), 'when creating model that has fragmentArray');
     });
   });
+
+  test('can be created with null', async function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null
+        }
+      }
+    });
+
+    return run(() => {
+      assert.strictEqual(person.name, null);
+    });
+  });
+
+  test('can be updated to null', async function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Eddard',
+            last: 'Stark'
+          }
+        }
+      }
+    });
+
+    return run(() => {
+      assert.equal(person.name.first, 'Eddard');
+
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: null
+          }
+        }
+      });
+
+      assert.equal(person.name, null);
+    });
+  });
 });
