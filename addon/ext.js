@@ -13,7 +13,6 @@ import {
 import { isPresent } from '@ember/utils';
 import { computed } from '@ember/object';
 import { getOwner } from '@ember/application';
-import { assign } from '@ember/polyfills';
 import { lte, gte } from 'ember-compatibility-helpers';
 
 function serializerForFragment(owner, normalizedModelName) {
@@ -42,7 +41,7 @@ function serializerForFragment(owner, normalizedModelName) {
 const InternalModelPrototype = InternalModel.prototype;
 const RecordDataPrototype = RecordData.prototype;
 
-assign(RecordDataPrototype, {
+Object.assign(RecordDataPrototype, {
   eachFragmentKey(fn) {
     this._fragments = this._fragments || Object.create({});
     Object.keys(this._fragments).forEach(fn);
@@ -110,7 +109,7 @@ assign(RecordDataPrototype, {
 
     const changedKeys = this._changedKeys(data);
 
-    assign(this._data, this._inFlightAttributes, data);
+    Object.assign(this._data, this._inFlightAttributes, data);
     this._inFlightAttributes = null;
     this._updateChangedAttributes();
 

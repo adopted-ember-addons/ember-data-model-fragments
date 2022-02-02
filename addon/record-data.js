@@ -14,7 +14,6 @@ import {
   createFragment,
   isFragment
 } from './fragment';
-import { assign } from '@ember/polyfills';
 import { gte } from 'ember-compatibility-helpers';
 
 let fragmentRecordDatas = new WeakMap();
@@ -284,7 +283,7 @@ export default class FragmentRecordData extends RecordData {
     // the fragment data back in here so that it's not lost when we go back to the
     // function calling pushData.
     if (data.attributes) {
-      assign(data.attributes, ourAttributes);
+      Object.assign(data.attributes, ourAttributes);
     }
 
     return keys.concat(edKeys);
