@@ -27,18 +27,21 @@ export default class FragmentRecordData extends RecordData {
       super(identifier.type, identifier.id, identifier.clientId, store);
     }
 
+    // @patocallaghan - We need to keep a copy of the record so we can recreate the fragment/fragmentArray.
+    this._record = null;
     this.fragmentData = Object.create(null);
     this.serverFragments = Object.create(null);
     this.inFlightFragments = Object.create(null);
 
     this.fragments = Object.create(null);
-    this.fragmentNames = [];
+    // @patocallaghan - We need to keep the fragment definitions for later on in case we need recreate the fragment or fragmentArray
+    this.fragmentDefs = Object.create(null);
     let defs = store.attributesDefinitionFor(identifier.type, identifier.id, identifier.lid);
 
     Object.keys(defs).forEach(key => {
       let options = defs[key];
       if (options.isFragment) {
-        this.fragmentNames.push(key);
+        this.fragmentDefs[key] = defs[key];
       }
     });
     fragmentRecordDatas.set(identifier, this);
@@ -54,6 +57,8 @@ export default class FragmentRecordData extends RecordData {
   }
 
   setupFragment(key, options, declaredModelName, record) {
+    // @patocallaghan -  This is extremely janky way of making sure we always have a copy of the record saved. There must be a better way of doing this?
+    this._record = record;
     let data = this.getFragmentDataWithDefault(key, options, 'object');
     let fragment = this.fragments[key];
 
@@ -79,6 +84,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   getFragment(key, options, declaredModelName, record) {
+    this._record = record;
     let fragment = this.getFragmentWithoutCreating(key);
     if (fragment === undefined) {
       return this.setupFragment(key, options, declaredModelName, record);
@@ -88,6 +94,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   setFragmentArrayValue(key, fragments, value, record, declaredModelName, options, isFragmentArray) {
+    this._record = record;
     if (isArray(value)) {
       if (!fragments) {
         if (isFragmentArray) {
@@ -126,6 +133,7 @@ export default class FragmentRecordData extends RecordData {
 
     // Model Fragments are hard tied to DS.Model, and all DS.Models have the store on them.
     // We need access to the store because EDMF uses the store for `createRecord`
+    this._record = record;
     let store = record.store;
     assert(
       `You can only assign \`null\`, an object literal or a '${declaredModelName}' fragment instance to this property`,
@@ -170,6 +178,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   getFragmentArray(key, options, declaredModelName, record, isFragmentArray) {
+    this._record = record;
     let data = this.getFragmentDataWithDefault(key, options, 'array');
     let fragmentArray = this.getFragmentWithoutCreating(key);
 
@@ -185,6 +194,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   setupFragmentArray(key, record, data, declaredModelName, options, isFragmentArray) {
+    this._record = record;
     let fragmentArray;
     if  (data !== null) {
       if (isFragmentArray) {
@@ -223,7 +233,7 @@ export default class FragmentRecordData extends RecordData {
   setupFragmentData(data, calculateChange) {
     let keys = [];
     if (data.attributes) {
-      this.fragmentNames.forEach(name => {
+      Object.keys(this.fragmentDefs).forEach(name => {
         if (calculateChange && this.getFragmentWithoutCreating(name) !== undefined) {
           keys.push(name);
         }
@@ -232,7 +242,11 @@ export default class FragmentRecordData extends RecordData {
           let serverFragment = this.serverFragments[name];
           if (serverFragment) {
             let fragmentKeys = [];
-            if (serverFragment instanceof StatefulArray) {
+            if (data.attributes[name] === null) {
+              // if we have data with a Fragment set up, but now we've received null,
+              // delete the null fragment from serverFragments.
+              delete this.serverFragments[name];
+            } else if (serverFragment instanceof StatefulArray) {
               serverFragment.setupData(data.attributes[name]);
             } else {
               fragmentKeys = serverFragment._internalModel._recordData.pushData({ attributes: data.attributes[name] }, calculateChange);
@@ -257,7 +271,7 @@ export default class FragmentRecordData extends RecordData {
 
     let ourAttributes = {};
     if (data.attributes) {
-      this.fragmentNames.forEach(name => {
+      Object.keys(this.fragmentDefs).forEach(name => {
         if (name in data.attributes) {
           ourAttributes[name] = data.attributes[name];
           delete data.attributes[name];
@@ -303,7 +317,7 @@ export default class FragmentRecordData extends RecordData {
 
   hasChangedAttributes() {
     return super.hasChangedAttributes() ||
-      this.fragmentNames.some(fragmentName => {
+      Object.keys(this.fragmentDefs).some(fragmentName => {
         const fragment = this.getFragmentWithoutCreating(fragmentName);
         return fragment && fragment.hasDirtyAttributes;
       });
@@ -355,7 +369,7 @@ export default class FragmentRecordData extends RecordData {
     // for more details
 
     let ourChanges = super.changedAttributes();
-    for (let key of this.fragmentNames) {
+    for (let key of Object.keys(this.fragmentDefs)) {
       // either the whole fragment was replaced, or a property on the fragment was replaced
       // this is the case where we replaced the whole framgent
       let newFragment;
@@ -401,7 +415,7 @@ export default class FragmentRecordData extends RecordData {
       keys.push(key);
       delete this.fragments[key];
     }
-    this.fragmentNames.forEach((key) => {
+    Object.keys(this.fragmentDefs).forEach((key) => {
       let fragment = this.getFragmentWithoutCreating(key);
       if (fragment) {
         fragment.rollbackAttributes();
@@ -423,12 +437,24 @@ export default class FragmentRecordData extends RecordData {
       delete this.inFlightFragments[key];
       this.serverFragments[key] = fragment;
     }
-    this.fragmentNames.forEach(key => {
+    Object.keys(this.fragmentDefs).forEach(key => {
       fragment = this.serverFragments[key];
+      // @patocallaghan - So basically if the existing fragment/fragmentArray is null but it is part of the response we need to recreate the fragment/fragment array and re-add it to the record.
+      // Unfortunately we have no access to the `record` (is there a way to get it from `RecordData`?) in this codepath hence why we need to do the `this._record` hack.
+      if (!fragment && attributes[key] && this._record) {
+        let def = this.fragmentDefs[key];
+        let declaredModelName = def.type.split('$')[1];
+        if (def.type.includes('-array')) {
+          fragment = this.setupFragmentArray(key, this._record, attributes[key], declaredModelName, def.options, def.type.includes('fragment-array'));
+        } else {
+          fragment = createFragment(this._record.store, def.type.split('$')[1], this._record, key, def.options, attributes[key]);
+        }
+        // @patocallaghan - Not sure of the repercussions of just re-assigning the new fragment here. Should it be done a better way?
+        this._record[key] = fragment;
+      }
       if (fragment) {
         fragment._didCommit(attributes[key]);
       }
-      // this is here so that the super call does not process this key
       delete attributes[key];
     });
     return super.didCommit(data);
@@ -458,7 +484,7 @@ export default class FragmentRecordData extends RecordData {
         }
       }
     }
-    return super.commitWasRejected();
+    return super.commitWasRejected(...arguments);
   }
 
   setAttr(key, value) {

@@ -1,6 +1,6 @@
 # Ember Data Model Fragments
 
-[![Build Status](https://github.com/adopted-ember-addons/ember-data-model-fragments/workflows/ci/badge.svg)](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml)
+[![CI](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml/badge.svg)](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml)
 [![NPM Version](https://badge.fury.io/js/ember-data-model-fragments.svg)](http://badge.fury.io/js/ember-data-model-fragments)
 [![Ember Observer Score](http://emberobserver.com/badges/ember-data-model-fragments.svg)](http://emberobserver.com/addons/ember-data-model-fragments)
 
@@ -29,6 +29,7 @@ Use the following table to decide which version of this project to use with your
 | >= v3.2.x < v3.4.x | v3.3.x |
 | >= v3.5.x < v3.12.x | v4.0.x |
 | >= v3.13.x | v5.0.x |
+| >= v3.28.x | Not fully compatible (See [issue](https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406)) |
 
 #### Notes
 
