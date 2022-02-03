@@ -1,5 +1,22 @@
 # Changelog
 
+### v5.0.0-beta.3 (December 22, 2021)
+
+## What's Changed
+* 🐛 Bugfix: Pass arguments to `super.commitWasRejected` to get back `DS.Errors` by @enspandi in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/412
+* 🐛 Bugfix: modelName undefined when serializing fragment and fragment array by @knownasilya in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/407
+* 🐛 Bugfix: Fix serialization in ember 3.28 by @VincentMolinie in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/414
+* 🐛 Bugfix: Fix fragment attributes in save response being ignored by @dwickern in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/404
+* 🏠 Do not fail CI on Ember release by @patocallaghan in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/419
+* 💥 Breaking fix: respect null on server updates  by @ro0gr in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/415
+* 🐛 Bugfix: Make sure we can update fragments/fragment arrays after they are initially set to null by @patocallaghan in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/384
+
+## Breaking change
+Before v5.0.0-beta.3, when setting a fragment array property to `null` from a server response, it wouldn't nullify the attribute. Instead, the fragment array instance just became empty with no items inside. Now updating the fragment array to `null` works correctly and is consistent with fragments behaviour. For more details see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/415.
+
+### v5.0.0-beta.2 (April 20, 2021)
+* 🐛 Bugfix: [#397](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/397) Use send('loadedData') instead of loadedData method (@runspired)
+
 ### v5.0.0-beta.1 (November 12, 2020)
 
 * [#381](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/381) Fix `hasDirtyAttributes` when resetting a property (@VincentMolinie)
