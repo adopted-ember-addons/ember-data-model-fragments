@@ -13,6 +13,7 @@ const dirtySetup = function(internalModel) {
   let record = internalModel._recordData._owner;
   let key = internalModel._recordData._name;
 
+  console.log('dirtySetup');
   // A newly created fragment may not have an owner yet
   if (record) {
     fragmentDidDirty(record, key, internalModel);
@@ -87,7 +88,7 @@ let FragmentRootState = {
         let key = internalModel._recordData._name;
 
         // Abort if fragment is still initializing
-        if (!record._internalModel._recordData.getFragmentWithoutCreating(key)) {
+        if (record._internalModel._recordData.isStillInitializing(key)) {
           return;
         }
 
