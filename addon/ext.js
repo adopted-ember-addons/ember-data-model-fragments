@@ -85,7 +85,9 @@ assign(RecordDataPrototype, {
   },
 
   didCommit(data) {
-    if (this._attributes) {
+    // It seems the will commit has changed because _attributes
+    // is actually not set to null but just empty
+    if (this._attributes && !this._inFlightAttributes) {
       // willCommit was never called
       this._inFlightAttributes = this._attributes;
       this._attributes = null;
