@@ -2,6 +2,25 @@
 
 ### v5.0.0-beta.3 (December 22, 2021)
 
+
+## v5.0.0-beta.4 (2022-03-16)
+
+#### :rocket: Enhancement
+* [#430](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/430) feat(polymorphism): add the possibility to compute the type based on owner and data ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :bug: Bug Fix
+* [#428](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/428) fix: handle current state not yet set ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#425](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/425) Bump mout from 1.2.2 to 1.2.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#395](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/395) Bump elliptic from 6.5.3 to 6.5.4 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#424](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/424) Add `release-it` to automate releases and add missing entries from CHANGELOG.md ([@patocallaghan](https://github.com/patocallaghan))
+* [#421](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/421) Bump follow-redirects from 1.13.0 to 1.14.7 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 2
+- Pat O'Callaghan ([@patocallaghan](https://github.com/patocallaghan))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## What's Changed
 * 🐛 Bugfix: Pass arguments to `super.commitWasRejected` to get back `DS.Errors` by @enspandi in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/412
 * 🐛 Bugfix: modelName undefined when serializing fragment and fragment array by @knownasilya in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/407
