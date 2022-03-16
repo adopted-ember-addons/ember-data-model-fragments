@@ -179,6 +179,11 @@ const StatefulArray = ArrayProxy.extend(Copyable, {
     let record = get(this, 'owner');
     let key = get(this, 'name');
 
+    // Abort if fragment is still initializing
+    if (record._internalModel._recordData.isStateInitializing()) {
+      return;
+    }
+
     // Any change to the size of the fragment array means a potential state change
     if (get(this, 'hasDirtyAttributes')) {
       fragmentDidDirty(record, key, this);

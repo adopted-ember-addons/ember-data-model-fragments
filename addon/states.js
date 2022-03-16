@@ -87,7 +87,7 @@ let FragmentRootState = {
         let key = internalModel._recordData._name;
 
         // Abort if fragment is still initializing
-        if (!record._internalModel._recordData.getFragmentWithoutCreating(key)) {
+        if (record._internalModel._recordData.isStillInitializing(key)) {
           return;
         }
 
