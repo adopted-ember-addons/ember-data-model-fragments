@@ -165,8 +165,6 @@ export function getActualFragmentType(declaredType, options, data, owner) {
   }
 
   let typeKey = options.typeKey || 'type';
-  console.log('data', data);
-  console.log('owner', owner);
   let actualType = typeof typeKey === 'function' ? typeKey(data, owner) : data[typeKey];
 
   return actualType || declaredType;
