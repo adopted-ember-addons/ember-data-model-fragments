@@ -87,7 +87,10 @@ assign(RecordDataPrototype, {
   didCommit(data) {
     // It seems the will commit has changed because _attributes
     // is actually not set to null but just empty
-    if (this._attributes && !this._inFlightAttributes) {
+    const shouldSetInFlightAttributes = gte('ember-data', '3.28.0') ?
+      this._attributes && !this._inFlightAttributes :
+      this._attributes;
+    if (shouldSetInFlightAttributes) {
       // willCommit was never called
       this._inFlightAttributes = this._attributes;
       this._attributes = null;

@@ -120,7 +120,7 @@ export default class FragmentRecordData extends RecordData {
       assert('A fragment array property can only be assigned an array or null');
     }
 
-    if (!record._internalModel._recordData.isStillInitializing(key)) {
+    if (!record._internalModel._recordData.isStateInitializing()) {
       if (this.serverFragments[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
         fragmentDidDirty(record, key, fragments);
       } else {
@@ -170,7 +170,7 @@ export default class FragmentRecordData extends RecordData {
 
     let currentFragment = this.getFragment(key, options, declaredModelName, record);
 
-    if (!record._internalModel._recordData.isStillInitializing(key)) {
+    if (!record._internalModel._recordData.isStateInitializing()) {
       if (currentFragment !== fragment) {
         this.fragments[key] = fragment;
         fragmentDidDirty(record, key, fragment);
@@ -234,8 +234,13 @@ export default class FragmentRecordData extends RecordData {
   }
 
   isStillInitializing(key) {
-    return !this.getFragmentWithoutCreating(key) || !this._record.___recordState;
+    return !this.getFragmentWithoutCreating(key) || this.isStateInitializing();
   }
+
+  isStateInitializing() {
+    return gte('ember-data', '3.28.0') && !this._record.___recordState;
+  }
+
   // PUBLIC API
 
   setupFragmentData(data, calculateChange) {

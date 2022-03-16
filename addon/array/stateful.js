@@ -180,7 +180,7 @@ const StatefulArray = ArrayProxy.extend(Copyable, {
     let key = get(this, 'name');
 
     // Abort if fragment is still initializing
-    if (record._internalModel._recordData.isStillInitializing(key)) {
+    if (record._internalModel._recordData.isStateInitializing()) {
       return;
     }
 
