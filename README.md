@@ -456,6 +456,8 @@ However, note that fragments do not currently support `belongsTo` or `hasMany` p
 Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `fragment` or `fragmentArray`
 with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to `'type'`.
 
+The `typeKey` option might be a `String` or a `Function` returning a `String`. If you use a function, the `data` and the `owner` will be passed as parameter.
+
 The `typeKey`'s value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass. Additionally, the `typeKey`'s value must be a field on the parent class.
 
 In the following example the declared type of `animals` is `animal`, which corresponds to the class `Animal`. `Animal` has two subclasses: `Elephant` and `Lion`,
@@ -471,6 +473,7 @@ export default Model.extend({
   name: attr('string'),
   city: attr('string'),
   animals: fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
+  bestAnimal: fragment('animal', { polymorphic: true, typeKey: (data) => `my-model-prefix-${data.name}` })
 });
 ```
 
