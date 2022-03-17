@@ -160,6 +160,53 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
+  test('when setting a property to the same value', function(assert) {
+    return run(() => {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            title: 'Lord',
+            name: {
+              first: 'Tyrion',
+              last: 'Lannister'
+            }
+          }
+        }
+      });
+
+      server.put('/people/1', () => {
+        return [204];
+      });
+
+      return store
+        .find('person', 1)
+        .then(person => {
+          person.set('title', 'titleModified');
+          person.set('name.first', 'firstNameModified');
+          person.set('name.last', 'lastNameModified');
+          return person.save();
+        })
+        .then(person => {
+          assert.equal(person.get('title'), 'titleModified');
+          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+
+          const name = person.get('name');
+          assert.equal(name.get('first'), 'firstNameModified');
+          assert.equal(name.get('last'), 'lastNameModified');
+          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
+
+          person.set('title', 'titleModified');
+          person.set('name.first', 'firstNameModified');
+          person.set('name.last', 'lastNameModified');
+
+          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
+        });
+    });
+  });
+
   test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', function(assert) {
     return run(() => {
       store.push({
