@@ -3,6 +3,15 @@
 ### v5.0.0-beta.3 (December 22, 2021)
 
 
+
+## v5.0.0-beta.5 (2022-03-17)
+
+#### :bug: Bug Fix
+* [#431](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/431) fix(dirty state): prevent record from being tagged as dirty when not changed ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### Committers: 1
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v5.0.0-beta.4 (2022-03-16)
 
 #### :rocket: Enhancement
