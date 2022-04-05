@@ -20,6 +20,7 @@ function metaTypeFor(name, type, options) {
 
   if (options && options.polymorphic) {
     let typeKey = options.typeKey || 'type';
+    typeKey = typeof typeKey === 'function' ? '__dynamic__' : typeKey;
     metaType += `$${typeKey}`;
   }
 
