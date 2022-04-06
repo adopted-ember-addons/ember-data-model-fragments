@@ -10,12 +10,6 @@ export default Model.extend({
   titles: MF.array(),
   hobbies: MF.fragmentArray('hobby', { defaultValue: null }),
   houses: MF.fragmentArray('house'),
-  titleDescription: MF.fragment('title-description', {
-    polymorphic: true,
-    typeKey: (data, owner) => {
-      return `title-description-${owner.title}`;
-    }
-  }),
   children: MF.array(),
   strings: MF.array('string'),
   numbers: MF.array('number'),

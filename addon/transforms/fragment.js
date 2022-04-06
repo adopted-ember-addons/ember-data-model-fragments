@@ -21,12 +21,12 @@ const FragmentTransform = Transform.extend({
   type: null,
   polymorphicTypeProp: null,
 
-  deserialize: function deserializeFragment(data) {
+  deserialize: function deserializeFragment(data, options, parentData) {
     if (data == null) {
       return null;
     }
 
-    return this.deserializeSingle(data);
+    return this.deserializeSingle(data, options, parentData);
   },
 
   serialize: function serializeFragment(snapshot) {
@@ -41,20 +41,22 @@ const FragmentTransform = Transform.extend({
     return serializer.serialize(realSnapshot);
   },
 
-  modelNameFor(data) {
+  modelNameFor(data, options, parentData) {
     let modelName = this.type;
     let polymorphicTypeProp = this.polymorphicTypeProp;
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
       modelName = data[polymorphicTypeProp];
+    } else if (options && typeof options.typeKey === 'function') {
+      modelName = options.typeKey(data, parentData);
     }
 
     return modelName;
   },
 
-  deserializeSingle(data) {
+  deserializeSingle(data, options, parentData) {
     let store = this.store;
-    let modelName = this.modelNameFor(data);
+    let modelName = this.modelNameFor(data, options, parentData);
     let serializer = store.serializerFor(modelName);
 
     assert('The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`', !(serializer instanceof JSONAPISerializer));
