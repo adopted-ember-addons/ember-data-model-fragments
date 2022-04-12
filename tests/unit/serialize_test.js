@@ -27,6 +27,26 @@ module('unit - Serialization', function(hooks) {
     store = null;
   });
 
+  test('polymorphic properties are deserialized correctly', async function(assert) {
+    store.pushPayload('component', {
+      data: [{
+        type: 'components',
+        id: 1,
+        attributes: {
+          type: 'text',
+          options: {
+            fontFamily: 'roman',
+            fontSize: 12
+          }
+        }
+      }]
+    });
+
+    const component = store.peekRecord('component', 1);
+    assert.strictEqual(component.options.fontSize, 12);
+    assert.strictEqual(component.options.fontFamily, 'roman');
+  });
+
   test('fragment properties are snapshotted as normal attributes on the owner record snapshot', function(assert) {
     let person = {
       name: {
