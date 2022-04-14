@@ -4,6 +4,19 @@
 
 
 
+
+## v5.0.0-beta.6 (2022-04-14)
+
+#### :bug: Bug Fix
+* [#432](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/432) fix(serializer): fix the deserialization when using a typeKey as a function ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#434](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/434) Remove bowerDependencies warning ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 2
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v5.0.0-beta.5 (2022-03-17)
 
 #### :bug: Bug Fix
