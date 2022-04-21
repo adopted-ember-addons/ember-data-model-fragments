@@ -7,7 +7,8 @@ import {
   setFragmentOwner,
   setFragmentData,
   createFragment,
-  isFragment
+  isFragment,
+  getActualFragmentType
 } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
 
@@ -232,17 +233,17 @@ const FragmentArray = StatefulArray.extend({
 
   /**
     Creates a new fragment of the fragment array's type and adds it to the end
-    of the fragment array
+    of the fragment array.
 
     @method createFragment
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the newly added fragment
     */
   createFragment(props) {
-    let record = this.owner;
-    let store = get(record, 'store');
-    let type = this.type;
-    let fragment = store.createFragment(type, props);
+    const record = this.owner;
+    const type = getActualFragmentType(this.type, this.options, props, record);
+
+    const fragment = record.store.createFragment(type, props);
 
     return this.pushObject(fragment);
   },
