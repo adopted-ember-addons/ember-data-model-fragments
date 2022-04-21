@@ -153,27 +153,4 @@ module('unit - Polymorphism', function(hooks) {
       assert.equal(component.optionsHistory.length, 1, 'fragment obhject was added to fragment array');
     });
   });
-
-  // test('fragment array\'s createFragment prints error message when failing to determine modelName', (assert) => {
-  //   run(async() => {
-  //     store.push({
-  //       data: {
-  //         type: 'zoo',
-  //         id: 1,
-  //         attributes: zoo
-  //       }
-  //     });
-
-  //     const record = await store.find('zoo', 1);
-  //     const animals = record.get('animals');
-
-  //     assert.throws(() => {
-  //       animals.createFragment({
-  //         $type: null,
-  //         name: 'Alex',
-  //         hasManes: 'true'
-  //       });
-  //     }, )
-  //   });
-  // });
 });
