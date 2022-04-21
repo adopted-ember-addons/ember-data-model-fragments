@@ -360,6 +360,10 @@ module('integration - Dependent State', function(hooks) {
 
         assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
 
+        // Settings to the same value should still mark the record as dirty
+        person.set('name', null);
+        assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+
         person.rollbackAttributes();
 
         assert.deepEqual(person.get('name'), name, 'property is restored');
