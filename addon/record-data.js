@@ -168,10 +168,8 @@ export default class FragmentRecordData extends RecordData {
       return fragment;
     }
 
-    let currentFragment = this.getFragment(key, options, declaredModelName, record);
-
     if (!record._internalModel._recordData.isStateInitializing()) {
-      if (currentFragment !== fragment) {
+      if (this.serverFragments[key] !== fragment) {
         this.fragments[key] = fragment;
         fragmentDidDirty(record, key, fragment);
       } else {
