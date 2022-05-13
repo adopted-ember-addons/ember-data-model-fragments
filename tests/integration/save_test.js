@@ -856,4 +856,39 @@ module('integration - Persistence', function(hooks) {
     army.set('soldiers', ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']);
     run(() => army.save());
   });
+
+  test('initializing a fragment, saving and then updating that fragment', async function(assert) {
+    const component = store.createRecord('component', { id: 10, type: 'chart', options: {} });
+
+    server.post('/components', () => [204]);
+    server.put('/components/:id', () => [204]);
+
+    await component.save();
+
+    assert.ok(
+      !component.get('hasDirtyAttributes'),
+      'component record is not dirty'
+    );
+
+    component.options.lastOrder = { products: [] };
+    component.options.lastOrder.products.pushObject({ name: 'Light Saber' });
+
+    assert.ok(
+      component.get('hasDirtyAttributes'),
+      'component record is dirty'
+    );
+
+    await component.save();
+
+    assert.ok(
+      !component.get('hasDirtyAttributes'),
+      'component record is not dirty after save'
+    );
+
+    component.options.lastOrder.products.createFragment({ name: 'Baby Yoda' });
+    assert.ok(
+      component.get('hasDirtyAttributes'),
+      'component record is dirty'
+    );
+  });
 });

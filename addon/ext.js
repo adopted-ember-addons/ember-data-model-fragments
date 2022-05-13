@@ -45,8 +45,7 @@ const RecordDataPrototype = RecordData.prototype;
 
 assign(RecordDataPrototype, {
   eachFragmentKey(fn) {
-    this._fragments = this._fragments || Object.create({});
-    Object.keys(this._fragments).forEach(fn);
+    Object.keys(this.fragments).forEach(fn);
   },
 
   eachFragmentKeyValue(fn) {
@@ -75,14 +74,7 @@ assign(RecordDataPrototype, {
   },
 
   getFragment(name) {
-    this._fragments = this._fragments || Object.create({});
-    return this._fragments[name];
-  },
-
-  setFragment(name, fragment) {
-    this._fragments = this._fragments || Object.create({});
-    this._fragments[name] = fragment;
-    return this._fragments[name];
+    return this.fragments[name];
   },
 
   didCommit(data) {
