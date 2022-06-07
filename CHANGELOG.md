@@ -5,6 +5,20 @@
 
 
 
+
+## v5.0.0-beta.8 (2022-06-07)
+
+#### :bug: Bug Fix
+* [#439](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/439) fix(array): allow resetting an array to null ([@VincentMolinie](https://github.com/VincentMolinie))
+* [#438](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/438) fix(polymorphic): update of type of a polymorphic key works ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#423](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/423) Remove assign usage ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 2
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v5.0.0-beta.7 (2022-04-21)
 
 ## v5.0.0-beta.6 (2022-04-14)
