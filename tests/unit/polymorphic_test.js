@@ -150,7 +150,7 @@ module('unit - Polymorphism', function(hooks) {
       assert.ok(textOptions instanceof ComponentOptionsText, 'options is ComponentOptionsText');
       assert.equal(textOptions.fontFamily, 'Verdana', 'options has correct fontFamily attribute');
       assert.equal(textOptions.fontSize, 12, 'options has correct fontSize attribute');
-      assert.equal(component.optionsHistory.length, 1, 'fragment obhject was added to fragment array');
+      assert.equal(component.optionsHistory.length, 1, 'fragment object was added to fragment array');
     });
   });
 });
