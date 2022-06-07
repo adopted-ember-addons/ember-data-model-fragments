@@ -12,7 +12,8 @@ import FragmentArray from './array/fragment';
 import {
   setFragmentOwner,
   createFragment,
-  isFragment
+  isFragment,
+  getActualFragmentType
 } from './fragment';
 import { gte } from 'ember-compatibility-helpers';
 
@@ -148,7 +149,7 @@ export default class FragmentRecordData extends RecordData {
     } else if (isFragment(value)) {
       // A fragment instance was given, so just replace the existing value
       fragment = setFragmentOwner(value, record, key);
-    } else if (!fragment) {
+    } else if (!fragment || (getActualFragmentType(declaredModelName, options, value, record) !== fragment.constructor.modelName)) {
       // A property hash was given but the property was null, so create a new
       // fragment with the data
       fragment = createFragment(
