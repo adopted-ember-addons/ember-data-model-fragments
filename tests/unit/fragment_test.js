@@ -5,6 +5,8 @@ import Ember from 'ember';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import Pretender from 'pretender';
+import Lion from 'dummy/models/lion';
+import Elephant from 'dummy/models/elephant';
 
 let store;
 
@@ -417,6 +419,44 @@ module('unit - `MF.Fragment`', function(hooks) {
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
       assert.deepEqual(person.name.serialize(), { first: 'John', last: 'Doe', prefixes: [{ name: 'Mr.' }, { name: 'Sir' }] }, 'name is correctly loaded');
       assert.deepEqual(person.names.serialize(), [{ first: 'John', last: 'Doe', prefixes: [] }], 'names is correct');
+    });
+  });
+
+  module('polymorphic', function() {
+    module('when updating the type of the model', function() {
+      test('it should rebuild the fragment', async function(assert) {
+        const zoo = store.push({
+          data: {
+            type: 'zoo',
+            id: 1,
+            attributes: {
+              name: 'Cincinnati Zoo',
+              star: {
+                $type: 'elephant',
+                name: 'Sabu'
+              }
+            },
+            relationships: {
+              manager: {
+                data: { type: 'person', id: 1 }
+              }
+            }
+          }
+        });
+
+        assert.ok(zoo.star instanceof Elephant);
+        assert.strictEqual(zoo.star.name, 'Sabu');
+
+        zoo.star = {
+          $type: 'lion',
+          hasManes: true
+        };
+
+        assert.ok(zoo.star instanceof Lion);
+        assert.strictEqual(zoo.star.name, undefined);
+        assert.strictEqual(zoo.star.hasManes, true);
+
+      });
     });
   });
 });

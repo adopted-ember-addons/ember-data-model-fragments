@@ -82,7 +82,7 @@ Object.assign(RecordDataPrototype, {
       if (!this._inFlightAttributes) {
         this._inFlightAttributes = this._attributes;
       } else {
-        assign(this._inFlightAttributes, this._attributes);
+        Object.assign(this._inFlightAttributes, this._attributes);
       }
       this._attributes = null;
     }
