@@ -144,7 +144,7 @@ export default class FragmentRecordData extends RecordData {
         isInstanceOfType(store.modelFor(declaredModelName), value)
     );
 
-    // If the fragment was null before or if the new value i not of the same model as the previous one (polymorphism) we should recreate the fragment.
+    // If the fragment was null before or if the new value is not of the same model as the previous one (polymorphism) we should recreate the fragment.
     const shouldRecreateFragment = !fragment || (getActualFragmentType(declaredModelName, options, value, record) !== fragment.constructor.modelName);
     if (!value) {
       fragment = null;
