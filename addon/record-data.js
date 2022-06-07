@@ -144,12 +144,14 @@ export default class FragmentRecordData extends RecordData {
         isInstanceOfType(store.modelFor(declaredModelName), value)
     );
 
+    // If the fragment was null before or if the new value i not of the same model as the previous one (polymorphism) we should recreate the fragment.
+    const shouldRecreateFragment = !fragment || (getActualFragmentType(declaredModelName, options, value, record) !== fragment.constructor.modelName);
     if (!value) {
       fragment = null;
     } else if (isFragment(value)) {
       // A fragment instance was given, so just replace the existing value
       fragment = setFragmentOwner(value, record, key);
-    } else if (!fragment || (getActualFragmentType(declaredModelName, options, value, record) !== fragment.constructor.modelName)) {
+    } else if (shouldRecreateFragment) {
       // A property hash was given but the property was null, so create a new
       // fragment with the data
       fragment = createFragment(
