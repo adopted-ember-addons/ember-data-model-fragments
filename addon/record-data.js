@@ -121,7 +121,7 @@ export default class FragmentRecordData extends RecordData {
     }
 
     if (!record._internalModel._recordData.isStateInitializing()) {
-      if (this.serverFragments[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
+      if (this.serverFragments[key] !== fragments || (fragments && get(fragments, 'hasDirtyAttributes'))) {
         fragmentDidDirty(record, key, fragments);
       } else {
         fragmentDidReset(record, key);

@@ -104,6 +104,24 @@ module('unit - `MF.array` property', function(hooks) {
     });
   });
 
+  test('resetting to null is allowed', function(assert) {
+    const person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          nickName: 'R\'hllor',
+          titles: null
+        }
+      }
+    });
+
+    person.set('titles', ['Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow']);
+    person.set('titles', null);
+
+    assert.equal(person.get('titles'), null, 'property is null');
+  });
+
   test('array properties default to an empty array-ish', function(assert) {
     run(() => {
       let person = store.createRecord('person', {
