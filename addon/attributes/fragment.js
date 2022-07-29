@@ -3,7 +3,7 @@ import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
 import { recordDataFor } from '@ember-data/store/-private';
 import { copy } from 'ember-copy';
-import { isFragment, setFragmentOwner } from '../fragment';
+import { getActualFragmentType, isFragment, setFragmentOwner } from '../fragment';
 import metaTypeFor from '../util/meta-type-for';
 import isInstanceOfType from '../util/instance-of-type';
 
@@ -88,7 +88,8 @@ export default function fragment(type, options) {
           recordData._fragmentData[key] = null;
           return null;
         }
-        const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(type, defaultValue);
+        const actualType = getActualFragmentType(type, options, undefined, this);
+        const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(actualType, defaultValue);
         setFragmentOwner(fragment, recordData, key);
         recordData._fragmentData[key] = recordDataFor(fragment);
         return fragment;
@@ -111,7 +112,8 @@ export default function fragment(type, options) {
         if (defaultValue === null) {
           recordData._fragmentData[key] = null;
         } else {
-          const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(type, defaultValue);
+          const actualType = getActualFragmentType(type, options, value, this);
+          const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(actualType, defaultValue);
           setFragmentOwner(fragment, recordData, key);
           recordData._fragmentData[key] = recordDataFor(fragment);
         }
@@ -131,7 +133,8 @@ export default function fragment(type, options) {
       }
       const fragmentRecordData = recordData.getFragment(key);
       if (fragmentRecordData === null) {
-        const fragment = this.store.createFragment(type, value);
+        const actualType = getActualFragmentType(type, options, value, this);
+        const fragment = this.store.createFragment(actualType, value);
         setFragmentOwner(fragment, recordData, key);
         recordData._fragmentData[key] = recordDataFor(fragment);
         return fragment;
