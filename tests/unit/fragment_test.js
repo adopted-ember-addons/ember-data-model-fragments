@@ -142,8 +142,8 @@ module('unit - `MF.Fragment`', function(hooks) {
         name.set('last', 'Baratheon');
 
         const [oldName, newName] = person.changedAttributes().name;
-        assert.deepEqual(oldName, { first: 'Loras', last: 'Tyrell' }, 'old fragment is indicated in the diff object');
-        assert.deepEqual(newName, { first: 'Loras', last: 'Baratheon' }, 'new fragment is indicated in the diff object');
+        assert.deepEqual(oldName, { first: 'Loras', last: 'Tyrell', prefixes: [] }, 'old fragment is indicated in the diff object');
+        assert.deepEqual(newName, { first: 'Loras', last: 'Baratheon', prefixes: [] }, 'new fragment is indicated in the diff object');
       });
     });
   });
@@ -167,7 +167,7 @@ module('unit - `MF.Fragment`', function(hooks) {
         person.set('name', null);
 
         const [oldName, newName] = person.changedAttributes().name;
-        assert.deepEqual(oldName, { first: 'Rob', last: 'Stark' }, 'old fragment is indicated in the diff object');
+        assert.deepEqual(oldName, { first: 'Rob', last: 'Stark', prefixes: [] }, 'old fragment is indicated in the diff object');
         assert.deepEqual(newName, null, 'new fragment is indicated in the diff object');
       });
     });
