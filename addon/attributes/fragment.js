@@ -132,11 +132,11 @@ export default function fragment(type, options) {
         return value;
       }
       const fragmentRecordData = recordData.getFragment(key);
-      if (fragmentRecordData === null) {
-        const actualType = getActualFragmentType(type, options, value, this);
+      const actualType = getActualFragmentType(type, options, value, this);
+      if (fragmentRecordData?.modelName !== actualType) {
         const fragment = this.store.createFragment(actualType, value);
         setFragmentOwner(fragment, recordData, key);
-        recordData._fragmentData[key] = recordDataFor(fragment);
+        recordData.setDirtyFragment(key, recordDataFor(fragment));
         return fragment;
       }
       const fragment = this.store._internalModelForResource(fragmentRecordData.identifier).getRecord();
