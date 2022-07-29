@@ -1,4 +1,3 @@
-import { assert } from '@ember/debug';
 import { copy, Copyable } from 'ember-copy';
 import { get, computed } from '@ember/object';
 import Ember from 'ember';
