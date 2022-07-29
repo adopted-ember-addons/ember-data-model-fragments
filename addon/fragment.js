@@ -137,13 +137,13 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
  * @param {Object} data the fragment data
  * @return {String} the actual fragment type
  */
-export function getActualFragmentType(declaredType, options, data) {
+export function getActualFragmentType(declaredType, options, data, owner) {
   if (!options.polymorphic || !data) {
     return declaredType;
   }
 
   let typeKey = options.typeKey || 'type';
-  let actualType = data[typeKey];
+  let actualType = typeof typeKey === 'function' ? typeKey(data, owner) : data[typeKey];
 
   return actualType || declaredType;
 }
@@ -175,7 +175,7 @@ export function setFragmentData(fragment, data) {
 
 // Creates a fragment and sets its owner to the given record
 export function createFragment(store, declaredModelName, record, key, options, data) {
-  let actualModelName = getActualFragmentType(declaredModelName, options, data);
+  let actualModelName = getActualFragmentType(declaredModelName, options, data, record);
   let fragment = store.createFragment(actualModelName);
 
   setFragmentOwner(fragment, record, key);

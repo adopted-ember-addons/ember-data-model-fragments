@@ -4,6 +4,9 @@ import { Copyable } from 'ember-copy';
 import Ember from 'ember';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
+import Pretender from 'pretender';
+import Lion from 'dummy/models/lion';
+import Elephant from 'dummy/models/elephant';
 
 let store;
 
@@ -302,6 +305,155 @@ module('unit - `MF.Fragment`', function(hooks) {
 
       assert.ok(person.get('name.readyWasCalled'), 'when creating model that has fragment');
       assert.ok(person.get('names').isEvery('readyWasCalled'), 'when creating model that has fragmentArray');
+    });
+  });
+
+  test('can be created with null', async function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null
+        }
+      }
+    });
+
+    return run(() => {
+      assert.strictEqual(person.name, null);
+    });
+  });
+
+  test('can be updated to null', async function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Eddard',
+            last: 'Stark'
+          }
+        }
+      }
+    });
+
+    return run(() => {
+      assert.equal(person.name.first, 'Eddard');
+
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            name: null
+          }
+        }
+      });
+
+      assert.equal(person.name, null);
+    });
+  });
+
+  module('fragment bug when initially set to `null`', function() {
+    let server;
+    hooks.beforeEach(function() {
+      server = new Pretender();
+      server.post('/people', () => {
+        return [
+          200,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify({
+            person: {
+              id: 1,
+              title: 'Mr.',
+              nickName: 'Johnner',
+              names: [{ first: 'John', last: 'Doe' }],
+              name: {
+                first: 'John',
+                last: 'Doe',
+                prefixes: [{ name: 'Mr.' }, { name: 'Sir' }]
+              }
+            }
+          })
+        ];
+      });
+    });
+
+    hooks.afterEach(function() {
+      server.shutdown();
+    });
+
+    test('`person` fragments/fragment arrays are not initially `null`', async function(assert) {
+      let person = store.createRecord('person', {
+        title: 'Mr.',
+        name: {}
+      });
+
+      assert.ok(person.name, 'name is not null');
+      assert.ok(person.names, 'names is not null');
+      assert.notOk(person.nickName, 'nickName is not set');
+
+      await person.save();
+
+      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
+      assert.deepEqual(person.name.serialize(), { first: 'John', last: 'Doe', prefixes: [{ name: 'Mr.' }, { name: 'Sir' }] }, 'name is correctly loaded');
+      assert.deepEqual(person.names.serialize(), [{ first: 'John', last: 'Doe', prefixes: [] }], 'names is correct');
+    });
+
+    test('`person` fragments/fragment arrays are initially `null`', async function(assert) {
+      let person = store.createRecord('person', {
+        title: 'Mr.',
+        name: null,
+        names: null
+      });
+
+      assert.notOk(person.names, 'names is null');
+      assert.notOk(person.nickName, 'nickName is not set');
+
+      await person.save();
+
+      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
+      assert.deepEqual(person.name.serialize(), { first: 'John', last: 'Doe', prefixes: [{ name: 'Mr.' }, { name: 'Sir' }] }, 'name is correctly loaded');
+      assert.deepEqual(person.names.serialize(), [{ first: 'John', last: 'Doe', prefixes: [] }], 'names is correct');
+    });
+  });
+
+  module('polymorphic', function() {
+    module('when updating the type of the model', function() {
+      test('it should rebuild the fragment', async function(assert) {
+        const zoo = store.push({
+          data: {
+            type: 'zoo',
+            id: 1,
+            attributes: {
+              name: 'Cincinnati Zoo',
+              star: {
+                $type: 'elephant',
+                name: 'Sabu'
+              }
+            },
+            relationships: {
+              manager: {
+                data: { type: 'person', id: 1 }
+              }
+            }
+          }
+        });
+
+        assert.ok(zoo.star instanceof Elephant);
+        assert.strictEqual(zoo.star.name, 'Sabu');
+
+        zoo.star = {
+          $type: 'lion',
+          hasManes: true
+        };
+
+        assert.ok(zoo.star instanceof Lion);
+        assert.strictEqual(zoo.star.name, undefined);
+        assert.strictEqual(zoo.star.hasManes, true);
+
+      });
     });
   });
 });

@@ -1,6 +1,6 @@
 # Ember Data Model Fragments
 
-[![Build Status](https://github.com/adopted-ember-addons/ember-data-model-fragments/workflows/ci/badge.svg)](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml)
+[![CI](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml/badge.svg)](https://github.com/adopted-ember-addons/ember-data-model-fragments/actions/workflows/ci.yml)
 [![NPM Version](https://badge.fury.io/js/ember-data-model-fragments.svg)](http://badge.fury.io/js/ember-data-model-fragments)
 [![Ember Observer Score](http://emberobserver.com/badges/ember-data-model-fragments.svg)](http://emberobserver.com/addons/ember-data-model-fragments)
 
@@ -29,6 +29,7 @@ Use the following table to decide which version of this project to use with your
 | >= v3.2.x < v3.4.x | v3.3.x |
 | >= v3.5.x < v3.12.x | v4.0.x |
 | >= v3.13.x | v5.0.x |
+| >= v3.28.x | Not fully compatible (See [issue](https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406)) |
 
 #### Notes
 
@@ -455,6 +456,8 @@ However, note that fragments do not currently support `belongsTo` or `hasMany` p
 Ember Data: Model Fragments has support for *reading* polymorphic fragments. To use this feature, pass an options object to `fragment` or `fragmentArray`
 with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to `'type'`.
 
+The `typeKey` option might be a `String` or a `Function` returning a `String`. If you use a function, the `data` and the `owner` will be passed as parameter.
+
 The `typeKey`'s value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass. Additionally, the `typeKey`'s value must be a field on the parent class.
 
 In the following example the declared type of `animals` is `animal`, which corresponds to the class `Animal`. `Animal` has two subclasses: `Elephant` and `Lion`,
@@ -470,6 +473,7 @@ export default Model.extend({
   name: attr('string'),
   city: attr('string'),
   animals: fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
+  bestAnimal: fragment('animal', { polymorphic: true, typeKey: (data) => `my-model-prefix-${data.name}` })
 });
 ```
 

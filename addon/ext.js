@@ -9,6 +9,7 @@ import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
 import { lte, gte } from 'ember-compatibility-helpers';
+import { get } from '@ember/object';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -189,6 +190,23 @@ JSONSerializer.reopen({
       owner.register(containerKey, transformClass);
     }
     return owner.lookup(containerKey);
+  },
+
+  // We need to override this to handle polymorphic with a typeKey function
+  applyTransforms(typeClass, data) {
+    let attributes = get(typeClass, 'attributes');
+
+    typeClass.eachTransformedAttribute((key, typeClass) => {
+      if (data[key] === undefined) {
+        return;
+      }
+
+      let transform = this.transformFor(typeClass);
+      let transformMeta = attributes.get(key);
+      data[key] = transform.deserialize(data[key], transformMeta.options, data);
+    });
+
+    return data;
   }
 });
 

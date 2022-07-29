@@ -13,13 +13,13 @@ import FragmentTransform from './fragment';
   @extends DS.Transform
 */
 const FragmentArrayTransform = FragmentTransform.extend({
-  deserialize: function deserializeFragmentArray(data) {
+  deserialize: function deserializeFragmentArray(data, options, parentData) {
     if (data == null) {
       return null;
     }
 
     return data.map(datum => {
-      return this.deserializeSingle(datum);
+      return this.deserializeSingle(datum, options, parentData);
     }, this);
   },
 

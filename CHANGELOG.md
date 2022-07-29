@@ -1,5 +1,79 @@
 # Changelog
 
+### v5.0.0-beta.3 (December 22, 2021)
+
+
+
+
+
+## v5.0.0-beta.8 (2022-06-07)
+
+#### :bug: Bug Fix
+* [#439](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/439) fix(array): allow resetting an array to null ([@VincentMolinie](https://github.com/VincentMolinie))
+* [#438](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/438) fix(polymorphic): update of type of a polymorphic key works ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#423](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/423) Remove assign usage ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 2
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v5.0.0-beta.7 (2022-04-21)
+
+## v5.0.0-beta.6 (2022-04-14)
+
+#### :bug: Bug Fix
+* [#432](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/432) fix(serializer): fix the deserialization when using a typeKey as a function ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#434](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/434) Remove bowerDependencies warning ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 2
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v5.0.0-beta.5 (2022-03-17)
+
+#### :bug: Bug Fix
+* [#431](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/431) fix(dirty state): prevent record from being tagged as dirty when not changed ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### Committers: 1
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v5.0.0-beta.4 (2022-03-16)
+
+#### :rocket: Enhancement
+* [#430](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/430) feat(polymorphism): add the possibility to compute the type based on owner and data ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :bug: Bug Fix
+* [#428](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/428) fix: handle current state not yet set ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#425](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/425) Bump mout from 1.2.2 to 1.2.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#395](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/395) Bump elliptic from 6.5.3 to 6.5.4 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#424](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/424) Add `release-it` to automate releases and add missing entries from CHANGELOG.md ([@patocallaghan](https://github.com/patocallaghan))
+* [#421](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/421) Bump follow-redirects from 1.13.0 to 1.14.7 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 2
+- Pat O'Callaghan ([@patocallaghan](https://github.com/patocallaghan))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## What's Changed
+* 🐛 Bugfix: Pass arguments to `super.commitWasRejected` to get back `DS.Errors` by @enspandi in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/412
+* 🐛 Bugfix: modelName undefined when serializing fragment and fragment array by @knownasilya in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/407
+* 🐛 Bugfix: Fix serialization in ember 3.28 by @VincentMolinie in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/414
+* 🐛 Bugfix: Fix fragment attributes in save response being ignored by @dwickern in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/404
+* 🏠 Do not fail CI on Ember release by @patocallaghan in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/419
+* 💥 Breaking fix: respect null on server updates  by @ro0gr in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/415
+* 🐛 Bugfix: Make sure we can update fragments/fragment arrays after they are initially set to null by @patocallaghan in https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/384
+
+## Breaking change
+Before v5.0.0-beta.3, when setting a fragment array property to `null` from a server response, it wouldn't nullify the attribute. Instead, the fragment array instance just became empty with no items inside. Now updating the fragment array to `null` works correctly and is consistent with fragments behaviour. For more details see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/415.
+
+### v5.0.0-beta.2 (April 20, 2021)
+* 🐛 Bugfix: [#397](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/397) Use send('loadedData') instead of loadedData method (@runspired)
+
 ### v5.0.0-beta.1 (November 12, 2020)
 
 * [#381](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/381) Fix `hasDirtyAttributes` when resetting a property (@VincentMolinie)
