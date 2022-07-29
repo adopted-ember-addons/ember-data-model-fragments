@@ -454,6 +454,11 @@ export default class FragmentRecordData extends RecordData {
   getCanonicalState() {
     const result = Object.assign({}, this._data);
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      if (!this.hasFragment(key)) {
+        // force the fragment attribute to initialize its default value
+        internalModelFor(this).getRecord().get(key);
+        assert('Failed to initialize fragment default value', this.hasFragment(key));
+      }
       result[key] = behavior.canonicalState(this._fragmentData[key]);
     }
     return result;
@@ -462,6 +467,11 @@ export default class FragmentRecordData extends RecordData {
   getCurrentState() {
     const result = Object.assign({}, this._data, this._inFlightAttributes, this._attributes);
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      if (!this.hasFragment(key)) {
+        // force the fragment attribute to initialize its default value
+        internalModelFor(this).getRecord().get(key);
+        assert('Failed to initialize fragment default value', this.hasFragment(key));
+      }
       result[key] = behavior.currentState(this.getFragment(key));
     }
     return result;
