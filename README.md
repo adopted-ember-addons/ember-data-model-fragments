@@ -582,7 +582,7 @@ export default AnimalSerializer;
 
 ## Typescript
 
-To use with typescript, defines the following files in your project:
+To use with typescript, define the following files in your project:
 
 ```typescript
 // types/ember-data-model-fragments/types/registries/fragment.d.ts
