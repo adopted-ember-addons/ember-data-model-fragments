@@ -605,7 +605,7 @@ And the following one which will help you validate entries when doing a `createF
 // types/ember-data-model-fragments/types/registries/fragment-attributes.d.ts
 import Fragment from 'ember-data-model-fragments/fragment';
 
-import { ProductAttributes} from 'client/models/product';
+import { ProductAttributes } from '<your-app-name>/models/product';
 
 /**
  * Define all your fragments attributes here.
