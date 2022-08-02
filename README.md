@@ -634,7 +634,8 @@ export default class Product
   extends Fragment
   implements ProductAttributes
 {
-  @attr('string') declare name: string;
+  @attr('string')
+  declare name: string;
 
   @fragmentArray('order')
   declare smartActions: Array<Order>;
