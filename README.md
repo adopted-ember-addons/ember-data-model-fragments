@@ -588,7 +588,7 @@ To use with typescript, define the following files in your project:
 // types/ember-data-model-fragments/types/registries/fragment.d.ts
 import Fragment from 'ember-data-model-fragments/fragment';
 
-import Product from 'client/models/product';
+import Product from '<your-app-name>/models/product';
 
 /**
  * Define all your fragments here.
