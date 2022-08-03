@@ -580,6 +580,68 @@ import AnimalSerializer from './animal';
 export default AnimalSerializer;
 ```
 
+## Typescript
+
+To use with typescript, define the following files in your project:
+
+```typescript
+// types/ember-data-model-fragments/types/registries/fragment.d.ts
+import Fragment from 'ember-data-model-fragments/fragment';
+
+import Product from '<your-app-name>/models/product';
+
+/**
+ * Define all your fragments here.
+ */
+export default interface FragmentRegistry {
+  [key: string]: Fragment;
+  'product': Product;
+}
+```
+
+And the following one which will help you validate entries when doing a `createFragment`, `push` on a fragmentArray, etc...
+
+```typescript
+// types/ember-data-model-fragments/types/registries/fragment-attributes.d.ts
+import Fragment from 'ember-data-model-fragments/fragment';
+
+import { ProductAttributes } from '<your-app-name>/models/product';
+
+/**
+ * Define all your fragments attributes here.
+ */
+export default interface FragmentRegistry {
+  [key: string]: Record<string, any>;
+  'product': ProductAttributes;
+}
+```
+
+Those attributes can be implemented like so:
+
+```typescript
+// app/models/product.ts
+import { attr } from '@ember-data/model';
+import Fragment from 'ember-data-model-fragments/fragment';
+
+import Order from './order';
+
+export interface ProductAttributes {
+  name: string;
+  orders: Array<Order>;
+}
+
+export default class Product
+  extends Fragment
+  implements ProductAttributes
+{
+  @attr('string')
+  declare name: string;
+
+  @fragmentArray('order')
+  declare smartActions: Array<Order>;
+}
+```
+
 ## Limitations
 
 ### Conflict Resolution
