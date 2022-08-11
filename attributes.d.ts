@@ -19,8 +19,8 @@ interface FragmentOptions<K extends keyof FragmentRegistry> {
   defaultValue?: () => FragmentAttributesRegistry[K];
 }
 
-type TransformType<T extends keyof TransformRegistry> = ReturnType<
-  TransformRegistry[T]['deserialize']
+type TransformType<K extends keyof TransformRegistry> = ReturnType<
+  TransformRegistry[K]['deserialize']
 >;
 
 export function fragment<K extends keyof FragmentRegistry>(
