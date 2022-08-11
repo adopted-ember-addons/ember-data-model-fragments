@@ -3,8 +3,8 @@ import FragmentAttributesRegistry from 'ember-data-model-fragments/types/registr
 import EmberStore from '@ember-data/store';
 
 export class Store extends EmberStore {
-  createFragment<FragmentType extends keyof FragmentRegistry>(	
-    type: FragmentType,	
-    attributes: FragmentAttributesRegistry[FragmentType],	
-  ): FragmentRegistry[FragmentType];
+  createFragment<K extends keyof FragmentRegistry>(	
+    type: K,	
+    attributes?: FragmentAttributesRegistry[K],	
+  ): FragmentRegistry[K];
 }
