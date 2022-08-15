@@ -605,7 +605,7 @@ export default class AddressFragment extends Fragment {
 
 declare module 'ember-data-model-fragments/types/registries/fragment' {
   export default interface FragmentRegistry {
-    address: AddressModel;
+    address: AddressFragment;
   }
 }
 ```
