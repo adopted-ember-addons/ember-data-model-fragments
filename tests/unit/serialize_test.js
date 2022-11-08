@@ -27,7 +27,7 @@ module('unit - Serialization', function(hooks) {
     store = null;
   });
 
-  test('polymorphic properties are deserialized correctly', async function(assert) {
+  test.skip('polymorphic properties are deserialized correctly', async function(assert) {
     store.pushPayload('component', {
       data: [{
         type: 'components',
