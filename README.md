@@ -580,6 +580,36 @@ import AnimalSerializer from './animal';
 export default AnimalSerializer;
 ```
 
+## TypeScript
+
+TypeScript declarations are included out of the box. For additional type safety for `createFragment`, `push`, etc. you can index your fragment classes in the `FragmentRegistry`:
+
+```typescript
+// app/models/address.ts
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class AddressFragment extends Fragment {
+  @attr('string')
+  declare street: string;
+
+  @attr('string')
+  declare city: string;
+
+  @attr('string')
+  declare region: string;
+
+  @attr('string')
+  declare country: string;
+}
+
+declare module 'ember-data-model-fragments/types/registries/fragment' {
+  export default interface FragmentRegistry {
+    address: AddressFragment;
+  }
+}
+```
+
 ## Limitations
 
 ### Conflict Resolution
