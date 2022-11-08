@@ -238,7 +238,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   isStateInitializing() {
-    return gte('ember-data', '3.28.0') && !this._record.___recordState;
+    return gte('ember-data', '3.28.0') && !this._record?.___recordState;
   }
 
   // PUBLIC API
