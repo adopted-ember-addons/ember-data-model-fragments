@@ -177,6 +177,7 @@ JSONSerializer.reopen({
 
     if (!owner.hasRegistration(containerKey)) {
       const match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+      assert(`Failed parsing ember-data-model-fragments attribute type ${attributeType}`, match != null);
       const transformName = match[1];
       const type = match[2];
       const polymorphicTypeProp = match[3];
