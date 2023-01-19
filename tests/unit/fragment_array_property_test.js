@@ -436,12 +436,20 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         name: attr('string'),
         addresses: MF.fragmentArray('address', { defaultValue() { return defaultValue; } })
       });
+      let Shield = Model.extend({
+        name: attr('string'),
+        names: MF.array('string', { defaultValue(record) { return ['Fire', record.name]; } }),
+        addresses: MF.fragmentArray('address', { defaultValue() { return defaultValue; } })
+      });
 
       owner.register('model:sword', Sword);
+      owner.register('model:shield', Shield);
 
       let sword = store.createRecord('sword', { name: 'Ice' });
-
       assert.equal(sword.get('addresses.firstObject.street'), defaultValue[0].street, 'the default value is correct');
+
+      let shield = store.createRecord('shield', { name: 'Ice' });
+      assert.deepEqual(shield.names.toArray(), ['Fire', 'Ice'], 'the default value is correct');
     });
   });
 

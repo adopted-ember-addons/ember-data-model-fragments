@@ -48,18 +48,18 @@ export default class FragmentRecordData extends RecordData {
   }
 
   // Returns the value of the property or the default propery
-  getFragmentDataWithDefault(key, options, type) {
+  getFragmentDataWithDefault(key, options, type, record) {
     let data = this.fragmentData[key];
     if (data !== undefined) {
       return data;
     }
-    return getFragmentDefaultValue(options, type);
+    return getFragmentDefaultValue(options, type, record);
   }
 
   setupFragment(key, options, declaredModelName, record) {
     // @patocallaghan -  This is extremely janky way of making sure we always have a copy of the record saved. There must be a better way of doing this?
     this._record = record;
-    let data = this.getFragmentDataWithDefault(key, options, 'object');
+    let data = this.getFragmentDataWithDefault(key, options, 'object', record);
     let fragment = this.fragments[key];
 
     if (!data) {
@@ -521,11 +521,11 @@ export { fragmentRecordDatas };
 
 // The default value of a fragment is either an array or an object,
 // which should automatically get deep copied
-function getFragmentDefaultValue(options, type) {
+function getFragmentDefaultValue(options, type, record) {
   let value;
 
   if (typeof options.defaultValue === 'function') {
-    return options.defaultValue();
+    return options.defaultValue(record);
   } else if ('defaultValue' in options) {
     value = options.defaultValue;
   } else if (type === 'array') {
