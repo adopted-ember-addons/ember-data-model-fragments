@@ -933,6 +933,35 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
+  test('commitwasrejected is called properly after failed save on default', function(assert) {
+    // assert.expect(3);
+
+    let Address = MF.Fragment.extend({
+      line1: attr('string'),
+      line2: attr('string')
+    });
+
+    owner.register('model:address', Address);
+
+    let DefaultAddressPerson = Model.extend({
+      address: MF.fragment('address', {
+        defaultValue() {
+          return {};
+        }
+      })
+    });
+
+    owner.register('model:default-address-person', DefaultAddressPerson);
+
+    return run(() => {
+      let p = store.createRecord('default-address-person');
+      let address = p.get('address');
+      return p.save().catch(() => {
+        assert.equal(address._internalModel.currentState.stateName, 'root.loaded.created.uncommitted');
+      });
+    });
+  });
+
   test('setting an array does not error on save', function() {
     let Army = Model.extend({
       soldiers: MF.array('string')
