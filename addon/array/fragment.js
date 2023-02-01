@@ -67,7 +67,7 @@ const FragmentArray = StatefulArray.extend({
   replace(start, deleteCount, items) {
     assert('The third argument to replace needs to be an array.', isArray(items));
     const data = this.currentState.slice();
-    data.splice(start, deleteCount, ...items.map((item, i) => this._normalizeData(item, i)));
+    data.splice(start, deleteCount, ...items.map((item, i) => this._normalizeData(item, start + i)));
     this.recordData.setDirtyFragment(this.key, data);
     this.notify();
   },
