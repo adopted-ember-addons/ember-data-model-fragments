@@ -188,10 +188,10 @@ address.get('country'); // 'Westeros'
 // Fragments can be created and added directly through the fragment array
 addresses.get('length'); // 2
 addresses.createFragment({
-  street  : '1 Shy Maid',
-  city    : 'Rhoyne River',
-  region  : 'Free Cities',
-  country : 'Essos'
+  street: '1 Shy Maid',
+  city: 'Rhoyne River',
+  region: 'Free Cities',
+  country: 'Essos',
 });
 addresses.get('length'); // 3
 person.get('hasDirtyAttributes'); // true
@@ -230,18 +230,19 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
+
+import Model from '@ember-data/model';
 import {
   fragment,
   fragmentArray,
   array
 } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name      : fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : fragmentArray('address'),
-  titles    : array('string')
-});
+export default class PersonModel extends Model {
+  @fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }) name;
+  @fragmentArray('address') addresses;
+  @array('string') titles;
+}
 ```
 
 Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `fragment` properties default to `null` and `fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `fragmentArray` property:
@@ -417,7 +418,7 @@ With a JSON payload of:
   "orders": [
     {
       "amount": "799.98",
-      "products" : [
+      "products": [
         {
           "name": "Tears of Lys",
           "sku": "poison-bd-32",
@@ -526,30 +527,30 @@ export default class LionFragment extends AnimalFragment {
 The expected JSON payload is as follows:
 ```json
 {
-  "Zoo" : {
-    "id" : "1",
-    "name" : "Winterfell Zoo",
-    "city" : "Winterfell",
-    "animals" : [
+  "Zoo": {
+    "id": "1",
+    "name": "Winterfell Zoo",
+    "city": "Winterfell",
+    "animals": [
       {
-        "$type" : "lion",
-        "name" : "Simba",
-        "hasManes" : false
+        "$type": "lion",
+        "name": "Simba",
+        "hasManes": false
       },
       {
-        "$type" : "lion",
-        "name" : "Leonard",
-        "hasManes" : true
+        "$type": "lion",
+        "name": "Leonard",
+        "hasManes": true
       },
       {
-        "$type" : "elephant",
-        "name" : "Trunky",
-        "trunkLength" : 10
+        "$type": "elephant",
+        "name": "Trunky",
+        "trunkLength": 10
       },
       {
-        "$type" : "elephant",
-        "name" : "Snuffles",
-        "trunkLength" : 9
+        "$type": "elephant",
+        "name": "Snuffles",
+        "trunkLength": 9
       }
     ]
   }
