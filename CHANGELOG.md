@@ -7,6 +7,15 @@
 
 
 
+
+## v5.0.0 (2023-02-02)
+
+#### :bug: Bug Fix
+* [#455](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/455) Remove string index from fragment registry ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 1
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+
 ## v5.0.0-beta.9 (2023-01-16)
 
 #### :rocket: Enhancement
