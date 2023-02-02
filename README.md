@@ -131,7 +131,7 @@ With a JSON payload of:
         "country": "Westeros"
       }
     ],
-    "titles": [ "Imp", "Hand of the King" ]
+    "titles": ["Imp", "Hand of the King"]
   }
 }
 ```
@@ -585,6 +585,7 @@ export default class AnimalSerializer extends JSONSerializer {
 
 ```javascript
 // app/serializers/elephant.js
+
 import AnimalSerializer from './animal';
 
 export default AnimalSerializer;
@@ -592,6 +593,7 @@ export default AnimalSerializer;
 
 ```javascript
 // app/serializers/lion.js
+
 import AnimalSerializer from './animal';
 
 export default AnimalSerializer;
@@ -603,6 +605,7 @@ TypeScript declarations are included out of the box. For additional type safety 
 
 ```typescript
 // app/models/address.ts
+
 import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
 
