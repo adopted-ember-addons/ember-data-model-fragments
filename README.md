@@ -16,31 +16,12 @@ Use the following table to decide which version of this project to use with your
 
 | Ember Data | Model Fragments |
 |------------|-----------------|
-| > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
-| v1.0.0-beta.14 | v0.2.8 |
-| >= v1.0.0-beta.15 <= v1.0.0-beta.18 | v0.3.3 |
-| >= v1.13.x < v2.0.0 | v1.13.x |
-| >= v2.0.x < v2.1.0 | v2.0.x |
-| >= v2.1.x < v2.3.x | v2.1.x |
-| >= v2.3.x < v2.11.x | v2.3.x |
-| >= v2.11.x < v2.13.x | v2.11.x |
-| >= v2.14.x < v3.0.x | v2.14.x |
-| >= v3.0.x < v3.2.x | v3.0.x-beta.1 |
-| >= v3.2.x < v3.4.x | v3.3.x |
 | >= v3.5.x < v3.12.x | v4.0.x |
 | >= v3.13.x | v5.0.x |
 | >= v3.28.x | Not fully compatible (See [issue](https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406)) |
 
 #### Notes
 
-- Ember Data v1.0.0-beta.12 introduced a bug that makes it incompatible with any version of this project.
-- Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
-- Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
-- Ember Data 2.3 converted to a full Ember CLI addon. Removing the global `DS` namespace and switching to an import module strategy. More: [Ember Data 2.3 Released](http://emberjs.com/blog/2016/01/12/ember-data-2-3-released.html). Following ember-data's lead, the `MF` namespace was also removed. Import modules directly.
-- Ember Data 2.11 changed the implementation of their `ContainerInstanceCache`. We had to follow suite with our patches so that we could continue offering fragments their own default serializer. See [#224](https://github.com/lytics/ember-data-model-fragments/issues/224).
-- Ember Data 2.14 changed `-private` import paths. See [#266](https://github.com/lytics/ember-data-model-fragments/issues/266).
-- Ember Data 3.0 changed `ContainerInstanceCache` import paths. See [e4749c10](https://github.com/lytics/ember-data-model-fragments/pull/287/commits/e4749c107610a6d0dd6032a58c66356e6064562a).
-- Ember Data 3.2 changed `InternalModel#fields`. See: [#310](https://github.com/lytics/ember-data-model-fragments/pull/310).
 - Ember Data 3.5 added `RecordData` interfaces. See: [#324](https://github.com/lytics/ember-data-model-fragments/pull/324), [emberjs/rfcs#293](https://github.com/emberjs/rfcs/pull/293), and [emberjs/data#5616](https://github.com/emberjs/data/pull/5616).
 - Ember Data 3.13 changed `InternalModel` Private APIs. See: [#360] (https://github.com/lytics/ember-data-model-fragments/pull/360)
 
