@@ -933,33 +933,84 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('commitwasrejected is called properly after failed save on default', function(assert) {
-    // assert.expect(3);
-
-    let Address = MF.Fragment.extend({
+  test('fragments with default values are rolled back to uncommitted state after failed save', async function(assert) {
+    const Address = MF.Fragment.extend({
       line1: attr('string'),
       line2: attr('string')
     });
 
     owner.register('model:address', Address);
 
-    let DefaultAddressPerson = Model.extend({
-      address: MF.fragment('address', {
-        defaultValue() {
-          return {};
-        }
-      })
+    const PersonWithDefaults = Model.extend({
+      address: MF.fragment('address', { defaultValue: {} }),
+      addresses: MF.fragmentArray('address', { defaultValue: [{}] })
     });
 
-    owner.register('model:default-address-person', DefaultAddressPerson);
+    owner.register('model:person', PersonWithDefaults);
 
-    return run(() => {
-      let p = store.createRecord('default-address-person');
-      let address = p.get('address');
-      return p.save().catch(() => {
-        assert.equal(address._internalModel.currentState.stateName, 'root.loaded.created.uncommitted');
-      });
+    const person = store.createRecord('person');
+    const address = person.get('address');
+    const addresses = person.get('addresses');
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment state before save'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment array state before save'
+    );
+
+    server.post('/people', () => {
+      const response = {
+        errors: [
+          { code: 'custom-error-code' }
+        ]
+      };
+      return [400, { 'Content-Type': 'application/json' }, JSON.stringify(response)];
     });
+
+    let savePromise = person.save();
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.loaded.created.inFlight',
+      'fragment state during save'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.loaded.created.inFlight',
+      'fragment array state during save'
+    );
+
+    await assert.rejects(savePromise, ex => ex.errors[0].code === 'custom-error-code');
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment state after save'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment array state after save'
+    );
+
+    // unload will fail if the record is in-flight
+    person.unloadRecord();
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.empty',
+      'fragment state after unload'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.empty',
+      'fragment array state after unload'
+    );
   });
 
   test('setting an array does not error on save', function() {

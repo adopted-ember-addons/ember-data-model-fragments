@@ -92,7 +92,6 @@ export default function fragment(type, options) {
         const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(actualType, defaultValue);
         setFragmentOwner(fragment, recordData, key);
         recordData._fragmentData[key] = recordDataFor(fragment);
-        recordData._fragments[key] = recordDataFor(fragment);
         return fragment;
       }
       const fragment = recordData.getFragment(key);

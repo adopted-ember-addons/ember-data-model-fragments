@@ -612,11 +612,11 @@ export default class FragmentRecordData extends RecordData {
 
   commitWasRejected(identifier, errors) {
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
-      const data = this._inFlightFragments[key];
-      if (data == null) {
+      const fragment = key in this._inFlightFragments ? this._inFlightFragments[key] : this._fragmentData[key];
+      if (fragment == null) {
         continue;
       }
-      behavior.commitWasRejected(data);
+      behavior.commitWasRejected(fragment);
     }
     Object.assign(this._fragments, this._inFlightFragments);
     this._inFlightFragments = null;
