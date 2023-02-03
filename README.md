@@ -16,31 +16,12 @@ Use the following table to decide which version of this project to use with your
 
 | Ember Data | Model Fragments |
 |------------|-----------------|
-| > v1.0.0-beta.7 <= v1.0.0-beta.11 | v0.2.3 |
-| v1.0.0-beta.14 | v0.2.8 |
-| >= v1.0.0-beta.15 <= v1.0.0-beta.18 | v0.3.3 |
-| >= v1.13.x < v2.0.0 | v1.13.x |
-| >= v2.0.x < v2.1.0 | v2.0.x |
-| >= v2.1.x < v2.3.x | v2.1.x |
-| >= v2.3.x < v2.11.x | v2.3.x |
-| >= v2.11.x < v2.13.x | v2.11.x |
-| >= v2.14.x < v3.0.x | v2.14.x |
-| >= v3.0.x < v3.2.x | v3.0.x-beta.1 |
-| >= v3.2.x < v3.4.x | v3.3.x |
 | >= v3.5.x < v3.12.x | v4.0.x |
 | >= v3.13.x | v5.0.x |
 | >= v3.28.x | Not fully compatible (See [issue](https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406)) |
 
 #### Notes
 
-- Ember Data v1.0.0-beta.12 introduced a bug that makes it incompatible with any version of this project.
-- Ember Data v1.0.0-beta.15 introduced a breaking change to the serializer API with [Snapshots](https://github.com/emberjs/data/pull/2623). Since this affected fragment serialization as well, support for it was added in v0.3.0. See the [serializing](#serializing) section below for more information.
-- Ember Data v1.0.0-beta.19 refactored a large number of internal APIs this project relied on and is not officially supported. Compatibility was added in v0.4.0 and targeted at Ember Data v1.13.x.
-- Ember Data 2.3 converted to a full Ember CLI addon. Removing the global `DS` namespace and switching to an import module strategy. More: [Ember Data 2.3 Released](http://emberjs.com/blog/2016/01/12/ember-data-2-3-released.html). Following ember-data's lead, the `MF` namespace was also removed. Import modules directly.
-- Ember Data 2.11 changed the implementation of their `ContainerInstanceCache`. We had to follow suite with our patches so that we could continue offering fragments their own default serializer. See [#224](https://github.com/lytics/ember-data-model-fragments/issues/224).
-- Ember Data 2.14 changed `-private` import paths. See [#266](https://github.com/lytics/ember-data-model-fragments/issues/266).
-- Ember Data 3.0 changed `ContainerInstanceCache` import paths. See [e4749c10](https://github.com/lytics/ember-data-model-fragments/pull/287/commits/e4749c107610a6d0dd6032a58c66356e6064562a).
-- Ember Data 3.2 changed `InternalModel#fields`. See: [#310](https://github.com/lytics/ember-data-model-fragments/pull/310).
 - Ember Data 3.5 added `RecordData` interfaces. See: [#324](https://github.com/lytics/ember-data-model-fragments/pull/324), [emberjs/rfcs#293](https://github.com/emberjs/rfcs/pull/293), and [emberjs/data#5616](https://github.com/emberjs/data/pull/5616).
 - Ember Data 3.13 changed `InternalModel` Private APIs. See: [#360] (https://github.com/lytics/ember-data-model-fragments/pull/360)
 
@@ -66,42 +47,45 @@ You might also want to take a look at [FEDITOR's Ember Data model generator](htt
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
+
+import Model from '@ember-data/model';
 import {
   fragment,
   fragmentArray,
   array
 } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name      : fragment('name'),
-  addresses : fragmentArray('address'),
-  titles    : array()
-});
+export default class PersonModel extends Model {
+  @fragment('name') name;
+  @fragmentArray('address') addresses;
+  @array() titles;
+}
 ```
 
 ```javascript
 // app/models/name.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  first : attr('string'),
-  last  : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class NameFragment extends Fragment {
+  @attr('string') first;
+  @attr('string') last;
+}
 ```
 
 ```javascript
 // app/models/address.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  street  : attr('string'),
-  city    : attr('string'),
-  region  : attr('string'),
-  country : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class AddressFragment extends Fragment {
+  @attr('string') street;
+  @attr('string') city;
+  @attr('string') region;
+  @attr('string') country;
+}
 ```
 
 With a JSON payload of:
@@ -128,7 +112,7 @@ With a JSON payload of:
         "country": "Westeros"
       }
     ],
-    "titles": [ "Imp", "Hand of the King" ]
+    "titles": ["Imp", "Hand of the King"]
   }
 }
 ```
@@ -136,85 +120,88 @@ With a JSON payload of:
 The `name` attribute can be treated similar to a `belongsTo` relationship:
 
 ```javascript
-let person = store.getById('person', '1');
-let name = person.get('name');
+const person = store.peekRecord('person', '1');
+const name = person.get('name');
 
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 name.get('first'); // 'Tyrion'
 
 name.set('first', 'Jamie');
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
-person.rollback();
+person.rollbackAttributes();
 name.get('first'); // 'Tyrion'
 
 // New fragments are created through the store and assigned directly
-person.set('name', store.createFragment('name', {
-  first : 'Hugor',
-  last  : 'Hill'
-}));
-person.get('isDirty'); // true
+person.set(
+  'name',
+  store.createFragment('name', {
+    first: 'Hugor',
+    last: 'Hill',
+  })
+);
+person.get('hasDirtyAttributes'); // true
 
 // Fragments can also be set with hashes
 person.set('name', {
-  'first' : 'Tyrion',
-  'last'  : 'Lannister'
+  first: 'Tyrion',
+  last: 'Lannister',
 });
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 ```
 
 The `addresses` attribute can be treated similar to a `hasMany` relationship:
 
 ```javascript
-let person = store.getById('person', '1');
-let addresses = person.get('addresses');
-let address = addresses.get('lastObject');
+const person = store.peekRecord('person', '1');
+const addresses = person.get('addresses');
+const address = addresses.get('lastObject');
 
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 address.get('country'); // 'Westeros'
 
 address.set('country', 'Essos');
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
-person.rollback();
+person.rollbackAttributes();
 address.get('country'); // 'Westeros'
 
 // Fragments can be created and added directly through the fragment array
 addresses.get('length'); // 2
 addresses.createFragment({
-  street  : '1 Shy Maid',
-  city    : 'Rhoyne River',
-  region  : 'Free Cities',
-  country : 'Essos'
+  street: '1 Shy Maid',
+  city: 'Rhoyne River',
+  region: 'Free Cities',
+  country: 'Essos',
 });
 addresses.get('length'); // 3
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
 // Or with arrays of objects
 person.set('addresses', [
   {
-    street  : '1 Great Pyramid',
-    city    : 'Meereen',
-    region  : 'Slaver\'s Bay',
-    country : 'Essos'
-  }
+    street: '1 Great Pyramid',
+    city: 'Meereen',
+    region: "Slaver's Bay",
+    country: 'Essos',
+  },
 ]);
 ```
 
 The `titles` attribute can be treated as an `Ember.Array`:
 
 ```javascript
-let person = store.getById('person', '1');
-let titles = person.get('titles');
+const person = store.peekRecord('person', '1');
+const titles = person.get('titles');
 
-person.get('isDirty'); // false
+person.get('hasDirtyAttributes'); // false
 titles.get('length'); // 2
 
 titles.pushObject('Halfman');
 titles.get('length'); // 3
-person.get('isDirty'); // true
+person.get('hasDirtyAttributes'); // true
 
-person.rollback();
+person.rollbackAttributes();
 titles.get('length'); // 2
 ```
 
@@ -224,25 +211,26 @@ Ember Data attributes [support a `defaultValue` config option](http://emberjs.co
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
+
+import Model from '@ember-data/model';
 import {
   fragment,
   fragmentArray,
   array
 } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name      : fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }),
-  addresses : fragmentArray('address'),
-  titles    : array('string')
-});
+export default class PersonModel extends Model {
+  @fragment('name', { defaultValue: { first: 'Faceless', last: 'Man' } }) name;
+  @fragmentArray('address') addresses;
+  @array('string') titles;
+}
 ```
 
 Since JavaScript objects and arrays are passed by reference, the value of `defaultValue` is copied using `Ember.copy` in order to prevent all instances sharing the same value. If a `defaultValue` option is not specified, `fragment` properties default to `null` and `fragmentArray` properties default to an empty array. Note that this may cause confusion when creating a record with a `fragmentArray` property:
 
 ```javascript
-let person = store.createRecord('person');
-let addresses = person.get('addresses'); // null
+const person = store.createRecord('person');
+const addresses = person.get('addresses'); // null
 
 // Fails with "Cannot read property 'createFragment' of null"
 addresses.createFragment({
@@ -254,19 +242,20 @@ Like `attr`, the `defaultValue` option can be a function that is invoked to gene
 
 ```javascript
 // app/models/person.js
-import Model from 'ember-data/model';
+
+import Model from '@ember-data/model';
 import { fragment } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name: fragment('name', {
+export default class PersonModel extends Model {
+  @fragment('name', {
     defaultValue() {
       return {
         first: 'Unsullied',
-        last: Ember.uuid()
-      }
+        last: new Date().toString(),
+      };
     }
-  })
-});
+  }) name;
+}
 ```
 ## Serializing
 
@@ -274,26 +263,28 @@ Serializing records with fragment attributes works using a special `Transform` t
 
 ```javascript
 // app/models/name.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  given  : attr('string'),
-  family : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class NameFragment extends Fragment {
+  @attr('string') given;
+  @attr('string') family;
+}
 ```
 
 ```javascript
 // apps/serializers/name.js
 // Serializers for fragments work just as with models
-import JSONSerializer from 'ember-data/serializers/json';
 
-export default JSONSerializer.extend({
-  attrs: {
-    given  : 'first',
-    family : 'last'
-  }
-});
+import JSONSerializer from '@ember-data/serializer/json';
+
+export default class NameSerializer extends JSONSerializer {
+  attrs = {
+    given: 'first',
+    family: 'last',
+  };
+}
 ```
 
 Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `JSONSerializer`.
@@ -302,24 +293,24 @@ If common logic must be added to auto-generated fragment serializers, apps can r
 
 ```javascript
 // app/serializers/fragment.js
-import JSONSerializer from 'ember-data/serializers/json';
 
-export default JSONSerializer.extend({
+import JSONSerializer from '@ember-data/serializer/json';
 
-});
+export default class FragmentSerializer extends JSONSerializer {}
 ```
 
 ```javascript
 // app/initializers/fragment-serializer.js
+
 import FragmentSerializer from '../serializers/fragment';
 
 export function initialize(application) {
-	application.register('serializer:-fragment', FragmentSerializer);
+  application.register('serializer:-fragment', FragmentSerializer);
 }
 
 export default {
-	name: 'fragment-serializer',
-	initialize: initialize
+  name: 'fragment-serializer',
+  initialize: initialize,
 };
 ```
 
@@ -328,26 +319,27 @@ If custom serialization of the owner record is needed, fragment [snapshots](http
 ```javascript
 // apps/serializers/person.js
 // Fragment snapshots are accessed using `snapshot.attr()`
-import JSONSerializer from 'ember-data/serializers/json';
+
+import JSONSerializer from '@ember-data/serializer/json';
 
 export default JSONSerializer.extend({
   serialize(snapshot, options) {
-    let json = this._super(...arguments);
+    const json = super.serialize(...arguments);
 
     // Returns a `Snapshot` instance of the fragment
-    let nameSnapshot = snapshot.attr('name');
+    const nameSnapshot = snapshot.attr('name');
 
     json.full_name = nameSnapshot.attr('given') + ' ' + nameSnapshot.attr('family');
 
     // Returns a plain array of `Snapshot` instances
-    let addressSnapshots = snapshot.attr('addresses');
+    const addressSnapshots = snapshot.attr('addresses');
 
     json.countries = addressSnapshots.map(function(addressSnapshot) {
       return addressSnapshot.attr('country');
     });
 
     // Returns a plain array of primitives
-    let titlesSnapshot = snapshot.attr('titles');
+    const titlesSnapshot = snapshot.attr('titles');
 
     json.title_count = titlesSnapshot.length;
 
@@ -362,38 +354,40 @@ Nesting of fragments is fully supported:
 
 ```javascript
 // app/models/user.js
-import Model from 'ember-data/model';
-import attr from 'ember-data/attr';
+
+import Model, { attr } from '@ember-data/model';
 import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name   : attr('string'),
-  orders : fragmentArray('order')
-});
+export default class UserModel extends Model {
+  @attr('string') name;
+  @fragmentArray('order') orders;
+}
 ```
 
 ```javascript
 // app/models/order.js
-import attr from 'ember-data/attr';
+
 import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
 import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Fragment.extend({
-  amount   : attr('string'),
-  products : fragmentArray('product')
-});
+export default class OrderFragment extends Fragment {
+  @attr('string') amount;
+  @fragmentArray('product') products;
+}
 ```
 
 ```javascript
 // app/models/product.js
-import attr from 'ember-data/attr';
-import Fragment from 'ember-data-model-fragments/fragment';
 
-export default Fragment.extend({
-  name  : attr('string'),
-  sku   : attr('string'),
-  price : attr('string')
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class ProductFragment extends Fragment {
+  @attr('string') name;
+  @attr('string') sku;
+  @attr('string') price;
+}
 ```
 
 With a JSON payload of:
@@ -405,7 +399,7 @@ With a JSON payload of:
   "orders": [
     {
       "amount": "799.98",
-      "products" : [
+      "products": [
         {
           "name": "Tears of Lys",
           "sku": "poison-bd-32",
@@ -435,17 +429,17 @@ With a JSON payload of:
 Dirty state propagates up to the parent record, rollback cascades down:
 
 ```javascript
-let user = store.getById('user', '1');
-let product = user.get('orders.firstObject.products.lastObject');
+const user = store.peekRecord('user', '1');
+const product = user.get('orders.firstObject.products.lastObject');
 
-user.get('isDirty'); // false
+user.get('hasDirtyAttributes'); // false
 product.get('price'); // '299.99'
 
 product.set('price', '1.99');
-user.get('isDirty'); // true
+user.get('hasDirtyAttributes'); // true
 
-user.rollback();
-user.get('isDirty'); // false
+user.rollbackAttributes();
+user.get('hasDirtyAttributes'); // false
 product.get('price'); // '299.99'
 ```
 
@@ -465,76 +459,79 @@ so to `typeKey`'s value can be `'animal'`, `'elephant'` or `'lion'`.
 
 ```javascript
 // app/models/zoo.js
-import Model from 'ember-data/model';
-import attr from 'ember-data/attr';
-import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name: attr('string'),
-  city: attr('string'),
-  animals: fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
-  bestAnimal: fragment('animal', { polymorphic: true, typeKey: (data) => `my-model-prefix-${data.name}` })
-});
+import Model, { attr } from '@ember-data/model';
+import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
+
+export default class ZooModel extends Model {
+  @attr('string') name;
+  @attr('string') city;
+  @fragmentArray('animal', { polymorphic: true, typeKey: '$type' }) animals;
+  @fragment('animal', { polymorphic: true, typeKey: (data) => `my-model-prefix-${data.name}` }) bestAnimal;
+}
 ```
 
 ```javascript
 // app/models/animal.js
-import Fragment from 'ember-data-model-fragments/fragment';
-import attr from 'ember-data/attr';
 
-export default Fragment.extend({
-  $type: attr('string'),
-  name: attr('string'),
-});
+import Fragment from 'ember-data-model-fragments/fragment';
+import { attr } from '@ember-data/model';
+
+export default class AnimalFragment extends Fragment {
+  @attr('string') $type;
+  @attr('string') name;
+}
 ```
 
 ```javascript
 // app/models/elephant.js
-import Animal from './Animal';
-import attr from 'ember-data/attr';
 
-export default Animal.extend({
-  trunkLength: attr('number'),
-});
+import AnimalFragment from './animal';
+import { attr } from '@ember-data/model';
+
+export default class ElephantFragment extends AnimalFragment {
+  @attr('number') trunkLength;
+}
 ```
 
 ```javascript
 // app/models/lion.js
-import Animal from './Animal';
-import attr from 'ember-data/attr';
 
-export default Animal.extend({
-  hasManes: attr('boolean'),
-});
+import AnimalFragment from './animal';
+import { attr } from '@ember-data/model';
+
+export default class LionFragment extends AnimalFragment {
+  @attr('boolean') hasManes;
+}
 ```
 
 The expected JSON payload is as follows:
 ```json
 {
-  "Zoo" : {
-    "id" : "1",
-    "name" : "Winterfell Zoo",
-    "city" : "Winterfell",
-    "animals" : [
+  "Zoo": {
+    "id": "1",
+    "name": "Winterfell Zoo",
+    "city": "Winterfell",
+    "animals": [
       {
-        "$type" : "lion",
-        "name" : "Simba",
-        "hasManes" : false
+        "$type": "lion",
+        "name": "Simba",
+        "hasManes": false
       },
       {
-        "$type" : "lion",
-        "name" : "Leonard",
-        "hasManes" : true
+        "$type": "lion",
+        "name": "Leonard",
+        "hasManes": true
       },
       {
-        "$type" : "elephant",
-        "name" : "Trunky",
-        "trunkLength" : 10
+        "$type": "elephant",
+        "name": "Trunky",
+        "trunkLength": 10
       },
       {
-        "$type" : "elephant",
-        "name" : "Snuffles",
-        "trunkLength" : 9
+        "$type": "elephant",
+        "name": "Snuffles",
+        "trunkLength": 9
       }
     ]
   }
@@ -545,17 +542,18 @@ Serializing the fragment type back to JSON is not currently supported out of the
 
 ```javascript
 // app/serializers/animal.js
-import JSONSerializer from 'ember-data/serializers/json';
-import Elephant from 'app/models/elephant';
-import Lion from 'app/models/elephant';
 
-export default JSONSerializer.extend({
+import JSONSerializer from '@ember-data/serializer/json';
+import ElephantFragment from 'app/models/elephant';
+import LionFragment from 'app/models/elephant';
+
+export default class AnimalSerializer extends JSONSerializer {
   serialize(record, options) {
-    let json = this._super(...arguments);
+    const json = super.serialize(...arguments);
 
-    if (record instanceof Elephant) {
+    if (record instanceof ElephantFragment) {
       json.$type = 'elephant';
-    } else if (record instanceof Lion) {
+    } else if (record instanceof LionFragment) {
       json.$type = 'lion';
     } else {
       json.$type = 'animal';
@@ -563,11 +561,12 @@ export default JSONSerializer.extend({
 
     return json;
   }
-});
+}
 ```
 
 ```javascript
 // app/serializers/elephant.js
+
 import AnimalSerializer from './animal';
 
 export default AnimalSerializer;
@@ -575,6 +574,7 @@ export default AnimalSerializer;
 
 ```javascript
 // app/serializers/lion.js
+
 import AnimalSerializer from './animal';
 
 export default AnimalSerializer;
@@ -586,6 +586,7 @@ TypeScript declarations are included out of the box. For additional type safety 
 
 ```typescript
 // app/models/address.ts
+
 import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
 

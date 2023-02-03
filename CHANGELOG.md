@@ -6,6 +6,36 @@
 
 
 
+
+
+## v5.0.0 (2023-02-02)
+
+#### :bug: Bug Fix
+* [#455](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/455) Remove string index from fragment registry ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 1
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+
+## v5.0.0-beta.9 (2023-01-16)
+
+#### :rocket: Enhancement
+* [#445](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/445) chore: fix typescript declarations ([@charlesfries](https://github.com/charlesfries))
+* [#443](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/443) chore: add typescript definitions files ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :bug: Bug Fix
+* [#447](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/447) Handle null record in isStateInitializing ([@richgt](https://github.com/richgt))
+
+#### :house: Internal
+* [#442](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/442) Bump terser from 4.8.0 to 4.8.1 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#440](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/440) Bump shell-quote from 1.7.2 to 1.7.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#410](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/410) Bump y18n from 4.0.0 to 4.0.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#426](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/426) Bump follow-redirects from 1.14.7 to 1.14.8 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 3
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Rich Glazerman ([@richgt](https://github.com/richgt))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v5.0.0-beta.8 (2022-06-07)
 
 #### :bug: Bug Fix
