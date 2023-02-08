@@ -118,9 +118,7 @@ export default function array(type, options) {
         });
         recordData._fragmentArrayCache[key] = array;
       }
-      if (value) {
-        array.setObjects(value instanceof Array ? value : value.toArray());
-      }
+      array.setObjects(value);
       return array;
     }
   }).meta(meta);
