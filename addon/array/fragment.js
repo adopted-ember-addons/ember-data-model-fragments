@@ -1,6 +1,5 @@
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
-import { isArray } from '@ember/array';
 import StatefulArray from './stateful';
 import { isFragment, setFragmentOwner } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
@@ -62,14 +61,6 @@ const FragmentArray = StatefulArray.extend({
     const fragment = this.store.createFragment(this.modelName, data);
     setFragmentOwner(fragment, this.recordData, this.key);
     return recordDataFor(fragment);
-  },
-
-  replace(start, deleteCount, items) {
-    assert('The third argument to replace needs to be an array.', isArray(items));
-    const data = this.currentState.slice();
-    data.splice(start, deleteCount, ...items.map((item, i) => this._normalizeData(item, start + i)));
-    this.recordData.setDirtyFragment(this.key, data);
-    this.notify();
   },
 
   /**
