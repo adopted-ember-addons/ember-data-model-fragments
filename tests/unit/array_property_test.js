@@ -104,6 +104,27 @@ module('unit - `MF.array` property', function(hooks) {
     });
   });
 
+  test('setting to array value is allowed', function(assert) {
+    run(() => {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            nickName: 'R\'hllor',
+            titles: ['Lord of Light', 'The Heart of Fire', 'The God of Flame and Shadow']
+          }
+        }
+      });
+
+      return store.find('person', 1).then(person => {
+        person.set('titles', ['hello', 'there']);
+
+        assert.deepEqual(person.get('titles').toArray(), ['hello', 'there'], 'property has correct values');
+      });
+    });
+  });
+
   test('resetting to null is allowed', function(assert) {
     const person = store.push({
       data: {
