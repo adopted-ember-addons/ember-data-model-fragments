@@ -178,7 +178,7 @@ Store.reopen({
     }
 
     // invoke the ready callback ( to mimic DS.Model behaviour )
-    fragment.trigger('ready');
+    fragment.ready?.();
 
     // Add brand to reduce usages of `instanceof`
     fragment._isFragment = true;
