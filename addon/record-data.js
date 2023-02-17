@@ -504,7 +504,7 @@ export default class FragmentRecordData extends RecordData {
 
   _changedFragmentKeys(updates) {
     const changedKeys = [];
-    const original = Object.assign({}, this._fragmentData, this._inFlightAttributes);
+    const original = Object.assign({}, this._fragmentData, this._inFlightFragments);
     for (const key of Object.keys(updates)) {
       if (this._fragments[key]) {
         continue;
