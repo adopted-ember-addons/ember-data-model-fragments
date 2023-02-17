@@ -8,7 +8,7 @@ import FragmentRecordData from './record-data';
 import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
-import { lte, gte } from 'ember-compatibility-helpers';
+import { gte } from 'ember-compatibility-helpers';
 import { get } from '@ember/object';
 
 function serializerForFragment(owner, normalizedModelName) {
@@ -41,15 +41,10 @@ const InternalModelPrototype = InternalModel.prototype;
 */
 Store.reopen({
   createRecordDataFor(type, id, lid, storeWrapper) {
-    let identifier;
-    if (lte('ember-data', '3.13.0')) {
-      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.13. See matrix at https://github.com/lytics/ember-data-model-fragments#compatibility for details.');
+    if (!gte('ember-data', '3.28.0')) {
+      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/lytics/ember-data-model-fragments#compatibility for details.');
     }
-    if (gte('ember-data', '3.15.0')) {
-      identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
-    } else {
-      identifier = { type, id, clientId: lid };
-    }
+    const identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
     return new FragmentRecordData(identifier, storeWrapper);
   },
 
@@ -75,14 +70,8 @@ Store.reopen({
   */
   createFragment(modelName, props) {
     assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
-    let internalModel;
-    if (gte('ember-data', '3.15.0')) {
-      const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
-      internalModel = this._internalModelForResource(identifier);
-    } else {
-      let identifier = { type: modelName, id: `${Math.random()}`, lid: `${Math.random()}` };
-      internalModel = this._internalModelForResource(identifier);
-    }
+    const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
+    const internalModel = this._internalModelForResource(identifier);
     internalModel.send('loadedData');
     internalModel.didCreateRecord();
     return internalModel.getRecord(props);
