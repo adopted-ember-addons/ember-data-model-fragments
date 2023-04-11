@@ -40,7 +40,12 @@ function normalizeFragmentArray(array, content, objs, canonical) {
         setFragmentOwner(fragment, record, key);
       }
     } else {
-      fragment = content[index];
+      const fragmentUniqueKey = store.serializerFor(declaredModelName).fragmentUniqueKey;
+      if (fragmentUniqueKey) {
+        fragment = content.findBy(fragmentUniqueKey, data[fragmentUniqueKey]);
+      } else {
+        fragment = content[index];
+      }
 
       if (fragment) {
         // The data could come from a property update, which should leave the
