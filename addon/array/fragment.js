@@ -27,7 +27,7 @@ function normalizeFragmentArray(array, content, objs, canonical) {
 
   return objs.map((data, index) => {
     let type = get(array, 'type');
-    assert(`You can only add '${type}' fragments or object literals to this property`, typeOf(data) === 'object' || isInstanceOfType(store.modelFor(type), data));
+    assert(`You can only add '${type}' fragments or object literals to the '${key}' property`, typeOf(data) === 'object' || isInstanceOfType(store.modelFor(type), data));
 
     if (isFragment(data)) {
       fragment = data;
