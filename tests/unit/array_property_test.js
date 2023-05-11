@@ -198,4 +198,45 @@ module('unit - `MF.array` property', function(hooks) {
     });
   });
 
+  test('supports array observers', async function(assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          nickName: 'Tyrion Lannister',
+          titles: ['Hand of the King']
+        }
+      }
+    });
+
+    this.arrayWillChange = function(array, start, removeCount, addCount) {
+      assert.step(`arrayWillChange(${start},${removeCount},${addCount})`);
+    };
+    this.arrayDidChange = function(array, start, removeCount, addCount) {
+      assert.step(`arrayDidChange(${start},${removeCount},${addCount})`);
+    };
+
+    const person = await store.find('person', 1);
+    const titles = person.get('titles');
+    titles.addArrayObserver(this, {
+      willChange: 'arrayWillChange',
+      didChange: 'arrayDidChange'
+    });
+    titles.pushObject('Master of Coin');
+
+    assert.verifySteps([
+      'arrayWillChange(1,0,1)',
+      'arrayDidChange(1,0,1)'
+    ]);
+
+    titles.clear();
+
+    assert.verifySteps([
+      'arrayWillChange(0,2,0)',
+      'arrayDidChange(0,2,0)'
+    ]);
+
+    titles.removeArrayObserver(this);
+  });
 });

@@ -105,7 +105,7 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
 
     this._isDirty = false;
     this._isUpdating = true;
-    if (this._hasArrayObservers && !this._hasNotified) {
+    if (this.hasArrayObservers && !this._hasNotified) {
       // diff to find changes
       const diff = diffArray(this.currentState, currentState);
       // it's null if no change found
