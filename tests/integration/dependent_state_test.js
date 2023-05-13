@@ -480,7 +480,7 @@ module('integration - Dependent State', function(hooks) {
       return store.find('person', 1).then(person => {
         let addresses = person.get('addresses');
 
-        addresses.createFragment('address', {
+        addresses.createFragment({
           street: '1 Dungeon Cell',
           city: 'King\'s Landing',
           region: 'Crownlands',
@@ -583,6 +583,40 @@ module('integration - Dependent State', function(hooks) {
     });
   });
 
+  test('restoring a primitive array to its original order returns the array owner record to a clean state', async function(assert) {
+    pushPerson(1);
+
+    const person = await store.find('person', 1);
+    const titles = person.get('titles');
+    assert.ok(!titles.get('hasDirtyAttributes'), 'primitive array is clean');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+
+    const title = titles.popObject();
+    assert.ok(titles.get('hasDirtyAttributes'), 'primitive array is dirty');
+    assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
+
+    titles.pushObject(title);
+    assert.ok(!titles.get('hasDirtyAttributes'), 'primitive array is clean');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+  });
+
+  test('restoring a primitive array after setting to null returns the array owner record to a clean state', async function(assert) {
+    pushPerson(1);
+
+    const person = await store.find('person', 1);
+    const titles = person.get('titles');
+    assert.ok(!titles.get('hasDirtyAttributes'), 'primitive array is clean');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+
+    person.set('titles', null);
+    assert.ok(titles.get('hasDirtyAttributes'), 'primitive array is dirty');
+    assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
+
+    person.set('titles', titles);
+    assert.ok(!titles.get('hasDirtyAttributes'), 'primitive array is clean');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+  });
+
   test('changing a fragment property in a fragment array dirties the fragment, fragment array, and owner record', function(assert) {
     run(() => {
       pushPerson(1);
@@ -590,6 +624,13 @@ module('integration - Dependent State', function(hooks) {
       return store.find('person', 1).then(person => {
         let addresses = person.get('addresses');
         let address = addresses.get('firstObject');
+
+        assert.false(address.get('hasDirtyAttributes'), 'fragment is clean');
+        assert.false(
+          addresses.get('hasDirtyAttributes'),
+          'fragment array is clean'
+        );
+        assert.false(person.get('hasDirtyAttributes'), 'owner record is clean');
 
         address.set('street', '2 Sky Cell');
 
@@ -725,6 +766,35 @@ module('integration - Dependent State', function(hooks) {
     });
   });
 
+  test('rolling back an array returns the array to a clean state', async function(assert) {
+    pushPerson(1);
+
+    const person = await store.find('person', 1);
+    const titles = person.get('titles');
+    const values = titles.toArray();
+
+    // Dirty the owner record and the primitive array
+    person.set('title', 'Warden of the West');
+    assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
+
+    titles.popObject();
+    titles.unshiftObject('Giant of Lannister');
+    assert.ok(titles.get('hasDirtyAttributes'), 'primitive array is dirty');
+
+    titles.rollbackAttributes();
+
+    assert.deepEqual(
+      values,
+      person.get('titles').toArray(),
+      'primitive values are reset'
+    );
+    assert.ok(!titles.get('hasDirtyAttributes'), 'primitive array is clean');
+    assert.ok(person.get('hasDirtyAttributes'), 'owner record is still dirty');
+
+    person.rollbackAttributes();
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+  });
+
   test('rolling back a fragment array returns all fragments, the fragment array, and the owner record to a clean state', function(assert) {
     run(() => {
       pushPerson(1);
@@ -747,6 +817,54 @@ module('integration - Dependent State', function(hooks) {
         assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
       });
     });
+  });
+
+  test('rolling back a nested fragment array returns both fragment arrays and the owner record to a clean state', async function(assert) {
+    store.push({
+      data: {
+        type: 'user',
+        id: 1,
+        attributes: {
+          orders: [
+            {
+              amount: '799.98',
+              products: [
+                {
+                  name: 'Tears of Lys',
+                  sku: 'poison-bd-32',
+                  price: '499.99'
+                },
+                {
+                  name: 'The Strangler',
+                  sku: 'poison-md-24',
+                  price: '299.99'
+                }
+              ]
+            }
+          ]
+        }
+      }
+    });
+
+    const user = await store.find('user', 1);
+    const orders = user.get('orders');
+    const products = orders.get('firstObject.products');
+
+    assert.ok(!products.get('hasDirtyAttributes'), 'inner fragment array is clean');
+    assert.ok(!orders.get('hasDirtyAttributes'), 'outer fragment array is clean');
+    assert.ok(!user.get('hasDirtyAttributes'), 'owner record is clean');
+
+    products.popObject();
+
+    assert.ok(products.get('hasDirtyAttributes'), 'inner fragment array is dirty');
+    assert.ok(orders.get('hasDirtyAttributes'), 'outer fragment array is dirty');
+    assert.ok(user.get('hasDirtyAttributes'), 'owner record is dirty');
+
+    products.rollbackAttributes();
+
+    assert.ok(!products.get('hasDirtyAttributes'), 'inner fragment array is clean');
+    assert.ok(!orders.get('hasDirtyAttributes'), 'outer fragment array is clean');
+    assert.ok(!user.get('hasDirtyAttributes'), 'owner record is clean');
   });
 
   test('rolling back a fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retains the owner record\'s dirty state', function(assert) {

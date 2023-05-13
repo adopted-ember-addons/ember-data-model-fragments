@@ -272,7 +272,7 @@ module('integration - Nested fragments', function(hooks) {
         let products = order.get('products');
         let product = products.get('firstObject');
 
-        user.destroy();
+        user.unloadRecord();
 
         schedule('destroy', () => {
           assert.ok(user.get('isDestroying'), 'the user is being destroyed');

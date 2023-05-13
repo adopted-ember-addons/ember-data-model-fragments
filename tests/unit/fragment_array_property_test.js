@@ -128,7 +128,7 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
     });
   });
 
-  test('changing the fragment array is reflected in parent changedAttribtues', function(assert) {
+  test('changing the fragment array is reflected in parent changedAttributes', function(assert) {
     pushPerson(1);
 
     return store.find('person', 1).then(person => {
@@ -140,20 +140,23 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         region: 'Crownlands',
         country: 'Westeros'
       });
-      assert.deepEqual(person.changedAttributes().addresses, undefined, 'a frehsly pushed object has no changes');
+      assert.deepEqual(person.changedAttributes(), {}, 'a freshly pushed object has no changes');
       addresses.addFragment(address);
 
-      // This is the current behavior but seems not great, we should return a better diff objectt
-      assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changed arrays are indicated in the diff object');
+      let [oldAddresses, newAddresses] = person.changedAttributes().addresses;
+      assert.equal(oldAddresses.length, 2, 'changedAttributes has the old length');
+      assert.equal(newAddresses.length, 3, 'changedAttributes has the new length');
 
       addresses.rollbackAttributes();
-      assert.deepEqual(person.changedAttributes().addresses, undefined, 'there are no changes after a rollback');
-      addresses.objectAt(0).set('street', 'Changed Streett');
+      assert.deepEqual(person.changedAttributes(), {}, 'there are no changes after a rollback');
+      addresses.objectAt(0).set('street', 'Changed Street');
 
-      // This is the current behavior but seems not great, we should return a better diff objectt
-      assert.deepEqual(person.changedAttributes().addresses, [addresses, addresses], 'changing a property on a element of the array marks the array as having changedAttribtuest');
+      [oldAddresses, newAddresses] = person.changedAttributes().addresses;
+      assert.equal(oldAddresses[0].street, '1 Sky Cell', 'changedAttributes has the old street');
+      assert.equal(newAddresses[0].street, 'Changed Street', 'changedAttributes has the new street');
+
       addresses.rollbackAttributes();
-      assert.deepEqual(person.changedAttributes().addresses, undefined, 'there are no changes after a rollback');
+      assert.deepEqual(person.changedAttributes(), {}, 'there are no changes after a rollback');
     });
   });
 
@@ -480,7 +483,7 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         let secondAddress = addresses.objectAt(1);
         person.set('addresses', null);
 
-        person.destroy();
+        person.unloadRecord();
 
         schedule('destroy', () => {
           assert.ok(person.get('isDestroying'), 'the model is being destroyed');
@@ -502,7 +505,7 @@ module('unit - `MF.fragmentArray` property', function(hooks) {
         let secondAddress = addresses.objectAt(1);
         addresses.removeAt(0);
 
-        person.destroy();
+        person.unloadRecord();
 
         schedule('destroy', () => {
           assert.ok(person.get('isDestroying'), 'the model is being destroyed');

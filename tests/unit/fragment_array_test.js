@@ -116,6 +116,37 @@ module('unit - `MF.fragmentArray`', function(hooks) {
     });
   });
 
+  test('objects can be added to the fragment array', function(assert) {
+    run(() => {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            names: [
+              {
+                first: 'Tyrion',
+                last: 'Lannister'
+              }
+            ]
+          }
+        }
+      });
+
+      return store.find('person', 1).then(person => {
+        let fragments = person.get('names');
+        let length = fragments.get('length');
+        fragments.addFragment({ first: 'Yollo', last: 'Baggins' });
+
+        assert.equal(fragments.get('length'), length + 1, 'property size is correct');
+        assert.equal(fragments.objectAt(0).first, 'Tyrion');
+        assert.equal(fragments.objectAt(0).last, 'Lannister');
+        assert.equal(fragments.objectAt(1).first, 'Yollo');
+        assert.equal(fragments.objectAt(1).last, 'Baggins');
+      });
+    });
+  });
+
   test('fragments can be removed from the fragment array', function(assert) {
     run(() => {
       store.push({

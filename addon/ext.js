@@ -2,18 +2,13 @@ import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
+import { InternalModel, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentRootState from './states';
 import FragmentRecordData from './record-data';
-import {
-  internalModelFor,
-  default as Fragment
-} from './fragment';
+import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
-import { computed } from '@ember/object';
 import { getOwner } from '@ember/application';
-import { lte, gte } from 'ember-compatibility-helpers';
+import { gte } from 'ember-compatibility-helpers';
 import { get } from '@ember/object';
 
 function serializerForFragment(owner, normalizedModelName) {
@@ -40,95 +35,16 @@ function serializerForFragment(owner, normalizedModelName) {
 */
 
 const InternalModelPrototype = InternalModel.prototype;
-const RecordDataPrototype = RecordData.prototype;
-
-Object.assign(RecordDataPrototype, {
-  eachFragmentKey(fn) {
-    Object.keys(this.fragments).forEach(fn);
-  },
-
-  eachFragmentKeyValue(fn) {
-    this.eachFragmentKey((key) => {
-      const value = this.getFragment(key);
-      if (value) {
-        fn(key, value);
-      }
-    });
-  },
-
-  getOwner() {
-    return this._owner;
-  },
-
-  setOwner(value) {
-    this._owner = value;
-  },
-
-  setName(value) {
-    this._name = value;
-  },
-
-  getName() {
-    return this._name;
-  },
-
-  getFragment(name) {
-    return this.fragments[name];
-  },
-
-  didCommit(data) {
-    if (this._attributes) {
-      // willCommit was never called
-      if (!this._inFlightAttributes) {
-        this._inFlightAttributes = this._attributes;
-      } else {
-        Object.assign(this._inFlightAttributes, this._attributes);
-      }
-      this._attributes = null;
-    }
-    this._isNew = false;
-    if (data) {
-      if (data.relationships) {
-        this._setupRelationships(data);
-      }
-      if (data.id) {
-        // didCommit provided an ID, notify the store of it
-        this.storeWrapper.setRecordId(this.modelName, data.id, this.clientId);
-        this.id = coerceId(data.id);
-      }
-      data = data.attributes;
-
-      // Notify fragments that the record was committed
-      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit(data[key]));
-    } else {
-      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit());
-    }
-
-    const changedKeys = this._changedKeys(data);
-
-    Object.assign(this._data, this._inFlightAttributes, data);
-    this._inFlightAttributes = null;
-    this._updateChangedAttributes();
-
-    return changedKeys;
-  }
-});
-
 /**
   @class Store
   @namespace DS
 */
 Store.reopen({
   createRecordDataFor(type, id, lid, storeWrapper) {
-    let identifier;
-    if (lte('ember-data', '3.13.0')) {
-      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.13. See matrix at https://github.com/lytics/ember-data-model-fragments#compatibility for details.');
+    if (!gte('ember-data', '3.28.0')) {
+      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.');
     }
-    if (gte('ember-data', '3.15.0')) {
-      identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
-    } else {
-      identifier = { type, id, clientId: lid };
-    }
+    const identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
     return new FragmentRecordData(identifier, storeWrapper);
   },
 
@@ -154,36 +70,11 @@ Store.reopen({
   */
   createFragment(modelName, props) {
     assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
-    let internalModel;
-    if (gte('ember-data', '3.15.0')) {
-      const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
-      internalModel = this._internalModelForResource(identifier);
-    } else {
-      let identifier = { type: modelName, id: `${Math.random()}`, lid: `${Math.random()}` };
-      internalModel = this._internalModelForResource(identifier);
-    }
-
-    // Re-wire the internal model to use the fragment state machine
-    internalModel.currentState = FragmentRootState.empty;
-
-    internalModel._recordData._name = null;
-    internalModel._recordData._owner = null;
-
+    const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
+    const internalModel = this._internalModelForResource(identifier);
     internalModel.send('loadedData');
-
-    let fragment = internalModel.getRecord();
-
-    if (props) {
-      fragment.setProperties(props);
-    }
-
-    // invoke the ready callback ( to mimic DS.Model behaviour )
-    fragment.ready?.();
-
-    // Add brand to reduce usages of `instanceof`
-    fragment._isFragment = true;
-
-    return fragment;
+    internalModel.didCreateRecord();
+    return internalModel.getRecord(props);
   },
 
   /**
@@ -217,41 +108,6 @@ Store.reopen({
       return this._super(...arguments);
     }
   }
-});
-
-/**
-  @class Model
-  @namespace DS
-  */
-Model.reopen({
-
-  willDestroy() {
-    this._super(...arguments);
-
-    let internalModel = internalModelFor(this);
-
-    // destroy the current state
-    internalModel._recordData.resetFragments();
-  }
-});
-
-Model.reopenClass({
-  fields: computed(function() {
-    let map = new Map();
-
-    this.eachComputedProperty((name, meta) => {
-      if (meta.isFragment) {
-        map.set(name, 'fragment');
-      } else if (meta.isRelationship) {
-        map.set(name, meta.kind);
-      } else if (meta.isAttribute) {
-        map.set(name, 'attribute');
-      }
-    });
-
-    return map;
-  }).readOnly()
-
 });
 
 // Replace a method on an object with a new one that calls the original and then
@@ -310,6 +166,7 @@ JSONSerializer.reopen({
 
     if (!owner.hasRegistration(containerKey)) {
       const match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+      assert(`Failed parsing ember-data-model-fragments attribute type ${attributeType}`, match != null);
       const transformName = match[1];
       const type = match[2];
       const polymorphicTypeProp = match[3];

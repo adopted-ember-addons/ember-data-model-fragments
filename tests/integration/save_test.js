@@ -424,6 +424,103 @@ module('integration - Persistence', function(hooks) {
     );
   });
 
+  test('the adapter can set fragments to null on save', async function(assert) {
+    let data = {
+      name: {
+        first: 'Eddard',
+        last: 'Stark'
+      },
+      addresses: [
+        {
+          street: '1 Great Keep',
+          city: 'Winterfell',
+          region: 'North',
+          country: 'Westeros'
+        }
+      ]
+    };
+
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data
+      }
+    });
+
+    let payload = {
+      person: {
+        name: null,
+        addresses: null
+      }
+    };
+
+    server.put('/people/1', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload)
+      ];
+    });
+
+    assert.equal(person.get('name.first'), 'Eddard', 'fragment initial state');
+    assert.equal(person.get('addresses.firstObject.country'), 'Westeros', 'fragment array initial state');
+
+    await person.save();
+
+    assert.equal(person.get('name'), null, 'fragment correctly updated');
+    assert.equal(person.get('addresses'), null, 'fragment array correctly updated');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+  });
+
+  test('the adapter can set fragments from null to a new value on save', async function(assert) {
+    let person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null,
+          addresses: null
+        }
+      }
+    });
+
+    let payload = {
+      person: {
+        id: 1,
+        name: {
+          first: 'Eddard',
+          last: 'Stark'
+        },
+        addresses: [
+          {
+            street: '1 Great Keep',
+            city: 'Winterfell',
+            region: 'North',
+            country: 'Westeros'
+          }
+        ]
+      }
+    };
+
+    server.put('/people/1', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload)
+      ];
+    });
+
+    assert.equal(person.get('name'), null, 'fragment initial state');
+    assert.equal(person.get('addresses'), null, 'fragment array initial state');
+
+    await person.save();
+
+    assert.equal(person.get('name.first'), 'Eddard', 'fragment correctly updated');
+    assert.equal(person.get('addresses.firstObject.country'), 'Westeros', 'fragment array correctly updated');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+  });
+
   test('existing fragments are updated on save', function(assert) {
     let data = {
       name: {
@@ -660,7 +757,7 @@ module('integration - Persistence', function(hooks) {
   });
 
   // TODO(igor) figure out why length is different the first time this assertion is called.
-  skip('fragment array properties are notifed on reload', function(assert) {
+  skip('fragment array properties are notified on reload', function(assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
     let Army = Model.extend({
@@ -836,6 +933,86 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
+  test('fragments with default values are rolled back to uncommitted state after failed save', async function(assert) {
+    const Address = MF.Fragment.extend({
+      line1: attr('string'),
+      line2: attr('string')
+    });
+
+    owner.register('model:address', Address);
+
+    const PersonWithDefaults = Model.extend({
+      address: MF.fragment('address', { defaultValue: {} }),
+      addresses: MF.fragmentArray('address', { defaultValue: [{}] })
+    });
+
+    owner.register('model:person', PersonWithDefaults);
+
+    const person = store.createRecord('person');
+    const address = person.get('address');
+    const addresses = person.get('addresses');
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment state before save'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment array state before save'
+    );
+
+    server.post('/people', () => {
+      const response = {
+        errors: [
+          { code: 'custom-error-code' }
+        ]
+      };
+      return [400, { 'Content-Type': 'application/json' }, JSON.stringify(response)];
+    });
+
+    let savePromise = person.save();
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.loaded.created.inFlight',
+      'fragment state during save'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.loaded.created.inFlight',
+      'fragment array state during save'
+    );
+
+    await assert.rejects(savePromise, ex => ex.errors[0].code === 'custom-error-code');
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment state after save'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.loaded.created.uncommitted',
+      'fragment array state after save'
+    );
+
+    // unload will fail if the record is in-flight
+    person.unloadRecord();
+
+    assert.equal(
+      address._internalModel.currentState.stateName,
+      'root.empty',
+      'fragment state after unload'
+    );
+    assert.equal(
+      addresses.firstObject._internalModel.currentState.stateName,
+      'root.empty',
+      'fragment array state after unload'
+    );
+  });
+
   test('setting an array does not error on save', function() {
     let Army = Model.extend({
       soldiers: MF.array('string')
@@ -855,6 +1032,109 @@ module('integration - Persistence', function(hooks) {
     });
     army.set('soldiers', ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']);
     run(() => army.save());
+  });
+
+  test('change fragment attributes while save is in-flight', async function(assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Tyrion',
+            last: 'Lannister'
+          },
+          addresses: [
+            {
+              street: '1 Sky Cell',
+              city: 'Eyre',
+              region: 'Vale of Arryn',
+              country: 'Westeros'
+            }
+          ]
+        }
+      }
+    });
+
+    server.put('/people/1', () => {
+      return [200, { 'Content-Type': 'application/json' }, '{}'];
+    });
+
+    const person = await store.find('person', 1);
+    const name = person.get('name');
+
+    // set the value and save
+    name.set('first', 'Tywin');
+    const savePromise = person.save();
+
+    // change the value while in-flight
+    name.set('first', 'Jamie');
+
+    await savePromise;
+
+    assert.equal(name.get('first'), 'Jamie');
+    assert.ok(name.get('hasDirtyAttributes'), 'fragment is dirty');
+    assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
+
+    // revert to the saved value
+    name.set('first', 'Tywin');
+
+    assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
+    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+  });
+
+  test('change fragment value while save is in-flight', async function(assert) {
+    const data = {
+      name: {
+        first: 'Eddard',
+        last: 'Stark'
+      },
+      addresses: [
+        {
+          street: '1 Great Keep',
+          city: 'Winterfell',
+          region: 'North',
+          country: 'Westeros'
+        }
+      ]
+    };
+
+    const person = store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data
+      }
+    });
+
+    const payload = {
+      person: {
+        id: 1,
+        name: null
+      }
+    };
+
+    server.put('/people/1', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload)
+      ];
+    });
+
+    assert.equal(person.get('name.first'), 'Eddard');
+    const savePromise = person.save();
+
+    // while save is in-flight, set the fragment
+    person.set('name', null);
+
+    assert.equal(person.get('name'), null);
+    assert.ok(person.get('hasDirtyAttributes'), 'record is dirty');
+
+    // save response confirms the null value
+    await savePromise;
+
+    assert.ok(!person.get('hasDirtyAttributes'), 'record is clean');
   });
 
   test('initializing a fragment, saving and then updating that fragment', async function(assert) {
