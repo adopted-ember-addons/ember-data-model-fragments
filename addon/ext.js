@@ -42,7 +42,7 @@ const InternalModelPrototype = InternalModel.prototype;
 Store.reopen({
   createRecordDataFor(type, id, lid, storeWrapper) {
     if (!gte('ember-data', '3.28.0')) {
-      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/lytics/ember-data-model-fragments#compatibility for details.');
+      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.');
     }
     const identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
     return new FragmentRecordData(identifier, storeWrapper);
