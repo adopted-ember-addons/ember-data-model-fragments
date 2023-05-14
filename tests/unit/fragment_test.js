@@ -1,4 +1,3 @@
-import { run } from '@ember/runloop';
 import { all } from 'rsvp';
 import { Copyable } from 'ember-copy';
 import Ember from 'ember';
@@ -22,217 +21,191 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('fragments are `Copyable`', function (assert) {
-    run(() => {
-      let fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
 
-      assert.ok(Copyable.detect(fragment), 'fragments are copyable');
-    });
+    assert.ok(Copyable.detect(fragment), 'fragments are copyable');
   });
 
   test('copied fragments can be added to any record', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Jon',
-              last: 'Snow',
-            },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Jon',
+            last: 'Snow',
           },
         },
-      });
-
-      store.push({
-        data: {
-          type: 'person',
-          id: 2,
-          attributes: {},
-        },
-      });
-
-      return all([store.find('person', 1), store.find('person', 2)]).then(
-        (people) => {
-          let copy = people[0].get('name').copy();
-
-          people[1].set('name', copy);
-
-          assert.ok(true, 'fragment copies can be assigned to other records');
-        }
-      );
+      },
     });
+
+    store.push({
+      data: {
+        type: 'person',
+        id: 2,
+        attributes: {},
+      },
+    });
+
+    return all([store.find('person', 1), store.find('person', 2)]).then(
+      (people) => {
+        let copy = people[0].get('name').copy();
+
+        people[1].set('name', copy);
+
+        assert.ok(true, 'fragment copies can be assigned to other records');
+      }
+    );
   });
 
   test("copying a fragment copies the fragment's properties", function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Jon',
-              last: 'Snow',
-            },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Jon',
+            last: 'Snow',
           },
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let copy = person.get('name').copy();
+    return store.find('person', 1).then((person) => {
+      let copy = person.get('name').copy();
 
-        assert.ok(copy.get('first'), 'Jon');
-        assert.ok(copy.get('last'), 'Snow');
-      });
+      assert.ok(copy.get('first'), 'Jon');
+      assert.ok(copy.get('last'), 'Snow');
     });
   });
 
   test('fragments are `Ember.Comparable`', function (assert) {
-    run(() => {
-      let fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
 
-      assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
-    });
+    assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
   });
 
   test('fragments are compared by reference', function (assert) {
-    run(() => {
-      let fragment1 = store.createFragment('name', {
-        first: 'Jon',
-        last: 'Arryn',
-      });
-      let fragment2 = store.createFragment('name', {
-        first: 'Jon',
-        last: 'Arryn',
-      });
-
-      assert.ok(
-        fragment1.compare(fragment1, fragment2) !== 0,
-        'deeply equal objects are not the same'
-      );
-      assert.ok(
-        fragment1.compare(fragment1, fragment1) === 0,
-        'identical objects are the same'
-      );
+    let fragment1 = store.createFragment('name', {
+      first: 'Jon',
+      last: 'Arryn',
     });
+    let fragment2 = store.createFragment('name', {
+      first: 'Jon',
+      last: 'Arryn',
+    });
+
+    assert.ok(
+      fragment1.compare(fragment1, fragment2) !== 0,
+      'deeply equal objects are not the same'
+    );
+    assert.ok(
+      fragment1.compare(fragment1, fragment1) === 0,
+      'identical objects are the same'
+    );
   });
 
   test('newly create fragments start in the new state', function (assert) {
-    run(() => {
-      let fragment = store.createFragment('name');
+    let fragment = store.createFragment('name');
 
-      assert.ok(fragment.get('isNew'), 'fragments start as new');
-    });
+    assert.ok(fragment.get('isNew'), 'fragments start as new');
   });
 
   test("changes to fragments are indicated in the owner record's `changedAttributes`", function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Loras',
-              last: 'Tyrell',
-            },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Loras',
+            last: 'Tyrell',
           },
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let name = person.get('name');
+    return store.find('person', 1).then((person) => {
+      let name = person.get('name');
 
-        name.set('last', 'Baratheon');
+      name.set('last', 'Baratheon');
 
-        const [oldName, newName] = person.changedAttributes().name;
-        assert.deepEqual(
-          oldName,
-          { first: 'Loras', last: 'Tyrell', prefixes: [] },
-          'old fragment is indicated in the diff object'
-        );
-        assert.deepEqual(
-          newName,
-          { first: 'Loras', last: 'Baratheon', prefixes: [] },
-          'new fragment is indicated in the diff object'
-        );
-      });
+      const [oldName, newName] = person.changedAttributes().name;
+      assert.deepEqual(
+        oldName,
+        { first: 'Loras', last: 'Tyrell', prefixes: [] },
+        'old fragment is indicated in the diff object'
+      );
+      assert.deepEqual(
+        newName,
+        { first: 'Loras', last: 'Baratheon', prefixes: [] },
+        'new fragment is indicated in the diff object'
+      );
     });
   });
 
   test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Rob',
-              last: 'Stark',
-            },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Rob',
+            last: 'Stark',
           },
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        person.set('name', null);
+    return store.find('person', 1).then((person) => {
+      person.set('name', null);
 
-        const [oldName, newName] = person.changedAttributes().name;
-        assert.deepEqual(
-          oldName,
-          { first: 'Rob', last: 'Stark', prefixes: [] },
-          'old fragment is indicated in the diff object'
-        );
-        assert.deepEqual(
-          newName,
-          null,
-          'new fragment is indicated in the diff object'
-        );
-      });
+      const [oldName, newName] = person.changedAttributes().name;
+      assert.deepEqual(
+        oldName,
+        { first: 'Rob', last: 'Stark', prefixes: [] },
+        'old fragment is indicated in the diff object'
+      );
+      assert.deepEqual(
+        newName,
+        null,
+        'new fragment is indicated in the diff object'
+      );
     });
   });
 
   test('changes to attributes can be rolled back', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Ramsay',
-              last: 'Snow',
-            },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Ramsay',
+            last: 'Snow',
           },
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let name = person.get('name');
+    return store.find('person', 1).then((person) => {
+      let name = person.get('name');
 
-        name.set('last', 'Bolton');
-        name.rollbackAttributes();
+      name.set('last', 'Bolton');
+      name.rollbackAttributes();
 
-        assert.ok(name.get('last', 'Snow'), 'fragment properties are restored');
-        assert.ok(
-          !name.get('hasDirtyAttributes'),
-          'fragment is in clean state'
-        );
-      });
+      assert.ok(name.get('last', 'Snow'), 'fragment properties are restored');
+      assert.ok(!name.get('hasDirtyAttributes'), 'fragment is in clean state');
     });
   });
 
   test('fragments without an owner can be destroyed', function (assert) {
-    run(() => {
-      let fragment = store.createFragment('name');
-      fragment.destroy();
-      assert.ok(
-        fragment.get('isDestroying'),
-        'the fragment is being destroyed'
-      );
-    });
+    let fragment = store.createFragment('name');
+    fragment.destroy();
+    assert.ok(fragment.get('isDestroying'), 'the fragment is being destroyed');
   });
 
   test('fragments unloaded/reload w/ relationship', function (assert) {
@@ -244,40 +217,36 @@ module('unit - `MF.Fragment`', function (hooks) {
     }
 
     function pushPerson() {
-      run(() => {
-        store.push({
-          data: {
-            type: 'person',
-            id: 1,
-            attributes: {
-              title: 'Zoo Manager',
-            },
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            title: 'Zoo Manager',
           },
-        });
+        },
       });
       return store.peekRecord('person', 1);
     }
 
     function pushZoo() {
-      run(() => {
-        store.push({
-          data: {
-            type: 'zoo',
-            id: 1,
-            attributes: {
-              name: 'Cincinnati Zoo',
-              star: {
-                $type: 'elephant',
-                name: 'Sabu',
-              },
-            },
-            relationships: {
-              manager: {
-                data: { type: 'person', id: 1 },
-              },
+      store.push({
+        data: {
+          type: 'zoo',
+          id: 1,
+          attributes: {
+            name: 'Cincinnati Zoo',
+            star: {
+              $type: 'elephant',
+              name: 'Sabu',
             },
           },
-        });
+          relationships: {
+            manager: {
+              data: { type: 'person', id: 1 },
+            },
+          },
+        },
       });
       return store.peekRecord('zoo', 1);
     }
@@ -286,8 +255,8 @@ module('unit - `MF.Fragment`', function (hooks) {
     let zoo = pushZoo();
 
     // Prime the relationship and fragment
-    run(() => zoo.get('manager'));
-    run(() => zoo.get('star'));
+    zoo.get('manager');
+    zoo.get('star');
 
     assert.equal(
       person.get('title'),
@@ -309,7 +278,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.notOk(isUnloaded(zoo.get('star')), 'Fragment is not destroyed');
 
     // Unload the record
-    run(() => zoo.unloadRecord());
+    zoo.unloadRecord();
 
     assert.notOk(isUnloaded(person), 'Person was not unloaded');
     // We'd like to test that the records are unloaded, but the hueristics for that
@@ -320,7 +289,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     // Load a new record
     let origZoo = zoo;
     zoo = pushZoo();
-    run(() => zoo.get('star')); // Prime the fragment on the new model
+    zoo.get('star'); // Prime the fragment on the new model
 
     // Make sure the reloaded record is new and has the right data
     assert.notOk(isUnloaded(zoo), 'Zoo was unloaded');
@@ -347,27 +316,25 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('fragments call ready callback when they are created', function (assert) {
-    run(() => {
-      let name = store.createFragment('name');
-      assert.ok(
-        name.get('readyWasCalled'),
-        'when making fragment directly with store.createFragment'
-      );
+    let name = store.createFragment('name');
+    assert.ok(
+      name.get('readyWasCalled'),
+      'when making fragment directly with store.createFragment'
+    );
 
-      let person = store.createRecord('person', {
-        name: { first: 'dan' },
-        names: [{ first: 'eric' }],
-      });
-
-      assert.ok(
-        person.get('name.readyWasCalled'),
-        'when creating model that has fragment'
-      );
-      assert.ok(
-        person.get('names').isEvery('readyWasCalled'),
-        'when creating model that has fragmentArray'
-      );
+    let person = store.createRecord('person', {
+      name: { first: 'dan' },
+      names: [{ first: 'eric' }],
     });
+
+    assert.ok(
+      person.get('name.readyWasCalled'),
+      'when creating model that has fragment'
+    );
+    assert.ok(
+      person.get('names').isEvery('readyWasCalled'),
+      'when creating model that has fragmentArray'
+    );
   });
 
   test('can be created with null', async function (assert) {
@@ -381,9 +348,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return run(() => {
-      assert.strictEqual(person.name, null);
-    });
+    assert.strictEqual(person.name, null);
   });
 
   test('can be updated to null', async function (assert) {
@@ -400,21 +365,19 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return run(() => {
-      assert.equal(person.name.first, 'Eddard');
+    assert.equal(person.name.first, 'Eddard');
 
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: null,
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null,
         },
-      });
-
-      assert.equal(person.name, null);
+      },
     });
+
+    assert.equal(person.name, null);
   });
 
   module('fragment bug when initially set to `null`', function () {

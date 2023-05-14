@@ -1,4 +1,3 @@
-import { run } from '@ember/runloop';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 let store;
@@ -30,360 +29,344 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       ],
     };
 
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: data,
-        },
-      });
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data,
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let copy = person.get('names').copy();
+    return store.find('person', 1).then((person) => {
+      let copy = person.get('names').copy();
 
-        assert.equal(
-          copy.length,
-          person.get('names.length'),
-          "copy's size is correct"
-        );
-        assert.equal(
-          copy[0].get('first'),
-          data.names[0].first,
-          'child fragments are copied'
-        );
-        assert.ok(
-          copy[0] !== person.get('names.firstObject'),
-          'copied fragments are new fragments'
-        );
-      });
+      assert.equal(
+        copy.length,
+        person.get('names.length'),
+        "copy's size is correct"
+      );
+      assert.equal(
+        copy[0].get('first'),
+        data.names[0].first,
+        'child fragments are copied'
+      );
+      assert.ok(
+        copy[0] !== person.get('names.firstObject'),
+        'copied fragments are new fragments'
+      );
     });
   });
 
   test('fragments can be created and added through the fragment array', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Tyrion',
-                last: 'Lannister',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Tyrion',
+              last: 'Lannister',
+            },
+          ],
         },
+      },
+    });
+
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let length = fragments.get('length');
+
+      let fragment = fragments.createFragment({
+        first: 'Hugor',
+        last: 'Hill',
       });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let length = fragments.get('length');
-
-        let fragment = fragments.createFragment({
-          first: 'Hugor',
-          last: 'Hill',
-        });
-
-        assert.equal(
-          fragments.get('length'),
-          length + 1,
-          'property size is correct'
-        );
-        assert.equal(
-          fragments.indexOf(fragment),
-          length,
-          'new fragment is in correct location'
-        );
-      });
+      assert.equal(
+        fragments.get('length'),
+        length + 1,
+        'property size is correct'
+      );
+      assert.equal(
+        fragments.indexOf(fragment),
+        length,
+        'new fragment is in correct location'
+      );
     });
   });
 
   test('fragments can be added to the fragment array', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Tyrion',
-                last: 'Lannister',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Tyrion',
+              last: 'Lannister',
+            },
+          ],
         },
+      },
+    });
+
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let length = fragments.get('length');
+
+      let fragment = store.createFragment('name', {
+        first: 'Yollo',
       });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let length = fragments.get('length');
+      fragments.addFragment(fragment);
 
-        let fragment = store.createFragment('name', {
-          first: 'Yollo',
-        });
-
-        fragments.addFragment(fragment);
-
-        assert.equal(
-          fragments.get('length'),
-          length + 1,
-          'property size is correct'
-        );
-        assert.equal(
-          fragments.indexOf(fragment),
-          length,
-          'fragment is in correct location'
-        );
-      });
+      assert.equal(
+        fragments.get('length'),
+        length + 1,
+        'property size is correct'
+      );
+      assert.equal(
+        fragments.indexOf(fragment),
+        length,
+        'fragment is in correct location'
+      );
     });
   });
 
   test('objects can be added to the fragment array', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Tyrion',
-                last: 'Lannister',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Tyrion',
+              last: 'Lannister',
+            },
+          ],
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let length = fragments.get('length');
-        fragments.addFragment({ first: 'Yollo', last: 'Baggins' });
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let length = fragments.get('length');
+      fragments.addFragment({ first: 'Yollo', last: 'Baggins' });
 
-        assert.equal(
-          fragments.get('length'),
-          length + 1,
-          'property size is correct'
-        );
-        assert.equal(fragments.objectAt(0).first, 'Tyrion');
-        assert.equal(fragments.objectAt(0).last, 'Lannister');
-        assert.equal(fragments.objectAt(1).first, 'Yollo');
-        assert.equal(fragments.objectAt(1).last, 'Baggins');
-      });
+      assert.equal(
+        fragments.get('length'),
+        length + 1,
+        'property size is correct'
+      );
+      assert.equal(fragments.objectAt(0).first, 'Tyrion');
+      assert.equal(fragments.objectAt(0).last, 'Lannister');
+      assert.equal(fragments.objectAt(1).first, 'Yollo');
+      assert.equal(fragments.objectAt(1).last, 'Baggins');
     });
   });
 
   test('fragments can be removed from the fragment array', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Arya',
-                last: 'Stark',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Arya',
+              last: 'Stark',
+            },
+          ],
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let fragment = fragments.get('firstObject');
-        let length = fragments.get('length');
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let fragment = fragments.get('firstObject');
+      let length = fragments.get('length');
 
-        fragments.removeFragment(fragment);
+      fragments.removeFragment(fragment);
 
-        assert.equal(
-          fragments.get('length'),
-          length - 1,
-          'property size is correct'
-        );
-        assert.ok(!includes(fragments, fragment), 'fragment is removed');
-      });
+      assert.equal(
+        fragments.get('length'),
+        length - 1,
+        'property size is correct'
+      );
+      assert.ok(!includes(fragments, fragment), 'fragment is removed');
     });
   });
 
   test('changes to array contents change the fragment array `hasDirtyAttributes` property', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Aegon',
-                last: 'Targaryen',
-              },
-              {
-                first: 'Visenya',
-                last: 'Targaryen',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Aegon',
+              last: 'Targaryen',
+            },
+            {
+              first: 'Visenya',
+              last: 'Targaryen',
+            },
+          ],
         },
+      },
+    });
+
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let fragment = fragments.get('firstObject');
+      let newFragment = store.createFragment('name', {
+        first: 'Rhaenys',
+        last: 'Targaryen',
       });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let fragment = fragments.get('firstObject');
-        let newFragment = store.createFragment('name', {
-          first: 'Rhaenys',
-          last: 'Targaryen',
-        });
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is initially in a clean state'
+      );
 
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is initially in a clean state'
-        );
+      fragments.removeFragment(fragment);
 
-        fragments.removeFragment(fragment);
+      assert.ok(
+        fragments.get('hasDirtyAttributes'),
+        'fragment array is in dirty state after removal'
+      );
 
-        assert.ok(
-          fragments.get('hasDirtyAttributes'),
-          'fragment array is in dirty state after removal'
-        );
+      fragments.unshiftObject(fragment);
 
-        fragments.unshiftObject(fragment);
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is returned to clean state'
+      );
 
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is returned to clean state'
-        );
+      fragments.addFragment(newFragment);
 
-        fragments.addFragment(newFragment);
+      assert.ok(
+        fragments.get('hasDirtyAttributes'),
+        'fragment array is in dirty state after addition'
+      );
 
-        assert.ok(
-          fragments.get('hasDirtyAttributes'),
-          'fragment array is in dirty state after addition'
-        );
+      fragments.removeFragment(newFragment);
 
-        fragments.removeFragment(newFragment);
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is returned to clean state'
+      );
 
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is returned to clean state'
-        );
+      fragments.removeFragment(fragment);
+      fragments.addFragment(fragment);
 
-        fragments.removeFragment(fragment);
-        fragments.addFragment(fragment);
+      assert.ok(
+        fragments.get('hasDirtyAttributes'),
+        'fragment array is in dirty state after reordering'
+      );
 
-        assert.ok(
-          fragments.get('hasDirtyAttributes'),
-          'fragment array is in dirty state after reordering'
-        );
+      fragments.removeFragment(fragment);
+      fragments.unshiftObject(fragment);
 
-        fragments.removeFragment(fragment);
-        fragments.unshiftObject(fragment);
-
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is returned to clean state'
-        );
-      });
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is returned to clean state'
+      );
     });
   });
 
   test('changes to array contents change the fragment array `hasDirtyAttributes` property', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Jon',
-                last: 'Snow',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Jon',
+              last: 'Snow',
+            },
+          ],
         },
-      });
+      },
+    });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let fragment = fragments.get('firstObject');
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let fragment = fragments.get('firstObject');
 
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is initially in a clean state'
-        );
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is initially in a clean state'
+      );
 
-        fragment.set('last', 'Stark');
+      fragment.set('last', 'Stark');
 
-        assert.ok(
-          fragments.get('hasDirtyAttributes'),
-          'fragment array in dirty state after change to a fragment'
-        );
+      assert.ok(
+        fragments.get('hasDirtyAttributes'),
+        'fragment array in dirty state after change to a fragment'
+      );
 
-        fragment.set('last', 'Snow');
+      fragment.set('last', 'Snow');
 
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is returned to clean state'
-        );
-      });
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is returned to clean state'
+      );
     });
   });
 
   test('changes to array contents and fragments can be rolled back', function (assert) {
-    run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: [
-              {
-                first: 'Catelyn',
-                last: 'Tully',
-              },
-              {
-                first: 'Catelyn',
-                last: 'Stark',
-              },
-            ],
-          },
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Catelyn',
+              last: 'Tully',
+            },
+            {
+              first: 'Catelyn',
+              last: 'Stark',
+            },
+          ],
         },
+      },
+    });
+
+    return store.find('person', 1).then((person) => {
+      let fragments = person.get('names');
+      let fragment = fragments.get('firstObject');
+
+      let originalState = fragments.toArray();
+
+      fragment.set('first', 'Cat');
+      fragments.removeFragment(fragments.get('lastObject'));
+      fragments.createFragment({
+        first: 'Lady',
+        last: 'Stonehart',
       });
 
-      return store.find('person', 1).then((person) => {
-        let fragments = person.get('names');
-        let fragment = fragments.get('firstObject');
+      fragments.rollbackAttributes();
 
-        let originalState = fragments.toArray();
-
-        fragment.set('first', 'Cat');
-        fragments.removeFragment(fragments.get('lastObject'));
-        fragments.createFragment({
-          first: 'Lady',
-          last: 'Stonehart',
-        });
-
-        fragments.rollbackAttributes();
-
-        assert.ok(
-          !fragments.get('hasDirtyAttributes'),
-          'fragment array is not dirty'
-        );
-        assert.ok(
-          !fragments.isAny('hasDirtyAttributes'),
-          'all fragments are in clean state'
-        );
-        assert.deepEqual(
-          fragments.toArray(),
-          originalState,
-          'original array contents is restored'
-        );
-      });
+      assert.ok(
+        !fragments.get('hasDirtyAttributes'),
+        'fragment array is not dirty'
+      );
+      assert.ok(
+        !fragments.isAny('hasDirtyAttributes'),
+        'all fragments are in clean state'
+      );
+      assert.deepEqual(
+        fragments.toArray(),
+        originalState,
+        'original array contents is restored'
+      );
     });
   });
 
@@ -398,9 +381,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    run(() => {
-      assert.strictEqual(person.names, null);
-    });
+    assert.strictEqual(person.names, null);
   });
 
   test('can be updated to null', function (assert) {
@@ -423,34 +404,32 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    run(() => {
-      assert.deepEqual(
-        person.names.toArray().map((f) => f.serialize()),
-        [
-          {
-            first: 'Catelyn',
-            last: 'Tully',
-            prefixes: [],
-          },
-          {
-            first: 'Catelyn',
-            last: 'Stark',
-            prefixes: [],
-          },
-        ]
-      );
-
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            names: null,
-          },
+    assert.deepEqual(
+      person.names.toArray().map((f) => f.serialize()),
+      [
+        {
+          first: 'Catelyn',
+          last: 'Tully',
+          prefixes: [],
         },
-      });
+        {
+          first: 'Catelyn',
+          last: 'Stark',
+          prefixes: [],
+        },
+      ]
+    );
 
-      assert.strictEqual(person.names, null);
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: null,
+        },
+      },
     });
+
+    assert.strictEqual(person.names, null);
   });
 });

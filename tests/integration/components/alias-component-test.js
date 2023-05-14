@@ -1,4 +1,3 @@
-import { run } from '@ember/runloop';
 import { module, skip } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import '@ember/test-helpers';
@@ -48,32 +47,30 @@ module('Integration | Component | alias component', function (hooks) {
 
     let done = assert.async();
 
-    run(() => {
-      server.get('/vehicles/:id', function () {
+    server.get('/vehicles/:id', function () {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payloadBefore),
+      ];
+    });
+
+    store.findRecord('vehicle', 1).then((vehicle) => {
+      this.setProperties({ vehicle });
+      this.render(hbs`{{alias-component model=vehicle}}`);
+
+      this.set('vehicle.passenger.name.last', 'Doctor');
+      server.put('/vehicles/:id', function () {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payloadBefore),
+          JSON.stringify(payloadAfter),
         ];
       });
 
-      store.findRecord('vehicle', 1).then((vehicle) => {
-        this.setProperties({ vehicle });
-        this.render(hbs`{{alias-component model=vehicle}}`);
-
-        this.set('vehicle.passenger.name.last', 'Doctor');
-        server.put('/vehicles/:id', function () {
-          return [
-            200,
-            { 'Content-Type': 'application/json' },
-            JSON.stringify(payloadAfter),
-          ];
-        });
-
-        vehicle.save().then(() => {
-          assert.ok(true);
-          done();
-        });
+      vehicle.save().then(() => {
+        assert.ok(true);
+        done();
       });
     });
   });
