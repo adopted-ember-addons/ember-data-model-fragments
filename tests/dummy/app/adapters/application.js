@@ -1,7 +1,7 @@
 import RESTAdapter from '@ember-data/adapter/rest';
 
-export default RESTAdapter.extend({
+export default class ApplicationAdapter extends RESTAdapter {
   shouldBackgroundReloadRecord() {
     return false;
-  },
-});
+  }
+}

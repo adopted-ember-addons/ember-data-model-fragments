@@ -16,6 +16,7 @@ import { copy, Copyable } from 'ember-copy';
   @namespace MF
   @extends Ember.MutableArray
 */
+// eslint-disable-next-line ember/no-classic-classes
 const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
   /**
     A reference to the array's owner record.

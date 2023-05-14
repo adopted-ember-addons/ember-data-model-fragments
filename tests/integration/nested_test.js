@@ -1,7 +1,7 @@
 import Model from '@ember-data/model';
 import { copy } from 'ember-copy';
 import { schedule } from '@ember/runloop';
-import MF from 'ember-data-model-fragments';
+import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import Order from 'dummy/models/order';
@@ -203,10 +203,10 @@ module('integration - Nested fragments', function (hooks) {
       },
     ];
 
-    let Assassin = Model.extend({
-      info: MF.fragment('info', { defaultValue: defaultInfo }),
-      orders: MF.fragmentArray('order', { defaultValue: defaultOrders }),
-    });
+    class Assassin extends Model {
+      @fragment('info', { defaultValue: defaultInfo }) info;
+      @fragmentArray('order', { defaultValue: defaultOrders }) orders;
+    }
 
     owner.register('model:assassin', Assassin);
 

@@ -1,6 +1,6 @@
 import Model from '@ember-data/model';
+import { fragmentOwner } from 'ember-data-model-fragments/attributes';
 import { all } from 'rsvp';
-import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 
@@ -44,9 +44,9 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
   });
 
   test('using a fragment owner property on a non-fragment throws an error', function (assert) {
-    let InvalidModel = Model.extend({
-      owner: MF.fragmentOwner(),
-    });
+    class InvalidModel extends Model {
+      @fragmentOwner() owner;
+    }
 
     owner.register('model:invalidModel', InvalidModel);
 

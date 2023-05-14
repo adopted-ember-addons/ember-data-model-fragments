@@ -1,7 +1,7 @@
 import Model from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  info: MF.fragment('info'),
-  orders: MF.fragmentArray('order'),
-});
+export default class User extends Model {
+  @fragment('info') info;
+  @fragmentArray('order') orders;
+}

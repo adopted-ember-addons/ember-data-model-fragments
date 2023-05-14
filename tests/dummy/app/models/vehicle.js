@@ -1,6 +1,6 @@
 import Model from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import { fragment } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  passenger: MF.fragment('passenger'),
-});
+export default class Vehicle extends Model {
+  @fragment('passenger') passenger;
+}

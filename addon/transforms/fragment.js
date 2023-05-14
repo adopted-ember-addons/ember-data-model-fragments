@@ -15,6 +15,7 @@ import { inject as service } from '@ember/service';
   @namespace MF
   @extends DS.Transform
 */
+// eslint-disable-next-line ember/no-classic-classes
 const FragmentTransform = Transform.extend({
   store: service(),
   type: null,

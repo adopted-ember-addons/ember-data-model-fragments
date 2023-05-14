@@ -1,5 +1,10 @@
 /* eslint-disable ember/no-observers */
 import Model, { attr } from '@ember-data/model';
+import {
+  fragment,
+  fragmentArray,
+  array,
+} from 'ember-data-model-fragments/attributes';
 import EmberObject, { observer } from '@ember/object';
 import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
@@ -684,6 +689,7 @@ module('integration - Persistence', function (hooks) {
       ],
     };
 
+    // eslint-disable-next-line ember/no-classic-classes
     let PersonObserver = EmberObject.extend({
       person: null,
       observer: observer('person.addresses.[]', function () {
@@ -721,10 +727,10 @@ module('integration - Persistence', function (hooks) {
   skip('fragment array properties are notified on reload', async function (assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
-    let Army = Model.extend({
-      name: attr('string'),
-      soldiers: MF.array(),
-    });
+    class Army extends Model {
+      @attr('string') name;
+      @array() soldiers;
+    }
 
     owner.register('model:army', Army);
 
@@ -733,6 +739,7 @@ module('integration - Persistence', function (hooks) {
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
+    // eslint-disable-next-line ember/no-classic-classes
     let ArmyObserver = EmberObject.extend({
       army: null,
       observer: observer('army.soldiers.[]', function () {
@@ -779,10 +786,10 @@ module('integration - Persistence', function (hooks) {
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
-    let Army = Model.extend({
-      name: attr('string'),
-      soldiers: MF.array(),
-    });
+    class Army extends Model {
+      @attr('string') name;
+      @array() soldiers;
+    }
 
     owner.register('model:army', Army);
 
@@ -876,17 +883,17 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('fragments with default values are rolled back to uncommitted state after failed save', async function (assert) {
-    const Address = MF.Fragment.extend({
-      line1: attr('string'),
-      line2: attr('string'),
-    });
+    class Address extends MF.Fragment {
+      @attr('string') line1;
+      @attr('string') line2;
+    }
 
     owner.register('model:address', Address);
 
-    const PersonWithDefaults = Model.extend({
-      address: MF.fragment('address', { defaultValue: {} }),
-      addresses: MF.fragmentArray('address', { defaultValue: [{}] }),
-    });
+    class PersonWithDefaults extends Model {
+      @fragment('address', { defaultValue: {} }) address;
+      @fragmentArray('address', { defaultValue: [{}] }) addresses;
+    }
 
     owner.register('model:person', PersonWithDefaults);
 
@@ -962,9 +969,9 @@ module('integration - Persistence', function (hooks) {
 
   test('setting an array does not error on save', async function (assert) {
     assert.expect(0);
-    let Army = Model.extend({
-      soldiers: MF.array('string'),
-    });
+    class Army extends Model {
+      @array('string') soldiers;
+    }
 
     let data = {
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],

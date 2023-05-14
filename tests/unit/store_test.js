@@ -41,11 +41,11 @@ module('unit - `DS.Store`', function (hooks) {
   });
 
   test('the default fragment serializer does not use the application serializer', function (assert) {
-    let Serializer = JSONAPISerializer.extend();
-    owner.register('serializer:application', Serializer);
+    class ApplicationSerializer extends JSONAPISerializer {}
+    owner.register('serializer:application', ApplicationSerializer);
 
     assert.ok(
-      !(store.serializerFor('name') instanceof Serializer),
+      !(store.serializerFor('name') instanceof ApplicationSerializer),
       'fragment serializer fallback is not `JSONAPISerializer`'
     );
     assert.ok(
@@ -68,11 +68,11 @@ module('unit - `DS.Store`', function (hooks) {
   });
 
   test('the default fragment serializer is `serializer:-fragment` if registered', function (assert) {
-    let Serializer = JSONSerializer.extend();
-    owner.register('serializer:-fragment', Serializer);
+    class FragmentSerializer extends JSONSerializer {}
+    owner.register('serializer:-fragment', FragmentSerializer);
 
     assert.ok(
-      store.serializerFor('name') instanceof Serializer,
+      store.serializerFor('name') instanceof FragmentSerializer,
       'fragment serializer fallback is correct'
     );
   });

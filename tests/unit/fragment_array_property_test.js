@@ -1,4 +1,5 @@
 import Model, { attr } from '@ember-data/model';
+import { fragmentArray } from 'ember-data-model-fragments/attributes';
 import { isEmpty } from '@ember/utils';
 import { schedule } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
@@ -438,10 +439,10 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       },
     ];
 
-    let Throne = Model.extend({
-      name: attr('string'),
-      addresses: MF.fragmentArray('address', { defaultValue: defaultValue }),
-    });
+    class Throne extends Model {
+      @attr('string') name;
+      @fragmentArray('address', { defaultValue: defaultValue }) addresses;
+    }
 
     owner.register('model:throne', Throne);
 
@@ -478,14 +479,15 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       },
     ];
 
-    let Sword = Model.extend({
-      name: attr('string'),
-      addresses: MF.fragmentArray('address', {
+    class Sword extends Model {
+      @attr('string') name;
+      @fragmentArray('address', {
         defaultValue() {
           return defaultValue;
         },
-      }),
-    });
+      })
+      addresses;
+    }
 
     owner.register('model:sword', Sword);
 
@@ -509,14 +511,15 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       },
     ];
 
-    let Sword = Model.extend({
-      name: attr('string'),
-      addresses: MF.fragmentArray('address', {
+    class Sword extends Model {
+      @attr('string') name;
+      @fragmentArray('address', {
         defaultValue() {
           return defaultValue;
         },
-      }),
-    });
+      })
+      addresses;
+    }
 
     owner.register('model:sword', Sword);
 

@@ -47,6 +47,7 @@ module('unit - Serialization', function (hooks) {
   });
 
   test('fragment properties are snapshotted as normal attributes on the owner record snapshot', async function (assert) {
+    assert.expect(7);
     let person = {
       name: {
         first: 'Catelyn',
@@ -75,47 +76,45 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    owner.register(
-      'serializer:person',
-      JSONSerializer.extend({
-        serialize(snapshot) {
-          let name = snapshot.attr('name');
-          assert.ok(
-            name instanceof DS.Snapshot,
-            'fragment snapshot attribute is a snapshot'
-          );
+    class PersonSerializer extends JSONSerializer {
+      serialize(snapshot) {
+        let name = snapshot.attr('name');
+        assert.ok(
+          name instanceof DS.Snapshot,
+          'fragment snapshot attribute is a snapshot'
+        );
 
-          assert.equal(
-            name.attr('first'),
-            person.name.first,
-            'fragment attributes are snapshoted correctly'
-          );
+        assert.equal(
+          name.attr('first'),
+          person.name.first,
+          'fragment attributes are snapshoted correctly'
+        );
 
-          let houses = snapshot.attr('houses');
-          assert.ok(
-            Array.isArray(houses),
-            'fragment array attribute is an array'
-          );
-          assert.ok(
-            houses[0] instanceof DS.Snapshot,
-            'fragment array attribute is an array of snapshots'
-          );
-          assert.equal(
-            houses[0].attr('name'),
-            person.houses[0].name,
-            'fragment array attributes are snapshotted correctly'
-          );
+        let houses = snapshot.attr('houses');
+        assert.ok(
+          Array.isArray(houses),
+          'fragment array attribute is an array'
+        );
+        assert.ok(
+          houses[0] instanceof DS.Snapshot,
+          'fragment array attribute is an array of snapshots'
+        );
+        assert.equal(
+          houses[0].attr('name'),
+          person.houses[0].name,
+          'fragment array attributes are snapshotted correctly'
+        );
 
-          let children = snapshot.attr('children');
-          assert.ok(Array.isArray(children), 'array attribute is an array');
-          assert.deepEqual(
-            children,
-            person.children,
-            'array attribute is snapshotted correctly'
-          );
-        },
-      })
-    );
+        let children = snapshot.attr('children');
+        assert.ok(Array.isArray(children), 'array attribute is an array');
+        assert.deepEqual(
+          children,
+          person.children,
+          'array attribute is snapshotted correctly'
+        );
+      }
+    }
+    owner.register('serializer:person', PersonSerializer);
 
     const person2 = await store.find('person', 1);
     person2.serialize();
@@ -135,14 +134,12 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    owner.register(
-      'serializer:name',
-      JSONSerializer.extend({
-        serialize() {
-          return 'Mad King';
-        },
-      })
-    );
+    class NameSerializer extends JSONSerializer {
+      serialize() {
+        return 'Mad King';
+      }
+    }
+    owner.register('serializer:name', NameSerializer);
 
     const person = await store.find('person', 1);
     let serialized = person.serialize();

@@ -1,4 +1,9 @@
 import Model, { attr } from '@ember-data/model';
+import {
+  fragment,
+  fragmentArray,
+  array,
+} from 'ember-data-model-fragments/attributes';
 import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import MF from 'ember-data-model-fragments';
@@ -8,20 +13,20 @@ import { setupApplicationTest } from 'ember-qunit';
 // import Person from 'dummy/models/person';
 
 let store;
-let Person = Model.extend({
-  title: attr('string'),
-  nickName: attr('string'),
-  name: MF.fragment('name'),
-  names: MF.fragmentArray('name'),
-  addresses: MF.fragmentArray('address'),
-  titles: MF.array(),
-  hobbies: MF.fragmentArray('hobby', { defaultValue: null }),
-  houses: MF.fragmentArray('house'),
-  children: MF.array(),
-  strings: MF.array('string'),
-  numbers: MF.array('number'),
-  booleans: MF.array('boolean'),
-});
+class Person extends Model {
+  @attr('string') title;
+  @attr('string') nickName;
+  @fragment('name') name;
+  @fragmentArray('name') names;
+  @fragmentArray('address') addresses;
+  @array() titles;
+  @fragmentArray('hobby', { defaultValue: null }) hobbies;
+  @fragmentArray('house') houses;
+  @array() children;
+  @array('string') strings;
+  @array('number') numbers;
+  @array('boolean') booleans;
+}
 
 module('unit - `MF.array` property', function (hooks) {
   setupApplicationTest(hooks);

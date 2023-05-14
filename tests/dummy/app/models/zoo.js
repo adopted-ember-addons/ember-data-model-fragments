@@ -1,10 +1,10 @@
 import Model, { attr, belongsTo } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  name: attr('string'),
-  city: attr('string'),
-  star: MF.fragment('animal', { polymorphic: true, typeKey: '$type' }),
-  animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
-  manager: belongsTo('person'),
-});
+export default class Zoo extends Model {
+  @attr('string') name;
+  @attr('string') city;
+  @fragment('animal', { polymorphic: true, typeKey: '$type' }) star;
+  @fragmentArray('animal', { polymorphic: true, typeKey: '$type' }) animals;
+  @belongsTo('person') manager;
+}

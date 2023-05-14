@@ -1,4 +1,5 @@
 import Model from '@ember-data/model';
+import { fragment } from 'ember-data-model-fragments/attributes';
 import { schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
@@ -273,9 +274,9 @@ module('unit - `MF.fragment` property', function (hooks) {
       last: 'Victory',
     };
 
-    let Ship = Model.extend({
-      name: MF.fragment('name', { defaultValue: defaultValue }),
-    });
+    class Ship extends Model {
+      @fragment('name', { defaultValue: defaultValue }) name;
+    }
 
     owner.register('model:ship', Ship);
 
@@ -315,9 +316,9 @@ module('unit - `MF.fragment` property', function (hooks) {
       last: 'Victory',
     };
 
-    let Ship = Model.extend({
-      name: MF.fragment('name', { defaultValue: defaultValue }),
-    });
+    class Ship extends Model {
+      @fragment('name', { defaultValue: defaultValue }) name;
+    }
 
     owner.register('model:ship', Ship);
 
@@ -350,13 +351,14 @@ module('unit - `MF.fragment` property', function (hooks) {
       last: 'Keeper',
     };
 
-    let Sword = Model.extend({
-      name: MF.fragment('name', {
+    class Sword extends Model {
+      @fragment('name', {
         defaultValue() {
           return defaultValue;
         },
-      }),
-    });
+      })
+      name;
+    }
 
     owner.register('model:sword', Sword);
 
@@ -376,13 +378,14 @@ module('unit - `MF.fragment` property', function (hooks) {
       uncopyableObject: EmberObject.create({ item: 'Longclaw' }), // Will throw an error if copied
     };
 
-    let Sword = Model.extend({
-      name: MF.fragment('name', {
+    class Sword extends Model {
+      @fragment('name', {
         defaultValue() {
           return defaultValue;
         },
-      }),
-    });
+      })
+      name;
+    }
 
     owner.register('model:sword', Sword);
 
@@ -401,13 +404,14 @@ module('unit - `MF.fragment` property', function (hooks) {
       last: 'Keeper',
     };
 
-    const Sword = Model.extend({
-      name: MF.fragment('name', {
+    class Sword extends Model {
+      @fragment('name', {
         defaultValue(record) {
           return record.store.createFragment('name', defaultValue);
         },
-      }),
-    });
+      })
+      name;
+    }
 
     owner.register('model:sword', Sword);
 
