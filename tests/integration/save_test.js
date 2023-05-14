@@ -13,7 +13,7 @@ let store, owner, server;
 module('integration - Persistence', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     owner = this.owner;
     store = owner.lookup('service:store');
     server = new Pretender();

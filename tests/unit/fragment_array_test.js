@@ -11,7 +11,7 @@ function includes(array, item) {
 module('unit - `MF.fragmentArray`', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     store = this.owner.lookup('service:store');
   });
 

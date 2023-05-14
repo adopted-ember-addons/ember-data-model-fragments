@@ -19,7 +19,7 @@ function pushPerson(id) {
 module('integration - Dependent State', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     store = this.owner.lookup('service:store');
     people = [
       {

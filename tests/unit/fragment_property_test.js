@@ -14,7 +14,7 @@ let store, owner, server;
 module('unit - `MF.fragment` property', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     owner = this.owner;
     store = owner.lookup('service:store');
     server = new Pretender();

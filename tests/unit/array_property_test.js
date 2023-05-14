@@ -26,7 +26,7 @@ let Person = Model.extend({
 module('unit - `MF.array` property', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     store = this.owner.lookup('service:store');
     this.owner.register('model:person', Person);
   });

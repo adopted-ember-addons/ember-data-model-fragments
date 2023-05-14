@@ -9,7 +9,6 @@ import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
 import { gte } from 'ember-compatibility-helpers';
-import { get } from '@ember/object';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);

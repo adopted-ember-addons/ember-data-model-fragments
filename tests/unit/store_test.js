@@ -9,7 +9,7 @@ let store, owner;
 module('unit - `DS.Store`', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     owner = this.owner;
     store = owner.lookup('service:store');
   });

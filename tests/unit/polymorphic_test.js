@@ -8,7 +8,7 @@ let store, zoo;
 module('unit - Polymorphism', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     store = this.owner.lookup('service:store');
 
     zoo = {

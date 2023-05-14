@@ -20,7 +20,7 @@ module('Integration | Component | alias component', function (hooks) {
     server.shutdown();
   });
 
-  skip('the adapter can update fragments without infinite loops when CPs are aliased more than once', async function (assert) {
+  skip('the adapter can update fragments without infinite loops when CPs are aliased more than once', async function () {
     let payloadBefore = {
       vehicle: {
         id: 1,

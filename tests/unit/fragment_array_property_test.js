@@ -22,7 +22,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     };
   });
 
-  hooks.beforeEach(function (assert) {
+  hooks.beforeEach(function () {
     owner = this.owner;
 
     store = owner.lookup('service:store');
