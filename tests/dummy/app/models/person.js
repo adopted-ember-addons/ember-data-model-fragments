@@ -13,5 +13,5 @@ export default Model.extend({
   children: MF.array(),
   strings: MF.array('string'),
   numbers: MF.array('number'),
-  booleans: MF.array('boolean')
+  booleans: MF.array('boolean'),
 });

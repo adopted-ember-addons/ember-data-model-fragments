@@ -11,10 +11,10 @@ import { setupApplicationTest } from 'ember-qunit';
 import Pretender from 'pretender';
 let store, owner, server;
 
-module('integration - Persistence', function(hooks) {
+module('integration - Persistence', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function(assert) {
+  hooks.beforeEach(function (assert) {
     owner = this.owner;
     store = owner.lookup('service:store');
     server = new Pretender();
@@ -22,18 +22,18 @@ module('integration - Persistence', function(hooks) {
     assert.expectNoDeprecation();
   });
 
-  hooks.afterEach(function() {
+  hooks.afterEach(function () {
     store = null;
     owner = null;
     server.shutdown();
   });
 
-  test('persisting the owner record changes the fragment state to non-new', function(assert) {
+  test('persisting the owner record changes the fragment state to non-new', function (assert) {
     let data = {
       name: {
         first: 'Viserys',
-        last: 'Targaryen'
-      }
+        last: 'Targaryen',
+      },
     };
 
     return run(() => {
@@ -42,7 +42,7 @@ module('integration - Persistence', function(hooks) {
       person.set('name', store.createFragment('name', data.name));
 
       let payload = {
-        person: copy(data, true)
+        person: copy(data, true),
       };
       payload.person.id = 3;
 
@@ -50,11 +50,11 @@ module('integration - Persistence', function(hooks) {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         ];
       });
 
-      return person.save().then(person => {
+      return person.save().then((person) => {
         assert.ok(
           !person.get('name.isNew'),
           'fragments are not new after save'
@@ -63,7 +63,7 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('persisting the owner record in a clean state maintains clean state', function(assert) {
+  test('persisting the owner record in a clean state maintains clean state', function (assert) {
     return run(() => {
       store.push({
         data: {
@@ -72,18 +72,18 @@ module('integration - Persistence', function(hooks) {
           attributes: {
             name: {
               first: 'Tyrion',
-              last: 'Lannister'
+              last: 'Lannister',
             },
             addresses: [
               {
                 street: '1 Sky Cell',
                 city: 'Eyre',
                 region: 'Vale of Arryn',
-                country: 'Westeros'
-              }
-            ]
-          }
-        }
+                country: 'Westeros',
+              },
+            ],
+          },
+        },
       });
 
       server.put('/people/1', () => {
@@ -92,10 +92,10 @@ module('integration - Persistence', function(hooks) {
 
       return store
         .find('person', 1)
-        .then(person => {
+        .then((person) => {
           return person.save();
         })
-        .then(person => {
+        .then((person) => {
           let name = person.get('name');
           let addresses = person.get('addresses');
 
@@ -113,7 +113,7 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('overwrite current state with fragment attributes from the save response', function(assert) {
+  test('overwrite current state with fragment attributes from the save response', function (assert) {
     return run(() => {
       store.push({
         data: {
@@ -123,10 +123,10 @@ module('integration - Persistence', function(hooks) {
             title: 'Lord',
             name: {
               first: 'Tyrion',
-              last: 'Lannister'
-            }
-          }
-        }
+              last: 'Lannister',
+            },
+          },
+        },
       });
 
       server.put('/people/1', (request) => {
@@ -137,30 +137,46 @@ module('integration - Persistence', function(hooks) {
         body.person.title = 'Ser';
         body.person.name.first = 'Tywin';
         body.person.name.last = 'Lannister';
-        return [200, { 'Content-Type': 'application/json' }, JSON.stringify(body)];
+        return [
+          200,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify(body),
+        ];
       });
 
       return store
         .find('person', 1)
-        .then(person => {
+        .then((person) => {
           person.set('title', 'modified');
           person.set('name.first', 'modified');
           person.set('name.last', 'modified');
           return person.save();
         })
-        .then(person => {
-          assert.equal(person.get('title'), 'Ser', 'use person.title from the response');
+        .then((person) => {
+          assert.equal(
+            person.get('title'),
+            'Ser',
+            'use person.title from the response'
+          );
           assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
 
           const name = person.get('name');
-          assert.equal(name.get('first'), 'Tywin', 'use person.name.first from the response');
-          assert.equal(name.get('last'), 'Lannister', 'use person.name.last from the response');
+          assert.equal(
+            name.get('first'),
+            'Tywin',
+            'use person.name.first from the response'
+          );
+          assert.equal(
+            name.get('last'),
+            'Lannister',
+            'use person.name.last from the response'
+          );
           assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
         });
     });
   });
 
-  test('when setting a property to the same value', function(assert) {
+  test('when setting a property to the same value', function (assert) {
     return run(() => {
       store.push({
         data: {
@@ -170,10 +186,10 @@ module('integration - Persistence', function(hooks) {
             title: 'Lord',
             name: {
               first: 'Tyrion',
-              last: 'Lannister'
-            }
-          }
-        }
+              last: 'Lannister',
+            },
+          },
+        },
       });
 
       server.put('/people/1', () => {
@@ -182,13 +198,13 @@ module('integration - Persistence', function(hooks) {
 
       return store
         .find('person', 1)
-        .then(person => {
+        .then((person) => {
           person.set('title', 'titleModified');
           person.set('name.first', 'firstNameModified');
           person.set('name.last', 'lastNameModified');
           return person.save();
         })
-        .then(person => {
+        .then((person) => {
           assert.equal(person.get('title'), 'titleModified');
           assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
 
@@ -207,7 +223,7 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', function(assert) {
+  test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', function (assert) {
     return run(() => {
       store.push({
         data: {
@@ -216,18 +232,18 @@ module('integration - Persistence', function(hooks) {
           attributes: {
             name: {
               first: 'Eddard',
-              last: 'Stark'
+              last: 'Stark',
             },
             addresses: [
               {
                 street: '1 Great Keep',
                 city: 'Winterfell',
                 region: 'North',
-                country: 'Westeros'
-              }
-            ]
-          }
-        }
+                country: 'Westeros',
+              },
+            ],
+          },
+        },
       });
 
       server.put('/people/1', () => {
@@ -236,7 +252,7 @@ module('integration - Persistence', function(hooks) {
 
       return store
         .find('person', 1)
-        .then(person => {
+        .then((person) => {
           let name = person.get('name');
           let address = person.get('addresses.firstObject');
 
@@ -245,7 +261,7 @@ module('integration - Persistence', function(hooks) {
 
           return person.save();
         })
-        .then(person => {
+        .then((person) => {
           let name = person.get('name');
           let addresses = person.get('addresses');
           let address = addresses.get('firstObject');
@@ -270,21 +286,21 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', function(assert) {
+  test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', function (assert) {
     return run(() => {
       let data = {
         name: {
           first: 'Daenerys',
-          last: 'Targaryen'
+          last: 'Targaryen',
         },
         addresses: [
           store.createFragment('address', {
             street: '1 Stone Drum',
             city: 'Dragonstone',
             region: 'Crownlands',
-            country: 'Westeros'
-          })
-        ]
+            country: 'Westeros',
+          }),
+        ],
       };
 
       let person = store.createRecord('person');
@@ -292,7 +308,7 @@ module('integration - Persistence', function(hooks) {
       person.set('addresses', data.addresses);
 
       let payload = {
-        person: copy(data, true)
+        person: copy(data, true),
       };
       payload.person.id = 3;
 
@@ -300,11 +316,11 @@ module('integration - Persistence', function(hooks) {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         ];
       });
 
-      return person.save().then(person => {
+      return person.save().then((person) => {
         let name = person.get('name');
         let addresses = person.get('addresses');
 
@@ -322,7 +338,7 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('a new record can be persisted with null fragments', function(assert) {
+  test('a new record can be persisted with null fragments', function (assert) {
     return run(() => {
       let person = store.createRecord('person');
 
@@ -335,19 +351,19 @@ module('integration - Persistence', function(hooks) {
 
       let payload = {
         person: {
-          id: 1
-        }
+          id: 1,
+        },
       };
 
       server.post('/people', () => {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         ];
       });
 
-      return person.save().then(person => {
+      return person.save().then((person) => {
         assert.equal(
           person.get('name'),
           null,
@@ -363,32 +379,32 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('the adapter can update fragments on save', async function(assert) {
+  test('the adapter can update fragments on save', async function (assert) {
     let data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     let person = store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: data
-      }
+        attributes: data,
+      },
     });
 
     let payload = {
-      person: copy(data, true)
+      person: copy(data, true),
     };
     payload.person.id = 1;
     payload.person.name.first = 'Ned';
@@ -398,7 +414,7 @@ module('integration - Persistence', function(hooks) {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
@@ -411,10 +427,7 @@ module('integration - Persistence', function(hooks) {
       !addresses.isAny('hasDirtyAttributes'),
       'all fragment array fragments are clean'
     );
-    assert.ok(
-      !addresses.get('hasDirtyAttributes'),
-      'fragment array is clean'
-    );
+    assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
     assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
     assert.equal(name.get('first'), 'Ned', 'fragment correctly updated');
     assert.equal(
@@ -424,65 +437,73 @@ module('integration - Persistence', function(hooks) {
     );
   });
 
-  test('the adapter can set fragments to null on save', async function(assert) {
+  test('the adapter can set fragments to null on save', async function (assert) {
     let data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     let person = store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: data
-      }
+        attributes: data,
+      },
     });
 
     let payload = {
       person: {
         name: null,
-        addresses: null
-      }
+        addresses: null,
+      },
     };
 
     server.put('/people/1', () => {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
     assert.equal(person.get('name.first'), 'Eddard', 'fragment initial state');
-    assert.equal(person.get('addresses.firstObject.country'), 'Westeros', 'fragment array initial state');
+    assert.equal(
+      person.get('addresses.firstObject.country'),
+      'Westeros',
+      'fragment array initial state'
+    );
 
     await person.save();
 
     assert.equal(person.get('name'), null, 'fragment correctly updated');
-    assert.equal(person.get('addresses'), null, 'fragment array correctly updated');
+    assert.equal(
+      person.get('addresses'),
+      null,
+      'fragment array correctly updated'
+    );
     assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
   });
 
-  test('the adapter can set fragments from null to a new value on save', async function(assert) {
+  test('the adapter can set fragments from null to a new value on save', async function (assert) {
     let person = store.push({
       data: {
         type: 'person',
         id: 1,
         attributes: {
           name: null,
-          addresses: null
-        }
-      }
+          addresses: null,
+        },
+      },
     });
 
     let payload = {
@@ -490,24 +511,24 @@ module('integration - Persistence', function(hooks) {
         id: 1,
         name: {
           first: 'Eddard',
-          last: 'Stark'
+          last: 'Stark',
         },
         addresses: [
           {
             street: '1 Great Keep',
             city: 'Winterfell',
             region: 'North',
-            country: 'Westeros'
-          }
-        ]
-      }
+            country: 'Westeros',
+          },
+        ],
+      },
     };
 
     server.put('/people/1', () => {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
@@ -516,30 +537,38 @@ module('integration - Persistence', function(hooks) {
 
     await person.save();
 
-    assert.equal(person.get('name.first'), 'Eddard', 'fragment correctly updated');
-    assert.equal(person.get('addresses.firstObject.country'), 'Westeros', 'fragment array correctly updated');
+    assert.equal(
+      person.get('name.first'),
+      'Eddard',
+      'fragment correctly updated'
+    );
+    assert.equal(
+      person.get('addresses.firstObject.country'),
+      'Westeros',
+      'fragment array correctly updated'
+    );
     assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
   });
 
-  test('existing fragments are updated on save', function(assert) {
+  test('existing fragments are updated on save', function (assert) {
     let data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     return run(() => {
       let payload = {
-        person: copy(data, true)
+        person: copy(data, true),
       };
 
       payload.person.id = 1;
@@ -549,7 +578,7 @@ module('integration - Persistence', function(hooks) {
         street: '1 Red Keep',
         city: 'Kings Landing',
         region: 'Crownlands',
-        country: 'Westeros'
+        country: 'Westeros',
       });
 
       return run(() => {
@@ -557,7 +586,7 @@ module('integration - Persistence', function(hooks) {
           return [
             200,
             { 'Content-Type': 'application/json' },
-            JSON.stringify(payload)
+            JSON.stringify(payload),
           ];
         });
 
@@ -592,20 +621,20 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('the adapter can update fragments on reload', function(assert) {
+  test('the adapter can update fragments on reload', function (assert) {
     let data = {
       name: {
         first: 'Brandon',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     return run(() => {
@@ -613,12 +642,12 @@ module('integration - Persistence', function(hooks) {
         data: {
           type: 'person',
           id: 1,
-          attributes: data
-        }
+          attributes: data,
+        },
       });
 
       let payload = {
-        person: copy(data, true)
+        person: copy(data, true),
       };
 
       payload.person.id = 1;
@@ -629,20 +658,20 @@ module('integration - Persistence', function(hooks) {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         ];
       });
 
       return store
         .find('person', 1)
-        .then(person => {
+        .then((person) => {
           // Access values that will change to prime CP cache
           person.get('name.first');
           person.get('addresses.firstObject.street');
 
           return person.reload();
         })
-        .then(person => {
+        .then((person) => {
           let name = person.get('name');
           let addresses = person.get('addresses');
 
@@ -661,12 +690,12 @@ module('integration - Persistence', function(hooks) {
     CPs are consumed as soon as they are changed. If we are not careful, this can cause infinite loops when
     updating existing fragment data
   */
-  test('the adapter can update fragments without infinite loops when CPs are eagerly consumed', function(assert) {
+  test('the adapter can update fragments without infinite loops when CPs are eagerly consumed', function (assert) {
     let data = {
       name: {
         first: 'Brandon',
-        last: 'Stark'
-      }
+        last: 'Stark',
+      },
     };
 
     return run(() => {
@@ -674,22 +703,22 @@ module('integration - Persistence', function(hooks) {
         data: {
           type: 'person',
           id: 1,
-          attributes: data
-        }
+          attributes: data,
+        },
       });
 
-      return store.find('person', 1).then(person => {
+      return store.find('person', 1).then((person) => {
         let personProxy = ObjectProxy.create({ content: person });
 
-        addObserver(personProxy, 'name.first', function() {});
+        addObserver(personProxy, 'name.first', function () {});
         personProxy.get('name.first');
 
         store.push({
           data: {
             type: 'person',
             id: 1,
-            attributes: data
-          }
+            attributes: data,
+          },
         });
 
         assert.equal(person.get('name.first'), 'Brandon');
@@ -701,30 +730,30 @@ module('integration - Persistence', function(hooks) {
   // means that the property actually _shouldn't_ be notified. Doing so requires
   // value diffing of deserialized model data, which means either saving a copy of
   // the data before giving it to the fragment
-  skip('fragment array properties are notified on save', function(assert) {
+  skip('fragment array properties are notified on save', function (assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
 
     let data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     let PersonObserver = EmberObject.extend({
       person: null,
-      observer: observer('person.addresses.[]', function() {
+      observer: observer('person.addresses.[]', function () {
         assert.ok(true, 'The array change was observed');
-      })
+      }),
     });
 
     return run(() => {
@@ -732,12 +761,12 @@ module('integration - Persistence', function(hooks) {
         data: {
           type: 'person',
           id: 1,
-          attributes: data
-        }
+          attributes: data,
+        },
       });
 
       let payload = {
-        person: copy(data, true)
+        person: copy(data, true),
       };
       payload.person.id = 1;
 
@@ -745,11 +774,11 @@ module('integration - Persistence', function(hooks) {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         ];
       });
 
-      return store.find('person', 1).then(person => {
+      return store.find('person', 1).then((person) => {
         PersonObserver.create({ person: person });
         return person.save();
       });
@@ -757,29 +786,30 @@ module('integration - Persistence', function(hooks) {
   });
 
   // TODO(igor) figure out why length is different the first time this assertion is called.
-  skip('fragment array properties are notified on reload', function(assert) {
+  skip('fragment array properties are notified on reload', function (assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
     let Army = Model.extend({
       name: attr('string'),
-      soldiers: MF.array()
+      soldiers: MF.array(),
     });
 
     owner.register('model:army', Army);
 
     let data = {
       name: 'Golden Company',
-      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
+      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
     let ArmyObserver = EmberObject.extend({
       army: null,
-      observer: observer('army.soldiers.[]', function() {
+      observer: observer('army.soldiers.[]', function () {
         assert.equal(
-          this.army.soldiers.length, 2,
+          this.army.soldiers.length,
+          2,
           'The array change to was observed'
         );
-      })
+      }),
     });
 
     return run(() => {
@@ -787,12 +817,12 @@ module('integration - Persistence', function(hooks) {
         data: {
           type: 'army',
           id: 1,
-          attributes: data
-        }
+          attributes: data,
+        },
       });
 
       let payload = {
-        army: copy(data, true)
+        army: copy(data, true),
       };
       payload.army.id = 1;
       payload.army.soldiers.shift();
@@ -801,28 +831,28 @@ module('integration - Persistence', function(hooks) {
         return [
           200,
           { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         ];
       });
 
-      return store.find('army', 1).then(army => {
+      return store.find('army', 1).then((army) => {
         ArmyObserver.create({ army: army });
         return army.reload();
       });
     });
   });
 
-  test('string array can be rolled back on failed save', function(assert) {
+  test('string array can be rolled back on failed save', function (assert) {
     // assert.expect(3);
 
     let data = {
       name: 'Golden Company',
-      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
+      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
     let Army = Model.extend({
       name: attr('string'),
-      soldiers: MF.array()
+      soldiers: MF.array(),
     });
 
     owner.register('model:army', Army);
@@ -832,8 +862,8 @@ module('integration - Persistence', function(hooks) {
         data: {
           type: 'army',
           id: 1,
-          attributes: data
-        }
+          attributes: data,
+        },
       });
 
       server.get('/armies', () => {
@@ -843,7 +873,7 @@ module('integration - Persistence', function(hooks) {
       let army, soliders;
       return store
         .find('army', 1)
-        .then(_army => {
+        .then((_army) => {
           army = _army;
           soliders = army.get('soldiers');
           soliders.pushObject('Lysono Maar');
@@ -852,7 +882,7 @@ module('integration - Persistence', function(hooks) {
           assert.deepEqual(soliders.toArray(), [
             'Aegor Rivers',
             'Tristan Rivers',
-            'Lysono Maar'
+            'Lysono Maar',
           ]);
 
           return army.save();
@@ -863,28 +893,28 @@ module('integration - Persistence', function(hooks) {
           assert.deepEqual(soliders.toArray(), [
             'Aegor Rivers',
             'Jon Connington',
-            'Tristan Rivers'
+            'Tristan Rivers',
           ]);
         });
     });
   });
 
-  test('existing fragments can be rolled back on failed save', function(assert) {
+  test('existing fragments can be rolled back on failed save', function (assert) {
     // assert.expect(3);
 
     let data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     return run(() => {
@@ -892,8 +922,8 @@ module('integration - Persistence', function(hooks) {
         data: {
           type: 'person',
           id: 1,
-          attributes: data
-        }
+          attributes: data,
+        },
       });
 
       server.put('/armies/1', () => {
@@ -904,7 +934,7 @@ module('integration - Persistence', function(hooks) {
 
       return store
         .find('person', 1)
-        .then(person => {
+        .then((person) => {
           mrStark = person;
 
           name = mrStark.get('name');
@@ -933,17 +963,17 @@ module('integration - Persistence', function(hooks) {
     });
   });
 
-  test('fragments with default values are rolled back to uncommitted state after failed save', async function(assert) {
+  test('fragments with default values are rolled back to uncommitted state after failed save', async function (assert) {
     const Address = MF.Fragment.extend({
       line1: attr('string'),
-      line2: attr('string')
+      line2: attr('string'),
     });
 
     owner.register('model:address', Address);
 
     const PersonWithDefaults = Model.extend({
       address: MF.fragment('address', { defaultValue: {} }),
-      addresses: MF.fragmentArray('address', { defaultValue: [{}] })
+      addresses: MF.fragmentArray('address', { defaultValue: [{}] }),
     });
 
     owner.register('model:person', PersonWithDefaults);
@@ -965,11 +995,13 @@ module('integration - Persistence', function(hooks) {
 
     server.post('/people', () => {
       const response = {
-        errors: [
-          { code: 'custom-error-code' }
-        ]
+        errors: [{ code: 'custom-error-code' }],
       };
-      return [400, { 'Content-Type': 'application/json' }, JSON.stringify(response)];
+      return [
+        400,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(response),
+      ];
     });
 
     let savePromise = person.save();
@@ -985,7 +1017,10 @@ module('integration - Persistence', function(hooks) {
       'fragment array state during save'
     );
 
-    await assert.rejects(savePromise, ex => ex.errors[0].code === 'custom-error-code');
+    await assert.rejects(
+      savePromise,
+      (ex) => ex.errors[0].code === 'custom-error-code'
+    );
 
     assert.equal(
       address._internalModel.currentState.stateName,
@@ -1013,28 +1048,32 @@ module('integration - Persistence', function(hooks) {
     );
   });
 
-  test('setting an array does not error on save', function() {
+  test('setting an array does not error on save', function () {
     let Army = Model.extend({
-      soldiers: MF.array('string')
+      soldiers: MF.array('string'),
     });
 
     let data = {
-      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
+      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
     let payload = {
-      army: copy(data, true)
+      army: copy(data, true),
     };
     owner.register('model:army', Army);
 
     const army = run(() => store.createRecord('army'));
     server.post('/armies', () => {
-      return [200, { 'Content-Type': 'application/json' },  JSON.stringify(payload)];
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
     });
     army.set('soldiers', ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']);
     run(() => army.save());
   });
 
-  test('change fragment attributes while save is in-flight', async function(assert) {
+  test('change fragment attributes while save is in-flight', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -1042,18 +1081,18 @@ module('integration - Persistence', function(hooks) {
         attributes: {
           name: {
             first: 'Tyrion',
-            last: 'Lannister'
+            last: 'Lannister',
           },
           addresses: [
             {
               street: '1 Sky Cell',
               city: 'Eyre',
               region: 'Vale of Arryn',
-              country: 'Westeros'
-            }
-          ]
-        }
-      }
+              country: 'Westeros',
+            },
+          ],
+        },
+      },
     });
 
     server.put('/people/1', () => {
@@ -1083,42 +1122,42 @@ module('integration - Persistence', function(hooks) {
     assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
   });
 
-  test('change fragment value while save is in-flight', async function(assert) {
+  test('change fragment value while save is in-flight', async function (assert) {
     const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     const person = store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: data
-      }
+        attributes: data,
+      },
     });
 
     const payload = {
       person: {
         id: 1,
-        name: null
-      }
+        name: null,
+      },
     };
 
     server.put('/people/1', () => {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
@@ -1137,8 +1176,12 @@ module('integration - Persistence', function(hooks) {
     assert.ok(!person.get('hasDirtyAttributes'), 'record is clean');
   });
 
-  test('initializing a fragment, saving and then updating that fragment', async function(assert) {
-    const component = store.createRecord('component', { id: 10, type: 'chart', options: {} });
+  test('initializing a fragment, saving and then updating that fragment', async function (assert) {
+    const component = store.createRecord('component', {
+      id: 10,
+      type: 'chart',
+      options: {},
+    });
 
     server.post('/components', () => [204]);
     server.put('/components/:id', () => [204]);
@@ -1153,10 +1196,7 @@ module('integration - Persistence', function(hooks) {
     component.options.lastOrder = { products: [] };
     component.options.lastOrder.products.pushObject({ name: 'Light Saber' });
 
-    assert.ok(
-      component.get('hasDirtyAttributes'),
-      'component record is dirty'
-    );
+    assert.ok(component.get('hasDirtyAttributes'), 'component record is dirty');
 
     await component.save();
 
@@ -1166,9 +1206,6 @@ module('integration - Persistence', function(hooks) {
     );
 
     component.options.lastOrder.products.createFragment({ name: 'Baby Yoda' });
-    assert.ok(
-      component.get('hasDirtyAttributes'),
-      'component record is dirty'
-    );
+    assert.ok(component.get('hasDirtyAttributes'), 'component record is dirty');
   });
 });

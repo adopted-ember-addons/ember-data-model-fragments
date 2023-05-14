@@ -35,8 +35,12 @@ const FragmentTransform = Transform.extend({
     }
 
     let store = this.store;
-    const realSnapshot = snapshot._createSnapshot ? snapshot._createSnapshot() : snapshot;
-    let serializer = store.serializerFor(realSnapshot.modelName || realSnapshot.constructor.modelName);
+    const realSnapshot = snapshot._createSnapshot
+      ? snapshot._createSnapshot()
+      : snapshot;
+    let serializer = store.serializerFor(
+      realSnapshot.modelName || realSnapshot.constructor.modelName
+    );
 
     return serializer.serialize(realSnapshot);
   },
@@ -59,7 +63,10 @@ const FragmentTransform = Transform.extend({
     let modelName = this.modelNameFor(data, options, parentData);
     let serializer = store.serializerFor(modelName);
 
-    assert('The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`', !(serializer instanceof JSONAPISerializer));
+    assert(
+      'The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`',
+      !(serializer instanceof JSONAPISerializer)
+    );
 
     let typeClass = store.modelFor(modelName);
     let serialized = serializer.normalize(typeClass, data);
@@ -67,7 +74,7 @@ const FragmentTransform = Transform.extend({
     // `JSONSerializer#normalize` returns a full JSON API document, but we only
     // need the attributes hash
     return get(serialized, 'data.attributes');
-  }
+  },
 });
 
 export default FragmentTransform;

@@ -9,7 +9,5 @@ export default MF.Fragment.extend({
 
   ready() {
     this.set('readyWasCalled', true);
-  }
-
+  },
 });
-

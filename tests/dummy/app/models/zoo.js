@@ -6,5 +6,5 @@ export default Model.extend({
   city: attr('string'),
   star: MF.fragment('animal', { polymorphic: true, typeKey: '$type' }),
   animals: MF.fragmentArray('animal', { polymorphic: true, typeKey: '$type' }),
-  manager: belongsTo('person')
+  manager: belongsTo('person'),
 });

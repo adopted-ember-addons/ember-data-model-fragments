@@ -5,5 +5,5 @@ export default MF.Fragment.extend({
   amount: attr('string'),
   recurring: attr('boolean'),
   products: MF.fragmentArray('product'),
-  product: MF.fragment('product')
+  product: MF.fragment('product'),
 });

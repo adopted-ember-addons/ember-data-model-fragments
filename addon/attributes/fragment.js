@@ -3,7 +3,11 @@ import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
 import { recordDataFor } from '@ember-data/store/-private';
 import { copy } from 'ember-copy';
-import { getActualFragmentType, isFragment, setFragmentOwner } from '../fragment';
+import {
+  getActualFragmentType,
+  isFragment,
+  setFragmentOwner,
+} from '../fragment';
 import metaTypeFor from '../util/meta-type-for';
 import isInstanceOfType from '../util/instance-of-type';
 
@@ -11,15 +15,17 @@ function getDefaultValue(record, options, key) {
   if (typeof options.defaultValue === 'function') {
     const defaultValue = options.defaultValue.call(null, record, options, key);
     assert(
-      'The fragment\'s default value must be an object',
-      defaultValue === null || typeOf(defaultValue) === 'object' || isFragment(defaultValue)
+      "The fragment's default value must be an object",
+      defaultValue === null ||
+        typeOf(defaultValue) === 'object' ||
+        isFragment(defaultValue)
     );
     return defaultValue;
   }
   if (options.defaultValue !== undefined) {
     const defaultValue = options.defaultValue;
     assert(
-      'The fragment\'s default value function must return an object',
+      "The fragment's default value function must return an object",
       defaultValue === null || typeOf(defaultValue) === 'object'
     );
     // Create a deep copy of the resulting value to avoid shared reference errors
@@ -75,7 +81,7 @@ export default function fragment(type, options) {
     isAttribute: true,
     isFragment: true,
     kind: 'fragment',
-    options
+    options,
   };
 
   // eslint-disable-next-line ember/require-computed-property-dependencies
@@ -88,8 +94,15 @@ export default function fragment(type, options) {
           recordData._fragmentData[key] = null;
           return null;
         }
-        const actualType = getActualFragmentType(type, options, undefined, this);
-        const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(actualType, defaultValue);
+        const actualType = getActualFragmentType(
+          type,
+          options,
+          undefined,
+          this
+        );
+        const fragment = isFragment(defaultValue)
+          ? defaultValue
+          : this.store.createFragment(actualType, defaultValue);
         setFragmentOwner(fragment, recordData, key);
         recordData._fragmentData[key] = recordDataFor(fragment);
         return fragment;
@@ -98,7 +111,9 @@ export default function fragment(type, options) {
       if (fragment === null) {
         return null;
       }
-      const internalModel = this.store._internalModelForResource(fragment.identifier);
+      const internalModel = this.store._internalModelForResource(
+        fragment.identifier
+      );
       return internalModel.getRecord();
     },
     set(key, value) {
@@ -113,7 +128,9 @@ export default function fragment(type, options) {
           recordData._fragmentData[key] = null;
         } else {
           const actualType = getActualFragmentType(type, options, value, this);
-          const fragment = isFragment(defaultValue) ? defaultValue : this.store.createFragment(actualType, defaultValue);
+          const fragment = isFragment(defaultValue)
+            ? defaultValue
+            : this.store.createFragment(actualType, defaultValue);
           setFragmentOwner(fragment, recordData, key);
           recordData._fragmentData[key] = recordDataFor(fragment);
         }
@@ -139,9 +156,11 @@ export default function fragment(type, options) {
         recordData.setDirtyFragment(key, recordDataFor(fragment));
         return fragment;
       }
-      const fragment = this.store._internalModelForResource(fragmentRecordData.identifier).getRecord();
+      const fragment = this.store
+        ._internalModelForResource(fragmentRecordData.identifier)
+        .getRecord();
       fragment.setProperties(value);
       return fragment;
-    }
+    },
   }).meta(meta);
 }

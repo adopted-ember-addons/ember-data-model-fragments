@@ -18,7 +18,7 @@ const FragmentArrayTransform = FragmentTransform.extend({
       return null;
     }
 
-    return data.map(datum => {
+    return data.map((datum) => {
       return this.deserializeSingle(datum, options, parentData);
     }, this);
   },
@@ -30,12 +30,16 @@ const FragmentArrayTransform = FragmentTransform.extend({
 
     let store = this.store;
 
-    return snapshots.map(snapshot => {
-      const realSnapshot = snapshot._createSnapshot ? snapshot._createSnapshot() : snapshot;
-      let serializer = store.serializerFor(realSnapshot.modelName || realSnapshot.constructor.modelName);
+    return snapshots.map((snapshot) => {
+      const realSnapshot = snapshot._createSnapshot
+        ? snapshot._createSnapshot()
+        : snapshot;
+      let serializer = store.serializerFor(
+        realSnapshot.modelName || realSnapshot.constructor.modelName
+      );
       return serializer.serialize(realSnapshot);
     });
-  }
+  },
 });
 
 export default FragmentArrayTransform;

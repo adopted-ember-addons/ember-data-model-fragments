@@ -3,10 +3,7 @@ const path = require('path');
 module.exports = {
   description: 'Generates an ember-data-model-fragments model.',
 
-  anonymousOptions: [
-    'name',
-    'attr:type'
-  ],
+  anonymousOptions: ['name', 'attr:type'],
 
   fileMapTokens() {
     return {
@@ -24,11 +21,11 @@ module.exports = {
         }
         // In non-pod format, fragments go in the 'models' directory
         return 'models';
-      }
+      },
     };
   },
 
   locals(options) {
     return this.lookupBlueprint('model').locals(options);
-  }
+  },
 };

@@ -12,16 +12,20 @@ function getDefaultValue(record, options, key) {
   if (typeof options.defaultValue === 'function') {
     const defaultValue = options.defaultValue.call(null, record, options, key);
     assert(
-      'The fragment array\'s default value function must return an array of fragments',
-      defaultValue === null || (isArray(defaultValue) && defaultValue.every(v => isFragment(v) || typeOf(v) === 'object'))
+      "The fragment array's default value function must return an array of fragments",
+      defaultValue === null ||
+        (isArray(defaultValue) &&
+          defaultValue.every((v) => isFragment(v) || typeOf(v) === 'object'))
     );
     return defaultValue;
   }
   if (options.defaultValue !== undefined) {
     const defaultValue = options.defaultValue;
     assert(
-      'The fragment array\'s default value must be an array of objects',
-      defaultValue === null || (isArray(defaultValue) && defaultValue.every(v => typeOf(v) === 'object'))
+      "The fragment array's default value must be an array of objects",
+      defaultValue === null ||
+        (isArray(defaultValue) &&
+          defaultValue.every((v) => typeOf(v) === 'object'))
     );
     // Create a deep copy of the resulting value to avoid shared reference errors
     return copy(defaultValue, true);
@@ -80,7 +84,7 @@ export default function fragmentArray(type, options) {
     isAttribute: true,
     isFragment: true,
     kind: 'fragment-array',
-    options
+    options,
   };
 
   // eslint-disable-next-line ember/require-computed-property-dependencies
@@ -93,8 +97,10 @@ export default function fragmentArray(type, options) {
           recordData._fragmentData[key] = null;
           return null;
         }
-        recordData._fragmentData[key] = defaultValue.map(dv => {
-          const fragment = isFragment(dv) ? dv : this.store.createFragment(type, dv);
+        recordData._fragmentData[key] = defaultValue.map((dv) => {
+          const fragment = isFragment(dv)
+            ? dv
+            : this.store.createFragment(type, dv);
           setFragmentOwner(fragment, recordData, key);
           return recordDataFor(fragment);
         });
@@ -108,7 +114,7 @@ export default function fragmentArray(type, options) {
           modelName: type,
           store: this.store,
           recordData,
-          key
+          key,
         });
         recordData._fragmentArrayCache[key] = fragmentArray;
       }
@@ -117,7 +123,9 @@ export default function fragmentArray(type, options) {
     set(key, value) {
       assert(
         'You must pass an array of fragments, or null to set a fragmentArray',
-        value === null || (isArray(value) && value.every(v => isFragment(v) || typeOf(v) === 'object'))
+        value === null ||
+          (isArray(value) &&
+            value.every((v) => isFragment(v) || typeOf(v) === 'object'))
       );
       const recordData = recordDataFor(this);
       if (!recordData.hasFragment(key)) {
@@ -125,8 +133,10 @@ export default function fragmentArray(type, options) {
         if (defaultValue === null) {
           recordData._fragmentData[key] = null;
         } else {
-          recordData._fragmentData[key] = defaultValue.map(dv => {
-            const fragment = isFragment(dv) ? dv : this.store.createFragment(type, dv);
+          recordData._fragmentData[key] = defaultValue.map((dv) => {
+            const fragment = isFragment(dv)
+              ? dv
+              : this.store.createFragment(type, dv);
             setFragmentOwner(fragment, recordData, key);
             return recordDataFor(fragment);
           });
@@ -142,12 +152,12 @@ export default function fragmentArray(type, options) {
           modelName: type,
           store: this.store,
           recordData,
-          key
+          key,
         });
         recordData._fragmentArrayCache[key] = fragmentArray;
       }
       fragmentArray.setObjects(value);
       return fragmentArray;
-    }
+    },
   }).meta(meta);
 }

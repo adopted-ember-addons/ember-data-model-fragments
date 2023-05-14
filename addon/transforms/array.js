@@ -53,7 +53,7 @@ const ArrayTransform = Transform.extend({
     return array.map(transform.serialize, transform);
   },
 
-  transform: computed('type', function() {
+  transform: computed('type', function () {
     let attributeType = this.type;
 
     if (!attributeType) {
@@ -64,7 +64,7 @@ const ArrayTransform = Transform.extend({
     assert(`Unable to find transform for '${attributeType}'`, !!transform);
 
     return transform;
-  })
+  }),
 });
 
 export default ArrayTransform;

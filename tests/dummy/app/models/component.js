@@ -5,5 +5,9 @@ const fragment = MF.fragment;
 
 export default class Component extends Model {
   @attr('string') type;
-  @fragment('component-options', { polymorphic: true, typeKey: (data, owner) => `component-options-${owner.type}` }) options;
+  @fragment('component-options', {
+    polymorphic: true,
+    typeKey: (data, owner) => `component-options-${owner.type}`,
+  })
+  options;
 }

@@ -28,15 +28,20 @@ import { recordDataFor } from '@ember-data/store/-private';
  */
 export default function fragmentOwner() {
   // eslint-disable-next-line ember/require-computed-property-dependencies
-  return computed(function() {
-    assert('Fragment owner properties can only be used on fragments.', isFragment(this));
+  return computed(function () {
+    assert(
+      'Fragment owner properties can only be used on fragments.',
+      isFragment(this)
+    );
     const recordData = recordDataFor(this);
     const owner = recordData.getFragmentOwner();
     if (!owner) {
       return null;
     }
     return this.store._internalModelForResource(owner.identifier).getRecord();
-  }).meta({
-    isFragmentOwner: true
-  }).readOnly();
+  })
+    .meta({
+      isFragmentOwner: true,
+    })
+    .readOnly();
 }

@@ -1,4 +1,3 @@
-
 /**
  @module ember-data-model-fragments
  */

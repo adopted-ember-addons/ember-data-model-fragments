@@ -94,7 +94,7 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
-    type.eachAttribute(name => {
+    type.eachAttribute((name) => {
       props[name] = copy(get(this, name));
     });
 
@@ -106,14 +106,14 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
     let internalModel = internalModelFor(this);
     let owner = internalModel && internalModel._recordData._owner;
     if (owner) {
-      let ownerId = get(owner, 'id');
+      let ownerId = owner.id;
       return `owner(${ownerId})`;
     } else {
       return '';
     }
-  }
+  },
 }).reopenClass({
-  fragmentOwnerProperties: computed(function() {
+  fragmentOwnerProperties: computed(function () {
     let props = [];
 
     this.eachComputedProperty((name, meta) => {
@@ -123,7 +123,7 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
     });
 
     return props;
-  }).readOnly()
+  }).readOnly(),
 });
 
 /**
@@ -142,7 +142,8 @@ export function getActualFragmentType(declaredType, options, data, owner) {
   }
 
   let typeKey = options.typeKey || 'type';
-  let actualType = typeof typeKey === 'function' ? typeKey(data, owner) : data[typeKey];
+  let actualType =
+    typeof typeKey === 'function' ? typeKey(data, owner) : data[typeKey];
 
   return actualType || declaredType;
 }
@@ -158,7 +159,7 @@ export function setFragmentOwner(fragment, record, key) {
   recordData.setFragmentOwner(record, key);
 
   // Notify any observers of `fragmentOwner` properties
-  get(fragment.constructor, 'fragmentOwnerProperties').forEach(name => {
+  fragment.constructor.fragmentOwnerProperties.forEach((name) => {
     fragment.notifyPropertyChange(name);
   });
 
@@ -168,13 +169,25 @@ export function setFragmentOwner(fragment, record, key) {
 // Sets the data of a fragment and leaves the fragment in a clean state
 export function setFragmentData(fragment, data) {
   internalModelFor(fragment).setupData({
-    attributes: data
+    attributes: data,
   });
 }
 
 // Creates a fragment and sets its owner to the given record
-export function createFragment(store, declaredModelName, record, key, options, data) {
-  let actualModelName = getActualFragmentType(declaredModelName, options, data, record);
+export function createFragment(
+  store,
+  declaredModelName,
+  record,
+  key,
+  options,
+  data
+) {
+  let actualModelName = getActualFragmentType(
+    declaredModelName,
+    options,
+    data,
+    record
+  );
   let fragment = store.createFragment(actualModelName);
 
   setFragmentOwner(fragment, record, key);

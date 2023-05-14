@@ -5,5 +5,5 @@ export default Component.extend({
   model: null,
 
   firstAlias: alias('model.passenger'),
-  secondAlias: alias('firstAlias.name')
+  secondAlias: alias('firstAlias.name'),
 });

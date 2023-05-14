@@ -5,5 +5,5 @@ export default MF.Fragment.extend({
   street: attr('string'),
   city: attr('string'),
   region: attr('string'),
-  country: attr('string')
+  country: attr('string'),
 });

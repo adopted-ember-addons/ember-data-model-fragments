@@ -85,9 +85,16 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
   },
 
   replace(start, deleteCount, items) {
-    assert('The third argument to replace needs to be an array.', isArray(items));
+    assert(
+      'The third argument to replace needs to be an array.',
+      isArray(items)
+    );
     const data = this.currentState.slice();
-    data.splice(start, deleteCount, ...items.map((item, i) => this._normalizeData(item, start + i)));
+    data.splice(
+      start,
+      deleteCount,
+      ...items.map((item, i) => this._normalizeData(item, start + i))
+    );
     this.recordData.setDirtyFragment(this.key, data);
     this.notify();
   },
@@ -111,10 +118,18 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       // it's null if no change found
       if (diff.firstChangeIndex !== null) {
         // we found a change
-        this.arrayContentWillChange(diff.firstChangeIndex, diff.removedCount, diff.addedCount);
+        this.arrayContentWillChange(
+          diff.firstChangeIndex,
+          diff.removedCount,
+          diff.addedCount
+        );
         this._length = currentState.length;
         this.currentState = currentState;
-        this.arrayContentDidChange(diff.firstChangeIndex, diff.removedCount, diff.addedCount);
+        this.arrayContentDidChange(
+          diff.firstChangeIndex,
+          diff.removedCount,
+          diff.addedCount
+        );
       }
     } else {
       this._hasNotified = false;
@@ -197,7 +212,7 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
 
   toStringExtension() {
     return `owner(${this.owner?.id})`;
-  }
+  },
 });
 
 export default StatefulArray;

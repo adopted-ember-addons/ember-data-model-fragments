@@ -1,5 +1,5 @@
 /* eslint-env node */
 
 module.exports = {
-  publish: true
+  publish: true,
 };
