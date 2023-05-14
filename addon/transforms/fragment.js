@@ -1,5 +1,4 @@
 import { assert } from '@ember/debug';
-import { get } from '@ember/object';
 import Transform from '@ember-data/serializer/transform';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
 import { inject as service } from '@ember/service';
@@ -73,7 +72,7 @@ const FragmentTransform = Transform.extend({
 
     // `JSONSerializer#normalize` returns a full JSON API document, but we only
     // need the attributes hash
-    return get(serialized, 'data.attributes');
+    return serialized?.data?.attributes;
   },
 });
 
