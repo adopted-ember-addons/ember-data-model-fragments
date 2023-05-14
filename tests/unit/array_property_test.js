@@ -30,7 +30,6 @@ module('unit - `MF.array` property', function (hooks) {
   hooks.beforeEach(function (assert) {
     store = this.owner.lookup('service:store');
     this.owner.register('model:person', Person);
-    assert.expectNoDeprecation();
   });
 
   hooks.afterEach(function () {

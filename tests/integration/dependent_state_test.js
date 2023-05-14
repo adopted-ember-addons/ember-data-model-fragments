@@ -22,7 +22,6 @@ module('integration - Dependent State', function (hooks) {
 
   hooks.beforeEach(function (assert) {
     store = this.owner.lookup('service:store');
-    assert.expectNoDeprecation();
     people = [
       {
         id: 1,

@@ -62,7 +62,6 @@
     "ember-load-initializers": "^2.1.2",
     "ember-page-title": "^7.0.0",
     "ember-qunit": "^6.1.1",
-    "ember-qunit-assert-helpers": "^0.2.0",
     "ember-resolver": "^10.0.0",
     "ember-source": "~3.28.12",
     "ember-source-channel-url": "^3.0.0",

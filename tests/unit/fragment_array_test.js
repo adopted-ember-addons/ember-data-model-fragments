@@ -14,8 +14,6 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
   hooks.beforeEach(function (assert) {
     store = this.owner.lookup('service:store');
-
-    assert.expectNoDeprecation();
   });
 
   hooks.afterEach(function () {

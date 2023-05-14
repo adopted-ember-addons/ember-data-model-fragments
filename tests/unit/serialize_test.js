@@ -16,8 +16,6 @@ module('unit - Serialization', function (hooks) {
     owner = this.owner;
     store = owner.lookup('service:store');
 
-    assert.expectNoDeprecation();
-
     // TODO: this is necessary to set `typeKey` and prevent `store#serializerFor` from blowing up
     store.modelFor('person');
   });

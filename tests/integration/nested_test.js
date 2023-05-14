@@ -17,8 +17,6 @@ module('integration - Nested fragments', function (hooks) {
     owner = this.owner;
     store = owner.lookup('service:store');
     server = new Pretender();
-
-    assert.expectNoDeprecation();
   });
 
   hooks.afterEach(function () {

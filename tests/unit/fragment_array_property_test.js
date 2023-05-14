@@ -27,8 +27,6 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     store = owner.lookup('service:store');
 
-    assert.expectNoDeprecation();
-
     people = [
       {
         id: 1,

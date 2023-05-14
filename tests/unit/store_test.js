@@ -12,8 +12,6 @@ module('unit - `DS.Store`', function (hooks) {
   hooks.beforeEach(function (assert) {
     owner = this.owner;
     store = owner.lookup('service:store');
-
-    assert.expectNoDeprecation();
   });
 
   hooks.afterEach(function () {

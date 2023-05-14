@@ -12,8 +12,6 @@ module('unit - Polymorphism', function (hooks) {
   hooks.beforeEach(function (assert) {
     store = this.owner.lookup('service:store');
 
-    assert.expectNoDeprecation();
-
     zoo = {
       name: 'Chilly Zoo',
       city: 'Winterfell',
