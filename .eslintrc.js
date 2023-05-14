@@ -24,7 +24,6 @@ module.exports = {
     // Overrides
     'brace-style': 'off',
     'object-shorthand': ['error', 'methods'],
-    'operator-linebreak': ['error', 'after'],
 
     // Taken from ember-suave/recommended
     'new-cap': [
