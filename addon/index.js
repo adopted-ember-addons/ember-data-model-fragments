@@ -1,3 +1,4 @@
+import Namespace from '@ember/application/namespace';
 import Ember from 'ember';
 import VERSION from './version';
 import Fragment from './fragment';
@@ -13,8 +14,7 @@ import { fragment, fragmentArray, array, fragmentOwner } from './attributes';
   @module ember-data-model-fragments
   @main ember-data-model-fragments
 */
-const MF = Ember.Namespace.create({
-  // eslint-disable-line ember/new-module-imports
+const MF = Namespace.create({
   VERSION: VERSION,
   Fragment: Fragment,
   FragmentArray: FragmentArray,
