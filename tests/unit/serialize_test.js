@@ -3,7 +3,7 @@ import { module, test } from 'qunit';
 import { setupApplicationTest } from 'ember-qunit';
 import JSONSerializer from '@ember-data/serializer/json';
 import Person from 'dummy/models/person';
-import MF from 'ember-data-model-fragments';
+import { fragmentArray, array } from 'ember-data-model-fragments/attributes';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import DS from 'ember-data';
 let store, owner;
@@ -193,10 +193,10 @@ module('unit - Serialization', function (hooks) {
   });
 
   test('normalizing data can handle `null` fragment values', function (assert) {
-    let NullDefaultPerson = Person.extend({
-      houses: MF.fragmentArray('house', { defaultValue: null }),
-      children: MF.array({ defaultValue: null }),
-    });
+    class NullDefaultPerson extends Person {
+      @fragmentArray('house', { defaultValue: null }) houses;
+      @array({ defaultValue: null }) children;
+    }
 
     owner.register('model:nullDefaultPerson', NullDefaultPerson);
 
@@ -226,10 +226,10 @@ module('unit - Serialization', function (hooks) {
   });
 
   test('normalizing data can handle `null` fragment values', async function (assert) {
-    let NullDefaultPerson = Person.extend({
-      houses: MF.fragmentArray('house', { defaultValue: null }),
-      children: MF.array({ defaultValue: null }),
-    });
+    class NullDefaultPerson extends Person {
+      @fragmentArray('house', { defaultValue: null }) houses;
+      @array({ defaultValue: null }) children;
+    }
 
     owner.register('model:nullDefaultPerson', NullDefaultPerson);
 

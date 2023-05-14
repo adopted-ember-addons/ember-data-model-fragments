@@ -1,6 +1,6 @@
+import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
 
-export default MF.Fragment.extend({
-  name: attr('string'),
-});
+export default class Prefix extends Fragment {
+  @attr('string') name;
+}

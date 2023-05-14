@@ -1,6 +1,6 @@
-import { attr } from '@ember-data/model';
 import Animal from 'dummy/models/animal';
+import { attr } from '@ember-data/model';
 
-export default Animal.extend({
-  trunkLength: attr('number'),
-});
+export default class Elephant extends Animal {
+  @attr('number') trunkLength;
+}

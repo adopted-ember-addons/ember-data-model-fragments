@@ -1,6 +1,6 @@
-import { attr } from '@ember-data/model';
 import Animal from 'dummy/models/animal';
+import { attr } from '@ember-data/model';
 
-export default Animal.extend({
-  hasManes: attr('boolean'),
-});
+export default class Lion extends Animal {
+  @attr('boolean') hasManes;
+}

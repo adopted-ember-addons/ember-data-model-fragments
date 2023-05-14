@@ -1,7 +1,8 @@
+import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import { array } from 'ember-data-model-fragments/attributes';
 
-export default MF.Fragment.extend({
-  name: attr('string'),
-  notes: MF.array(),
-});
+export default class Info extends Fragment {
+  @attr('string') name;
+  @array() notes;
+}
