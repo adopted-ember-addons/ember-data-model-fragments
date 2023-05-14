@@ -20,7 +20,7 @@ module('Integration | Component | alias component', function (hooks) {
     server.shutdown();
   });
 
-  skip('the adapter can update fragments without infinite loops when CPs are aliased more than once', function (assert) {
+  skip('the adapter can update fragments without infinite loops when CPs are aliased more than once', async function (assert) {
     let payloadBefore = {
       vehicle: {
         id: 1,
@@ -45,8 +45,6 @@ module('Integration | Component | alias component', function (hooks) {
       },
     };
 
-    let done = assert.async();
-
     server.get('/vehicles/:id', function () {
       return [
         200,
@@ -55,23 +53,19 @@ module('Integration | Component | alias component', function (hooks) {
       ];
     });
 
-    store.findRecord('vehicle', 1).then((vehicle) => {
-      this.setProperties({ vehicle });
-      this.render(hbs`{{alias-component model=vehicle}}`);
+    const vehicle = await store.find('vehicle', 1);
+    this.setProperties({ vehicle });
+    this.render(hbs`{{alias-component model=vehicle}}`);
 
-      this.set('vehicle.passenger.name.last', 'Doctor');
-      server.put('/vehicles/:id', function () {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payloadAfter),
-        ];
-      });
-
-      vehicle.save().then(() => {
-        assert.ok(true);
-        done();
-      });
+    this.set('vehicle.passenger.name.last', 'Doctor');
+    server.put('/vehicles/:id', function () {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payloadAfter),
+      ];
     });
+
+    await vehicle.save();
   });
 });

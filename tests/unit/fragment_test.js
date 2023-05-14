@@ -26,7 +26,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(Copyable.detect(fragment), 'fragments are copyable');
   });
 
-  test('copied fragments can be added to any record', function (assert) {
+  test('copied fragments can be added to any record', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -48,18 +48,18 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return all([store.find('person', 1), store.find('person', 2)]).then(
-      (people) => {
-        let copy = people[0].get('name').copy();
+    const people = await all([
+      store.find('person', 1),
+      store.find('person', 2),
+    ]);
+    let copy = people[0].get('name').copy();
 
-        people[1].set('name', copy);
+    people[1].set('name', copy);
 
-        assert.ok(true, 'fragment copies can be assigned to other records');
-      }
-    );
+    assert.ok(true, 'fragment copies can be assigned to other records');
   });
 
-  test("copying a fragment copies the fragment's properties", function (assert) {
+  test("copying a fragment copies the fragment's properties", async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -73,12 +73,11 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      let copy = person.get('name').copy();
+    const person = await store.find('person', 1);
+    let copy = person.get('name').copy();
 
-      assert.ok(copy.get('first'), 'Jon');
-      assert.ok(copy.get('last'), 'Snow');
-    });
+    assert.ok(copy.get('first'), 'Jon');
+    assert.ok(copy.get('last'), 'Snow');
   });
 
   test('fragments are `Ember.Comparable`', function (assert) {
@@ -113,7 +112,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(fragment.get('isNew'), 'fragments start as new');
   });
 
-  test("changes to fragments are indicated in the owner record's `changedAttributes`", function (assert) {
+  test("changes to fragments are indicated in the owner record's `changedAttributes`", async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -127,26 +126,25 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      let name = person.get('name');
+    const person = await store.find('person', 1);
+    let name = person.get('name');
 
-      name.set('last', 'Baratheon');
+    name.set('last', 'Baratheon');
 
-      const [oldName, newName] = person.changedAttributes().name;
-      assert.deepEqual(
-        oldName,
-        { first: 'Loras', last: 'Tyrell', prefixes: [] },
-        'old fragment is indicated in the diff object'
-      );
-      assert.deepEqual(
-        newName,
-        { first: 'Loras', last: 'Baratheon', prefixes: [] },
-        'new fragment is indicated in the diff object'
-      );
-    });
+    const [oldName, newName] = person.changedAttributes().name;
+    assert.deepEqual(
+      oldName,
+      { first: 'Loras', last: 'Tyrell', prefixes: [] },
+      'old fragment is indicated in the diff object'
+    );
+    assert.deepEqual(
+      newName,
+      { first: 'Loras', last: 'Baratheon', prefixes: [] },
+      'new fragment is indicated in the diff object'
+    );
   });
 
-  test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", function (assert) {
+  test("fragment properties that are set to null are indicated in the owner record's `changedAttributes`", async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -160,24 +158,23 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      person.set('name', null);
+    const person = await store.find('person', 1);
+    person.set('name', null);
 
-      const [oldName, newName] = person.changedAttributes().name;
-      assert.deepEqual(
-        oldName,
-        { first: 'Rob', last: 'Stark', prefixes: [] },
-        'old fragment is indicated in the diff object'
-      );
-      assert.deepEqual(
-        newName,
-        null,
-        'new fragment is indicated in the diff object'
-      );
-    });
+    const [oldName, newName] = person.changedAttributes().name;
+    assert.deepEqual(
+      oldName,
+      { first: 'Rob', last: 'Stark', prefixes: [] },
+      'old fragment is indicated in the diff object'
+    );
+    assert.deepEqual(
+      newName,
+      null,
+      'new fragment is indicated in the diff object'
+    );
   });
 
-  test('changes to attributes can be rolled back', function (assert) {
+  test('changes to attributes can be rolled back', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -191,15 +188,14 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      let name = person.get('name');
+    const person = await store.find('person', 1);
+    let name = person.get('name');
 
-      name.set('last', 'Bolton');
-      name.rollbackAttributes();
+    name.set('last', 'Bolton');
+    name.rollbackAttributes();
 
-      assert.ok(name.get('last', 'Snow'), 'fragment properties are restored');
-      assert.ok(!name.get('hasDirtyAttributes'), 'fragment is in clean state');
-    });
+    assert.ok(name.get('last', 'Snow'), 'fragment properties are restored');
+    assert.ok(!name.get('hasDirtyAttributes'), 'fragment is in clean state');
   });
 
   test('fragments without an owner can be destroyed', function (assert) {

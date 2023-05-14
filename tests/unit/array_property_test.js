@@ -35,7 +35,7 @@ module('unit - `MF.array` property', function (hooks) {
     store = null;
   });
 
-  test('array properties are converted to an array-ish containing original values', function (assert) {
+  test('array properties are converted to an array-ish containing original values', async function (assert) {
     let values = ['Hand of the King', 'Master of Coin'];
 
     store.push({
@@ -49,21 +49,20 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      let titles = person.get('titles');
+    const person = await store.find('person', 1);
+    let titles = person.get('titles');
 
-      assert.ok(isArray(titles), 'property is array-like');
+    assert.ok(isArray(titles), 'property is array-like');
 
-      assert.ok(
-        titles.every((title, index) => {
-          return title === values[index];
-        }),
-        'each title matches the original value'
-      );
-    });
+    assert.ok(
+      titles.every((title, index) => {
+        return title === values[index];
+      }),
+      'each title matches the original value'
+    );
   });
 
-  test('null values are allowed', function (assert) {
+  test('null values are allowed', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -75,12 +74,11 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      assert.equal(person.get('titles'), null, 'property is null');
-    });
+    const person = await store.find('person', 1);
+    assert.equal(person.get('titles'), null, 'property is null');
   });
 
-  test('setting to null is allowed', function (assert) {
+  test('setting to null is allowed', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -96,14 +94,13 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      person.set('titles', null);
+    const person = await store.find('person', 1);
+    person.set('titles', null);
 
-      assert.equal(person.get('titles'), null, 'property is null');
-    });
+    assert.equal(person.get('titles'), null, 'property is null');
   });
 
-  test('setting to array value is allowed', function (assert) {
+  test('setting to array value is allowed', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -119,15 +116,14 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      person.set('titles', ['hello', 'there']);
+    const person = await store.find('person', 1);
+    person.set('titles', ['hello', 'there']);
 
-      assert.deepEqual(
-        person.get('titles').toArray(),
-        ['hello', 'there'],
-        'property has correct values'
-      );
-    });
+    assert.deepEqual(
+      person.get('titles').toArray(),
+      ['hello', 'there'],
+      'property has correct values'
+    );
   });
 
   test('resetting to null is allowed', function (assert) {

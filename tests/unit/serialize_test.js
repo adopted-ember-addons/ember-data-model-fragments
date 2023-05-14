@@ -46,7 +46,7 @@ module('unit - Serialization', function (hooks) {
     assert.strictEqual(component.options.fontFamily, 'roman');
   });
 
-  test('fragment properties are snapshotted as normal attributes on the owner record snapshot', function (assert) {
+  test('fragment properties are snapshotted as normal attributes on the owner record snapshot', async function (assert) {
     let person = {
       name: {
         first: 'Catelyn',
@@ -117,12 +117,11 @@ module('unit - Serialization', function (hooks) {
       })
     );
 
-    return store.find('person', 1).then((person) => {
-      person.serialize();
-    });
+    const person2 = await store.find('person', 1);
+    person2.serialize();
   });
 
-  test('fragment properties are serialized as normal attributes using their own serializers', function (assert) {
+  test('fragment properties are serialized as normal attributes using their own serializers', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -145,18 +144,17 @@ module('unit - Serialization', function (hooks) {
       })
     );
 
-    return store.find('person', 1).then((person) => {
-      let serialized = person.serialize();
+    const person = await store.find('person', 1);
+    let serialized = person.serialize();
 
-      assert.equal(
-        serialized.name,
-        'Mad King',
-        'serialization uses result from `fragment#serialize`'
-      );
-    });
+    assert.equal(
+      serialized.name,
+      'Mad King',
+      'serialization uses result from `fragment#serialize`'
+    );
   });
 
-  test('serializing a fragment array creates a new array with contents the result of serializing each fragment', function (assert) {
+  test('serializing a fragment array creates a new array with contents the result of serializing each fragment', async function (assert) {
     let names = [
       {
         first: 'Rhaegar',
@@ -187,15 +185,14 @@ module('unit - Serialization', function (hooks) {
 
     owner.register('serializer:name', JSONSerializer);
 
-    return store.find('person', 1).then((person) => {
-      let serialized = person.serialize();
+    const person = await store.find('person', 1);
+    let serialized = person.serialize();
 
-      assert.deepEqual(
-        serialized.names,
-        names,
-        'serializing returns array of each fragment serialized'
-      );
-    });
+    assert.deepEqual(
+      serialized.names,
+      names,
+      'serializing returns array of each fragment serialized'
+    );
   });
 
   test('normalizing data can handle `null` fragment values', function (assert) {
@@ -231,7 +228,7 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
-  test('normalizing data can handle `null` fragment values', function (assert) {
+  test('normalizing data can handle `null` fragment values', async function (assert) {
     let NullDefaultPerson = Person.extend({
       houses: MF.fragmentArray('house', { defaultValue: null }),
       children: MF.array({ defaultValue: null }),
@@ -251,25 +248,24 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    return store.find('nullDefaultPerson', 1).then((person) => {
-      let serialized = person.serialize();
+    const person = await store.find('nullDefaultPerson', 1);
+    let serialized = person.serialize();
 
-      assert.strictEqual(
-        serialized.name,
-        null,
-        'fragment property values can be null'
-      );
-      assert.strictEqual(
-        serialized.houses,
-        null,
-        'fragment array property values can be null'
-      );
-      assert.strictEqual(
-        serialized.children,
-        null,
-        '`array property values can be null'
-      );
-    });
+    assert.strictEqual(
+      serialized.name,
+      null,
+      'fragment property values can be null'
+    );
+    assert.strictEqual(
+      serialized.houses,
+      null,
+      'fragment array property values can be null'
+    );
+    assert.strictEqual(
+      serialized.children,
+      null,
+      '`array property values can be null'
+    );
   });
 
   test('array properties use the specified transform to normalize data', function (assert) {
@@ -296,7 +292,7 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
-  test('array properties use the specified transform to serialize data', function (assert) {
+  test('array properties use the specified transform to serialize data', async function (assert) {
     let values = [1, 0, true, false, 'true', ''];
 
     store.push({
@@ -311,20 +307,19 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    return store.find('person', 1).then((person) => {
-      let serialized = person.serialize();
+    const person = await store.find('person', 1);
+    let serialized = person.serialize();
 
-      assert.ok(
-        values.every((value, index) => {
-          return (
-            serialized.strings[index] === String(value) &&
-            serialized.numbers[index] ===
-              (isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
-            serialized.booleans[index] === Boolean(value)
-          );
-        }),
-        'fragment property values are normalized'
-      );
-    });
+    assert.ok(
+      values.every((value, index) => {
+        return (
+          serialized.strings[index] === String(value) &&
+          serialized.numbers[index] ===
+            (isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
+          serialized.booleans[index] === Boolean(value)
+        );
+      }),
+      'fragment property values are normalized'
+    );
   });
 });

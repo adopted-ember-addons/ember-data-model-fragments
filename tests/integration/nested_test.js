@@ -25,7 +25,7 @@ module('integration - Nested fragments', function (hooks) {
     server.shutdown();
   });
 
-  test('`DS.hasManyFragment` properties can be nested', function (assert) {
+  test('`DS.hasManyFragment` properties can be nested', async function (assert) {
     let data = {
       info: {
         name: 'Tyrion Lannister',
@@ -82,51 +82,44 @@ module('integration - Nested fragments', function (hooks) {
       ];
     });
 
-    return store
-      .find('user', 1)
-      .then((user) => {
-        assert.equal(
-          user.get('orders.firstObject.products.firstObject.name'),
-          'Tears of Lys',
-          'nested fragment array properties are converted properly'
-        );
+    const user = await store.find('user', 1);
 
-        let product = user.get('orders.firstObject.products.firstObject');
+    assert.equal(
+      user.get('orders.firstObject.products.firstObject.name'),
+      'Tears of Lys',
+      'nested fragment array properties are converted properly'
+    );
 
-        product.set('price', '1.99');
-        assert.ok(
-          user.get('hasDirtyAttributes'),
-          'dirty state propagates to owner'
-        );
+    let product = user.get('orders.firstObject.products.firstObject');
 
-        user.rollbackAttributes();
-        assert.equal(
-          product.get('price'),
-          '499.99',
-          'rollbackAttributes cascades to nested fragments'
-        );
-        assert.ok(!user.get('hasDirtyAttributes'), 'dirty state is reset');
+    product.set('price', '1.99');
+    assert.ok(
+      user.get('hasDirtyAttributes'),
+      'dirty state propagates to owner'
+    );
 
-        user.get('orders.firstObject.products').removeAt(0);
-        assert.ok(
-          user.get('hasDirtyAttributes'),
-          'dirty state propagates to owner'
-        );
+    user.rollbackAttributes();
+    assert.equal(
+      product.get('price'),
+      '499.99',
+      'rollbackAttributes cascades to nested fragments'
+    );
+    assert.ok(!user.get('hasDirtyAttributes'), 'dirty state is reset');
 
-        return user.save();
-      })
-      .then((user) => {
-        assert.ok(!user.get('hasDirtyAttributes'), 'owner record is clean');
-        assert.equal(
-          user.get('orders.firstObject.products.length'),
-          1,
-          'fragment array length is correct'
-        );
-      })
-      .catch((err) => {
-        console.error(err); //eslint-disable-line
-        assert.ok(false, 'User was not found');
-      });
+    user.get('orders.firstObject.products').removeAt(0);
+    assert.ok(
+      user.get('hasDirtyAttributes'),
+      'dirty state propagates to owner'
+    );
+
+    await user.save();
+
+    assert.ok(!user.get('hasDirtyAttributes'), 'owner record is clean');
+    assert.equal(
+      user.get('orders.firstObject.products.length'),
+      1,
+      'fragment array length is correct'
+    );
   });
 
   test('Fragments can be created with nested object literals', function (assert) {
@@ -244,7 +237,7 @@ module('integration - Nested fragments', function (hooks) {
     );
   });
 
-  test('Nested fragments can be copied', function (assert) {
+  test('Nested fragments can be copied', async function (assert) {
     let data = {
       info: {
         name: 'Petyr Baelish',
@@ -270,47 +263,46 @@ module('integration - Nested fragments', function (hooks) {
       },
     });
 
-    return store.find('user', 1).then((user) => {
-      let info = user.get('info').copy();
+    const user = await store.find('user', 1);
+    let info = user.get('info').copy();
 
-      assert.deepEqual(
-        info.get('notes').toArray(),
-        data.info.notes,
-        'nested fragment arrays are copied'
-      );
-      assert.ok(
-        info.get('notes') !== user.get('info.notes'),
-        'nested fragment array copies are new fragment arrays'
-      );
+    assert.deepEqual(
+      info.get('notes').toArray(),
+      data.info.notes,
+      'nested fragment arrays are copied'
+    );
+    assert.ok(
+      info.get('notes') !== user.get('info.notes'),
+      'nested fragment array copies are new fragment arrays'
+    );
 
-      let orders = user.get('orders').copy();
-      let order = orders.objectAt(0);
+    let orders = user.get('orders').copy();
+    let order = orders.objectAt(0);
 
-      assert.equal(
-        order.get('recurring'),
-        data.orders[0].recurring,
-        'nested fragments are copied'
-      );
-      assert.ok(
-        order !== user.get('orders.firstObject'),
-        'nested fragment copies are new fragments'
-      );
+    assert.equal(
+      order.get('recurring'),
+      data.orders[0].recurring,
+      'nested fragments are copied'
+    );
+    assert.ok(
+      order !== user.get('orders.firstObject'),
+      'nested fragment copies are new fragments'
+    );
 
-      let product = order.get('product');
+    let product = order.get('product');
 
-      assert.equal(
-        product.get('name'),
-        data.orders[0].product.name,
-        'nested fragments are copied'
-      );
-      assert.ok(
-        product !== user.get('orders.firstObject.product'),
-        'nested fragment copies are new fragments'
-      );
-    });
+    assert.equal(
+      product.get('name'),
+      data.orders[0].product.name,
+      'nested fragments are copied'
+    );
+    assert.ok(
+      product !== user.get('orders.firstObject.product'),
+      'nested fragment copies are new fragments'
+    );
   });
 
-  test('Nested fragments are destroyed when the owner record is destroyed', function (assert) {
+  test('Nested fragments are destroyed when the owner record is destroyed', async function (assert) {
     store.push({
       data: {
         type: 'user',
@@ -336,31 +328,27 @@ module('integration - Nested fragments', function (hooks) {
       },
     });
 
-    return store.find('user', 1).then((user) => {
-      let info = user.get('info');
-      let notes = info.get('notes');
-      let orders = user.get('orders');
-      let order = orders.get('firstObject');
-      let products = order.get('products');
-      let product = products.get('firstObject');
+    const user = await store.find('user', 1);
+    let info = user.get('info');
+    let notes = info.get('notes');
+    let orders = user.get('orders');
+    let order = orders.get('firstObject');
+    let products = order.get('products');
+    let product = products.get('firstObject');
 
-      user.unloadRecord();
+    user.unloadRecord();
 
-      schedule('destroy', () => {
-        assert.ok(user.get('isDestroying'), 'the user is being destroyed');
-        assert.ok(info.get('isDestroying'), 'the info is being destroyed');
-        assert.ok(notes.get('isDestroying'), 'the notes are being destroyed');
-        assert.ok(orders.get('isDestroying'), 'the orders are being destroyed');
-        assert.ok(order.get('isDestroying'), 'the order is being destroyed');
-        assert.ok(
-          products.get('isDestroying'),
-          'the products are being destroyed'
-        );
-        assert.ok(
-          product.get('isDestroying'),
-          'the product is being destroyed'
-        );
-      });
+    schedule('destroy', () => {
+      assert.ok(user.get('isDestroying'), 'the user is being destroyed');
+      assert.ok(info.get('isDestroying'), 'the info is being destroyed');
+      assert.ok(notes.get('isDestroying'), 'the notes are being destroyed');
+      assert.ok(orders.get('isDestroying'), 'the orders are being destroyed');
+      assert.ok(order.get('isDestroying'), 'the order is being destroyed');
+      assert.ok(
+        products.get('isDestroying'),
+        'the products are being destroyed'
+      );
+      assert.ok(product.get('isDestroying'), 'the product is being destroyed');
     });
   });
 });
