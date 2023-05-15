@@ -7,7 +7,7 @@ import EmberObject from '@ember/object';
 import { all } from 'rsvp';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Address from 'dummy/models/address';
 
 let owner, store, people;

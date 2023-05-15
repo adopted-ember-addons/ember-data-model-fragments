@@ -8,9 +8,7 @@ import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
-
-import { setupApplicationTest } from 'ember-qunit';
-// import Person from 'dummy/models/person';
+import { setupApplicationTest } from '../helpers';
 
 let store;
 class Person extends Model {

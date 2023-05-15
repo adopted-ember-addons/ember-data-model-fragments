@@ -11,7 +11,7 @@ import ObjectProxy from '@ember/object/proxy';
 import { copy } from 'ember-copy';
 import MF from 'ember-data-model-fragments';
 import { module, test, skip } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 let store, owner, server;
 

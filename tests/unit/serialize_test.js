@@ -1,6 +1,6 @@
 import { isEmpty } from '@ember/utils';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import JSONSerializer from '@ember-data/serializer/json';
 import Person from 'dummy/models/person';
 import { fragmentArray, array } from 'ember-data-model-fragments/attributes';

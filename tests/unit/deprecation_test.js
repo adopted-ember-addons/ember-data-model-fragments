@@ -1,4 +1,4 @@
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import { module } from 'qunit';
 
 module('unit - Deprecations', function (hooks) {

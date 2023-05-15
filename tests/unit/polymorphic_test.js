@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Animal from 'dummy/models/animal';
 import Lion from 'dummy/models/lion';
 import Elephant from 'dummy/models/elephant';

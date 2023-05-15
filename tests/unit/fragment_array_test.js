@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 let store;
 
 // `contains` was deprecated in Ember 2.8. Replaced with `includes`.

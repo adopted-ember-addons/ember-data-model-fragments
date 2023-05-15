@@ -2,7 +2,7 @@ import { all } from 'rsvp';
 import { Copyable } from 'ember-copy';
 import Ember from 'ember';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 import Lion from 'dummy/models/lion';
 import Elephant from 'dummy/models/elephant';

@@ -6,7 +6,7 @@ import { all } from 'rsvp';
 import { copy } from 'ember-copy';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Name from 'dummy/models/name';
 import Pretender from 'pretender';
 

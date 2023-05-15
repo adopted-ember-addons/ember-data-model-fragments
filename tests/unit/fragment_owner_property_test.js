@@ -2,7 +2,7 @@ import Model from '@ember-data/model';
 import { fragmentOwner } from 'ember-data-model-fragments/attributes';
 import { all } from 'rsvp';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 
 let store, owner;
 

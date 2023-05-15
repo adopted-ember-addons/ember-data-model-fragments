@@ -3,7 +3,7 @@ import { copy } from 'ember-copy';
 import { schedule } from '@ember/runloop';
 import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Order from 'dummy/models/order';
 import Product from 'dummy/models/product';
 import Pretender from 'pretender';
