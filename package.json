@@ -72,7 +72,8 @@
     "pretender": "^3.4.3",
     "qunit-dom": "^1.6.0",
     "release-it": "^14.2.1",
-    "release-it-lerna-changelog": "^3.1.0"
+    "release-it-lerna-changelog": "^3.1.0",
+    "webpack": "5"
   },
   "engines": {
     "node": ">= 14"
