@@ -16,14 +16,6 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   setupApplicationTest(hooks);
 
   hooks.beforeEach(function () {
-    this.teardown = function () {
-      owner = null;
-      store = null;
-      people = null;
-    };
-  });
-
-  hooks.beforeEach(function () {
     owner = this.owner;
 
     store = owner.lookup('service:store');
@@ -65,6 +57,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
         addresses: null,
       },
     ];
+  });
+
+  hooks.afterEach(function () {
+    owner = null;
+    store = null;
+    people = null;
   });
 
   function pushPerson(id) {
