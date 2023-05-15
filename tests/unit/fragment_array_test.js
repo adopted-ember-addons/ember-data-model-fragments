@@ -2,12 +2,6 @@ import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 let store;
 
-// `contains` was deprecated in Ember 2.8. Replaced with `includes`.
-// Use `includes` when possible because if using >= ember-2-8, `contains` will produce a deprecation.
-function includes(array, item) {
-  return array.includes ? array.includes(item) : array.contains(item);
-}
-
 module('unit - `MF.fragmentArray`', function (hooks) {
   setupApplicationTest(hooks);
 
@@ -191,7 +185,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       length - 1,
       'property size is correct'
     );
-    assert.ok(!includes(fragments, fragment), 'fragment is removed');
+    assert.ok(!fragments.includes(fragment), 'fragment is removed');
   });
 
   test('changes to array contents change the fragment array `hasDirtyAttributes` property', async function (assert) {
