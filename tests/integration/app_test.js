@@ -1,5 +1,6 @@
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
+import { getDeprecations } from '@ember/test-helpers';
 
 module('Integration | Application', function (hooks) {
   setupApplicationTest(hooks);
@@ -9,5 +10,6 @@ module('Integration | Application', function (hooks) {
       this.owner.hasRegistration('transform:fragment'),
       'the model fragments initilizer ran'
     );
+    assert.deepEqual(getDeprecations(), [], 'expected no deprecations');
   });
 });
