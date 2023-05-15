@@ -81,7 +81,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
 
     assert.ok(isArray(addresses), 'property is array-like');
     assert.ok(
@@ -94,7 +94,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
 
     assert.ok(
       addresses.every((address) => {
@@ -108,8 +108,8 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
-    const length = addresses.get('length');
+    const addresses = person.addresses;
+    const length = addresses.length;
 
     const address = store.createFragment('address', {
       street: '1 Dungeon Cell',
@@ -121,7 +121,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     addresses.addFragment(address);
 
     assert.equal(
-      addresses.get('length'),
+      addresses.length,
       length + 1,
       'address property size is correct'
     );
@@ -136,7 +136,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
 
     const address = store.createFragment('address', {
       street: '1 Dungeon Cell',
@@ -195,7 +195,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
 
     assert.throws(() => {
       const otherPerson = store.createRecord('person');
@@ -212,10 +212,10 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       store.find('person', 1),
       store.find('person', 2),
     ]);
-    const address = people[0].get('addresses.firstObject');
+    const address = people[0].addresses.firstObject;
 
     assert.throws(() => {
-      people[1].get('addresses').addFragment(address);
+      people[1].addresses.addFragment(address);
     }, 'error is thrown when adding a fragment from another record');
   });
 
@@ -223,7 +223,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
 
     const address = store.createFragment('address', {
       street: '1 Dungeon Cell',
@@ -235,17 +235,17 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     person.set('addresses', [address]);
 
     assert.equal(
-      person.get('addresses'),
+      person.addresses,
       addresses,
       'fragment array is the same object'
     );
     assert.equal(
-      person.get('addresses.length'),
+      person.addresses.length,
       1,
       'fragment array has the correct length'
     );
     assert.equal(
-      person.get('addresses.firstObject'),
+      person.addresses.firstObject,
       address,
       'fragment array contains the new fragment'
     );
@@ -269,12 +269,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    assert.ok(isArray(person.get('addresses')), 'defaults to an array');
-    assert.ok(isEmpty(person.get('addresses')), 'default array is empty');
+    assert.ok(isArray(person.addresses), 'defaults to an array');
+    assert.ok(isEmpty(person.addresses), 'default array is empty');
 
     const person2 = await store.find('person', 2);
     assert.ok(
-      person.get('addresses') !== person2.get('addresses'),
+      person.addresses !== person2.addresses,
       'default array is unique'
     );
   });
@@ -283,7 +283,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    assert.equal(person.get('hobbies'), null, 'defaults to null');
+    assert.equal(person.hobbies, null, 'defaults to null');
 
     const hobbies = [
       store.createFragment('hobby', {
@@ -292,14 +292,14 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     ];
 
     person.set('hobbies', hobbies);
-    assert.equal(person.get('hobbies.length'), 1, 'can be set to an array');
+    assert.equal(person.hobbies.length, 1, 'can be set to an array');
   });
 
   test('null values are allowed', async function (assert) {
     pushPerson(3);
 
     const person = await store.find('person', 3);
-    assert.equal(person.get('addresses'), null, 'property is null');
+    assert.equal(person.addresses, null, 'property is null');
   });
 
   test('setting to null is allowed', async function (assert) {
@@ -308,7 +308,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const person = await store.find('person', 1);
     person.set('addresses', null);
 
-    assert.equal(person.get('addresses'), null, 'property is null');
+    assert.equal(person.addresses, null, 'property is null');
   });
 
   test('fragments are created from an array of object literals when creating a record', function (assert) {
@@ -328,11 +328,11 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     });
 
     assert.ok(
-      person.get('addresses.firstObject') instanceof MF.Fragment,
+      person.addresses.firstObject instanceof MF.Fragment,
       'a `MF.Fragment` instance is created'
     );
     assert.equal(
-      person.get('addresses.firstObject.street'),
+      person.addresses.firstObject.street,
       address.street,
       'fragment has correct values'
     );
@@ -364,11 +364,11 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     person.set('addresses', [address]);
 
     assert.ok(
-      person.get('addresses.firstObject') instanceof MF.Fragment,
+      person.addresses.firstObject instanceof MF.Fragment,
       'a `MF.Fragment` instance is created'
     );
     assert.equal(
-      person.get('addresses.firstObject.street'),
+      person.addresses.firstObject.street,
       address.street,
       'fragment has correct values'
     );
@@ -404,17 +404,17 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const address = person.get('addresses.firstObject');
+    const address = person.addresses.firstObject;
 
     person.set('addresses', [newAddress]);
 
     assert.equal(
       address,
-      person.get('addresses.firstObject'),
+      person.addresses.firstObject,
       'fragment instances are reused'
     );
     assert.equal(
-      person.get('addresses.firstObject.street'),
+      person.addresses.firstObject.street,
       newAddress.street,
       'fragment has correct values'
     );
@@ -449,21 +449,21 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     let throne = store.createRecord('throne', { name: 'Iron' });
 
     assert.equal(
-      throne.get('addresses.firstObject.street'),
+      throne.addresses.firstObject.street,
       defaultValue[0].street,
       'the default value is used when the value has not been specified'
     );
 
     throne.set('addresses', null);
     assert.equal(
-      throne.get('addresses'),
+      throne.addresses,
       null,
       'the default value is not used when the value is set to null'
     );
 
     throne = store.createRecord('throne', { name: 'Iron', addresses: null });
     assert.equal(
-      throne.get('addresses'),
+      throne.addresses,
       null,
       'the default value is not used when the value is initialized to null'
     );
@@ -494,7 +494,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const sword = store.createRecord('sword', { name: 'Ice' });
 
     assert.equal(
-      sword.get('addresses.firstObject.street'),
+      sword.addresses.firstObject.street,
       defaultValue[0].street,
       'the default value is correct'
     );
@@ -526,7 +526,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const sword = store.createRecord('sword', { name: 'Ice' });
 
     assert.equal(
-      sword.get('addresses.firstObject.street'),
+      sword.addresses.firstObject.street,
       defaultValue[0].street,
       'the default value is correct'
     );
@@ -536,7 +536,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
     const firstAddress = addresses.objectAt(0);
     const secondAddress = addresses.objectAt(1);
     person.set('addresses', null);
@@ -544,17 +544,17 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     person.unloadRecord();
 
     schedule('destroy', () => {
-      assert.ok(person.get('isDestroying'), 'the model is being destroyed');
+      assert.ok(person.isDestroying, 'the model is being destroyed');
       assert.ok(
-        addresses.get('isDestroying'),
+        addresses.isDestroying,
         'the fragment array is being destroyed'
       );
       assert.ok(
-        firstAddress.get('isDestroying'),
+        firstAddress.isDestroying,
         'the first fragment is being destroyed'
       );
       assert.ok(
-        secondAddress.get('isDestroying'),
+        secondAddress.isDestroying,
         'the second fragment is being destroyed'
       );
     });
@@ -564,7 +564,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    const addresses = person.get('addresses');
+    const addresses = person.addresses;
     const firstAddress = addresses.objectAt(0);
     const secondAddress = addresses.objectAt(1);
     addresses.removeAt(0);
@@ -572,17 +572,17 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     person.unloadRecord();
 
     schedule('destroy', () => {
-      assert.ok(person.get('isDestroying'), 'the model is being destroyed');
+      assert.ok(person.isDestroying, 'the model is being destroyed');
       assert.ok(
-        addresses.get('isDestroying'),
+        addresses.isDestroying,
         'the fragment array is being destroyed'
       );
       assert.ok(
-        firstAddress.get('isDestroying'),
+        firstAddress.isDestroying,
         'the removed fragment is being destroyed'
       );
       assert.ok(
-        secondAddress.get('isDestroying'),
+        secondAddress.isDestroying,
         'the remaining fragment is being destroyed'
       );
     });

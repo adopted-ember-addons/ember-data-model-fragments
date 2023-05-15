@@ -43,12 +43,12 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     const person = await store.find('person', 1);
     assert.ok(
-      person.get('name') instanceof Name,
+      person.name instanceof Name,
       'name property is an `MF.Fragment` instance'
     );
 
     assert.equal(
-      person.get('name.first'),
+      person.name.first,
       'Tyrion',
       'nested properties have original value'
     );
@@ -71,11 +71,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     person.set('name', name);
 
-    assert.equal(
-      person.get('name.first'),
-      'Davos',
-      'new fragment is correctly set'
-    );
+    assert.equal(person.name.first, 'Davos', 'new fragment is correctly set');
   });
 
   test('a fragment set to null can be recreated through the store with a non null value', async function (assert) {
@@ -102,7 +98,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
     const person = await store.find('person', 1);
-    assert.equal(person.get('name.first'), 'Bob', 'New name is set correctly');
+    assert.equal(person.name.first, 'Bob', 'New name is set correctly');
   });
 
   test('setting to a non-fragment or object literal throws an error', async function (assert) {
@@ -147,7 +143,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       store.find('person', 2),
     ]);
     assert.throws(() => {
-      people[1].set('name', people[0].get('name'));
+      people[1].set('name', people[0].name);
     }, 'error is thrown when setting to a fragment of another record');
   });
 
@@ -163,7 +159,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    assert.equal(person.get('name'), null, 'property is null');
+    assert.equal(person.name, null, 'property is null');
   });
 
   test('setting to null is allowed', async function (assert) {
@@ -182,7 +178,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     const person = await store.find('person', 1);
     person.set('name', null);
-    assert.equal(person.get('name'), null, 'property is null');
+    assert.equal(person.name, null, 'property is null');
   });
 
   test('fragments are created from object literals when creating a record', function (assert) {
@@ -196,14 +192,10 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     assert.ok(
-      person.get('name') instanceof MF.Fragment,
+      person.name instanceof MF.Fragment,
       'a `MF.Fragment` instance is created'
     );
-    assert.equal(
-      person.get('name.first'),
-      name.first,
-      'fragment has correct values'
-    );
+    assert.equal(person.name.first, name.first, 'fragment has correct values');
   });
 
   test('setting a fragment to an object literal creates a new fragment', async function (assert) {
@@ -226,14 +218,10 @@ module('unit - `MF.fragment` property', function (hooks) {
     person.set('name', name);
 
     assert.ok(
-      person.get('name') instanceof MF.Fragment,
+      person.name instanceof MF.Fragment,
       'a `MF.Fragment` instance is created'
     );
-    assert.equal(
-      person.get('name.first'),
-      name.first,
-      'fragment has correct values'
-    );
+    assert.equal(person.name.first, name.first, 'fragment has correct values');
   });
 
   test('setting a fragment to an object literal reuses an existing fragment', async function (assert) {
@@ -256,13 +244,13 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const name = person.get('name');
+    const name = person.name;
 
     person.set('name', newName);
 
-    assert.equal(name, person.get('name'), 'fragment instances are reused');
+    assert.equal(name, person.name, 'fragment instances are reused');
     assert.equal(
-      person.get('name.first'),
+      person.name.first,
       newName.first,
       'fragment has correct values'
     );
@@ -297,14 +285,14 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     await ship.save();
     assert.equal(
-      ship.get('name.first'),
+      ship.name.first,
       defaultValue.first,
       'the value is set as it was saved'
     );
 
     ship.set('name.first', null);
     assert.equal(
-      ship.get('name.first'),
+      ship.name.first,
       null,
       'the value is successfully set to null'
     );
@@ -325,21 +313,21 @@ module('unit - `MF.fragment` property', function (hooks) {
     let ship = store.createRecord('ship');
 
     assert.equal(
-      ship.get('name.first'),
+      ship.name.first,
       defaultValue.first,
       'the default value is used when the value has not been specified'
     );
 
     ship.set('name', null);
     assert.equal(
-      ship.get('name'),
+      ship.name,
       null,
       'the default value is not used when the value is set to null'
     );
 
     ship = store.createRecord('ship', { name: null });
     assert.equal(
-      ship.get('name'),
+      ship.name,
       null,
       'the default value is not used when the value is initialized to null'
     );
@@ -365,7 +353,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     const sword = store.createRecord('sword');
 
     assert.equal(
-      sword.get('name.first'),
+      sword.name.first,
       defaultValue.first,
       'the default value is correct'
     );
@@ -392,7 +380,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     const sword = store.createRecord('sword');
 
     assert.equal(
-      sword.get('name.first'),
+      sword.name.first,
       defaultValue.first,
       'the default value is correct'
     );
@@ -418,7 +406,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     const sword = store.createRecord('sword');
 
     assert.equal(
-      sword.get('name.first'),
+      sword.name.first,
       defaultValue.first,
       'the default value is correct'
     );
@@ -439,14 +427,14 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const name = person.get('name');
+    const name = person.name;
     person.set('name', null);
 
     person.unloadRecord();
 
     schedule('destroy', () => {
-      assert.ok(person.get('isDestroying'), 'the model is being destroyed');
-      assert.ok(name.get('isDestroying'), 'the fragment is being destroyed');
+      assert.ok(person.isDestroying, 'the model is being destroyed');
+      assert.ok(name.isDestroying, 'the fragment is being destroyed');
     });
   });
 
@@ -465,27 +453,21 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const oldName = person.get('name');
+    const oldName = person.name;
     const newName = store.createFragment('name');
     person.set('name', newName);
 
     assert.ok(
-      !oldName.get('isDestroying'),
+      !oldName.isDestroying,
       "don't destroy the old fragment yet because we could rollback"
     );
 
     person.unloadRecord();
 
     schedule('destroy', () => {
-      assert.ok(person.get('isDestroying'), 'the model is being destroyed');
-      assert.ok(
-        oldName.get('isDestroying'),
-        'the old fragment is being destroyed'
-      );
-      assert.ok(
-        newName.get('isDestroying'),
-        'the new fragment is being destroyed'
-      );
+      assert.ok(person.isDestroying, 'the model is being destroyed');
+      assert.ok(oldName.isDestroying, 'the old fragment is being destroyed');
+      assert.ok(newName.isDestroying, 'the new fragment is being destroyed');
     });
   });
 });

@@ -34,10 +34,10 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const name = person.get('name');
+    const name = person.name;
 
     assert.equal(
-      name.get('person'),
+      name.person,
       person,
       'fragment owner property is reference to the owner record'
     );
@@ -54,7 +54,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
 
     assert.throws(
       () => {
-        invalid.get('owner');
+        invalid.owner;
       },
       /Fragment owner properties can only be used on fragments/,
       'getting fragment owner on non-fragment throws an error'
@@ -92,7 +92,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
       store.find('person', 1),
       store.find('person', 2),
     ]);
-    const name = people[0].get('name');
+    const name = people[0].name;
 
     assert.throws(() => {
       name.set('person', people[1]);
@@ -119,14 +119,10 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
       last: 'Stark',
     });
 
-    assert.ok(!name.get('person'), 'fragment owner property is null');
+    assert.ok(!name.person, 'fragment owner property is null');
 
     person.set('name', name);
 
-    assert.equal(
-      name.get('person'),
-      person,
-      'fragment owner property is updated'
-    );
+    assert.equal(name.person, person, 'fragment owner property is updated');
   });
 });

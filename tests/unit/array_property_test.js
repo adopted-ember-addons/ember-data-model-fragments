@@ -53,7 +53,7 @@ module('unit - `MF.array` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const titles = person.get('titles');
+    const titles = person.titles;
 
     assert.ok(isArray(titles), 'property is array-like');
 
@@ -78,7 +78,7 @@ module('unit - `MF.array` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    assert.equal(person.get('titles'), null, 'property is null');
+    assert.equal(person.titles, null, 'property is null');
   });
 
   test('setting to null is allowed', async function (assert) {
@@ -100,7 +100,7 @@ module('unit - `MF.array` property', function (hooks) {
     const person = await store.find('person', 1);
     person.set('titles', null);
 
-    assert.equal(person.get('titles'), null, 'property is null');
+    assert.equal(person.titles, null, 'property is null');
   });
 
   test('setting to array value is allowed', async function (assert) {
@@ -123,7 +123,7 @@ module('unit - `MF.array` property', function (hooks) {
     person.set('titles', ['hello', 'there']);
 
     assert.deepEqual(
-      person.get('titles').toArray(),
+      person.titles.toArray(),
       ['hello', 'there'],
       'property has correct values'
     );
@@ -148,7 +148,7 @@ module('unit - `MF.array` property', function (hooks) {
     ]);
     person.set('titles', null);
 
-    assert.equal(person.get('titles'), null, 'property is null');
+    assert.equal(person.titles, null, 'property is null');
   });
 
   test('array properties default to an empty array-ish', function (assert) {
@@ -156,11 +156,7 @@ module('unit - `MF.array` property', function (hooks) {
       nickName: 'Boros Blount',
     });
 
-    assert.deepEqual(
-      person.get('titles').toArray(),
-      [],
-      'default value is correct'
-    );
+    assert.deepEqual(person.titles.toArray(), [], 'default value is correct');
   });
 
   test('array properties can have default values', function (assert) {
@@ -172,16 +168,8 @@ module('unit - `MF.array` property', function (hooks) {
       nickName: 'Barristan Selmy',
     });
 
-    assert.equal(
-      person.get('titles.length'),
-      1,
-      'default value length is correct'
-    );
-    assert.equal(
-      person.get('titles.firstObject'),
-      'Ser',
-      'default value is correct'
-    );
+    assert.equal(person.titles.length, 1, 'default value length is correct');
+    assert.equal(person.titles.firstObject, 'Ser', 'default value is correct');
   });
 
   test('default values can be functions', function (assert) {
@@ -197,13 +185,9 @@ module('unit - `MF.array` property', function (hooks) {
       nickName: 'Oberyn Martell',
     });
 
+    assert.equal(person.titles.length, 1, 'default value length is correct');
     assert.equal(
-      person.get('titles.length'),
-      1,
-      'default value length is correct'
-    );
-    assert.equal(
-      person.get('titles.firstObject'),
+      person.titles.firstObject,
       'Viper',
       'default value is correct'
     );
@@ -222,13 +206,9 @@ module('unit - `MF.array` property', function (hooks) {
       nickName: 'Oberyn Martell',
     });
 
+    assert.equal(person.titles.length, 2, 'default value length is correct');
     assert.equal(
-      person.get('titles.length'),
-      2,
-      'default value length is correct'
-    );
-    assert.equal(
-      person.get('titles.firstObject'),
+      person.titles.firstObject,
       'Viper',
       'default value is correct'
     );
@@ -254,7 +234,7 @@ module('unit - `MF.array` property', function (hooks) {
     };
 
     const person = await store.find('person', 1);
-    const titles = person.get('titles');
+    const titles = person.titles;
     titles.addArrayObserver(this, {
       willChange: 'arrayWillChange',
       didChange: 'arrayDidChange',

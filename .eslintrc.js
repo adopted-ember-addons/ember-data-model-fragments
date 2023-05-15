@@ -37,6 +37,7 @@ module.exports = {
     'no-useless-rename': 'error',
     'prefer-spread': 'error',
     'prefer-template': 'error',
+    'ember/no-get': ['error', { catchUnsafeObjects: true }],
   },
   overrides: [
     // node files

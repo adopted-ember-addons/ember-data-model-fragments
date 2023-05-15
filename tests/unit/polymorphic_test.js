@@ -48,14 +48,14 @@ module('unit - Polymorphism', function (hooks) {
     });
 
     const zoo2 = await store.find('zoo', 1);
-    assert.equal(zoo2.get('name'), 'Chilly Zoo', 'zoo name is correct');
-    assert.equal(zoo2.get('city'), 'Winterfell', 'zoo city is correct');
+    assert.equal(zoo2.name, 'Chilly Zoo', 'zoo name is correct');
+    assert.equal(zoo2.city, 'Winterfell', 'zoo city is correct');
 
-    const star = zoo2.get('star');
+    const star = zoo2.star;
     assert.ok(star instanceof Animal, "zoo's star is an animal");
-    assert.equal(star.get('name'), 'Mittens', 'animal name is correct');
+    assert.equal(star.name, 'Mittens', 'animal name is correct');
     assert.ok(star instanceof Lion, "zoo's star is a lion");
-    assert.ok(star.get('hasManes'), 'lion has manes');
+    assert.ok(star.hasManes, 'lion has manes');
   });
 
   test('fragment array properties support polymorphism', async function (assert) {
@@ -68,31 +68,19 @@ module('unit - Polymorphism', function (hooks) {
     });
 
     const zoo2 = await store.find('zoo', 1);
-    const animals = zoo2.get('animals');
-    assert.equal(animals.get('length'), 2);
+    const animals = zoo2.animals;
+    assert.equal(animals.length, 2);
 
     const first = animals.objectAt(0);
     assert.ok(first instanceof Animal);
-    assert.equal(
-      first.get('name'),
-      'Mittens',
-      "first animal's name is correct"
-    );
+    assert.equal(first.name, 'Mittens', "first animal's name is correct");
     assert.ok(first instanceof Lion);
-    assert.ok(first.get('hasManes'), 'lion has manes');
+    assert.ok(first.hasManes, 'lion has manes');
 
     const second = animals.objectAt(1);
     assert.ok(second instanceof Animal);
-    assert.equal(
-      second.get('name'),
-      'Snuitje',
-      "second animal's name is correct"
-    );
+    assert.equal(second.name, 'Snuitje', "second animal's name is correct");
     assert.ok(second instanceof Elephant);
-    assert.equal(
-      second.get('trunkLength'),
-      4,
-      "elephant's trunk length is correct"
-    );
+    assert.equal(second.trunkLength, 4, "elephant's trunk length is correct");
   });
 });

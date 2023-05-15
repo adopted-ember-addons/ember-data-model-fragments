@@ -52,7 +52,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       store.find('person', 1),
       store.find('person', 2),
     ]);
-    const copy = people[0].get('name').copy();
+    const copy = people[0].name.copy();
 
     people[1].set('name', copy);
 
@@ -74,10 +74,10 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const copy = person.get('name').copy();
+    const copy = person.name.copy();
 
-    assert.ok(copy.get('first'), 'Jon');
-    assert.ok(copy.get('last'), 'Snow');
+    assert.ok(copy.first, 'Jon');
+    assert.ok(copy.last, 'Snow');
   });
 
   test('fragments are `Ember.Comparable`', function (assert) {
@@ -109,7 +109,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   test('newly create fragments start in the new state', function (assert) {
     const fragment = store.createFragment('name');
 
-    assert.ok(fragment.get('isNew'), 'fragments start as new');
+    assert.ok(fragment.isNew, 'fragments start as new');
   });
 
   test("changes to fragments are indicated in the owner record's `changedAttributes`", async function (assert) {
@@ -127,7 +127,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const name = person.get('name');
+    const name = person.name;
 
     name.set('last', 'Baratheon');
 
@@ -189,19 +189,19 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const name = person.get('name');
+    const name = person.name;
 
     name.set('last', 'Bolton');
     name.rollbackAttributes();
 
-    assert.ok(name.get('last', 'Snow'), 'fragment properties are restored');
-    assert.ok(!name.get('hasDirtyAttributes'), 'fragment is in clean state');
+    assert.strictEqual(name.last, 'Snow', 'fragment properties are restored');
+    assert.ok(!name.hasDirtyAttributes, 'fragment is in clean state');
   });
 
   test('fragments without an owner can be destroyed', function (assert) {
     const fragment = store.createFragment('name');
     fragment.destroy();
-    assert.ok(fragment.get('isDestroying'), 'the fragment is being destroyed');
+    assert.ok(fragment.isDestroying, 'the fragment is being destroyed');
   });
 
   test('fragments unloaded/reload w/ relationship', function (assert) {
@@ -251,27 +251,23 @@ module('unit - `MF.Fragment`', function (hooks) {
     let zoo = pushZoo();
 
     // Prime the relationship and fragment
-    zoo.get('manager');
-    zoo.get('star');
+    zoo.manager;
+    zoo.star;
 
+    assert.equal(person.title, 'Zoo Manager', 'Person has the right title');
     assert.equal(
-      person.get('title'),
-      'Zoo Manager',
-      'Person has the right title'
-    );
-    assert.equal(
-      zoo.get('manager.content'),
+      zoo.manager.content,
       person,
       'Manager relationship was correctly loaded'
     );
     assert.equal(
-      zoo.get('star.name'),
+      zoo.star.name,
       'Sabu',
       'Elephant fragment has the right name.'
     );
     assert.notOk(isUnloaded(person), 'Person is no destroyed');
     assert.notOk(isUnloaded(zoo), 'Zoo is not destroyed');
-    assert.notOk(isUnloaded(zoo.get('star')), 'Fragment is not destroyed');
+    assert.notOk(isUnloaded(zoo.star), 'Fragment is not destroyed');
 
     // Unload the record
     zoo.unloadRecord();
@@ -285,18 +281,18 @@ module('unit - `MF.Fragment`', function (hooks) {
     // Load a new record
     const origZoo = zoo;
     zoo = pushZoo();
-    zoo.get('star'); // Prime the fragment on the new model
+    zoo.star; // Prime the fragment on the new model
 
     // Make sure the reloaded record is new and has the right data
     assert.notOk(isUnloaded(zoo), 'Zoo was unloaded');
-    assert.notOk(isUnloaded(zoo.get('star')), 'Fragment is now unloaded');
+    assert.notOk(isUnloaded(zoo.star), 'Fragment is now unloaded');
     assert.equal(
-      zoo.get('manager.content'),
+      zoo.manager.content,
       person,
       'Manager relationship was correctly loaded'
     );
     assert.equal(
-      zoo.get('star.name'),
+      zoo.star.name,
       'Sabu',
       'Elephant fragment has the right name.'
     );
@@ -305,16 +301,13 @@ module('unit - `MF.Fragment`', function (hooks) {
       zoo !== origZoo,
       'A different instance of the zoo model was loaded'
     );
-    assert.ok(
-      zoo.get('star') !== origZoo.get('star'),
-      'Fragments were not reused'
-    );
+    assert.ok(zoo.star !== origZoo.star, 'Fragments were not reused');
   });
 
   test('fragments call ready callback when they are created', function (assert) {
     const name = store.createFragment('name');
     assert.ok(
-      name.get('readyWasCalled'),
+      name.readyWasCalled,
       'when making fragment directly with store.createFragment'
     );
 
@@ -324,11 +317,11 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     assert.ok(
-      person.get('name.readyWasCalled'),
+      person.name.readyWasCalled,
       'when creating model that has fragment'
     );
     assert.ok(
-      person.get('names').isEvery('readyWasCalled'),
+      person.names.isEvery('readyWasCalled'),
       'when creating model that has fragmentArray'
     );
   });

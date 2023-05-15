@@ -23,10 +23,7 @@ module('unit - `DS.Store`', function (hooks) {
     const address = store.createFragment('name');
 
     assert.ok(address instanceof Name, 'fragment is correct type');
-    assert.ok(
-      address.get('hasDirtyAttributes'),
-      'fragment starts in dirty state'
-    );
+    assert.ok(address.hasDirtyAttributes, 'fragment starts in dirty state');
   });
 
   test('attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error', function (assert) {
@@ -98,13 +95,13 @@ module('unit - `DS.Store`', function (hooks) {
         last: 'Stark',
       },
     });
-    const name = person.get('name');
+    const name = person.name;
 
     store.unloadAll();
 
     schedule('destroy', () => {
-      assert.ok(person.get('isDestroying'), 'the model is being destroyed');
-      assert.ok(name.get('isDestroying'), 'the fragment is being destroyed');
+      assert.ok(person.isDestroying, 'the model is being destroyed');
+      assert.ok(name.isDestroying, 'the fragment is being destroyed');
     });
   });
 });

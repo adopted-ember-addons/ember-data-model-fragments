@@ -32,20 +32,16 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const copy = person.get('names').copy();
+    const copy = person.names.copy();
 
+    assert.equal(copy.length, person.names.length, "copy's size is correct");
     assert.equal(
-      copy.length,
-      person.get('names.length'),
-      "copy's size is correct"
-    );
-    assert.equal(
-      copy[0].get('first'),
+      copy[0].first,
       data.names[0].first,
       'child fragments are copied'
     );
     assert.ok(
-      copy[0] !== person.get('names.firstObject'),
+      copy[0] !== person.names.firstObject,
       'copied fragments are new fragments'
     );
   });
@@ -67,19 +63,15 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const length = fragments.get('length');
+    const fragments = person.names;
+    const length = fragments.length;
 
     const fragment = fragments.createFragment({
       first: 'Hugor',
       last: 'Hill',
     });
 
-    assert.equal(
-      fragments.get('length'),
-      length + 1,
-      'property size is correct'
-    );
+    assert.equal(fragments.length, length + 1, 'property size is correct');
     assert.equal(
       fragments.indexOf(fragment),
       length,
@@ -104,8 +96,8 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const length = fragments.get('length');
+    const fragments = person.names;
+    const length = fragments.length;
 
     const fragment = store.createFragment('name', {
       first: 'Yollo',
@@ -113,11 +105,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
     fragments.addFragment(fragment);
 
-    assert.equal(
-      fragments.get('length'),
-      length + 1,
-      'property size is correct'
-    );
+    assert.equal(fragments.length, length + 1, 'property size is correct');
     assert.equal(
       fragments.indexOf(fragment),
       length,
@@ -142,15 +130,11 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const length = fragments.get('length');
+    const fragments = person.names;
+    const length = fragments.length;
     fragments.addFragment({ first: 'Yollo', last: 'Baggins' });
 
-    assert.equal(
-      fragments.get('length'),
-      length + 1,
-      'property size is correct'
-    );
+    assert.equal(fragments.length, length + 1, 'property size is correct');
     assert.equal(fragments.objectAt(0).first, 'Tyrion');
     assert.equal(fragments.objectAt(0).last, 'Lannister');
     assert.equal(fragments.objectAt(1).first, 'Yollo');
@@ -174,17 +158,13 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const fragment = fragments.get('firstObject');
-    const length = fragments.get('length');
+    const fragments = person.names;
+    const fragment = fragments.firstObject;
+    const length = fragments.length;
 
     fragments.removeFragment(fragment);
 
-    assert.equal(
-      fragments.get('length'),
-      length - 1,
-      'property size is correct'
-    );
+    assert.equal(fragments.length, length - 1, 'property size is correct');
     assert.ok(!fragments.includes(fragment), 'fragment is removed');
   });
 
@@ -209,43 +189,43 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const fragment = fragments.get('firstObject');
+    const fragments = person.names;
+    const fragment = fragments.firstObject;
     const newFragment = store.createFragment('name', {
       first: 'Rhaenys',
       last: 'Targaryen',
     });
 
     assert.ok(
-      !fragments.get('hasDirtyAttributes'),
+      !fragments.hasDirtyAttributes,
       'fragment array is initially in a clean state'
     );
 
     fragments.removeFragment(fragment);
 
     assert.ok(
-      fragments.get('hasDirtyAttributes'),
+      fragments.hasDirtyAttributes,
       'fragment array is in dirty state after removal'
     );
 
     fragments.unshiftObject(fragment);
 
     assert.ok(
-      !fragments.get('hasDirtyAttributes'),
+      !fragments.hasDirtyAttributes,
       'fragment array is returned to clean state'
     );
 
     fragments.addFragment(newFragment);
 
     assert.ok(
-      fragments.get('hasDirtyAttributes'),
+      fragments.hasDirtyAttributes,
       'fragment array is in dirty state after addition'
     );
 
     fragments.removeFragment(newFragment);
 
     assert.ok(
-      !fragments.get('hasDirtyAttributes'),
+      !fragments.hasDirtyAttributes,
       'fragment array is returned to clean state'
     );
 
@@ -253,7 +233,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     fragments.addFragment(fragment);
 
     assert.ok(
-      fragments.get('hasDirtyAttributes'),
+      fragments.hasDirtyAttributes,
       'fragment array is in dirty state after reordering'
     );
 
@@ -261,7 +241,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     fragments.unshiftObject(fragment);
 
     assert.ok(
-      !fragments.get('hasDirtyAttributes'),
+      !fragments.hasDirtyAttributes,
       'fragment array is returned to clean state'
     );
   });
@@ -283,25 +263,25 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const fragment = fragments.get('firstObject');
+    const fragments = person.names;
+    const fragment = fragments.firstObject;
 
     assert.ok(
-      !fragments.get('hasDirtyAttributes'),
+      !fragments.hasDirtyAttributes,
       'fragment array is initially in a clean state'
     );
 
     fragment.set('last', 'Stark');
 
     assert.ok(
-      fragments.get('hasDirtyAttributes'),
+      fragments.hasDirtyAttributes,
       'fragment array in dirty state after change to a fragment'
     );
 
     fragment.set('last', 'Snow');
 
     assert.ok(
-      !fragments.get('hasDirtyAttributes'),
+      !fragments.hasDirtyAttributes,
       'fragment array is returned to clean state'
     );
   });
@@ -327,13 +307,13 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    const fragments = person.get('names');
-    const fragment = fragments.get('firstObject');
+    const fragments = person.names;
+    const fragment = fragments.firstObject;
 
     const originalState = fragments.toArray();
 
     fragment.set('first', 'Cat');
-    fragments.removeFragment(fragments.get('lastObject'));
+    fragments.removeFragment(fragments.lastObject);
     fragments.createFragment({
       first: 'Lady',
       last: 'Stonehart',
@@ -341,10 +321,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
     fragments.rollbackAttributes();
 
-    assert.ok(
-      !fragments.get('hasDirtyAttributes'),
-      'fragment array is not dirty'
-    );
+    assert.ok(!fragments.hasDirtyAttributes, 'fragment array is not dirty');
     assert.ok(
       !fragments.isAny('hasDirtyAttributes'),
       'all fragments are in clean state'
