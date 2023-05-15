@@ -81,7 +81,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     assert.ok(isArray(addresses), 'property is array-like');
     assert.ok(
@@ -94,7 +94,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     assert.ok(
       addresses.every((address) => {
@@ -108,10 +108,10 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let length = addresses.get('length');
+    const addresses = person.get('addresses');
+    const length = addresses.get('length');
 
-    let address = store.createFragment('address', {
+    const address = store.createFragment('address', {
       street: '1 Dungeon Cell',
       city: "King's Landing",
       region: 'Crownlands',
@@ -136,9 +136,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
-    let address = store.createFragment('address', {
+    const address = store.createFragment('address', {
       street: '1 Dungeon Cell',
       city: "King's Landing",
       region: 'Crownlands',
@@ -195,10 +195,10 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     assert.throws(() => {
-      let otherPerson = store.createRecord('person');
+      const otherPerson = store.createRecord('person');
 
       addresses.addFragment(otherPerson);
     }, 'error is thrown when adding a DS.Model instance');
@@ -212,7 +212,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       store.find('person', 1),
       store.find('person', 2),
     ]);
-    let address = people[0].get('addresses.firstObject');
+    const address = people[0].get('addresses.firstObject');
 
     assert.throws(() => {
       people[1].get('addresses').addFragment(address);
@@ -223,9 +223,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
-    let address = store.createFragment('address', {
+    const address = store.createFragment('address', {
       street: '1 Dungeon Cell',
       city: "King's Landing",
       region: 'Crownlands',
@@ -285,7 +285,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const person = await store.find('person', 1);
     assert.equal(person.get('hobbies'), null, 'defaults to null');
 
-    let hobbies = [
+    const hobbies = [
       store.createFragment('hobby', {
         name: 'guitar',
       }),
@@ -312,14 +312,14 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   });
 
   test('fragments are created from an array of object literals when creating a record', function (assert) {
-    let address = {
+    const address = {
       street: '1 Sea Tower',
       city: 'Pyke',
       region: 'Iron Islands',
       country: 'Westeros',
     };
 
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       name: {
         first: 'Balon',
         last: 'Greyjoy',
@@ -339,7 +339,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   });
 
   test('setting a fragment array to an array of to an object literals creates new fragments', async function (assert) {
-    let address = {
+    const address = {
       street: '1 Great Keep',
       city: 'Pyke',
       region: 'Iron Islands',
@@ -375,7 +375,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   });
 
   test('setting a fragment array to an array of object literals reuses an existing fragments', async function (assert) {
-    let newAddress = {
+    const newAddress = {
       street: '1 Great Keep',
       city: 'Winterfell',
       region: 'North',
@@ -404,7 +404,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let address = person.get('addresses.firstObject');
+    const address = person.get('addresses.firstObject');
 
     person.set('addresses', [newAddress]);
 
@@ -430,7 +430,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   });
 
   test('fragments can have default values', function (assert) {
-    let defaultValue = [
+    const defaultValue = [
       {
         street: '1 Throne Room',
         city: "King's Landing",
@@ -470,7 +470,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   });
 
   test('fragment default values can be functions', function (assert) {
-    let defaultValue = [
+    const defaultValue = [
       {
         street: '1 Great Keep',
         city: 'Winterfell',
@@ -491,7 +491,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     owner.register('model:sword', Sword);
 
-    let sword = store.createRecord('sword', { name: 'Ice' });
+    const sword = store.createRecord('sword', { name: 'Ice' });
 
     assert.equal(
       sword.get('addresses.firstObject.street'),
@@ -501,7 +501,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   });
 
   test('fragment default values that are functions are not deep copied', function (assert) {
-    let defaultValue = [
+    const defaultValue = [
       {
         street: '1 Great Keep',
         city: 'Winterfell',
@@ -523,7 +523,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     owner.register('model:sword', Sword);
 
-    let sword = store.createRecord('sword', { name: 'Ice' });
+    const sword = store.createRecord('sword', { name: 'Ice' });
 
     assert.equal(
       sword.get('addresses.firstObject.street'),
@@ -536,9 +536,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let firstAddress = addresses.objectAt(0);
-    let secondAddress = addresses.objectAt(1);
+    const addresses = person.get('addresses');
+    const firstAddress = addresses.objectAt(0);
+    const secondAddress = addresses.objectAt(1);
     person.set('addresses', null);
 
     person.unloadRecord();
@@ -564,9 +564,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let firstAddress = addresses.objectAt(0);
-    let secondAddress = addresses.objectAt(1);
+    const addresses = person.get('addresses');
+    const firstAddress = addresses.objectAt(0);
+    const secondAddress = addresses.objectAt(1);
     addresses.removeAt(0);
 
     person.unloadRecord();

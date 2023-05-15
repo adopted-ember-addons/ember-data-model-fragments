@@ -21,7 +21,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('fragments are `Copyable`', function (assert) {
-    let fragment = store.createFragment('name');
+    const fragment = store.createFragment('name');
 
     assert.ok(Copyable.detect(fragment), 'fragments are copyable');
   });
@@ -52,7 +52,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       store.find('person', 1),
       store.find('person', 2),
     ]);
-    let copy = people[0].get('name').copy();
+    const copy = people[0].get('name').copy();
 
     people[1].set('name', copy);
 
@@ -74,24 +74,24 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let copy = person.get('name').copy();
+    const copy = person.get('name').copy();
 
     assert.ok(copy.get('first'), 'Jon');
     assert.ok(copy.get('last'), 'Snow');
   });
 
   test('fragments are `Ember.Comparable`', function (assert) {
-    let fragment = store.createFragment('name');
+    const fragment = store.createFragment('name');
 
     assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
   });
 
   test('fragments are compared by reference', function (assert) {
-    let fragment1 = store.createFragment('name', {
+    const fragment1 = store.createFragment('name', {
       first: 'Jon',
       last: 'Arryn',
     });
-    let fragment2 = store.createFragment('name', {
+    const fragment2 = store.createFragment('name', {
       first: 'Jon',
       last: 'Arryn',
     });
@@ -107,7 +107,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('newly create fragments start in the new state', function (assert) {
-    let fragment = store.createFragment('name');
+    const fragment = store.createFragment('name');
 
     assert.ok(fragment.get('isNew'), 'fragments start as new');
   });
@@ -127,7 +127,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     name.set('last', 'Baratheon');
 
@@ -189,7 +189,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     name.set('last', 'Bolton');
     name.rollbackAttributes();
@@ -199,7 +199,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('fragments without an owner can be destroyed', function (assert) {
-    let fragment = store.createFragment('name');
+    const fragment = store.createFragment('name');
     fragment.destroy();
     assert.ok(fragment.get('isDestroying'), 'the fragment is being destroyed');
   });
@@ -247,7 +247,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       return store.peekRecord('zoo', 1);
     }
 
-    let person = pushPerson();
+    const person = pushPerson();
     let zoo = pushZoo();
 
     // Prime the relationship and fragment
@@ -283,7 +283,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     // assert.ok(isUnloaded(zoo.get('star')), 'Fragment is now unloaded');
 
     // Load a new record
-    let origZoo = zoo;
+    const origZoo = zoo;
     zoo = pushZoo();
     zoo.get('star'); // Prime the fragment on the new model
 
@@ -312,13 +312,13 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('fragments call ready callback when they are created', function (assert) {
-    let name = store.createFragment('name');
+    const name = store.createFragment('name');
     assert.ok(
       name.get('readyWasCalled'),
       'when making fragment directly with store.createFragment'
     );
 
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       name: { first: 'dan' },
       names: [{ first: 'eric' }],
     });
@@ -334,7 +334,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('can be created with null', async function (assert) {
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
@@ -348,7 +348,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   test('can be updated to null', async function (assert) {
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
@@ -406,7 +406,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     test('`person` fragments/fragment arrays are not initially `null`', async function (assert) {
-      let person = store.createRecord('person', {
+      const person = store.createRecord('person', {
         title: 'Mr.',
         name: {},
       });
@@ -435,7 +435,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     test('`person` fragments/fragment arrays are initially `null`', async function (assert) {
-      let person = store.createRecord('person', {
+      const person = store.createRecord('person', {
         title: 'Mr.',
         name: null,
         names: null,

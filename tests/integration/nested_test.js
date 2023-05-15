@@ -26,7 +26,7 @@ module('integration - Nested fragments', function (hooks) {
   });
 
   test('`DS.hasManyFragment` properties can be nested', async function (assert) {
-    let data = {
+    const data = {
       info: {
         name: 'Tyrion Lannister',
         notes: ['smart', 'short'],
@@ -68,7 +68,7 @@ module('integration - Nested fragments', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       user: copy(data, true),
     };
     payload.user.id = 1;
@@ -90,7 +90,7 @@ module('integration - Nested fragments', function (hooks) {
       'nested fragment array properties are converted properly'
     );
 
-    let product = user.get('orders.firstObject.products.firstObject');
+    const product = user.get('orders.firstObject.products.firstObject');
 
     product.set('price', '1.99');
     assert.ok(
@@ -123,7 +123,7 @@ module('integration - Nested fragments', function (hooks) {
   });
 
   test('Fragments can be created with nested object literals', function (assert) {
-    let data = {
+    const data = {
       info: {
         name: 'Tyrion Lannister',
         notes: ['smart', 'short'],
@@ -157,8 +157,8 @@ module('integration - Nested fragments', function (hooks) {
       ],
     };
 
-    let user = store.createRecord('user', data);
-    let orders = user.get('orders');
+    const user = store.createRecord('user', data);
+    const orders = user.get('orders');
 
     assert.equal(orders.get('length'), 2, 'fragment array length is correct');
     assert.ok(
@@ -187,10 +187,10 @@ module('integration - Nested fragments', function (hooks) {
   });
 
   test('Nested fragments can have default values', function (assert) {
-    let defaultInfo = {
+    const defaultInfo = {
       notes: ['dangerous', 'sorry'],
     };
-    let defaultOrders = [
+    const defaultOrders = [
       {
         amount: '1499.99',
         products: [
@@ -210,7 +210,7 @@ module('integration - Nested fragments', function (hooks) {
 
     owner.register('model:assassin', Assassin);
 
-    let user = store.createRecord('assassin');
+    const user = store.createRecord('assassin');
 
     assert.ok(
       user.get('info'),
@@ -238,7 +238,7 @@ module('integration - Nested fragments', function (hooks) {
   });
 
   test('Nested fragments can be copied', async function (assert) {
-    let data = {
+    const data = {
       info: {
         name: 'Petyr Baelish',
         notes: ['smart', 'despicable'],
@@ -264,7 +264,7 @@ module('integration - Nested fragments', function (hooks) {
     });
 
     const user = await store.find('user', 1);
-    let info = user.get('info').copy();
+    const info = user.get('info').copy();
 
     assert.deepEqual(
       info.get('notes').toArray(),
@@ -276,8 +276,8 @@ module('integration - Nested fragments', function (hooks) {
       'nested fragment array copies are new fragment arrays'
     );
 
-    let orders = user.get('orders').copy();
-    let order = orders.objectAt(0);
+    const orders = user.get('orders').copy();
+    const order = orders.objectAt(0);
 
     assert.equal(
       order.get('recurring'),
@@ -289,7 +289,7 @@ module('integration - Nested fragments', function (hooks) {
       'nested fragment copies are new fragments'
     );
 
-    let product = order.get('product');
+    const product = order.get('product');
 
     assert.equal(
       product.get('name'),
@@ -329,12 +329,12 @@ module('integration - Nested fragments', function (hooks) {
     });
 
     const user = await store.find('user', 1);
-    let info = user.get('info');
-    let notes = info.get('notes');
-    let orders = user.get('orders');
-    let order = orders.get('firstObject');
-    let products = order.get('products');
-    let product = products.get('firstObject');
+    const info = user.get('info');
+    const notes = info.get('notes');
+    const orders = user.get('orders');
+    const order = orders.get('firstObject');
+    const products = order.get('products');
+    const product = products.get('firstObject');
 
     user.unloadRecord();
 

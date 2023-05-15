@@ -28,13 +28,13 @@ const FragmentArrayTransform = FragmentTransform.extend({
       return null;
     }
 
-    let store = this.store;
+    const store = this.store;
 
     return snapshots.map((snapshot) => {
       const realSnapshot = snapshot._createSnapshot
         ? snapshot._createSnapshot()
         : snapshot;
-      let serializer = store.serializerFor(
+      const serializer = store.serializerFor(
         realSnapshot.modelName || realSnapshot.constructor.modelName
       );
       return serializer.serialize(realSnapshot);

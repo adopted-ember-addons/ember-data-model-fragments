@@ -67,7 +67,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     name.set('first', 'Cercei');
 
@@ -90,7 +90,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     person.set('name', {
       first: 'Rhaenys',
@@ -115,7 +115,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     person.set('name', {
       first: 'Samwell',
@@ -141,7 +141,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     name.set('first', 'Brynden');
     name.set('first', 'Hoster');
@@ -165,7 +165,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     // Dirty the owner record
     person.set('title', 'Lord Commander');
@@ -192,7 +192,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     name.set('last', 'Tully');
 
@@ -217,7 +217,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     name.set('last', '');
     person.rollbackAttributes();
@@ -249,7 +249,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     // Dirty the fragment
     name.set('last', 'Lannister');
@@ -275,7 +275,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     person.set('name', null);
 
@@ -299,7 +299,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     // Dirty the owner record and fragment
     person.set('title', 'Heir to Winterfell');
@@ -315,7 +315,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     person.set('name', null);
 
@@ -342,7 +342,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     assert.equal(name, undefined, 'property is null');
 
@@ -363,7 +363,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     person.set('addresses', [
       {
@@ -388,7 +388,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     addresses.pushObject({
       street: '1 Dungeon Cell',
@@ -405,7 +405,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     person.set('addresses', people[0].addresses);
 
@@ -417,7 +417,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     addresses.createFragment({
       street: '1 Dungeon Cell',
@@ -434,7 +434,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     addresses.removeObject(addresses.get('firstObject'));
 
@@ -446,10 +446,10 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let length = addresses.get('length');
+    const addresses = person.get('addresses');
+    const length = addresses.get('length');
 
-    let address = addresses.popObject();
+    const address = addresses.popObject();
     addresses.unshiftObject(address);
 
     assert.equal(
@@ -465,9 +465,9 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
-    let address = addresses.popObject();
+    const address = addresses.popObject();
     addresses.pushObject(address);
 
     assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
@@ -478,12 +478,12 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     // Dirty the owner record
     person.set('title', 'Hand of the King');
 
-    let address = addresses.popObject();
+    const address = addresses.popObject();
     addresses.pushObject(address);
 
     assert.ok(!addresses.get('hasDirtyAttributes'), 'fragment array is clean');
@@ -528,8 +528,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     assert.false(address.get('hasDirtyAttributes'), 'fragment is clean');
     assert.false(
@@ -549,8 +549,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     address.set('street', '2 Sky Cell');
     address.set('street', '1 Sky Cell');
@@ -564,8 +564,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty the record array
     addresses.popObject();
@@ -585,8 +585,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     address.set('street', '2 Sky Cell');
     address.set('street', '1 Sky Cell');
@@ -603,8 +603,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty the owner record, fragment array, and a fragment
     person.set('title', 'Warden of the West');
@@ -622,8 +622,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let titles = person.get('titles');
-    let values = titles.toArray();
+    const titles = person.get('titles');
+    const values = titles.toArray();
 
     // Dirty the primitive array
     titles.popObject();
@@ -673,8 +673,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty the fragment array and a fragment
     addresses.popObject();
@@ -757,8 +757,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty the owner record, fragment array, and a fragment
     person.set('title', 'Lord of the Westerlands');
@@ -776,8 +776,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty a fragment
     address.set('street', '2 Sky Cell');
@@ -793,8 +793,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty fragment array, and a fragment
     addresses.popObject();
@@ -814,8 +814,8 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
-    let address = addresses.get('firstObject');
+    const addresses = person.get('addresses');
+    const address = addresses.get('firstObject');
 
     // Dirty the owner record, and a fragment
     person.set('title', 'Lord of Casterly Rock');
@@ -832,7 +832,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     person.set('addresses', null);
 
@@ -849,7 +849,7 @@ module('integration - Dependent State', function (hooks) {
     pushPerson(1);
 
     const person = await store.find('person', 1);
-    let hobbies = person.get('hobbies');
+    const hobbies = person.get('hobbies');
 
     assert.equal(hobbies, null, 'property is null');
 
@@ -877,7 +877,7 @@ module('integration - Dependent State', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     assert.ok(
       isArray(addresses) && isEmpty(addresses),

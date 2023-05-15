@@ -51,7 +51,7 @@ module('unit - Polymorphism', function (hooks) {
     assert.equal(zoo2.get('name'), 'Chilly Zoo', 'zoo name is correct');
     assert.equal(zoo2.get('city'), 'Winterfell', 'zoo city is correct');
 
-    let star = zoo2.get('star');
+    const star = zoo2.get('star');
     assert.ok(star instanceof Animal, "zoo's star is an animal");
     assert.equal(star.get('name'), 'Mittens', 'animal name is correct');
     assert.ok(star instanceof Lion, "zoo's star is a lion");
@@ -68,10 +68,10 @@ module('unit - Polymorphism', function (hooks) {
     });
 
     const zoo2 = await store.find('zoo', 1);
-    let animals = zoo2.get('animals');
+    const animals = zoo2.get('animals');
     assert.equal(animals.get('length'), 2);
 
-    let first = animals.objectAt(0);
+    const first = animals.objectAt(0);
     assert.ok(first instanceof Animal);
     assert.equal(
       first.get('name'),
@@ -81,7 +81,7 @@ module('unit - Polymorphism', function (hooks) {
     assert.ok(first instanceof Lion);
     assert.ok(first.get('hasManes'), 'lion has manes');
 
-    let second = animals.objectAt(1);
+    const second = animals.objectAt(1);
     assert.ok(second instanceof Animal);
     assert.equal(
       second.get('name'),

@@ -34,7 +34,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     assert.equal(
       name.get('person'),
@@ -50,7 +50,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
 
     owner.register('model:invalidModel', InvalidModel);
 
-    let invalid = store.createRecord('invalidModel');
+    const invalid = store.createRecord('invalidModel');
 
     assert.throws(
       () => {
@@ -92,7 +92,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
       store.find('person', 1),
       store.find('person', 2),
     ]);
-    let name = people[0].get('name');
+    const name = people[0].get('name');
 
     assert.throws(() => {
       name.set('person', people[1]);
@@ -114,7 +114,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = store.createFragment('name', {
+    const name = store.createFragment('name', {
       first: 'Arya',
       last: 'Stark',
     });

@@ -20,7 +20,7 @@ module('unit - `DS.Store`', function (hooks) {
   });
 
   test('a fragment can be created that starts in a dirty state', function (assert) {
-    let address = store.createFragment('name');
+    const address = store.createFragment('name');
 
     assert.ok(address instanceof Name, 'fragment is correct type');
     assert.ok(
@@ -92,13 +92,13 @@ module('unit - `DS.Store`', function (hooks) {
   });
 
   test('unloadAll destroys fragments', function (assert) {
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       name: {
         first: 'Catelyn',
         last: 'Stark',
       },
     });
-    let name = person.get('name');
+    const name = person.get('name');
 
     store.unloadAll();
 

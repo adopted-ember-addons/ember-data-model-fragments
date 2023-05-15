@@ -31,18 +31,18 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('persisting the owner record changes the fragment state to non-new', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Viserys',
         last: 'Targaryen',
       },
     };
 
-    let person = store.createRecord('person');
+    const person = store.createRecord('person');
 
     person.set('name', store.createFragment('name', data.name));
 
-    let payload = {
+    const payload = {
       person: copy(data, true),
     };
     payload.person.id = 3;
@@ -88,8 +88,8 @@ module('integration - Persistence', function (hooks) {
     const person = await store.find('person', 1);
     await person.save();
 
-    let name = person.get('name');
-    let addresses = person.get('addresses');
+    const name = person.get('name');
+    const addresses = person.get('addresses');
 
     assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
     assert.ok(
@@ -253,7 +253,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Daenerys',
         last: 'Targaryen',
@@ -268,11 +268,11 @@ module('integration - Persistence', function (hooks) {
       ],
     };
 
-    let person = store.createRecord('person');
+    const person = store.createRecord('person');
     person.set('name', store.createFragment('name', data.name));
     person.set('addresses', data.addresses);
 
-    let payload = {
+    const payload = {
       person: copy(data, true),
     };
     payload.person.id = 3;
@@ -286,8 +286,8 @@ module('integration - Persistence', function (hooks) {
     });
 
     await person.save();
-    let name = person.get('name');
-    let addresses = person.get('addresses');
+    const name = person.get('name');
+    const addresses = person.get('addresses');
 
     assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
     assert.ok(
@@ -299,7 +299,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('a new record can be persisted with null fragments', async function (assert) {
-    let person = store.createRecord('person');
+    const person = store.createRecord('person');
 
     assert.equal(person.get('name'), null, 'fragment property is null');
     assert.equal(
@@ -308,7 +308,7 @@ module('integration - Persistence', function (hooks) {
       'fragment array property is null'
     );
 
-    let payload = {
+    const payload = {
       person: {
         id: 1,
       },
@@ -333,7 +333,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('the adapter can update fragments on save', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
         last: 'Stark',
@@ -348,7 +348,7 @@ module('integration - Persistence', function (hooks) {
       ],
     };
 
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
@@ -356,7 +356,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       person: copy(data, true),
     };
     payload.person.id = 1;
@@ -372,8 +372,8 @@ module('integration - Persistence', function (hooks) {
     });
 
     await person.save();
-    let name = person.get('name');
-    let addresses = person.get('addresses');
+    const name = person.get('name');
+    const addresses = person.get('addresses');
 
     assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
     assert.ok(
@@ -391,7 +391,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('the adapter can set fragments to null on save', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
         last: 'Stark',
@@ -406,7 +406,7 @@ module('integration - Persistence', function (hooks) {
       ],
     };
 
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
@@ -414,7 +414,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       person: {
         name: null,
         addresses: null,
@@ -448,7 +448,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('the adapter can set fragments from null to a new value on save', async function (assert) {
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
@@ -459,7 +459,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       person: {
         id: 1,
         name: {
@@ -504,7 +504,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('existing fragments are updated on save', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
         last: 'Stark',
@@ -519,7 +519,7 @@ module('integration - Persistence', function (hooks) {
       ],
     };
 
-    let payload = {
+    const payload = {
       person: copy(data, true),
     };
 
@@ -541,14 +541,14 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    let person = store.createRecord('person');
-    let name = store.createFragment('name', copy(data.name));
-    let address = store.createFragment('address', copy(data.addresses[0]));
+    const person = store.createRecord('person');
+    const name = store.createFragment('name', copy(data.name));
+    const address = store.createFragment('address', copy(data.addresses[0]));
 
     person.set('name', name);
     person.set('addresses', [address]);
 
-    let addresses = person.get('addresses');
+    const addresses = person.get('addresses');
 
     await person.save();
     assert.equal(name.get('first'), 'Ned', 'fragment correctly updated');
@@ -570,7 +570,7 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('the adapter can update fragments on reload', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Brandon',
         last: 'Stark',
@@ -593,7 +593,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       person: copy(data, true),
     };
 
@@ -617,8 +617,8 @@ module('integration - Persistence', function (hooks) {
 
     await person.reload();
 
-    let name = person.get('name');
-    let addresses = person.get('addresses');
+    const name = person.get('name');
+    const addresses = person.get('addresses');
 
     assert.equal(name.get('first'), 'Bran', 'fragment correctly updated');
     assert.equal(
@@ -634,7 +634,7 @@ module('integration - Persistence', function (hooks) {
     updating existing fragment data
   */
   test('the adapter can update fragments without infinite loops when CPs are eagerly consumed', async function (assert) {
-    let data = {
+    const data = {
       name: {
         first: 'Brandon',
         last: 'Stark',
@@ -650,7 +650,7 @@ module('integration - Persistence', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let personProxy = ObjectProxy.create({ content: person });
+    const personProxy = ObjectProxy.create({ content: person });
 
     addObserver(personProxy, 'name.first', function () {});
     personProxy.get('name.first');
@@ -674,7 +674,7 @@ module('integration - Persistence', function (hooks) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
 
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
         last: 'Stark',
@@ -690,7 +690,7 @@ module('integration - Persistence', function (hooks) {
     };
 
     // eslint-disable-next-line ember/no-classic-classes
-    let PersonObserver = EmberObject.extend({
+    const PersonObserver = EmberObject.extend({
       person: null,
       observer: observer('person.addresses.[]', function () {
         assert.ok(true, 'The array change was observed');
@@ -705,7 +705,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       person: copy(data, true),
     };
     payload.person.id = 1;
@@ -734,13 +734,13 @@ module('integration - Persistence', function (hooks) {
 
     owner.register('model:army', Army);
 
-    let data = {
+    const data = {
       name: 'Golden Company',
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
     // eslint-disable-next-line ember/no-classic-classes
-    let ArmyObserver = EmberObject.extend({
+    const ArmyObserver = EmberObject.extend({
       army: null,
       observer: observer('army.soldiers.[]', function () {
         assert.equal(
@@ -759,7 +759,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    let payload = {
+    const payload = {
       army: copy(data, true),
     };
     payload.army.id = 1;
@@ -781,7 +781,7 @@ module('integration - Persistence', function (hooks) {
   test('string array can be rolled back on failed save', async function (assert) {
     // assert.expect(3);
 
-    let data = {
+    const data = {
       name: 'Golden Company',
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
@@ -830,7 +830,7 @@ module('integration - Persistence', function (hooks) {
   test('existing fragments can be rolled back on failed save', async function (assert) {
     // assert.expect(3);
 
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
         last: 'Stark',
@@ -923,7 +923,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    let savePromise = person.save();
+    const savePromise = person.save();
 
     assert.equal(
       address._internalModel.currentState.stateName,
@@ -973,10 +973,10 @@ module('integration - Persistence', function (hooks) {
       @array('string') soldiers;
     }
 
-    let data = {
+    const data = {
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
-    let payload = {
+    const payload = {
       army: copy(data, true),
     };
     owner.register('model:army', Army);

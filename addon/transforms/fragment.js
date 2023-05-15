@@ -34,11 +34,11 @@ const FragmentTransform = Transform.extend({
       return null;
     }
 
-    let store = this.store;
+    const store = this.store;
     const realSnapshot = snapshot._createSnapshot
       ? snapshot._createSnapshot()
       : snapshot;
-    let serializer = store.serializerFor(
+    const serializer = store.serializerFor(
       realSnapshot.modelName || realSnapshot.constructor.modelName
     );
 
@@ -47,7 +47,7 @@ const FragmentTransform = Transform.extend({
 
   modelNameFor(data, options, parentData) {
     let modelName = this.type;
-    let polymorphicTypeProp = this.polymorphicTypeProp;
+    const polymorphicTypeProp = this.polymorphicTypeProp;
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
       modelName = data[polymorphicTypeProp];
@@ -59,17 +59,17 @@ const FragmentTransform = Transform.extend({
   },
 
   deserializeSingle(data, options, parentData) {
-    let store = this.store;
-    let modelName = this.modelNameFor(data, options, parentData);
-    let serializer = store.serializerFor(modelName);
+    const store = this.store;
+    const modelName = this.modelNameFor(data, options, parentData);
+    const serializer = store.serializerFor(modelName);
 
     assert(
       'The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`',
       !(serializer instanceof JSONAPISerializer)
     );
 
-    let typeClass = store.modelFor(modelName);
-    let serialized = serializer.normalize(typeClass, data);
+    const typeClass = store.modelFor(modelName);
+    const serialized = serializer.normalize(typeClass, data);
 
     // `JSONSerializer#normalize` returns a full JSON API document, but we only
     // need the attributes hash

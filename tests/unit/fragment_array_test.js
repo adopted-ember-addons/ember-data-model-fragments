@@ -14,7 +14,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
   });
 
   test('fragment arrays can be copied', async function (assert) {
-    let data = {
+    const data = {
       names: [
         {
           first: 'Meryn',
@@ -32,7 +32,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let copy = person.get('names').copy();
+    const copy = person.get('names').copy();
 
     assert.equal(
       copy.length,
@@ -67,10 +67,10 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let length = fragments.get('length');
+    const fragments = person.get('names');
+    const length = fragments.get('length');
 
-    let fragment = fragments.createFragment({
+    const fragment = fragments.createFragment({
       first: 'Hugor',
       last: 'Hill',
     });
@@ -104,10 +104,10 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let length = fragments.get('length');
+    const fragments = person.get('names');
+    const length = fragments.get('length');
 
-    let fragment = store.createFragment('name', {
+    const fragment = store.createFragment('name', {
       first: 'Yollo',
     });
 
@@ -142,8 +142,8 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let length = fragments.get('length');
+    const fragments = person.get('names');
+    const length = fragments.get('length');
     fragments.addFragment({ first: 'Yollo', last: 'Baggins' });
 
     assert.equal(
@@ -174,9 +174,9 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let fragment = fragments.get('firstObject');
-    let length = fragments.get('length');
+    const fragments = person.get('names');
+    const fragment = fragments.get('firstObject');
+    const length = fragments.get('length');
 
     fragments.removeFragment(fragment);
 
@@ -209,9 +209,9 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let fragment = fragments.get('firstObject');
-    let newFragment = store.createFragment('name', {
+    const fragments = person.get('names');
+    const fragment = fragments.get('firstObject');
+    const newFragment = store.createFragment('name', {
       first: 'Rhaenys',
       last: 'Targaryen',
     });
@@ -283,8 +283,8 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let fragment = fragments.get('firstObject');
+    const fragments = person.get('names');
+    const fragment = fragments.get('firstObject');
 
     assert.ok(
       !fragments.get('hasDirtyAttributes'),
@@ -327,10 +327,10 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let fragments = person.get('names');
-    let fragment = fragments.get('firstObject');
+    const fragments = person.get('names');
+    const fragment = fragments.get('firstObject');
 
-    let originalState = fragments.toArray();
+    const originalState = fragments.toArray();
 
     fragment.set('first', 'Cat');
     fragments.removeFragment(fragments.get('lastObject'));
@@ -357,7 +357,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
   });
 
   test('can be created with null', function (assert) {
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
@@ -371,7 +371,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
   });
 
   test('can be updated to null', function (assert) {
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,

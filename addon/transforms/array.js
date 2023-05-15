@@ -27,7 +27,7 @@ const ArrayTransform = Transform.extend({
       return null;
     }
 
-    let transform = this.transform;
+    const transform = this.transform;
 
     data = makeArray(data);
 
@@ -43,7 +43,7 @@ const ArrayTransform = Transform.extend({
       return null;
     }
 
-    let transform = this.transform;
+    const transform = this.transform;
 
     array = array.toArray ? array.toArray() : array;
 
@@ -55,13 +55,13 @@ const ArrayTransform = Transform.extend({
   },
 
   transform: computed('type', function () {
-    let attributeType = this.type;
+    const attributeType = this.type;
 
     if (!attributeType) {
       return null;
     }
 
-    let transform = getOwner(this).lookup(`transform:${attributeType}`);
+    const transform = getOwner(this).lookup(`transform:${attributeType}`);
     assert(`Unable to find transform for '${attributeType}'`, !!transform);
 
     return transform;

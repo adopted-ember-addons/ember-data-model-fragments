@@ -89,8 +89,8 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
     @return {MF.Fragment} the newly created fragment
   */
   copy() {
-    let type = this.constructor;
-    let props = Object.create(null);
+    const type = this.constructor;
+    const props = Object.create(null);
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
@@ -98,15 +98,15 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
       props[name] = copy(get(this, name));
     });
 
-    let modelName = type.modelName || this._internalModel.modelName;
+    const modelName = type.modelName || this._internalModel.modelName;
     return this.store.createFragment(modelName, props);
   },
 
   toStringExtension() {
-    let internalModel = internalModelFor(this);
-    let owner = internalModel && internalModel._recordData._owner;
+    const internalModel = internalModelFor(this);
+    const owner = internalModel && internalModel._recordData._owner;
     if (owner) {
-      let ownerId = owner.id;
+      const ownerId = owner.id;
       return `owner(${ownerId})`;
     } else {
       return '';
@@ -114,7 +114,7 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
   },
 }).reopenClass({
   fragmentOwnerProperties: computed(function () {
-    let props = [];
+    const props = [];
 
     this.eachComputedProperty((name, meta) => {
       if (meta.isFragmentOwner) {
@@ -141,8 +141,8 @@ export function getActualFragmentType(declaredType, options, data, owner) {
     return declaredType;
   }
 
-  let typeKey = options.typeKey || 'type';
-  let actualType =
+  const typeKey = options.typeKey || 'type';
+  const actualType =
     typeof typeKey === 'function' ? typeKey(data, owner) : data[typeKey];
 
   return actualType || declaredType;
@@ -182,13 +182,13 @@ export function createFragment(
   options,
   data
 ) {
-  let actualModelName = getActualFragmentType(
+  const actualModelName = getActualFragmentType(
     declaredModelName,
     options,
     data,
     record
   );
-  let fragment = store.createFragment(actualModelName);
+  const fragment = store.createFragment(actualModelName);
 
   setFragmentOwner(fragment, record, key);
   setFragmentData(fragment, data);

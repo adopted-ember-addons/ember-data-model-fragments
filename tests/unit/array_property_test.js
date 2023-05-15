@@ -39,7 +39,7 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('array properties are converted to an array-ish containing original values', async function (assert) {
-    let values = ['Hand of the King', 'Master of Coin'];
+    const values = ['Hand of the King', 'Master of Coin'];
 
     store.push({
       data: {
@@ -53,7 +53,7 @@ module('unit - `MF.array` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let titles = person.get('titles');
+    const titles = person.get('titles');
 
     assert.ok(isArray(titles), 'property is array-like');
 
@@ -152,7 +152,7 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('array properties default to an empty array-ish', function (assert) {
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       nickName: 'Boros Blount',
     });
 
@@ -168,7 +168,7 @@ module('unit - `MF.array` property', function (hooks) {
       titles: MF.array({ defaultValue: ['Ser'] }),
     });
 
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       nickName: 'Barristan Selmy',
     });
 
@@ -193,7 +193,7 @@ module('unit - `MF.array` property', function (hooks) {
       }),
     });
 
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       nickName: 'Oberyn Martell',
     });
 
@@ -218,7 +218,7 @@ module('unit - `MF.array` property', function (hooks) {
       }),
     });
 
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       nickName: 'Oberyn Martell',
     });
 

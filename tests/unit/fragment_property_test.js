@@ -64,7 +64,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = store.createFragment('name', {
+    const name = store.createFragment('name', {
       first: 'Davos',
       last: 'Seaworth',
     });
@@ -186,12 +186,12 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('fragments are created from object literals when creating a record', function (assert) {
-    let name = {
+    const name = {
       first: 'Balon',
       last: 'Greyjoy',
     };
 
-    let person = store.createRecord('person', {
+    const person = store.createRecord('person', {
       name: name,
     });
 
@@ -207,7 +207,7 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('setting a fragment to an object literal creates a new fragment', async function (assert) {
-    let name = {
+    const name = {
       first: 'Asha',
       last: 'Greyjoy',
     };
@@ -237,7 +237,7 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('setting a fragment to an object literal reuses an existing fragment', async function (assert) {
-    let newName = {
+    const newName = {
       first: 'Reek',
       last: null,
     };
@@ -256,7 +256,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
 
     person.set('name', newName);
 
@@ -269,7 +269,7 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('fragments can be saved with values, then have a value set to null without causing error', async function (assert) {
-    let defaultValue = {
+    const defaultValue = {
       first: 'Iron',
       last: 'Victory',
     };
@@ -280,9 +280,9 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     owner.register('model:ship', Ship);
 
-    let ship = store.createRecord('ship');
+    const ship = store.createRecord('ship');
 
-    let payload = {
+    const payload = {
       ship: copy(defaultValue, true),
     };
     payload.ship.id = 3;
@@ -311,7 +311,7 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('fragments can have default values', function (assert) {
-    let defaultValue = {
+    const defaultValue = {
       first: 'Iron',
       last: 'Victory',
     };
@@ -346,7 +346,7 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('fragment default values can be functions', function (assert) {
-    let defaultValue = {
+    const defaultValue = {
       first: 'Oath',
       last: 'Keeper',
     };
@@ -362,7 +362,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     owner.register('model:sword', Sword);
 
-    let sword = store.createRecord('sword');
+    const sword = store.createRecord('sword');
 
     assert.equal(
       sword.get('name.first'),
@@ -372,7 +372,7 @@ module('unit - `MF.fragment` property', function (hooks) {
   });
 
   test('fragment default values that are functions are not deep copied', function (assert) {
-    let defaultValue = {
+    const defaultValue = {
       first: 'Oath',
       last: 'Keeper',
       uncopyableObject: EmberObject.create({ item: 'Longclaw' }), // Will throw an error if copied
@@ -389,7 +389,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     owner.register('model:sword', Sword);
 
-    let sword = store.createRecord('sword');
+    const sword = store.createRecord('sword');
 
     assert.equal(
       sword.get('name.first'),
@@ -439,7 +439,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let name = person.get('name');
+    const name = person.get('name');
     person.set('name', null);
 
     person.unloadRecord();
@@ -465,8 +465,8 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let oldName = person.get('name');
-    let newName = store.createFragment('name');
+    const oldName = person.get('name');
+    const newName = store.createFragment('name');
     person.set('name', newName);
 
     assert.ok(

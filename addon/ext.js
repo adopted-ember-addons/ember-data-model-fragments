@@ -100,7 +100,7 @@ Store.reopen({
       return false;
     }
 
-    let type = this.modelFor(modelName);
+    const type = this.modelFor(modelName);
     return Fragment.detect(type);
   },
 
@@ -115,8 +115,8 @@ Store.reopen({
       typeof modelName === 'string'
     );
 
-    let owner = getOwner(this);
-    let normalizedModelName = normalizeModelName(modelName);
+    const owner = getOwner(this);
+    const normalizedModelName = normalizeModelName(modelName);
 
     if (this.isFragment(normalizedModelName)) {
       return serializerForFragment(owner, normalizedModelName);
@@ -129,10 +129,10 @@ Store.reopen({
 // Replace a method on an object with a new one that calls the original and then
 // invokes a function with the result
 function decorateMethod(obj, name, fn) {
-  let originalFn = obj[name];
+  const originalFn = obj[name];
 
   obj[name] = function () {
-    let value = originalFn.apply(this, arguments);
+    const value = originalFn.apply(this, arguments);
 
     return fn.call(this, value, arguments);
   };
@@ -149,9 +149,9 @@ decorateMethod(
   InternalModelPrototype,
   'createSnapshot',
   function createFragmentSnapshot(snapshot) {
-    let attrs = snapshot._attributes;
+    const attrs = snapshot._attributes;
     Object.keys(attrs).forEach((key) => {
-      let attr = attrs[key];
+      const attr = attrs[key];
       // If the attribute has a `_createSnapshot` method, invoke it before the
       // snapshot gets passed to the serializer
       if (attr && typeof attr._createSnapshot === 'function') {
@@ -208,15 +208,15 @@ JSONSerializer.reopen({
 
   // We need to override this to handle polymorphic with a typeKey function
   applyTransforms(typeClass, data) {
-    let attributes = typeClass.attributes;
+    const attributes = typeClass.attributes;
 
     typeClass.eachTransformedAttribute((key, typeClass) => {
       if (data[key] === undefined) {
         return;
       }
 
-      let transform = this.transformFor(typeClass);
-      let transformMeta = attributes.get(key);
+      const transform = this.transformFor(typeClass);
+      const transformMeta = attributes.get(key);
       data[key] = transform.deserialize(data[key], transformMeta.options, data);
     });
 

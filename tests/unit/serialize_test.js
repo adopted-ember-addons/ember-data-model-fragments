@@ -48,7 +48,7 @@ module('unit - Serialization', function (hooks) {
 
   test('fragment properties are snapshotted as normal attributes on the owner record snapshot', async function (assert) {
     assert.expect(7);
-    let person = {
+    const person = {
       name: {
         first: 'Catelyn',
         last: 'Stark',
@@ -78,7 +78,7 @@ module('unit - Serialization', function (hooks) {
 
     class PersonSerializer extends JSONSerializer {
       serialize(snapshot) {
-        let name = snapshot.attr('name');
+        const name = snapshot.attr('name');
         assert.ok(
           name instanceof DS.Snapshot,
           'fragment snapshot attribute is a snapshot'
@@ -90,7 +90,7 @@ module('unit - Serialization', function (hooks) {
           'fragment attributes are snapshoted correctly'
         );
 
-        let houses = snapshot.attr('houses');
+        const houses = snapshot.attr('houses');
         assert.ok(
           Array.isArray(houses),
           'fragment array attribute is an array'
@@ -105,7 +105,7 @@ module('unit - Serialization', function (hooks) {
           'fragment array attributes are snapshotted correctly'
         );
 
-        let children = snapshot.attr('children');
+        const children = snapshot.attr('children');
         assert.ok(Array.isArray(children), 'array attribute is an array');
         assert.deepEqual(
           children,
@@ -142,7 +142,7 @@ module('unit - Serialization', function (hooks) {
     owner.register('serializer:name', NameSerializer);
 
     const person = await store.find('person', 1);
-    let serialized = person.serialize();
+    const serialized = person.serialize();
 
     assert.equal(
       serialized.name,
@@ -152,7 +152,7 @@ module('unit - Serialization', function (hooks) {
   });
 
   test('serializing a fragment array creates a new array with contents the result of serializing each fragment', async function (assert) {
-    let names = [
+    const names = [
       {
         first: 'Rhaegar',
         last: 'Targaryen',
@@ -183,7 +183,7 @@ module('unit - Serialization', function (hooks) {
     owner.register('serializer:name', JSONSerializer);
 
     const person = await store.find('person', 1);
-    let serialized = person.serialize();
+    const serialized = person.serialize();
 
     assert.deepEqual(
       serialized.names,
@@ -200,13 +200,13 @@ module('unit - Serialization', function (hooks) {
 
     owner.register('model:nullDefaultPerson', NullDefaultPerson);
 
-    let normalized = store.normalize('nullDefaultPerson', {
+    const normalized = store.normalize('nullDefaultPerson', {
       name: null,
       houses: null,
       children: null,
     });
 
-    let attributes = normalized.data.attributes;
+    const attributes = normalized.data.attributes;
 
     assert.strictEqual(
       attributes.name,
@@ -246,7 +246,7 @@ module('unit - Serialization', function (hooks) {
     });
 
     const person = await store.find('nullDefaultPerson', 1);
-    let serialized = person.serialize();
+    const serialized = person.serialize();
 
     assert.strictEqual(
       serialized.name,
@@ -266,15 +266,15 @@ module('unit - Serialization', function (hooks) {
   });
 
   test('array properties use the specified transform to normalize data', function (assert) {
-    let values = [1, 0, true, false, 'true', ''];
+    const values = [1, 0, true, false, 'true', ''];
 
-    let normalized = store.normalize('person', {
+    const normalized = store.normalize('person', {
       strings: values,
       numbers: values,
       booleans: values,
     });
 
-    let attributes = normalized.data.attributes;
+    const attributes = normalized.data.attributes;
 
     assert.ok(
       values.every((value, index) => {
@@ -290,7 +290,7 @@ module('unit - Serialization', function (hooks) {
   });
 
   test('array properties use the specified transform to serialize data', async function (assert) {
-    let values = [1, 0, true, false, 'true', ''];
+    const values = [1, 0, true, false, 'true', ''];
 
     store.push({
       data: {
@@ -305,7 +305,7 @@ module('unit - Serialization', function (hooks) {
     });
 
     const person = await store.find('person', 1);
-    let serialized = person.serialize();
+    const serialized = person.serialize();
 
     assert.ok(
       values.every((value, index) => {
