@@ -15,6 +15,7 @@ module.exports = async function() {
           }
         }
       },
+      // @patocallaghan - Allow ember 4+ to fail release until we resolve https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406
       {
         name: 'ember-lts-4.4',
         npm: {
@@ -23,7 +24,6 @@ module.exports = async function() {
           }
         }
       },
-      // @patocallaghan - Allow ember-release to fail release until we resolve https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/406
       {
         name: 'ember-release',
         npm: {

@@ -44,7 +44,7 @@ on:
   pull_request:
 
 env:
-  NODE_VERSION: "12.x"
+  NODE_VERSION: "14.x"
 
 jobs:
   lint:
@@ -55,7 +55,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v3
         with:
           node-version: "${{ env.NODE_VERSION }}"
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Cache package manager's global cache and node_modules
         id: cache-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ steps.global-cache-dir-path.outputs.dir }}
@@ -99,7 +99,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v3
         with:
           node-version: "${{ env.NODE_VERSION }}"
 
@@ -109,7 +109,7 @@ jobs:
 
       - name: Cache package manager's global cache and node_modules
         id: cache-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ steps.global-cache-dir-path.outputs.dir }}
@@ -143,7 +143,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v3
         with:
           node-version: "${{ env.NODE_VERSION }}"
 
@@ -153,7 +153,7 @@ jobs:
 
       - name: Cache package manager's global cache and node_modules
         id: cache-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ steps.global-cache-dir-path.outputs.dir }}
@@ -178,14 +178,11 @@ jobs:
       fail-fast: true
       matrix:
         ember-try-scenario:
-          [
-            ember-lts-3.28,
-            ember-lts-4.4,
-            ember-default-with-jquery,
-            ember-classic,
-          ]
+          [ember-lts-3.28, ember-default-with-jquery, ember-classic]
         allow-failure: [false]
         include:
+          - ember-try-scenario: ember-lts-4.4
+            allow-failure: true
           - ember-try-scenario: ember-release
             allow-failure: true
           - ember-try-scenario: ember-beta
@@ -198,7 +195,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v3
         with:
           node-version: "${{ env.NODE_VERSION }}"
 
@@ -208,7 +205,7 @@ jobs:
 
       - name: Cache package manager's global cache and node_modules
         id: cache-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ steps.global-cache-dir-path.outputs.dir }}
