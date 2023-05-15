@@ -369,7 +369,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.equal(person.name, null);
   });
 
-  module('fragment bug when initially set to `null`', function () {
+  module('fragment bug when initially set to `null`', function (hooks) {
     let server;
     hooks.beforeEach(function () {
       server = new Pretender();
