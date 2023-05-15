@@ -256,12 +256,12 @@ module('integration - Persistence', function (hooks) {
         last: 'Targaryen',
       },
       addresses: [
-        store.createFragment('address', {
+        {
           street: '1 Stone Drum',
           city: 'Dragonstone',
           region: 'Crownlands',
           country: 'Westeros',
-        }),
+        },
       ],
     };
 
