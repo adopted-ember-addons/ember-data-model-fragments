@@ -120,6 +120,7 @@ module('integration - Persistence', function (hooks) {
       assert.equal(body.person.title, 'modified');
       assert.equal(body.person.name.first, 'modified');
       assert.equal(body.person.name.last, 'modified');
+      body.person.id = '1';
       body.person.title = 'Ser';
       body.person.name.first = 'Tywin';
       body.person.name.last = 'Lannister';
@@ -404,6 +405,7 @@ module('integration - Persistence', function (hooks) {
 
     const payload = {
       person: {
+        id: 1,
         name: null,
         addresses: null,
       },
