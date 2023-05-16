@@ -1,394 +1,352 @@
 /* eslint-disable ember/no-observers */
 import Model, { attr } from '@ember-data/model';
+import {
+  fragment,
+  fragmentArray,
+  array,
+} from 'ember-data-model-fragments/attributes';
 import EmberObject, { observer } from '@ember/object';
 import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
 import { copy } from 'ember-copy';
-import { run } from '@ember/runloop';
 import MF from 'ember-data-model-fragments';
 import { module, test, skip } from 'qunit';
-import { setupApplicationTest } from 'ember-qunit';
+import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 let store, owner, server;
 
-module('integration - Persistence', function(hooks) {
+module('integration - Persistence', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function(assert) {
+  hooks.beforeEach(function () {
     owner = this.owner;
     store = owner.lookup('service:store');
     server = new Pretender();
-
-    assert.expectNoDeprecation();
   });
 
-  hooks.afterEach(function() {
+  hooks.afterEach(function () {
     store = null;
     owner = null;
     server.shutdown();
   });
 
-  test('persisting the owner record changes the fragment state to non-new', function(assert) {
-    let data = {
+  test('persisting the owner record changes the fragment state to non-new', async function (assert) {
+    const data = {
       name: {
         first: 'Viserys',
-        last: 'Targaryen'
-      }
+        last: 'Targaryen',
+      },
     };
 
-    return run(() => {
-      let person = store.createRecord('person');
+    const person = store.createRecord('person');
 
-      person.set('name', store.createFragment('name', data.name));
+    person.set('name', store.createFragment('name', data.name));
 
-      let payload = {
-        person: copy(data, true)
-      };
-      payload.person.id = 3;
+    const payload = {
+      person: copy(data, true),
+    };
+    payload.person.id = 3;
 
-      server.post('/people', () => {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
-        ];
-      });
-
-      return person.save().then(person => {
-        assert.ok(
-          !person.get('name.isNew'),
-          'fragments are not new after save'
-        );
-      });
+    server.post('/people', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
     });
+
+    await person.save();
+    assert.ok(!person.name.isNew, 'fragments are not new after save');
   });
 
-  test('persisting the owner record in a clean state maintains clean state', function(assert) {
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Tyrion',
-              last: 'Lannister'
+  test('persisting the owner record in a clean state maintains clean state', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Tyrion',
+            last: 'Lannister',
+          },
+          addresses: [
+            {
+              street: '1 Sky Cell',
+              city: 'Eyre',
+              region: 'Vale of Arryn',
+              country: 'Westeros',
             },
-            addresses: [
-              {
-                street: '1 Sky Cell',
-                city: 'Eyre',
-                region: 'Vale of Arryn',
-                country: 'Westeros'
-              }
-            ]
-          }
-        }
-      });
-
-      server.put('/people/1', () => {
-        return [200, { 'Content-Type': 'application/json' }, '{}'];
-      });
-
-      return store
-        .find('person', 1)
-        .then(person => {
-          return person.save();
-        })
-        .then(person => {
-          let name = person.get('name');
-          let addresses = person.get('addresses');
-
-          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-          assert.ok(
-            !addresses.isAny('hasDirtyAttributes'),
-            'all fragment array fragments are clean'
-          );
-          assert.ok(
-            !addresses.get('hasDirtyAttributes'),
-            'fragment array is clean'
-          );
-          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-        });
-    });
-  });
-
-  test('overwrite current state with fragment attributes from the save response', function(assert) {
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            title: 'Lord',
-            name: {
-              first: 'Tyrion',
-              last: 'Lannister'
-            }
-          }
-        }
-      });
-
-      server.put('/people/1', (request) => {
-        const body = JSON.parse(request.requestBody);
-        assert.equal(body.person.title, 'modified');
-        assert.equal(body.person.name.first, 'modified');
-        assert.equal(body.person.name.last, 'modified');
-        body.person.title = 'Ser';
-        body.person.name.first = 'Tywin';
-        body.person.name.last = 'Lannister';
-        return [200, { 'Content-Type': 'application/json' }, JSON.stringify(body)];
-      });
-
-      return store
-        .find('person', 1)
-        .then(person => {
-          person.set('title', 'modified');
-          person.set('name.first', 'modified');
-          person.set('name.last', 'modified');
-          return person.save();
-        })
-        .then(person => {
-          assert.equal(person.get('title'), 'Ser', 'use person.title from the response');
-          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-
-          const name = person.get('name');
-          assert.equal(name.get('first'), 'Tywin', 'use person.name.first from the response');
-          assert.equal(name.get('last'), 'Lannister', 'use person.name.last from the response');
-          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-        });
-    });
-  });
-
-  test('when setting a property to the same value', function(assert) {
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            title: 'Lord',
-            name: {
-              first: 'Tyrion',
-              last: 'Lannister'
-            }
-          }
-        }
-      });
-
-      server.put('/people/1', () => {
-        return [204];
-      });
-
-      return store
-        .find('person', 1)
-        .then(person => {
-          person.set('title', 'titleModified');
-          person.set('name.first', 'firstNameModified');
-          person.set('name.last', 'lastNameModified');
-          return person.save();
-        })
-        .then(person => {
-          assert.equal(person.get('title'), 'titleModified');
-          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-
-          const name = person.get('name');
-          assert.equal(name.get('first'), 'firstNameModified');
-          assert.equal(name.get('last'), 'lastNameModified');
-          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-
-          person.set('title', 'titleModified');
-          person.set('name.first', 'firstNameModified');
-          person.set('name.last', 'lastNameModified');
-
-          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-        });
-    });
-  });
-
-  test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', function(assert) {
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            name: {
-              first: 'Eddard',
-              last: 'Stark'
-            },
-            addresses: [
-              {
-                street: '1 Great Keep',
-                city: 'Winterfell',
-                region: 'North',
-                country: 'Westeros'
-              }
-            ]
-          }
-        }
-      });
-
-      server.put('/people/1', () => {
-        return [200, { 'Content-Type': 'application/json' }, '{}'];
-      });
-
-      return store
-        .find('person', 1)
-        .then(person => {
-          let name = person.get('name');
-          let address = person.get('addresses.firstObject');
-
-          name.set('first', 'Arya');
-          address.set('street', '1 Godswood');
-
-          return person.save();
-        })
-        .then(person => {
-          let name = person.get('name');
-          let addresses = person.get('addresses');
-          let address = addresses.get('firstObject');
-
-          assert.equal(name.get('first'), 'Arya', 'change is persisted');
-          assert.equal(
-            address.get('street'),
-            '1 Godswood',
-            'fragment array change is persisted'
-          );
-          assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-          assert.ok(
-            !addresses.isAny('hasDirtyAttributes'),
-            'all fragment array fragments are clean'
-          );
-          assert.ok(
-            !addresses.get('hasDirtyAttributes'),
-            'fragment array is clean'
-          );
-          assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-        });
-    });
-  });
-
-  test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', function(assert) {
-    return run(() => {
-      let data = {
-        name: {
-          first: 'Daenerys',
-          last: 'Targaryen'
+          ],
         },
-        addresses: [
-          store.createFragment('address', {
-            street: '1 Stone Drum',
-            city: 'Dragonstone',
-            region: 'Crownlands',
-            country: 'Westeros'
-          })
-        ]
-      };
-
-      let person = store.createRecord('person');
-      person.set('name', store.createFragment('name', data.name));
-      person.set('addresses', data.addresses);
-
-      let payload = {
-        person: copy(data, true)
-      };
-      payload.person.id = 3;
-
-      server.post('/people', () => {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
-        ];
-      });
-
-      return person.save().then(person => {
-        let name = person.get('name');
-        let addresses = person.get('addresses');
-
-        assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-        assert.ok(
-          !addresses.isAny('hasDirtyAttributes'),
-          'all fragment array fragments are clean'
-        );
-        assert.ok(
-          !addresses.get('hasDirtyAttributes'),
-          'fragment array is clean'
-        );
-        assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-      });
+      },
     });
+
+    server.put('/people/1', () => {
+      return [200, { 'Content-Type': 'application/json' }, '{}'];
+    });
+
+    const person = await store.find('person', 1);
+    await person.save();
+
+    const name = person.name;
+    const addresses = person.addresses;
+
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
+    assert.ok(
+      !addresses.isAny('hasDirtyAttributes'),
+      'all fragment array fragments are clean'
+    );
+    assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
 
-  test('a new record can be persisted with null fragments', function(assert) {
-    return run(() => {
-      let person = store.createRecord('person');
-
-      assert.equal(person.get('name'), null, 'fragment property is null');
-      assert.equal(
-        person.get('hobbies'),
-        null,
-        'fragment array property is null'
-      );
-
-      let payload = {
-        person: {
-          id: 1
-        }
-      };
-
-      server.post('/people', () => {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
-        ];
-      });
-
-      return person.save().then(person => {
-        assert.equal(
-          person.get('name'),
-          null,
-          'fragment property is still null'
-        );
-        assert.equal(
-          person.get('hobbies'),
-          null,
-          'fragment array property is still null'
-        );
-        assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-      });
+  test('overwrite current state with fragment attributes from the save response', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          title: 'Lord',
+          name: {
+            first: 'Tyrion',
+            last: 'Lannister',
+          },
+        },
+      },
     });
+
+    server.put('/people/1', (request) => {
+      const body = JSON.parse(request.requestBody);
+      assert.equal(body.person.title, 'modified');
+      assert.equal(body.person.name.first, 'modified');
+      assert.equal(body.person.name.last, 'modified');
+      body.person.id = '1';
+      body.person.title = 'Ser';
+      body.person.name.first = 'Tywin';
+      body.person.name.last = 'Lannister';
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(body),
+      ];
+    });
+
+    const person = await store.find('person', 1);
+
+    person.set('title', 'modified');
+    person.set('name.first', 'modified');
+    person.set('name.last', 'modified');
+    await person.save();
+
+    assert.equal(person.title, 'Ser', 'use person.title from the response');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+
+    const name = person.name;
+    assert.equal(
+      name.first,
+      'Tywin',
+      'use person.name.first from the response'
+    );
+    assert.equal(
+      name.last,
+      'Lannister',
+      'use person.name.last from the response'
+    );
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
   });
 
-  test('the adapter can update fragments on save', async function(assert) {
-    let data = {
+  test('when setting a property to the same value', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          title: 'Lord',
+          name: {
+            first: 'Tyrion',
+            last: 'Lannister',
+          },
+        },
+      },
+    });
+
+    server.put('/people/1', () => {
+      return [204];
+    });
+
+    const person = await store.find('person', 1);
+
+    person.set('title', 'titleModified');
+    person.set('name.first', 'firstNameModified');
+    person.set('name.last', 'lastNameModified');
+    await person.save();
+
+    assert.equal(person.title, 'titleModified');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+
+    const name = person.name;
+    assert.equal(name.first, 'firstNameModified');
+    assert.equal(name.last, 'lastNameModified');
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
+
+    person.set('title', 'titleModified');
+    person.set('name.first', 'firstNameModified');
+    person.set('name.last', 'lastNameModified');
+
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
+  });
+
+  test('persisting the owner record when a fragment is dirty moves owner record, fragment array, and all fragments into clean state', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Eddard',
+            last: 'Stark',
+          },
+          addresses: [
+            {
+              street: '1 Great Keep',
+              city: 'Winterfell',
+              region: 'North',
+              country: 'Westeros',
+            },
+          ],
+        },
+      },
+    });
+
+    server.put('/people/1', () => {
+      return [200, { 'Content-Type': 'application/json' }, '{}'];
+    });
+
+    const person = await store.find('person', 1);
+
+    const name = person.name;
+    const addresses = person.addresses;
+    const address = addresses.firstObject;
+
+    name.set('first', 'Arya');
+    address.set('street', '1 Godswood');
+
+    await person.save();
+
+    assert.equal(name.first, 'Arya', 'change is persisted');
+    assert.equal(
+      address.street,
+      '1 Godswood',
+      'fragment array change is persisted'
+    );
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
+    assert.ok(
+      !addresses.isAny('hasDirtyAttributes'),
+      'all fragment array fragments are clean'
+    );
+    assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+  });
+
+  test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', async function (assert) {
+    const data = {
+      name: {
+        first: 'Daenerys',
+        last: 'Targaryen',
+      },
+      addresses: [
+        {
+          street: '1 Stone Drum',
+          city: 'Dragonstone',
+          region: 'Crownlands',
+          country: 'Westeros',
+        },
+      ],
+    };
+
+    const person = store.createRecord('person');
+    person.set('name', store.createFragment('name', data.name));
+    person.set('addresses', data.addresses);
+
+    const payload = {
+      person: copy(data, true),
+    };
+    payload.person.id = 3;
+
+    server.post('/people', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    await person.save();
+    const name = person.name;
+    const addresses = person.addresses;
+
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
+    assert.ok(
+      !addresses.isAny('hasDirtyAttributes'),
+      'all fragment array fragments are clean'
+    );
+    assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+  });
+
+  test('a new record can be persisted with null fragments', async function (assert) {
+    const person = store.createRecord('person');
+
+    assert.equal(person.name, null, 'fragment property is null');
+    assert.equal(person.hobbies, null, 'fragment array property is null');
+
+    const payload = {
+      person: {
+        id: 1,
+      },
+    };
+
+    server.post('/people', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    await person.save();
+    assert.equal(person.name, null, 'fragment property is still null');
+    assert.equal(person.hobbies, null, 'fragment array property is still null');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+  });
+
+  test('the adapter can update fragments on save', async function (assert) {
+    const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: data
-      }
+        attributes: data,
+      },
     });
 
-    let payload = {
-      person: copy(data, true)
+    const payload = {
+      person: copy(data, true),
     };
     payload.person.id = 1;
     payload.person.name.first = 'Ned';
@@ -398,262 +356,258 @@ module('integration - Persistence', function(hooks) {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
     await person.save();
-    let name = person.get('name');
-    let addresses = person.get('addresses');
+    const name = person.name;
+    const addresses = person.addresses;
 
-    assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
     assert.ok(
       !addresses.isAny('hasDirtyAttributes'),
       'all fragment array fragments are clean'
     );
-    assert.ok(
-      !addresses.get('hasDirtyAttributes'),
-      'fragment array is clean'
-    );
-    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
-    assert.equal(name.get('first'), 'Ned', 'fragment correctly updated');
+    assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
+    assert.equal(name.first, 'Ned', 'fragment correctly updated');
     assert.equal(
-      addresses.get('firstObject.street'),
+      addresses.firstObject.street,
       '1 Godswood',
       'fragment array fragment correctly updated'
     );
   });
 
-  test('the adapter can set fragments to null on save', async function(assert) {
-    let data = {
+  test('the adapter can set fragments to null on save', async function (assert) {
+    const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
-    let person = store.push({
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: data
-      }
+        attributes: data,
+      },
     });
 
-    let payload = {
+    const payload = {
       person: {
+        id: 1,
         name: null,
-        addresses: null
-      }
+        addresses: null,
+      },
     };
 
     server.put('/people/1', () => {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
-    assert.equal(person.get('name.first'), 'Eddard', 'fragment initial state');
-    assert.equal(person.get('addresses.firstObject.country'), 'Westeros', 'fragment array initial state');
+    assert.equal(person.name.first, 'Eddard', 'fragment initial state');
+    assert.equal(
+      person.addresses.firstObject.country,
+      'Westeros',
+      'fragment array initial state'
+    );
 
     await person.save();
 
-    assert.equal(person.get('name'), null, 'fragment correctly updated');
-    assert.equal(person.get('addresses'), null, 'fragment array correctly updated');
-    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+    assert.equal(person.name, null, 'fragment correctly updated');
+    assert.equal(person.addresses, null, 'fragment array correctly updated');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
 
-  test('the adapter can set fragments from null to a new value on save', async function(assert) {
-    let person = store.push({
+  test('the adapter can set fragments from null to a new value on save', async function (assert) {
+    const person = store.push({
       data: {
         type: 'person',
         id: 1,
         attributes: {
           name: null,
-          addresses: null
-        }
-      }
+          addresses: null,
+        },
+      },
     });
 
-    let payload = {
+    const payload = {
       person: {
         id: 1,
         name: {
           first: 'Eddard',
-          last: 'Stark'
+          last: 'Stark',
         },
         addresses: [
           {
             street: '1 Great Keep',
             city: 'Winterfell',
             region: 'North',
-            country: 'Westeros'
-          }
-        ]
-      }
+            country: 'Westeros',
+          },
+        ],
+      },
     };
 
     server.put('/people/1', () => {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
-    assert.equal(person.get('name'), null, 'fragment initial state');
-    assert.equal(person.get('addresses'), null, 'fragment array initial state');
+    assert.equal(person.name, null, 'fragment initial state');
+    assert.equal(person.addresses, null, 'fragment array initial state');
 
     await person.save();
 
-    assert.equal(person.get('name.first'), 'Eddard', 'fragment correctly updated');
-    assert.equal(person.get('addresses.firstObject.country'), 'Westeros', 'fragment array correctly updated');
-    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+    assert.equal(person.name.first, 'Eddard', 'fragment correctly updated');
+    assert.equal(
+      person.addresses.firstObject.country,
+      'Westeros',
+      'fragment array correctly updated'
+    );
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
 
-  test('existing fragments are updated on save', function(assert) {
-    let data = {
+  test('existing fragments are updated on save', async function (assert) {
+    const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
-    return run(() => {
-      let payload = {
-        person: copy(data, true)
-      };
+    const payload = {
+      person: copy(data, true),
+    };
 
-      payload.person.id = 1;
-      payload.person.name.first = 'Ned';
-      payload.person.addresses[0].street = '1 Godswood';
-      payload.person.addresses.unshift({
-        street: '1 Red Keep',
-        city: 'Kings Landing',
-        region: 'Crownlands',
-        country: 'Westeros'
-      });
-
-      return run(() => {
-        server.post('/people', () => {
-          return [
-            200,
-            { 'Content-Type': 'application/json' },
-            JSON.stringify(payload)
-          ];
-        });
-
-        let person = store.createRecord('person');
-        let name = store.createFragment('name', copy(data.name));
-        let address = store.createFragment('address', copy(data.addresses[0]));
-
-        person.set('name', name);
-        person.set('addresses', [address]);
-
-        let addresses = person.get('addresses');
-
-        return person.save().then(() => {
-          assert.equal(name.get('first'), 'Ned', 'fragment correctly updated');
-          assert.equal(
-            address.get('street'),
-            '1 Red Keep',
-            'fragment array fragment correctly updated'
-          );
-          assert.equal(
-            addresses.get('lastObject.street'),
-            '1 Godswood',
-            'fragment array fragment correctly updated'
-          );
-          assert.equal(
-            addresses.get('length'),
-            2,
-            'fragment array fragment correctly updated'
-          );
-        });
-      });
+    payload.person.id = 1;
+    payload.person.name.first = 'Ned';
+    payload.person.addresses[0].street = '1 Godswood';
+    payload.person.addresses.unshift({
+      street: '1 Red Keep',
+      city: 'Kings Landing',
+      region: 'Crownlands',
+      country: 'Westeros',
     });
+
+    server.post('/people', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    const person = store.createRecord('person');
+    const name = store.createFragment('name', copy(data.name));
+    const address = store.createFragment('address', copy(data.addresses[0]));
+
+    person.set('name', name);
+    person.set('addresses', [address]);
+
+    const addresses = person.addresses;
+
+    await person.save();
+    assert.equal(name.first, 'Ned', 'fragment correctly updated');
+    assert.equal(
+      address.street,
+      '1 Red Keep',
+      'fragment array fragment correctly updated'
+    );
+    assert.equal(
+      addresses.lastObject.street,
+      '1 Godswood',
+      'fragment array fragment correctly updated'
+    );
+    assert.equal(
+      addresses.length,
+      2,
+      'fragment array fragment correctly updated'
+    );
   });
 
-  test('the adapter can update fragments on reload', function(assert) {
-    let data = {
+  test('the adapter can update fragments on reload', async function (assert) {
+    const data = {
       name: {
         first: 'Brandon',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: data
-        }
-      });
-
-      let payload = {
-        person: copy(data, true)
-      };
-
-      payload.person.id = 1;
-      payload.person.name.first = 'Bran';
-      payload.person.addresses[0].street = '1 Broken Tower';
-
-      server.get('/people/1', () => {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
-        ];
-      });
-
-      return store
-        .find('person', 1)
-        .then(person => {
-          // Access values that will change to prime CP cache
-          person.get('name.first');
-          person.get('addresses.firstObject.street');
-
-          return person.reload();
-        })
-        .then(person => {
-          let name = person.get('name');
-          let addresses = person.get('addresses');
-
-          assert.equal(name.get('first'), 'Bran', 'fragment correctly updated');
-          assert.equal(
-            addresses.get('firstObject.street'),
-            '1 Broken Tower',
-            'fragment array fragment correctly updated'
-          );
-        });
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data,
+      },
     });
+
+    const payload = {
+      person: copy(data, true),
+    };
+
+    payload.person.id = 1;
+    payload.person.name.first = 'Bran';
+    payload.person.addresses[0].street = '1 Broken Tower';
+
+    server.get('/people/1', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    const person = await store.find('person', 1);
+
+    // Access values that will change to prime CP cache
+    person.name.first;
+    person.addresses.firstObject.street;
+
+    await person.reload();
+
+    const name = person.name;
+    const addresses = person.addresses;
+
+    assert.equal(name.first, 'Bran', 'fragment correctly updated');
+    assert.equal(
+      addresses.firstObject.street,
+      '1 Broken Tower',
+      'fragment array fragment correctly updated'
+    );
   });
 
   /*
@@ -661,296 +615,275 @@ module('integration - Persistence', function(hooks) {
     CPs are consumed as soon as they are changed. If we are not careful, this can cause infinite loops when
     updating existing fragment data
   */
-  test('the adapter can update fragments without infinite loops when CPs are eagerly consumed', function(assert) {
-    let data = {
+  test('the adapter can update fragments without infinite loops when CPs are eagerly consumed', async function (assert) {
+    const data = {
       name: {
         first: 'Brandon',
-        last: 'Stark'
-      }
+        last: 'Stark',
+      },
     };
 
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: data
-        }
-      });
-
-      return store.find('person', 1).then(person => {
-        let personProxy = ObjectProxy.create({ content: person });
-
-        addObserver(personProxy, 'name.first', function() {});
-        personProxy.get('name.first');
-
-        store.push({
-          data: {
-            type: 'person',
-            id: 1,
-            attributes: data
-          }
-        });
-
-        assert.equal(person.get('name.first'), 'Brandon');
-      });
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data,
+      },
     });
+
+    const person = await store.find('person', 1);
+    const personProxy = ObjectProxy.create({ content: person });
+
+    addObserver(personProxy, 'name.first', function () {});
+
+    // eslint-disable-next-line ember/no-get
+    personProxy.get('name.first');
+
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data,
+      },
+    });
+
+    assert.equal(person.name.first, 'Brandon');
   });
 
   // TODO: The data in the adapter response is not actually changing here, which
   // means that the property actually _shouldn't_ be notified. Doing so requires
   // value diffing of deserialized model data, which means either saving a copy of
   // the data before giving it to the fragment
-  skip('fragment array properties are notified on save', function(assert) {
+  skip('fragment array properties are notified on save', async function (assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
 
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
-    let PersonObserver = EmberObject.extend({
+    // eslint-disable-next-line ember/no-classic-classes
+    const PersonObserver = EmberObject.extend({
       person: null,
-      observer: observer('person.addresses.[]', function() {
+      observer: observer('person.addresses.[]', function () {
         assert.ok(true, 'The array change was observed');
-      })
+      }),
     });
 
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: data
-        }
-      });
-
-      let payload = {
-        person: copy(data, true)
-      };
-      payload.person.id = 1;
-
-      server.put('/people/1', () => {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
-        ];
-      });
-
-      return store.find('person', 1).then(person => {
-        PersonObserver.create({ person: person });
-        return person.save();
-      });
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data,
+      },
     });
+
+    const payload = {
+      person: copy(data, true),
+    };
+    payload.person.id = 1;
+
+    server.put('/people/1', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    const person = await store.find('person', 1);
+    PersonObserver.create({ person: person });
+    return person.save();
   });
 
   // TODO(igor) figure out why length is different the first time this assertion is called.
-  skip('fragment array properties are notified on reload', function(assert) {
+  skip('fragment array properties are notified on reload', async function (assert) {
     // The extra assertion comes from deprecation checking
     // assert.expect(2);
-    let Army = Model.extend({
-      name: attr('string'),
-      soldiers: MF.array()
-    });
+    class Army extends Model {
+      @attr('string') name;
+      @array() soldiers;
+    }
 
     owner.register('model:army', Army);
 
-    let data = {
+    const data = {
       name: 'Golden Company',
-      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
+      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
-    let ArmyObserver = EmberObject.extend({
+    // eslint-disable-next-line ember/no-classic-classes
+    const ArmyObserver = EmberObject.extend({
       army: null,
-      observer: observer('army.soldiers.[]', function() {
+      observer: observer('army.soldiers.[]', function () {
         assert.equal(
-          this.army.soldiers.length, 2,
+          this.army.soldiers.length,
+          2,
           'The array change to was observed'
         );
-      })
+      }),
     });
 
-    return run(() => {
-      store.push({
-        data: {
-          type: 'army',
-          id: 1,
-          attributes: data
-        }
-      });
-
-      let payload = {
-        army: copy(data, true)
-      };
-      payload.army.id = 1;
-      payload.army.soldiers.shift();
-
-      server.get('/armies/1', () => {
-        return [
-          200,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify(payload)
-        ];
-      });
-
-      return store.find('army', 1).then(army => {
-        ArmyObserver.create({ army: army });
-        return army.reload();
-      });
+    store.push({
+      data: {
+        type: 'army',
+        id: 1,
+        attributes: data,
+      },
     });
+
+    const payload = {
+      army: copy(data, true),
+    };
+    payload.army.id = 1;
+    payload.army.soldiers.shift();
+
+    server.get('/armies/1', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    const army = await store.find('army', 1);
+    ArmyObserver.create({ army: army });
+    return army.reload();
   });
 
-  test('string array can be rolled back on failed save', function(assert) {
+  test('string array can be rolled back on failed save', async function (assert) {
     // assert.expect(3);
 
-    let data = {
+    const data = {
       name: 'Golden Company',
-      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
+      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
 
-    let Army = Model.extend({
-      name: attr('string'),
-      soldiers: MF.array()
-    });
+    class Army extends Model {
+      @attr('string') name;
+      @array() soldiers;
+    }
 
     owner.register('model:army', Army);
 
-    return run(() => {
-      store.push({
-        data: {
-          type: 'army',
-          id: 1,
-          attributes: data
-        }
-      });
-
-      server.get('/armies', () => {
-        return [500, { 'Content-Type': 'application/json' }];
-      });
-
-      let army, soliders;
-      return store
-        .find('army', 1)
-        .then(_army => {
-          army = _army;
-          soliders = army.get('soldiers');
-          soliders.pushObject('Lysono Maar');
-          soliders.removeObject('Jon Connington');
-
-          assert.deepEqual(soliders.toArray(), [
-            'Aegor Rivers',
-            'Tristan Rivers',
-            'Lysono Maar'
-          ]);
-
-          return army.save();
-        })
-        .catch(() => {
-          army.rollbackAttributes();
-
-          assert.deepEqual(soliders.toArray(), [
-            'Aegor Rivers',
-            'Jon Connington',
-            'Tristan Rivers'
-          ]);
-        });
+    store.push({
+      data: {
+        type: 'army',
+        id: 1,
+        attributes: data,
+      },
     });
+
+    server.get('/armies', () => {
+      return [500, { 'Content-Type': 'application/json' }];
+    });
+
+    const army = await store.find('army', 1);
+    const soliders = army.soldiers;
+    soliders.pushObject('Lysono Maar');
+    soliders.removeObject('Jon Connington');
+
+    assert.deepEqual(soliders.toArray(), [
+      'Aegor Rivers',
+      'Tristan Rivers',
+      'Lysono Maar',
+    ]);
+
+    await assert.rejects(army.save());
+
+    army.rollbackAttributes();
+
+    assert.deepEqual(soliders.toArray(), [
+      'Aegor Rivers',
+      'Jon Connington',
+      'Tristan Rivers',
+    ]);
   });
 
-  test('existing fragments can be rolled back on failed save', function(assert) {
+  test('existing fragments can be rolled back on failed save', async function (assert) {
     // assert.expect(3);
 
-    let data = {
+    const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
-    return run(() => {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: data
-        }
-      });
-
-      server.put('/armies/1', () => {
-        return [500, { 'Content-Type': 'application/json' }];
-      });
-
-      let mrStark, name, address;
-
-      return store
-        .find('person', 1)
-        .then(person => {
-          mrStark = person;
-
-          name = mrStark.get('name');
-          address = mrStark.get('addresses.firstObject');
-
-          name.set('first', 'BadFirstName');
-          name.set('last', 'BadLastName');
-          address.set('street', 'BadStreet');
-
-          return mrStark.save();
-        })
-        .catch(() => {
-          mrStark.rollbackAttributes();
-
-          assert.equal(
-            `${name.get('first')} ${name.get('last')}`,
-            'Eddard Stark',
-            'fragment name rolled back'
-          );
-          assert.equal(
-            address.get('street'),
-            '1 Great Keep',
-            'fragment array fragment correctly rolled back'
-          );
-        });
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: data,
+      },
     });
+
+    server.put('/armies/1', () => {
+      return [500, { 'Content-Type': 'application/json' }];
+    });
+
+    const mrStark = await store.find('person', 1);
+
+    const name = mrStark.name;
+    const address = mrStark.addresses.firstObject;
+
+    name.set('first', 'BadFirstName');
+    name.set('last', 'BadLastName');
+    address.set('street', 'BadStreet');
+
+    await assert.rejects(mrStark.save());
+
+    mrStark.rollbackAttributes();
+
+    assert.equal(
+      `${name.first} ${name.last}`,
+      'Eddard Stark',
+      'fragment name rolled back'
+    );
+    assert.equal(
+      address.street,
+      '1 Great Keep',
+      'fragment array fragment correctly rolled back'
+    );
   });
 
-  test('fragments with default values are rolled back to uncommitted state after failed save', async function(assert) {
-    const Address = MF.Fragment.extend({
-      line1: attr('string'),
-      line2: attr('string')
-    });
+  test('fragments with default values are rolled back to uncommitted state after failed save', async function (assert) {
+    class Address extends MF.Fragment {
+      @attr('string') line1;
+      @attr('string') line2;
+    }
 
     owner.register('model:address', Address);
 
-    const PersonWithDefaults = Model.extend({
-      address: MF.fragment('address', { defaultValue: {} }),
-      addresses: MF.fragmentArray('address', { defaultValue: [{}] })
-    });
+    class PersonWithDefaults extends Model {
+      @fragment('address', { defaultValue: {} }) address;
+      @fragmentArray('address', { defaultValue: [{}] }) addresses;
+    }
 
     owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person');
-    const address = person.get('address');
-    const addresses = person.get('addresses');
+    const address = person.address;
+    const addresses = person.addresses;
 
     assert.equal(
       address._internalModel.currentState.stateName,
@@ -965,14 +898,16 @@ module('integration - Persistence', function(hooks) {
 
     server.post('/people', () => {
       const response = {
-        errors: [
-          { code: 'custom-error-code' }
-        ]
+        errors: [{ code: 'custom-error-code' }],
       };
-      return [400, { 'Content-Type': 'application/json' }, JSON.stringify(response)];
+      return [
+        400,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(response),
+      ];
     });
 
-    let savePromise = person.save();
+    const savePromise = person.save();
 
     assert.equal(
       address._internalModel.currentState.stateName,
@@ -985,7 +920,10 @@ module('integration - Persistence', function(hooks) {
       'fragment array state during save'
     );
 
-    await assert.rejects(savePromise, ex => ex.errors[0].code === 'custom-error-code');
+    await assert.rejects(
+      savePromise,
+      (ex) => ex.errors[0].code === 'custom-error-code'
+    );
 
     assert.equal(
       address._internalModel.currentState.stateName,
@@ -1013,28 +951,33 @@ module('integration - Persistence', function(hooks) {
     );
   });
 
-  test('setting an array does not error on save', function() {
-    let Army = Model.extend({
-      soldiers: MF.array('string')
-    });
+  test('setting an array does not error on save', async function (assert) {
+    assert.expect(0);
+    class Army extends Model {
+      @array('string') soldiers;
+    }
 
-    let data = {
-      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']
+    const data = {
+      soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
-    let payload = {
-      army: copy(data, true)
+    const payload = {
+      army: copy(data, true),
     };
     owner.register('model:army', Army);
 
-    const army = run(() => store.createRecord('army'));
+    const army = store.createRecord('army');
     server.post('/armies', () => {
-      return [200, { 'Content-Type': 'application/json' },  JSON.stringify(payload)];
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
     });
     army.set('soldiers', ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers']);
-    run(() => army.save());
+    await army.save();
   });
 
-  test('change fragment attributes while save is in-flight', async function(assert) {
+  test('change fragment attributes while save is in-flight', async function (assert) {
     store.push({
       data: {
         type: 'person',
@@ -1042,18 +985,18 @@ module('integration - Persistence', function(hooks) {
         attributes: {
           name: {
             first: 'Tyrion',
-            last: 'Lannister'
+            last: 'Lannister',
           },
           addresses: [
             {
               street: '1 Sky Cell',
               city: 'Eyre',
               region: 'Vale of Arryn',
-              country: 'Westeros'
-            }
-          ]
-        }
-      }
+              country: 'Westeros',
+            },
+          ],
+        },
+      },
     });
 
     server.put('/people/1', () => {
@@ -1061,7 +1004,7 @@ module('integration - Persistence', function(hooks) {
     });
 
     const person = await store.find('person', 1);
-    const name = person.get('name');
+    const name = person.name;
 
     // set the value and save
     name.set('first', 'Tywin');
@@ -1072,103 +1015,98 @@ module('integration - Persistence', function(hooks) {
 
     await savePromise;
 
-    assert.equal(name.get('first'), 'Jamie');
-    assert.ok(name.get('hasDirtyAttributes'), 'fragment is dirty');
-    assert.ok(person.get('hasDirtyAttributes'), 'owner record is dirty');
+    assert.equal(name.first, 'Jamie');
+    assert.ok(name.hasDirtyAttributes, 'fragment is dirty');
+    assert.ok(person.hasDirtyAttributes, 'owner record is dirty');
 
     // revert to the saved value
     name.set('first', 'Tywin');
 
-    assert.ok(!name.get('hasDirtyAttributes'), 'fragment is clean');
-    assert.ok(!person.get('hasDirtyAttributes'), 'owner record is clean');
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
 
-  test('change fragment value while save is in-flight', async function(assert) {
+  test('change fragment value while save is in-flight', async function (assert) {
     const data = {
       name: {
         first: 'Eddard',
-        last: 'Stark'
+        last: 'Stark',
       },
       addresses: [
         {
           street: '1 Great Keep',
           city: 'Winterfell',
           region: 'North',
-          country: 'Westeros'
-        }
-      ]
+          country: 'Westeros',
+        },
+      ],
     };
 
     const person = store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: data
-      }
+        attributes: data,
+      },
     });
 
     const payload = {
       person: {
         id: 1,
-        name: null
-      }
+        name: null,
+      },
     };
 
     server.put('/people/1', () => {
       return [
         200,
         { 'Content-Type': 'application/json' },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       ];
     });
 
-    assert.equal(person.get('name.first'), 'Eddard');
+    assert.equal(person.name.first, 'Eddard');
     const savePromise = person.save();
 
     // while save is in-flight, set the fragment
     person.set('name', null);
 
-    assert.equal(person.get('name'), null);
-    assert.ok(person.get('hasDirtyAttributes'), 'record is dirty');
+    assert.equal(person.name, null);
+    assert.ok(person.hasDirtyAttributes, 'record is dirty');
 
     // save response confirms the null value
     await savePromise;
 
-    assert.ok(!person.get('hasDirtyAttributes'), 'record is clean');
+    assert.ok(!person.hasDirtyAttributes, 'record is clean');
   });
 
-  test('initializing a fragment, saving and then updating that fragment', async function(assert) {
-    const component = store.createRecord('component', { id: 10, type: 'chart', options: {} });
+  test('initializing a fragment, saving and then updating that fragment', async function (assert) {
+    const component = store.createRecord('component', {
+      id: 10,
+      type: 'chart',
+      options: {},
+    });
 
     server.post('/components', () => [204]);
     server.put('/components/:id', () => [204]);
 
     await component.save();
 
-    assert.ok(
-      !component.get('hasDirtyAttributes'),
-      'component record is not dirty'
-    );
+    assert.ok(!component.hasDirtyAttributes, 'component record is not dirty');
 
     component.options.lastOrder = { products: [] };
     component.options.lastOrder.products.pushObject({ name: 'Light Saber' });
 
-    assert.ok(
-      component.get('hasDirtyAttributes'),
-      'component record is dirty'
-    );
+    assert.ok(component.hasDirtyAttributes, 'component record is dirty');
 
     await component.save();
 
     assert.ok(
-      !component.get('hasDirtyAttributes'),
+      !component.hasDirtyAttributes,
       'component record is not dirty after save'
     );
 
     component.options.lastOrder.products.createFragment({ name: 'Baby Yoda' });
-    assert.ok(
-      component.get('hasDirtyAttributes'),
-      'component record is dirty'
-    );
+    assert.ok(component.hasDirtyAttributes, 'component record is dirty');
   });
 });

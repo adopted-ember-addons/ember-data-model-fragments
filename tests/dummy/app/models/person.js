@@ -1,17 +1,21 @@
 import Model, { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import {
+  fragment,
+  fragmentArray,
+  array,
+} from 'ember-data-model-fragments/attributes';
 
-export default Model.extend({
-  title: attr('string'),
-  nickName: attr('string'),
-  name: MF.fragment('name'),
-  names: MF.fragmentArray('name'),
-  addresses: MF.fragmentArray('address'),
-  titles: MF.array(),
-  hobbies: MF.fragmentArray('hobby', { defaultValue: null }),
-  houses: MF.fragmentArray('house'),
-  children: MF.array(),
-  strings: MF.array('string'),
-  numbers: MF.array('number'),
-  booleans: MF.array('boolean')
-});
+export default class Person extends Model {
+  @attr('string') title;
+  @attr('string') nickName;
+  @fragment('name') name;
+  @fragmentArray('name') names;
+  @fragmentArray('address') addresses;
+  @array() titles;
+  @fragmentArray('hobby', { defaultValue: null }) hobbies;
+  @fragmentArray('house') houses;
+  @array() children;
+  @array('string') strings;
+  @array('number') numbers;
+  @array('boolean') booleans;
+}

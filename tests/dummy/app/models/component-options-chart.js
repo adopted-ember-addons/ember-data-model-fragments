@@ -1,6 +1,6 @@
 import ComponentOptions from './component-options';
-import MF from 'ember-data-model-fragments';
+import { fragment } from 'ember-data-model-fragments/attributes';
 
 export default class ComponentOptionsChart extends ComponentOptions {
-  @MF.fragment('order') lastOrder;
+  @fragment('order') lastOrder;
 }

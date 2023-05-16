@@ -1,3 +1,3 @@
-import MF from 'ember-data-model-fragments';
+import Fragment from 'ember-data-model-fragments/fragment';
 
-export default class ComponentOptions extends MF.Fragment {}
+export default class ComponentOptions extends Fragment {}

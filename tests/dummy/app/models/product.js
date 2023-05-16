@@ -1,8 +1,8 @@
+import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
 
-export default MF.Fragment.extend({
-  name: attr('string'),
-  sku: attr('string'),
-  price: attr('string')
-});
+export default class Product extends Fragment {
+  @attr('string') name;
+  @attr('string') sku;
+  @attr('string') price;
+}

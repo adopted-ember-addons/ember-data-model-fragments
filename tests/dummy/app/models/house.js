@@ -1,8 +1,8 @@
+import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
 
-export default MF.Fragment.extend({
-  name: attr('string'),
-  region: attr('string'),
-  exiled: attr('boolean')
-});
+export default class House extends Fragment {
+  @attr('string') name;
+  @attr('string') region;
+  @attr('boolean') exiled;
+}

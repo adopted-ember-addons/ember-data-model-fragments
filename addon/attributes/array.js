@@ -10,7 +10,7 @@ function getDefaultValue(record, options, key) {
   if (typeof options.defaultValue === 'function') {
     const defaultValue = options.defaultValue.call(null, record, options, key);
     assert(
-      'The fragment array\'s default value function must return an array',
+      "The fragment array's default value function must return an array",
       defaultValue === null || isArray(defaultValue)
     );
     return defaultValue;
@@ -18,7 +18,7 @@ function getDefaultValue(record, options, key) {
   if (options.defaultValue !== undefined) {
     const defaultValue = options.defaultValue;
     assert(
-      'The fragment array\'s default value must be an array',
+      "The fragment array's default value must be an array",
       defaultValue === null || isArray(defaultValue)
     );
     // Create a deep copy of the resulting value to avoid shared reference errors
@@ -71,7 +71,7 @@ export default function array(type, options) {
     isAttribute: true,
     isFragment: true,
     kind: 'array',
-    options
+    options,
   };
 
   // eslint-disable-next-line ember/require-computed-property-dependencies
@@ -89,7 +89,7 @@ export default function array(type, options) {
         array = StatefulArray.create({
           store: this.store,
           recordData,
-          key
+          key,
         });
         recordData._fragmentArrayCache[key] = array;
       }
@@ -114,12 +114,12 @@ export default function array(type, options) {
         array = StatefulArray.create({
           store: this.store,
           recordData,
-          key
+          key,
         });
         recordData._fragmentArrayCache[key] = array;
       }
       array.setObjects(value);
       return array;
-    }
+    },
   }).meta(meta);
 }

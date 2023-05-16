@@ -35,7 +35,9 @@ const FragmentArray = StatefulArray.extend({
     if (recordData === undefined) {
       return;
     }
-    const internalModel = this.store._internalModelForResource(recordData.identifier);
+    const internalModel = this.store._internalModelForResource(
+      recordData.identifier
+    );
     if (internalModel === undefined) {
       return;
     }
@@ -45,7 +47,8 @@ const FragmentArray = StatefulArray.extend({
   _normalizeData(data, index) {
     assert(
       `You can only add '${this.modelName}' fragments or object literals to this property`,
-      typeOf(data) === 'object' || isInstanceOfType(this.store.modelFor(this.modelName), data)
+      typeOf(data) === 'object' ||
+        isInstanceOfType(this.store.modelFor(this.modelName), data)
     );
 
     if (isFragment(data)) {
@@ -69,7 +72,7 @@ const FragmentArray = StatefulArray.extend({
   */
   _createSnapshot() {
     // Snapshot each fragment
-    return this.map(fragment => {
+    return this.map((fragment) => {
       return fragment._createSnapshot();
     });
   },
@@ -155,7 +158,7 @@ const FragmentArray = StatefulArray.extend({
     const fragment = this.store.createFragment(this.modelName, props);
     setFragmentOwner(fragment, this.recordData, this.key);
     return this.pushObject(fragment);
-  }
+  },
 });
 
 export default FragmentArray;

@@ -7,5 +7,5 @@ export default {
   name: 'fragmentTransform',
   after: 'ember-data',
 
-  initialize() {}
+  initialize() {},
 };

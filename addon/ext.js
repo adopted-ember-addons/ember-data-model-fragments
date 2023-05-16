@@ -9,7 +9,6 @@ import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
 import { gte } from 'ember-compatibility-helpers';
-import { get } from '@ember/object';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -42,9 +41,15 @@ const InternalModelPrototype = InternalModel.prototype;
 Store.reopen({
   createRecordDataFor(type, id, lid, storeWrapper) {
     if (!gte('ember-data', '3.28.0')) {
-      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.');
+      throw new Error(
+        'This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.'
+      );
     }
-    const identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
+    const identifier = this.identifierCache.getOrCreateRecordIdentifier({
+      type,
+      id,
+      lid,
+    });
     return new FragmentRecordData(identifier, storeWrapper);
   },
 
@@ -69,8 +74,13 @@ Store.reopen({
     @return {MF.Fragment} fragment
   */
   createFragment(modelName, props) {
-    assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
-    const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
+    assert(
+      `The '${modelName}' model must be a subclass of MF.Fragment`,
+      this.isFragment(modelName)
+    );
+    const identifier = this.identifierCache.createIdentifierForNewRecord({
+      type: modelName,
+    });
     const internalModel = this._internalModelForResource(identifier);
     internalModel.send('loadedData');
     internalModel.didCreateRecord();
@@ -90,33 +100,39 @@ Store.reopen({
       return false;
     }
 
-    let type = this.modelFor(modelName);
+    const type = this.modelFor(modelName);
     return Fragment.detect(type);
   },
 
   serializerFor(modelName) {
     // this assertion is cargo-culted from ember-data TODO: update comment
-    assert('You need to pass a model name to the store\'s serializerFor method', isPresent(modelName));
-    assert(`Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`, typeof modelName === 'string');
+    assert(
+      "You need to pass a model name to the store's serializerFor method",
+      isPresent(modelName)
+    );
+    assert(
+      `Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`,
+      typeof modelName === 'string'
+    );
 
-    let owner = getOwner(this);
-    let normalizedModelName = normalizeModelName(modelName);
+    const owner = getOwner(this);
+    const normalizedModelName = normalizeModelName(modelName);
 
     if (this.isFragment(normalizedModelName)) {
       return serializerForFragment(owner, normalizedModelName);
     } else {
       return this._super(...arguments);
     }
-  }
+  },
 });
 
 // Replace a method on an object with a new one that calls the original and then
 // invokes a function with the result
 function decorateMethod(obj, name, fn) {
-  let originalFn = obj[name];
+  const originalFn = obj[name];
 
-  obj[name] = function() {
-    let value = originalFn.apply(this, arguments);
+  obj[name] = function () {
+    const value = originalFn.apply(this, arguments);
 
     return fn.call(this, value, arguments);
   };
@@ -129,20 +145,23 @@ function decorateMethod(obj, name, fn) {
   @method _createSnapshot
   @private
 */
-decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
-  let attrs = snapshot._attributes;
-  Object.keys(attrs).forEach((key) => {
-    let attr = attrs[key];
-    // If the attribute has a `_createSnapshot` method, invoke it before the
-    // snapshot gets passed to the serializer
-    if (attr && typeof attr._createSnapshot === 'function') {
+decorateMethod(
+  InternalModelPrototype,
+  'createSnapshot',
+  function createFragmentSnapshot(snapshot) {
+    const attrs = snapshot._attributes;
+    Object.keys(attrs).forEach((key) => {
+      const attr = attrs[key];
+      // If the attribute has a `_createSnapshot` method, invoke it before the
+      // snapshot gets passed to the serializer
+      if (attr && typeof attr._createSnapshot === 'function') {
+        attrs[key] = attr._createSnapshot();
+      }
+    });
 
-      attrs[key] = attr._createSnapshot();
-    }
-  });
-
-  return snapshot;
-});
+    return snapshot;
+  }
+);
 
 /**
   @class JSONSerializer
@@ -165,8 +184,13 @@ JSONSerializer.reopen({
     const containerKey = `transform:${attributeType}`;
 
     if (!owner.hasRegistration(containerKey)) {
-      const match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
-      assert(`Failed parsing ember-data-model-fragments attribute type ${attributeType}`, match != null);
+      const match = attributeType.match(
+        /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/
+      );
+      assert(
+        `Failed parsing ember-data-model-fragments attribute type ${attributeType}`,
+        match != null
+      );
       const transformName = match[1];
       const type = match[2];
       const polymorphicTypeProp = match[3];
@@ -175,7 +199,7 @@ JSONSerializer.reopen({
       transformClass = transformClass.extend({
         type,
         polymorphicTypeProp,
-        store: this.store
+        store: this.store,
       });
       owner.register(containerKey, transformClass);
     }
@@ -184,20 +208,20 @@ JSONSerializer.reopen({
 
   // We need to override this to handle polymorphic with a typeKey function
   applyTransforms(typeClass, data) {
-    let attributes = get(typeClass, 'attributes');
+    const attributes = typeClass.attributes;
 
     typeClass.eachTransformedAttribute((key, typeClass) => {
       if (data[key] === undefined) {
         return;
       }
 
-      let transform = this.transformFor(typeClass);
-      let transformMeta = attributes.get(key);
+      const transform = this.transformFor(typeClass);
+      const transformMeta = attributes.get(key);
       data[key] = transform.deserialize(data[key], transformMeta.options, data);
     });
 
     return data;
-  }
+  },
 });
 
 export { Store, Model, JSONSerializer };

@@ -106,7 +106,10 @@ class FragmentBehavior {
       'Fragment original value must be a RecordData',
       originalValue === null || originalValue instanceof RecordData
     );
-    return value !== originalValue || (value !== null && value.hasChangedAttributes());
+    return (
+      value !== originalValue ||
+      (value !== null && value.hasChangedAttributes())
+    );
   }
 
   currentState(fragment) {
@@ -135,11 +138,14 @@ class FragmentArrayBehavior {
   pushData(fragmentArray, canonical) {
     assert(
       'Fragment array value must be an array of RecordData',
-      fragmentArray == null || (isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData))
+      fragmentArray == null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
     );
     assert(
       'Fragment array canonical value must be an array of objects',
-      canonical === null || (isArray(canonical) && canonical.every(v => typeOf(v) === 'object'))
+      canonical === null ||
+        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object'))
     );
 
     if (canonical === null) {
@@ -154,7 +160,10 @@ class FragmentArrayBehavior {
         fragment._fragmentPushData({ attributes });
         return fragment;
       } else {
-        return this.recordData._newFragmentRecordData(this.definition, attributes);
+        return this.recordData._newFragmentRecordData(
+          this.definition,
+          attributes
+        );
       }
     });
   }
@@ -162,23 +171,27 @@ class FragmentArrayBehavior {
   willCommit(fragmentArray) {
     assert(
       'Fragment array value must be an array of RecordData',
-      isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData)
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
     );
-    fragmentArray.forEach(fragment => fragment._fragmentWillCommit());
+    fragmentArray.forEach((fragment) => fragment._fragmentWillCommit());
   }
 
   didCommit(fragmentArray, canonical) {
     assert(
       'Fragment array value must be an array of RecordData',
-      fragmentArray === null || (isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData))
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
     );
     assert(
       'Fragment array canonical value must be an array of objects',
-      canonical == null || (isArray(canonical) && canonical.every(v => typeOf(v) === 'object'))
+      canonical == null ||
+        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object'))
     );
 
     if (canonical == null) {
-      fragmentArray?.forEach(fragment => fragment._fragmentDidCommit(null));
+      fragmentArray?.forEach((fragment) => fragment._fragmentDidCommit(null));
       if (canonical === null) {
         // server replaced fragment array with null
         return null;
@@ -194,7 +207,10 @@ class FragmentArrayBehavior {
         fragment._fragmentDidCommit({ attributes });
         return fragment;
       } else {
-        return this.recordData._newFragmentRecordData(this.definition, attributes);
+        return this.recordData._newFragmentRecordData(
+          this.definition,
+          attributes
+        );
       }
     });
 
@@ -208,53 +224,70 @@ class FragmentArrayBehavior {
   commitWasRejected(fragmentArray) {
     assert(
       'Fragment array value must be an array of RecordData',
-      isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData)
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
     );
-    fragmentArray.forEach(fragment => fragment._fragmentCommitWasRejected());
+    fragmentArray.forEach((fragment) => fragment._fragmentCommitWasRejected());
   }
 
   rollback(fragmentArray) {
     assert(
       'Fragment array value must be an array of RecordData',
-      isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData)
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
     );
-    fragmentArray.forEach(fragment => fragment._fragmentRollbackAttributes());
+    fragmentArray.forEach((fragment) => fragment._fragmentRollbackAttributes());
   }
 
   unload(fragmentArray) {
     assert(
       'Fragment array value must be an array of RecordData',
-      isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData)
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
     );
-    fragmentArray.forEach(fragment => fragment._fragmentUnloadRecord());
+    fragmentArray.forEach((fragment) => fragment._fragmentUnloadRecord());
   }
 
   isDirty(value, originalValue) {
     assert(
       'Fragment array value must be an array of RecordData',
-      value === null || (isArray(value) && value.every(rd => rd instanceof RecordData))
+      value === null ||
+        (isArray(value) && value.every((rd) => rd instanceof RecordData))
     );
     assert(
       'Fragment array original value must be an array of RecordData',
-      originalValue === null || (isArray(originalValue) && originalValue.every(rd => rd instanceof RecordData))
+      originalValue === null ||
+        (isArray(originalValue) &&
+          originalValue.every((rd) => rd instanceof RecordData))
     );
-    return !isArrayEqual(value, originalValue) || (value !== null && value.some(rd => rd.hasChangedAttributes()));
+    return (
+      !isArrayEqual(value, originalValue) ||
+      (value !== null && value.some((rd) => rd.hasChangedAttributes()))
+    );
   }
 
   currentState(fragmentArray) {
     assert(
       'Fragment array value must be an array of RecordData',
-      fragmentArray === null || (isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData))
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
     );
-    return fragmentArray === null ? null : fragmentArray.map(fragment => fragment.getCurrentState());
+    return fragmentArray === null
+      ? null
+      : fragmentArray.map((fragment) => fragment.getCurrentState());
   }
 
   canonicalState(fragmentArray) {
     assert(
       'Fragment array value must be an array of RecordData',
-      fragmentArray === null || (isArray(fragmentArray) && fragmentArray.every(rd => rd instanceof RecordData))
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
     );
-    return fragmentArray === null ? null : fragmentArray.map(fragment => fragment.getCanonicalState());
+    return fragmentArray === null
+      ? null
+      : fragmentArray.map((fragment) => fragment.getCanonicalState());
   }
 }
 
@@ -265,10 +298,7 @@ class ArrayBehavior {
   }
 
   pushData(array, canonical) {
-    assert(
-      'Array value must be an array',
-      array == null || isArray(array)
-    );
+    assert('Array value must be an array', array == null || isArray(array));
     assert(
       'Array canonical value must be an array',
       canonical === null || isArray(canonical)
@@ -285,10 +315,7 @@ class ArrayBehavior {
   }
 
   didCommit(array, canonical) {
-    assert(
-      'Array value must be an array',
-      array === null || isArray(array)
-    );
+    assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
       canonical === null || canonical === undefined || isArray(canonical)
@@ -322,7 +349,10 @@ class ArrayBehavior {
 
   isDirty(value, originalValue) {
     assert('Array value must be an array', value === null || isArray(value));
-    assert('Array original value must be an array', originalValue === null || isArray(originalValue));
+    assert(
+      'Array original value must be an array',
+      originalValue === null || isArray(originalValue)
+    );
     return !isArrayEqual(value, originalValue);
   }
 
@@ -342,7 +372,9 @@ export default class FragmentRecordData extends RecordData {
     super(identifier, storeWrapper);
 
     const behavior = Object.create(null);
-    const definitions = this.storeWrapper.attributesDefinitionFor(this.modelName);
+    const definitions = this.storeWrapper.attributesDefinitionFor(
+      this.modelName
+    );
     for (const [key, definition] of Object.entries(definitions)) {
       if (!definition.isFragment) {
         continue;
@@ -376,13 +408,23 @@ export default class FragmentRecordData extends RecordData {
   }
 
   hasFragment(key) {
-    return key in this._fragments || key in this._inFlightFragments || key in this._fragmentData;
+    return (
+      key in this._fragments ||
+      key in this._inFlightFragments ||
+      key in this._fragmentData
+    );
   }
 
   setDirtyFragment(key, value) {
     const behavior = this._fragmentBehavior[key];
-    assert(`Attribute '${key}' for model '${this.modelName}' must be a fragment`, behavior != null);
-    const originalValue = key in this._inFlightFragments ? this._inFlightFragments[key] : this._fragmentData[key];
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
+    const originalValue =
+      key in this._inFlightFragments
+        ? this._inFlightFragments[key]
+        : this._fragmentData[key];
     const isDirty = behavior.isDirty(value, originalValue);
     const oldDirty = this.isFragmentDirty(key);
     if (isDirty !== oldDirty) {
@@ -422,8 +464,14 @@ export default class FragmentRecordData extends RecordData {
   }
 
   setFragmentOwner(recordData, key) {
-    assert('Fragment owner must be a RecordData', recordData instanceof RecordData);
-    assert('Fragment owner key must be a fragment', recordData._fragmentBehavior[key] != null);
+    assert(
+      'Fragment owner must be a RecordData',
+      recordData instanceof RecordData
+    );
+    assert(
+      'Fragment owner key must be a fragment',
+      recordData._fragmentBehavior[key] != null
+    );
     assert(
       'Fragments can only belong to one owner, try copying instead',
       !this._fragmentOwner || this._fragmentOwner.recordData === recordData
@@ -432,7 +480,11 @@ export default class FragmentRecordData extends RecordData {
   }
 
   _newFragmentRecordData(definition, attributes) {
-    const type = getActualFragmentType(definition.modelName, definition.options, attributes);
+    const type = getActualFragmentType(
+      definition.modelName,
+      definition.options,
+      attributes
+    );
     const recordData = this.storeWrapper.recordDataFor(type);
     recordData.setFragmentOwner(this, definition.name);
     recordData._fragmentPushData({ attributes });
@@ -444,7 +496,9 @@ export default class FragmentRecordData extends RecordData {
   }
 
   hasChangedFragments() {
-    return this.__fragments !== null && Object.keys(this.__fragments).length > 0;
+    return (
+      this.__fragments !== null && Object.keys(this.__fragments).length > 0
+    );
   }
 
   isFragmentDirty(key) {
@@ -457,7 +511,10 @@ export default class FragmentRecordData extends RecordData {
       if (!this.hasFragment(key)) {
         // force the fragment attribute to initialize its default value
         internalModelFor(this).getRecord().get(key);
-        assert('Failed to initialize fragment default value', this.hasFragment(key));
+        assert(
+          'Failed to initialize fragment default value',
+          this.hasFragment(key)
+        );
       }
       result[key] = behavior.canonicalState(this._fragmentData[key]);
     }
@@ -465,12 +522,20 @@ export default class FragmentRecordData extends RecordData {
   }
 
   getCurrentState() {
-    const result = Object.assign({}, this._data, this._inFlightAttributes, this._attributes);
+    const result = Object.assign(
+      {},
+      this._data,
+      this._inFlightAttributes,
+      this._attributes
+    );
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
       if (!this.hasFragment(key)) {
         // force the fragment attribute to initialize its default value
         internalModelFor(this).getRecord().get(key);
-        assert('Failed to initialize fragment default value', this.hasFragment(key));
+        assert(
+          'Failed to initialize fragment default value',
+          this.hasFragment(key)
+        );
       }
       result[key] = behavior.currentState(this.getFragment(key));
     }
@@ -496,15 +561,25 @@ export default class FragmentRecordData extends RecordData {
     const diffData = Object.create(null);
     for (const [key, newFragment] of Object.entries(this._fragments)) {
       const behavior = this._fragmentBehavior[key];
-      const oldFragment = key in this._inFlightFragments ? this._inFlightFragments[key] : this._fragmentData[key];
-      diffData[key] = [behavior.canonicalState(oldFragment), behavior.currentState(newFragment)];
+      const oldFragment =
+        key in this._inFlightFragments
+          ? this._inFlightFragments[key]
+          : this._fragmentData[key];
+      diffData[key] = [
+        behavior.canonicalState(oldFragment),
+        behavior.currentState(newFragment),
+      ];
     }
     return diffData;
   }
 
   _changedFragmentKeys(updates) {
     const changedKeys = [];
-    const original = Object.assign({}, this._fragmentData, this._inFlightFragments);
+    const original = Object.assign(
+      {},
+      this._fragmentData,
+      this._inFlightFragments
+    );
     for (const key of Object.keys(updates)) {
       if (this._fragments[key]) {
         continue;
@@ -592,11 +667,16 @@ export default class FragmentRecordData extends RecordData {
         canonical = data.attributes[key];
         delete data.attributes[key];
       }
-      const fragment = key in this._inFlightFragments ? this._inFlightFragments[key] : this._fragmentData[key];
+      const fragment =
+        key in this._inFlightFragments
+          ? this._inFlightFragments[key]
+          : this._fragmentData[key];
       newCanonicalFragments[key] = behavior.didCommit(fragment, canonical);
     }
 
-    const changedFragmentKeys = this._changedFragmentKeys(newCanonicalFragments);
+    const changedFragmentKeys = this._changedFragmentKeys(
+      newCanonicalFragments
+    );
     Object.assign(this._fragmentData, newCanonicalFragments);
     this._inFlightFragments = null;
 
@@ -605,14 +685,19 @@ export default class FragmentRecordData extends RecordData {
     const changedAttributeKeys = super.didCommit(data);
 
     // update fragment arrays
-    Object.keys(newCanonicalFragments).forEach(key => this._fragmentArrayCache[key]?.notify());
+    Object.keys(newCanonicalFragments).forEach((key) =>
+      this._fragmentArrayCache[key]?.notify()
+    );
 
     return mergeArrays(changedAttributeKeys, changedFragmentKeys);
   }
 
   commitWasRejected(identifier, errors) {
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
-      const fragment = key in this._inFlightFragments ? this._inFlightFragments[key] : this._fragmentData[key];
+      const fragment =
+        key in this._inFlightFragments
+          ? this._inFlightFragments[key]
+          : this._fragmentData[key];
       if (fragment == null) {
         continue;
       }
@@ -640,7 +725,10 @@ export default class FragmentRecordData extends RecordData {
 
   rollbackFragment(key) {
     const behavior = this._fragmentBehavior[key];
-    assert(`Attribute '${key}' for model '${this.modelName}' must be a fragment`, behavior != null);
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
     if (!this.isFragmentDirty(key)) {
       return;
     }
@@ -734,7 +822,12 @@ export default class FragmentRecordData extends RecordData {
   }
 
   notifyStateChange(key) {
-    this.storeWrapper.notifyStateChange(this.modelName, this.id, this.clientId, key);
+    this.storeWrapper.notifyStateChange(
+      this.modelName,
+      this.id,
+      this.clientId,
+      key
+    );
   }
 
   /*
@@ -818,7 +911,9 @@ export default class FragmentRecordData extends RecordData {
 }
 
 function internalModelFor(recordData) {
-  return recordData.storeWrapper._store._internalModelForResource(recordData.identifier);
+  return recordData.storeWrapper._store._internalModelForResource(
+    recordData.identifier
+  );
 }
 
 function isArrayEqual(a, b) {
