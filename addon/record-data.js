@@ -508,14 +508,7 @@ export default class FragmentRecordData extends RecordData {
   getCanonicalState() {
     const result = Object.assign({}, this._data);
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
-      if (!this.hasFragment(key)) {
-        // force the fragment attribute to initialize its default value
-        internalModelFor(this).getRecord().get(key);
-        assert(
-          'Failed to initialize fragment default value',
-          this.hasFragment(key)
-        );
-      }
+      this._initializeFragmentDefaultValue(key);
       result[key] = behavior.canonicalState(this._fragmentData[key]);
     }
     return result;
@@ -529,17 +522,23 @@ export default class FragmentRecordData extends RecordData {
       this._attributes
     );
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
-      if (!this.hasFragment(key)) {
-        // force the fragment attribute to initialize its default value
-        internalModelFor(this).getRecord().get(key);
-        assert(
-          'Failed to initialize fragment default value',
-          this.hasFragment(key)
-        );
-      }
+      this._initializeFragmentDefaultValue(key);
       result[key] = behavior.currentState(this.getFragment(key));
     }
     return result;
+  }
+
+  _initializeFragmentDefaultValue(key) {
+    if (this.hasFragment(key)) {
+      // already initialized
+      return;
+    }
+    // force the fragment attribute to initialize its default value
+    internalModelFor(this).getRecord().get(key);
+    assert(
+      'Failed to initialize fragment default value',
+      this.hasFragment(key)
+    );
   }
 
   /*
@@ -622,6 +621,7 @@ export default class FragmentRecordData extends RecordData {
 
   willCommit() {
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      this._initializeFragmentDefaultValue(key);
       const data = this.getFragment(key);
       if (data) {
         behavior.willCommit(data);
