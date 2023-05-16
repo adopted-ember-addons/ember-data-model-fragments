@@ -6,7 +6,6 @@ import {
 } from 'ember-data-model-fragments/attributes';
 import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
-import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import { gte } from 'ember-compatibility-helpers';
@@ -161,9 +160,11 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('array properties can have default values', function (assert) {
-    Person.reopen({
-      titles: MF.array({ defaultValue: ['Ser'] }),
-    });
+    class PersonWithDefaults extends Person {
+      @array({ defaultValue: ['Ser'] })
+      titles;
+    }
+    this.owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person', {
       nickName: 'Barristan Selmy',
@@ -174,13 +175,10 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('default values can be functions', function (assert) {
-    Person.reopen({
-      titles: MF.array({
-        defaultValue() {
-          return ['Viper'];
-        },
-      }),
-    });
+    class PersonWithDefaults extends Person {
+      @array({ defaultValue: () => ['Viper'] }) titles;
+    }
+    this.owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person', {
       nickName: 'Oberyn Martell',
@@ -195,13 +193,15 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('default values that are functions are not deep copied', function (assert) {
-    Person.reopen({
-      titles: MF.array({
+    class PersonWithDefaults extends Person {
+      @array({
         defaultValue() {
           return ['Viper', EmberObject.create({ item: 'Longclaw' })];
         },
-      }),
-    });
+      })
+      titles;
+    }
+    this.owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person', {
       nickName: 'Oberyn Martell',
