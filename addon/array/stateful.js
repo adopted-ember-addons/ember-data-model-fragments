@@ -29,7 +29,7 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     if (!owner) {
       return null;
     }
-    return this.store._internalModelForResource(owner.identifier).getRecord();
+    return owner._fragmentGetRecord();
   },
 
   /**

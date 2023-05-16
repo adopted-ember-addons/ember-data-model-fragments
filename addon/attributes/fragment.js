@@ -2,7 +2,6 @@ import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
 import { recordDataFor } from '@ember-data/store/-private';
-import { copy } from 'ember-copy';
 import {
   getActualFragmentType,
   isFragment,
@@ -10,29 +9,6 @@ import {
 } from '../fragment';
 import metaTypeFor from '../util/meta-type-for';
 import isInstanceOfType from '../util/instance-of-type';
-
-function getDefaultValue(record, options, key) {
-  if (typeof options.defaultValue === 'function') {
-    const defaultValue = options.defaultValue.call(null, record, options, key);
-    assert(
-      "The fragment's default value must be an object",
-      defaultValue === null ||
-        typeOf(defaultValue) === 'object' ||
-        isFragment(defaultValue)
-    );
-    return defaultValue;
-  }
-  if (options.defaultValue !== undefined) {
-    const defaultValue = options.defaultValue;
-    assert(
-      "The fragment's default value function must return an object",
-      defaultValue === null || typeOf(defaultValue) === 'object'
-    );
-    // Create a deep copy of the resulting value to avoid shared reference errors
-    return copy(defaultValue, true);
-  }
-  return null;
-}
 
 /**
  `MF.fragment` defines an attribute on a `DS.Model` or `MF.Fragment`. Much
@@ -88,33 +64,11 @@ export default function fragment(type, options) {
   return computed({
     get(key) {
       const recordData = recordDataFor(this);
-      if (!recordData.hasFragment(key)) {
-        const defaultValue = getDefaultValue(this, options, key);
-        if (defaultValue === null) {
-          recordData._fragmentData[key] = null;
-          return null;
-        }
-        const actualType = getActualFragmentType(
-          type,
-          options,
-          undefined,
-          this
-        );
-        const fragment = isFragment(defaultValue)
-          ? defaultValue
-          : this.store.createFragment(actualType, defaultValue);
-        setFragmentOwner(fragment, recordData, key);
-        recordData._fragmentData[key] = recordDataFor(fragment);
-        return fragment;
-      }
       const fragment = recordData.getFragment(key);
       if (fragment === null) {
         return null;
       }
-      const internalModel = this.store._internalModelForResource(
-        fragment.identifier
-      );
-      return internalModel.getRecord();
+      return fragment._fragmentGetRecord();
     },
     set(key, value) {
       assert(
@@ -122,19 +76,6 @@ export default function fragment(type, options) {
         value === null || isFragment(value) || typeOf(value) === 'object'
       );
       const recordData = recordDataFor(this);
-      if (!recordData.hasFragment(key)) {
-        const defaultValue = getDefaultValue(this, options, key);
-        if (defaultValue === null) {
-          recordData._fragmentData[key] = null;
-        } else {
-          const actualType = getActualFragmentType(type, options, value, this);
-          const fragment = isFragment(defaultValue)
-            ? defaultValue
-            : this.store.createFragment(actualType, defaultValue);
-          setFragmentOwner(fragment, recordData, key);
-          recordData._fragmentData[key] = recordDataFor(fragment);
-        }
-      }
       if (value === null) {
         recordData.setDirtyFragment(key, null);
         return null;
@@ -156,9 +97,7 @@ export default function fragment(type, options) {
         recordData.setDirtyFragment(key, recordDataFor(fragment));
         return fragment;
       }
-      const fragment = this.store
-        ._internalModelForResource(fragmentRecordData.identifier)
-        .getRecord();
+      const fragment = fragmentRecordData._fragmentGetRecord();
       fragment.setProperties(value);
       return fragment;
     },

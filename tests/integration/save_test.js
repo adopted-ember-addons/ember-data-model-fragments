@@ -887,12 +887,12 @@ module('integration - Persistence', function (hooks) {
 
     assert.equal(
       address._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
+      'root.loaded.updated.uncommitted',
       'fragment state before save'
     );
     assert.equal(
       addresses.firstObject._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
+      'root.loaded.updated.uncommitted',
       'fragment array state before save'
     );
 
@@ -911,12 +911,12 @@ module('integration - Persistence', function (hooks) {
 
     assert.equal(
       address._internalModel.currentState.stateName,
-      'root.loaded.created.inFlight',
+      'root.loaded.updated.inFlight',
       'fragment state during save'
     );
     assert.equal(
       addresses.firstObject._internalModel.currentState.stateName,
-      'root.loaded.created.inFlight',
+      'root.loaded.updated.inFlight',
       'fragment array state during save'
     );
 
@@ -927,12 +927,12 @@ module('integration - Persistence', function (hooks) {
 
     assert.equal(
       address._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
+      'root.loaded.updated.uncommitted',
       'fragment state after save'
     );
     assert.equal(
       addresses.firstObject._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
+      'root.loaded.updated.uncommitted',
       'fragment array state after save'
     );
 

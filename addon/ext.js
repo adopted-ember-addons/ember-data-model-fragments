@@ -78,13 +78,8 @@ Store.reopen({
       `The '${modelName}' model must be a subclass of MF.Fragment`,
       this.isFragment(modelName)
     );
-    const identifier = this.identifierCache.createIdentifierForNewRecord({
-      type: modelName,
-    });
-    const internalModel = this._internalModelForResource(identifier);
-    internalModel.send('loadedData');
-    internalModel.didCreateRecord();
-    return internalModel.getRecord(props);
+    const recordData = this.recordDataFor({ type: modelName }, true);
+    return recordData._fragmentGetRecord(props);
   },
 
   /**

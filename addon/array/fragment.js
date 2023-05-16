@@ -35,13 +35,7 @@ const FragmentArray = StatefulArray.extend({
     if (recordData === undefined) {
       return;
     }
-    const internalModel = this.store._internalModelForResource(
-      recordData.identifier
-    );
-    if (internalModel === undefined) {
-      return;
-    }
-    return internalModel.getRecord();
+    return recordData._fragmentGetRecord();
   },
 
   _normalizeData(data, index) {

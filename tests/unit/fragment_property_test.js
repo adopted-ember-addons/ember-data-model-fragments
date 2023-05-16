@@ -384,6 +384,11 @@ module('unit - `MF.fragment` property', function (hooks) {
       defaultValue.first,
       'the default value is correct'
     );
+    assert.strictEqual(
+      sword.name.person,
+      sword,
+      'the fragment owner is assigned'
+    );
   });
 
   test('fragment default value function returning Fragment instances', function (assert) {
@@ -409,6 +414,11 @@ module('unit - `MF.fragment` property', function (hooks) {
       sword.name.first,
       defaultValue.first,
       'the default value is correct'
+    );
+    assert.strictEqual(
+      sword.name.person,
+      sword,
+      'the fragment owner is assigned'
     );
   });
 

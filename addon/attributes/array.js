@@ -2,30 +2,8 @@ import { computed } from '@ember/object';
 import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
 import { recordDataFor } from '@ember-data/store/-private';
-import { copy } from 'ember-copy';
 import metaTypeFor from '../util/meta-type-for';
 import StatefulArray from '../array/stateful';
-
-function getDefaultValue(record, options, key) {
-  if (typeof options.defaultValue === 'function') {
-    const defaultValue = options.defaultValue.call(null, record, options, key);
-    assert(
-      "The fragment array's default value function must return an array",
-      defaultValue === null || isArray(defaultValue)
-    );
-    return defaultValue;
-  }
-  if (options.defaultValue !== undefined) {
-    const defaultValue = options.defaultValue;
-    assert(
-      "The fragment array's default value must be an array",
-      defaultValue === null || isArray(defaultValue)
-    );
-    // Create a deep copy of the resulting value to avoid shared reference errors
-    return copy(defaultValue, true);
-  }
-  return [];
-}
 
 /**
  `MF.array` defines an attribute on a `DS.Model` or `MF.Fragment`. It creates a
@@ -78,9 +56,6 @@ export default function array(type, options) {
   return computed({
     get(key) {
       const recordData = recordDataFor(this);
-      if (!recordData.hasFragment(key)) {
-        recordData._fragmentData[key] = getDefaultValue(this, options, key);
-      }
       if (recordData.getFragment(key) === null) {
         return null;
       }
@@ -101,9 +76,6 @@ export default function array(type, options) {
         value === null || isArray(value)
       );
       const recordData = recordDataFor(this);
-      if (!recordData.hasFragment(key)) {
-        recordData._fragmentData[key] = getDefaultValue(this, options, key);
-      }
       if (value === null) {
         recordData.setDirtyFragment(key, null);
         return null;
