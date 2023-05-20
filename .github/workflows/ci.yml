@@ -178,11 +178,9 @@ jobs:
       fail-fast: true
       matrix:
         ember-try-scenario:
-          [ember-lts-3.28, ember-classic]
+          [ember-lts-3.28, ember-lts-4.4, ember-classic]
         allow-failure: [false]
         include:
-          - ember-try-scenario: ember-lts-4.4
-            allow-failure: true
           - ember-try-scenario: ember-release
             allow-failure: true
           - ember-try-scenario: ember-beta
