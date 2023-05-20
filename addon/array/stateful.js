@@ -31,11 +31,11 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
   /**
     The array's property name on the owner record.
 
-    @property name
+    @property key
     @private
     @type {String}
   */
-  name: null,
+  key: null,
 
   init() {
     this._super(...arguments);
