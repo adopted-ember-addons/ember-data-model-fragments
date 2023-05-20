@@ -215,7 +215,11 @@ module('unit - `MF.array` property', function (hooks) {
     );
   });
 
-  if (!gte('ember-data', '4.0.0')) {
+  if (!gte('4.0.0')) {
+    // array observers were deprecated in ember 3.26 and removed in 4.0
+    // https://deprecations.emberjs.com/v3.x#toc_array-observers
+    // https://github.com/emberjs/ember.js/pull/19833
+
     test('supports array observers', async function (assert) {
       store.push({
         data: {
