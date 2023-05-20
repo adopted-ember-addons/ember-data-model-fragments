@@ -2,7 +2,7 @@ import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { InternalModel, normalizeModelName } from 'ember-data/-private';
+import { Snapshot, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from '@ember-data/serializer/json';
 import FragmentRecordData from './record-data';
 import { default as Fragment } from './fragment';
@@ -33,7 +33,6 @@ function serializerForFragment(owner, normalizedModelName) {
   @module ember-data-model-fragments
 */
 
-const InternalModelPrototype = InternalModel.prototype;
 /**
   @class Store
   @namespace DS
@@ -78,7 +77,12 @@ Store.reopen({
       `The '${modelName}' model must be a subclass of MF.Fragment`,
       this.isFragment(modelName)
     );
-    const recordData = this.recordDataFor({ type: modelName }, true);
+    let recordData;
+    if (gte('ember-data', '4.5.0')) {
+      recordData = this._instanceCache.recordDataFor({ type: modelName }, true);
+    } else {
+      recordData = this.recordDataFor({ type: modelName }, true);
+    }
     return recordData._fragmentGetRecord(props);
   },
 
@@ -121,30 +125,20 @@ Store.reopen({
   },
 });
 
-// Replace a method on an object with a new one that calls the original and then
-// invokes a function with the result
-function decorateMethod(obj, name, fn) {
-  const originalFn = obj[name];
-
-  obj[name] = function () {
-    const value = originalFn.apply(this, arguments);
-
-    return fn.call(this, value, arguments);
-  };
-}
-
 /**
-  Override parent method to snapshot fragment attributes before they are
+  Override `Snapshot._attributes` to snapshot fragment attributes before they are
   passed to the `DS.Model#serialize`.
 
-  @method _createSnapshot
   @private
 */
-decorateMethod(
-  InternalModelPrototype,
-  'createSnapshot',
-  function createFragmentSnapshot(snapshot) {
-    const attrs = snapshot._attributes;
+const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
+  Snapshot.prototype,
+  '_attributes'
+);
+
+Object.defineProperty(Snapshot.prototype, '_attributes', {
+  get() {
+    const attrs = oldSnapshotAttributes.get.call(this);
     Object.keys(attrs).forEach((key) => {
       const attr = attrs[key];
       // If the attribute has a `_createSnapshot` method, invoke it before the
@@ -153,10 +147,9 @@ decorateMethod(
         attrs[key] = attr._createSnapshot();
       }
     });
-
-    return snapshot;
-  }
-);
+    return attrs;
+  },
+});
 
 /**
   @class JSONSerializer

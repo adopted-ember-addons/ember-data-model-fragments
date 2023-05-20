@@ -6,6 +6,7 @@ import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { getActualFragmentType, isFragment } from './fragment';
 import isInstanceOfType from './util/instance-of-type';
+import { gte } from 'ember-compatibility-helpers';
 
 class FragmentBehavior {
   constructor(recordData, definition) {
@@ -727,7 +728,12 @@ export default class FragmentRecordData extends RecordData {
     }
 
     const changedAttributeKeys = super.pushData(data, calculateChange);
-    return mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+      internalModelFor(this).notifyAttributes(changedKeys);
+    }
+    // on ember-data 2.8 - 4.4, InternalModel.setupData will notify
+    return changedKeys;
   }
 
   willCommit() {
@@ -799,7 +805,12 @@ export default class FragmentRecordData extends RecordData {
       this._fragmentArrayCache[key]?.notify()
     );
 
-    return mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+      internalModelFor(this).notifyAttributes(changedKeys);
+    }
+    // on ember-data 2.8 - 4.4, InternalModel.adapterDidCommit will notify
+    return changedKeys;
   }
 
   commitWasRejected(identifier, errors) {
@@ -950,6 +961,12 @@ export default class FragmentRecordData extends RecordData {
    */
 
   _fragmentGetRecord(properties) {
+    if (gte('ember-data', '4.5.0')) {
+      return this.storeWrapper._store._instanceCache.getRecord(
+        this.identifier,
+        properties
+      );
+    }
     return internalModelFor(this).getRecord(properties);
   }
   _fragmentPushData(data) {
@@ -1028,9 +1045,13 @@ export default class FragmentRecordData extends RecordData {
 }
 
 function internalModelFor(recordData) {
-  return recordData.storeWrapper._store._internalModelForResource(
-    recordData.identifier
-  );
+  const store = recordData.storeWrapper._store;
+  if (gte('ember-data', '4.5.0')) {
+    return store._instanceCache._internalModelForResource(
+      recordData.identifier
+    );
+  }
+  return store._internalModelForResource(recordData.identifier);
 }
 
 function isArrayEqual(a, b) {
