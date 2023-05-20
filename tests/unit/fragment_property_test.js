@@ -1,4 +1,4 @@
-import Model from '@ember-data/model';
+import Model, { attr } from '@ember-data/model';
 import { fragment } from 'ember-data-model-fragments/attributes';
 import { schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
@@ -420,6 +420,46 @@ module('unit - `MF.fragment` property', function (hooks) {
       sword,
       'the fragment owner is assigned'
     );
+  });
+
+  test('fragment default value is merged with pushed attributes', function (assert) {
+    const defaultValue = {
+      first: 'Iron',
+      last: 'Victory',
+    };
+
+    class Ship extends Model {
+      @attr('string', { defaultValue: 'USA' }) country;
+      @fragment('name', { defaultValue: defaultValue }) name;
+    }
+
+    owner.register('model:ship', Ship);
+
+    store.push({
+      data: {
+        type: 'ship',
+        id: 1,
+      },
+    });
+
+    const ship = store.peekRecord('ship', 1);
+
+    store.push({
+      data: {
+        type: 'ship',
+        id: 1,
+        attributes: {
+          country: 'USSR',
+          name: {
+            last: 'Challenger',
+          },
+        },
+      },
+    });
+
+    assert.strictEqual(ship.country, 'USSR');
+    assert.strictEqual(ship.name.first, 'Iron');
+    assert.strictEqual(ship.name.last, 'Challenger');
   });
 
   test('destroy a fragment which was set to null', async function (assert) {

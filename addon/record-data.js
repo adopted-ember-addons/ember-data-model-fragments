@@ -55,7 +55,7 @@ class FragmentBehavior {
   pushData(fragment, canonical) {
     assert(
       'Fragment value must be a RecordData',
-      fragment == null || fragment instanceof RecordData
+      fragment === null || fragment instanceof RecordData
     );
     assert(
       'Fragment canonical value must be an object or null',
@@ -214,7 +214,7 @@ class FragmentArrayBehavior {
   pushData(fragmentArray, canonical) {
     assert(
       'Fragment array value must be an array of RecordData',
-      fragmentArray == null ||
+      fragmentArray === null ||
         (isArray(fragmentArray) &&
           fragmentArray.every((rd) => rd instanceof RecordData))
     );
@@ -396,7 +396,7 @@ class ArrayBehavior {
   }
 
   pushData(array, canonical) {
-    assert('Array value must be an array', array == null || isArray(array));
+    assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
       canonical === null || isArray(canonical)
@@ -714,7 +714,10 @@ export default class FragmentRecordData extends RecordData {
         // strip fragments from the attributes so the super call does not process them
         delete data.attributes[key];
 
-        const current = this._fragmentData[key];
+        const current =
+          key in this._fragmentData
+            ? this._fragmentData[key]
+            : this._getFragmentDefault(key);
         newCanonicalFragments[key] = behavior.pushData(current, canonical);
       }
       if (calculateChange) {
