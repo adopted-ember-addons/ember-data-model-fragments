@@ -116,7 +116,7 @@ module('unit - Serialization', function (hooks) {
     }
     owner.register('serializer:person', PersonSerializer);
 
-    const person2 = await store.find('person', 1);
+    const person2 = await store.findRecord('person', 1);
     person2.serialize();
   });
 
@@ -141,7 +141,7 @@ module('unit - Serialization', function (hooks) {
     }
     owner.register('serializer:name', NameSerializer);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const serialized = person.serialize();
 
     assert.equal(
@@ -182,7 +182,7 @@ module('unit - Serialization', function (hooks) {
 
     owner.register('serializer:name', JSONSerializer);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const serialized = person.serialize();
 
     assert.deepEqual(
@@ -245,7 +245,7 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    const person = await store.find('nullDefaultPerson', 1);
+    const person = await store.findRecord('nullDefaultPerson', 1);
     const serialized = person.serialize();
 
     assert.strictEqual(
@@ -304,7 +304,7 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const serialized = person.serialize();
 
     assert.ok(

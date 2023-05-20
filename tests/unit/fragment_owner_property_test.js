@@ -33,7 +33,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     assert.equal(
@@ -89,8 +89,8 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
     });
 
     const people = await all([
-      store.find('person', 1),
-      store.find('person', 2),
+      store.findRecord('person', 1),
+      store.findRecord('person', 2),
     ]);
     const name = people[0].name;
 
@@ -113,7 +113,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = store.createFragment('name', {
       first: 'Arya',
       last: 'Stark',

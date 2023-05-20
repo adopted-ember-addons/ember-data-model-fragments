@@ -41,7 +41,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.ok(
       person.name instanceof Name,
       'name property is an `MF.Fragment` instance'
@@ -63,7 +63,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = store.createFragment('name', {
       first: 'Davos',
       last: 'Seaworth',
@@ -84,7 +84,7 @@ module('unit - `MF.fragment` property', function (hooks) {
         },
       },
     });
-    await store.find('person', 1);
+    await store.findRecord('person', 1);
     store.push({
       data: {
         type: 'person',
@@ -97,7 +97,7 @@ module('unit - `MF.fragment` property', function (hooks) {
         },
       },
     });
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.equal(person.name.first, 'Bob', 'New name is set correctly');
   });
 
@@ -110,7 +110,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.throws(() => {
       person.set('name', store.createRecord('person'));
     }, 'error is thrown when setting non-fragment');
@@ -139,8 +139,8 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const people = await all([
-      store.find('person', 1),
-      store.find('person', 2),
+      store.findRecord('person', 1),
+      store.findRecord('person', 2),
     ]);
     assert.throws(() => {
       people[1].set('name', people[0].name);
@@ -158,7 +158,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.equal(person.name, null, 'property is null');
   });
 
@@ -176,7 +176,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('name', null);
     assert.equal(person.name, null, 'property is null');
   });
@@ -214,7 +214,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('name', name);
 
     assert.ok(
@@ -243,7 +243,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     person.set('name', newName);
@@ -476,7 +476,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
     person.set('name', null);
 
@@ -502,7 +502,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const oldName = person.name;
     const newName = store.createFragment('name');
     person.set('name', newName);

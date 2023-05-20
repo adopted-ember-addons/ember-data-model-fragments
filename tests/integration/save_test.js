@@ -87,7 +87,7 @@ module('integration - Persistence', function (hooks) {
       return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     await person.save();
 
     const name = person.name;
@@ -133,7 +133,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     person.set('title', 'modified');
     person.set('name.first', 'modified');
@@ -176,7 +176,7 @@ module('integration - Persistence', function (hooks) {
       return [204];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     person.set('title', 'titleModified');
     person.set('name.first', 'firstNameModified');
@@ -225,7 +225,7 @@ module('integration - Persistence', function (hooks) {
       return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     const name = person.name;
     const addresses = person.addresses;
@@ -593,7 +593,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     // Access values that will change to prime CP cache
     person.name.first;
@@ -633,7 +633,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const personProxy = ObjectProxy.create({ content: person });
 
     addObserver(personProxy, 'name.first', function () {});
@@ -704,7 +704,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     PersonObserver.create({ person: person });
     return person.save();
   });
@@ -759,7 +759,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const army = await store.find('army', 1);
+    const army = await store.findRecord('army', 1);
     ArmyObserver.create({ army: army });
     return army.reload();
   });
@@ -791,7 +791,7 @@ module('integration - Persistence', function (hooks) {
       return [500, { 'Content-Type': 'application/json' }];
     });
 
-    const army = await store.find('army', 1);
+    const army = await store.findRecord('army', 1);
     const soliders = army.soldiers;
     soliders.pushObject('Lysono Maar');
     soliders.removeObject('Jon Connington');
@@ -843,7 +843,7 @@ module('integration - Persistence', function (hooks) {
       return [500, { 'Content-Type': 'application/json' }];
     });
 
-    const mrStark = await store.find('person', 1);
+    const mrStark = await store.findRecord('person', 1);
 
     const name = mrStark.name;
     const address = mrStark.addresses.firstObject;
@@ -1009,7 +1009,7 @@ module('integration - Persistence', function (hooks) {
       return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     // set the value and save

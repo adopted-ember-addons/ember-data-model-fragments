@@ -49,7 +49,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.strictEqual(person.titles.owner, person);
   });
 
@@ -67,7 +67,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const titles = person.titles;
 
     assert.ok(isArray(titles), 'property is array-like');
@@ -92,7 +92,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.equal(person.titles, null, 'property is null');
   });
 
@@ -112,7 +112,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('titles', null);
 
     assert.equal(person.titles, null, 'property is null');
@@ -134,7 +134,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('titles', ['hello', 'there']);
 
     assert.deepEqual(
@@ -250,7 +250,7 @@ module('unit - `MF.array` property', function (hooks) {
         assert.step(`arrayDidChange(${start},${removeCount},${addCount})`);
       };
 
-      const person = await store.find('person', 1);
+      const person = await store.findRecord('person', 1);
       const titles = person.titles;
       titles.addArrayObserver(this, {
         willChange: 'arrayWillChange',

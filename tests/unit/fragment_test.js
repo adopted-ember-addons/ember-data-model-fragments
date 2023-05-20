@@ -50,8 +50,8 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const people = await all([
-      store.find('person', 1),
-      store.find('person', 2),
+      store.findRecord('person', 1),
+      store.findRecord('person', 2),
     ]);
     const copy = people[0].name.copy();
 
@@ -74,7 +74,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const copy = person.name.copy();
 
     assert.ok(copy.first, 'Jon');
@@ -153,7 +153,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('last', 'Baratheon');
@@ -185,7 +185,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('name', null);
 
     const [oldName, newName] = person.changedAttributes().name;
@@ -215,7 +215,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('last', 'Bolton');

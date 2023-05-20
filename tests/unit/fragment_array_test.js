@@ -31,7 +31,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const copy = person.names.copy();
 
     assert.equal(copy.length, person.names.length, "copy's size is correct");
@@ -62,7 +62,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.strictEqual(person.names.owner, person);
   });
 
@@ -82,7 +82,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const length = fragments.length;
 
@@ -115,7 +115,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const length = fragments.length;
 
@@ -149,7 +149,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const length = fragments.length;
     fragments.addFragment({ first: 'Yollo', last: 'Baggins' });
@@ -177,7 +177,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const fragment = fragments.firstObject;
     const length = fragments.length;
@@ -208,7 +208,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const fragment = fragments.firstObject;
     const newFragment = store.createFragment('name', {
@@ -282,7 +282,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const fragment = fragments.firstObject;
 
@@ -326,7 +326,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const fragments = person.names;
     const fragment = fragments.firstObject;
 
