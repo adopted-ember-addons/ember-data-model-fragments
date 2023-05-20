@@ -86,6 +86,32 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
   });
 
+  test('fragments support toString', function (assert) {
+    store.push({
+      data: {
+        type: 'vehicle',
+        id: 1,
+        attributes: {
+          passenger: {
+            name: {
+              first: 'Loras',
+              last: 'Tyrell',
+            },
+          },
+        },
+      },
+    });
+
+    const vehicle = store.peekRecord('vehicle', 1);
+
+    assert.ok(vehicle.passenger.toString().includes('owner(1)'));
+    assert.ok(vehicle.passenger.name.toString().includes('owner(null)'));
+    assert.notOk(
+      store.createFragment('name').toString().includes('owner('),
+      'fragment with no owner'
+    );
+  });
+
   test('fragments are compared by reference', function (assert) {
     const fragment1 = store.createFragment('name', {
       first: 'Jon',

@@ -103,14 +103,8 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
   },
 
   toStringExtension() {
-    const internalModel = internalModelFor(this);
-    const owner = internalModel && internalModel._recordData._owner;
-    if (owner) {
-      const ownerId = owner.id;
-      return `owner(${ownerId})`;
-    } else {
-      return '';
-    }
+    const owner = recordDataFor(this).getFragmentOwner();
+    return owner ? `owner(${owner.id})` : '';
   },
 }).reopenClass({
   fragmentOwnerProperties: computed(function () {
