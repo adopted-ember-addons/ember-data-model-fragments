@@ -25,11 +25,7 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     @type {DS.Model}
   */
   get owner() {
-    const owner = this.recordData.getFragmentOwner();
-    if (!owner) {
-      return null;
-    }
-    return owner._fragmentGetRecord();
+    return this.recordData._fragmentGetRecord();
   },
 
   /**

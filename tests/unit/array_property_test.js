@@ -38,6 +38,21 @@ module('unit - `MF.array` property', function (hooks) {
     store = null;
   });
 
+  test('arrays have an owner', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          titles: ['Hand of the King', 'Master of Coin'],
+        },
+      },
+    });
+
+    const person = await store.find('person', 1);
+    assert.strictEqual(person.titles.owner, person);
+  });
+
   test('array properties are converted to an array-ish containing original values', async function (assert) {
     const values = ['Hand of the King', 'Master of Coin'];
 

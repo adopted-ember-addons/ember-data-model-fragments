@@ -46,6 +46,26 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     );
   });
 
+  test('fragment arrays have an owner', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            {
+              first: 'Tyrion',
+              last: 'Lannister',
+            },
+          ],
+        },
+      },
+    });
+
+    const person = await store.find('person', 1);
+    assert.strictEqual(person.names.owner, person);
+  });
+
   test('fragments can be created and added through the fragment array', async function (assert) {
     store.push({
       data: {
