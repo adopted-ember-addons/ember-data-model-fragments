@@ -8,7 +8,7 @@ import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import { gte } from 'ember-compatibility-helpers';
+import { HAS_ARRAY_OBSERVERS } from 'ember-data-model-fragments/array/stateful';
 
 let store;
 class Person extends Model {
@@ -230,11 +230,7 @@ module('unit - `MF.array` property', function (hooks) {
     );
   });
 
-  if (!gte('4.0.0')) {
-    // array observers were deprecated in ember 3.26 and removed in 4.0
-    // https://deprecations.emberjs.com/v3.x#toc_array-observers
-    // https://github.com/emberjs/ember.js/pull/19833
-
+  if (HAS_ARRAY_OBSERVERS) {
     test('supports array observers', async function (assert) {
       store.push({
         data: {
