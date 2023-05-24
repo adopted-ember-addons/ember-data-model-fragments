@@ -47,7 +47,7 @@ module('unit - Polymorphism', function (hooks) {
       },
     });
 
-    const zoo2 = await store.find('zoo', 1);
+    const zoo2 = await store.findRecord('zoo', 1);
     assert.equal(zoo2.name, 'Chilly Zoo', 'zoo name is correct');
     assert.equal(zoo2.city, 'Winterfell', 'zoo city is correct');
 
@@ -67,7 +67,7 @@ module('unit - Polymorphism', function (hooks) {
       },
     });
 
-    const zoo2 = await store.find('zoo', 1);
+    const zoo2 = await store.findRecord('zoo', 1);
     const animals = zoo2.animals;
     assert.equal(animals.length, 2);
 

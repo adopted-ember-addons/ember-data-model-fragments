@@ -13,6 +13,8 @@ import MF from 'ember-data-model-fragments';
 import { module, test, skip } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
+import { gte } from 'ember-compatibility-helpers';
+
 let store, owner, server;
 
 module('integration - Persistence', function (hooks) {
@@ -85,7 +87,7 @@ module('integration - Persistence', function (hooks) {
       return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     await person.save();
 
     const name = person.name;
@@ -131,7 +133,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     person.set('title', 'modified');
     person.set('name.first', 'modified');
@@ -174,7 +176,7 @@ module('integration - Persistence', function (hooks) {
       return [204];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     person.set('title', 'titleModified');
     person.set('name.first', 'firstNameModified');
@@ -223,7 +225,7 @@ module('integration - Persistence', function (hooks) {
       return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     const name = person.name;
     const addresses = person.addresses;
@@ -591,7 +593,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
 
     // Access values that will change to prime CP cache
     person.name.first;
@@ -631,7 +633,7 @@ module('integration - Persistence', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const personProxy = ObjectProxy.create({ content: person });
 
     addObserver(personProxy, 'name.first', function () {});
@@ -702,7 +704,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     PersonObserver.create({ person: person });
     return person.save();
   });
@@ -757,7 +759,7 @@ module('integration - Persistence', function (hooks) {
       ];
     });
 
-    const army = await store.find('army', 1);
+    const army = await store.findRecord('army', 1);
     ArmyObserver.create({ army: army });
     return army.reload();
   });
@@ -789,7 +791,7 @@ module('integration - Persistence', function (hooks) {
       return [500, { 'Content-Type': 'application/json' }];
     });
 
-    const army = await store.find('army', 1);
+    const army = await store.findRecord('army', 1);
     const soliders = army.soldiers;
     soliders.pushObject('Lysono Maar');
     soliders.removeObject('Jon Connington');
@@ -841,7 +843,7 @@ module('integration - Persistence', function (hooks) {
       return [500, { 'Content-Type': 'application/json' }];
     });
 
-    const mrStark = await store.find('person', 1);
+    const mrStark = await store.findRecord('person', 1);
 
     const name = mrStark.name;
     const address = mrStark.addresses.firstObject;
@@ -866,90 +868,94 @@ module('integration - Persistence', function (hooks) {
     );
   });
 
-  test('fragments with default values are rolled back to uncommitted state after failed save', async function (assert) {
-    class Address extends MF.Fragment {
-      @attr('string') line1;
-      @attr('string') line2;
-    }
+  if (!gte('ember-data', '4.5.0')) {
+    // InternalModel.currentState was removed in ember-data 4.5
 
-    owner.register('model:address', Address);
+    test('fragments with default values are rolled back to uncommitted state after failed save', async function (assert) {
+      class Address extends MF.Fragment {
+        @attr('string') line1;
+        @attr('string') line2;
+      }
 
-    class PersonWithDefaults extends Model {
-      @fragment('address', { defaultValue: {} }) address;
-      @fragmentArray('address', { defaultValue: [{}] }) addresses;
-    }
+      owner.register('model:address', Address);
 
-    owner.register('model:person', PersonWithDefaults);
+      class PersonWithDefaults extends Model {
+        @fragment('address', { defaultValue: {} }) address;
+        @fragmentArray('address', { defaultValue: [{}] }) addresses;
+      }
 
-    const person = store.createRecord('person');
-    const address = person.address;
-    const addresses = person.addresses;
+      owner.register('model:person', PersonWithDefaults);
 
-    assert.equal(
-      address._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
-      'fragment state before save'
-    );
-    assert.equal(
-      addresses.firstObject._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
-      'fragment array state before save'
-    );
+      const person = store.createRecord('person');
+      const address = person.address;
+      const addresses = person.addresses;
 
-    server.post('/people', () => {
-      const response = {
-        errors: [{ code: 'custom-error-code' }],
-      };
-      return [
-        400,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify(response),
-      ];
+      assert.equal(
+        address._internalModel.currentState.stateName,
+        'root.loaded.updated.uncommitted',
+        'fragment state before save'
+      );
+      assert.equal(
+        addresses.firstObject._internalModel.currentState.stateName,
+        'root.loaded.updated.uncommitted',
+        'fragment array state before save'
+      );
+
+      server.post('/people', () => {
+        const response = {
+          errors: [{ code: 'custom-error-code' }],
+        };
+        return [
+          400,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify(response),
+        ];
+      });
+
+      const savePromise = person.save();
+
+      assert.equal(
+        address._internalModel.currentState.stateName,
+        'root.loaded.updated.inFlight',
+        'fragment state during save'
+      );
+      assert.equal(
+        addresses.firstObject._internalModel.currentState.stateName,
+        'root.loaded.updated.inFlight',
+        'fragment array state during save'
+      );
+
+      await assert.rejects(
+        savePromise,
+        (ex) => ex.errors[0].code === 'custom-error-code'
+      );
+
+      assert.equal(
+        address._internalModel.currentState.stateName,
+        'root.loaded.updated.uncommitted',
+        'fragment state after save'
+      );
+      assert.equal(
+        addresses.firstObject._internalModel.currentState.stateName,
+        'root.loaded.updated.uncommitted',
+        'fragment array state after save'
+      );
+
+      // unload will fail if the record is in-flight
+      person.unloadRecord();
+
+      assert.equal(
+        address._internalModel.currentState.stateName,
+        'root.empty',
+        'fragment state after unload'
+      );
+      assert.equal(
+        addresses.firstObject._internalModel.currentState.stateName,
+        'root.empty',
+        'fragment array state after unload'
+      );
     });
-
-    const savePromise = person.save();
-
-    assert.equal(
-      address._internalModel.currentState.stateName,
-      'root.loaded.created.inFlight',
-      'fragment state during save'
-    );
-    assert.equal(
-      addresses.firstObject._internalModel.currentState.stateName,
-      'root.loaded.created.inFlight',
-      'fragment array state during save'
-    );
-
-    await assert.rejects(
-      savePromise,
-      (ex) => ex.errors[0].code === 'custom-error-code'
-    );
-
-    assert.equal(
-      address._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
-      'fragment state after save'
-    );
-    assert.equal(
-      addresses.firstObject._internalModel.currentState.stateName,
-      'root.loaded.created.uncommitted',
-      'fragment array state after save'
-    );
-
-    // unload will fail if the record is in-flight
-    person.unloadRecord();
-
-    assert.equal(
-      address._internalModel.currentState.stateName,
-      'root.empty',
-      'fragment state after unload'
-    );
-    assert.equal(
-      addresses.firstObject._internalModel.currentState.stateName,
-      'root.empty',
-      'fragment array state after unload'
-    );
-  });
+  }
 
   test('setting an array does not error on save', async function (assert) {
     assert.expect(0);
@@ -1003,7 +1009,7 @@ module('integration - Persistence', function (hooks) {
       return [200, { 'Content-Type': 'application/json' }, '{}'];
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     // set the value and save

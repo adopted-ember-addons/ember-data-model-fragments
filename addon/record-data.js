@@ -1,9 +1,12 @@
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import { RecordData } from 'ember-data/-private';
+import { recordDataFor } from '@ember-data/store/-private';
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
-import { getActualFragmentType } from './fragment';
+import { getActualFragmentType, isFragment } from './fragment';
+import isInstanceOfType from './util/instance-of-type';
+import { gte } from 'ember-compatibility-helpers';
 
 class FragmentBehavior {
   constructor(recordData, definition) {
@@ -11,10 +14,49 @@ class FragmentBehavior {
     this.definition = definition;
   }
 
+  getDefaultValue(key) {
+    const { options } = this.definition;
+    if (options.defaultValue === undefined) {
+      return null;
+    }
+    let defaultValue;
+    if (typeof options.defaultValue === 'function') {
+      const record = this.recordData._fragmentGetRecord();
+      defaultValue = options.defaultValue.call(null, record, options, key);
+    } else {
+      defaultValue = options.defaultValue;
+    }
+    assert(
+      "The fragment's default value must be an object or null",
+      defaultValue === null ||
+        typeOf(defaultValue) === 'object' ||
+        isFragment(defaultValue)
+    );
+    if (defaultValue === null) {
+      return null;
+    }
+    if (isFragment(defaultValue)) {
+      assert(
+        `The fragment's default value must be a '${this.definition.modelName}' fragment`,
+        isInstanceOfType(
+          defaultValue.store.modelFor(this.definition.modelName),
+          defaultValue
+        )
+      );
+      const recordData = recordDataFor(defaultValue);
+      recordData.setFragmentOwner(this.recordData, key);
+      return recordData;
+    }
+    return this.recordData._newFragmentRecordData(
+      this.definition,
+      defaultValue
+    );
+  }
+
   pushData(fragment, canonical) {
     assert(
       'Fragment value must be a RecordData',
-      fragment == null || fragment instanceof RecordData
+      fragment === null || fragment instanceof RecordData
     );
     assert(
       'Fragment canonical value must be an object or null',
@@ -135,10 +177,45 @@ class FragmentArrayBehavior {
     this.definition = definition;
   }
 
+  getDefaultValue(key) {
+    const { options } = this.definition;
+    if (options.defaultValue === undefined) {
+      return [];
+    }
+    let defaultValue;
+    if (typeof options.defaultValue === 'function') {
+      const record = this.recordData._fragmentGetRecord();
+      defaultValue = options.defaultValue.call(null, record, options, key);
+    } else {
+      defaultValue = options.defaultValue;
+    }
+    assert(
+      "The fragment array's default value must be an array of fragments or null",
+      defaultValue === null ||
+        (isArray(defaultValue) &&
+          defaultValue.every((v) => typeOf(v) === 'object' || isFragment(v)))
+    );
+    if (defaultValue === null) {
+      return null;
+    }
+    return defaultValue.map((item) => {
+      if (isFragment(item)) {
+        assert(
+          `The fragment array's default value can only include '${this.definition.modelName}' fragments`,
+          isInstanceOfType(item.store.modelFor(this.definition.modelName), item)
+        );
+        const recordData = recordDataFor(defaultValue);
+        recordData.setFragmentOwner(this.recordData, key);
+        return recordData;
+      }
+      return this.recordData._newFragmentRecordData(this.definition, item);
+    });
+  }
+
   pushData(fragmentArray, canonical) {
     assert(
       'Fragment array value must be an array of RecordData',
-      fragmentArray == null ||
+      fragmentArray === null ||
         (isArray(fragmentArray) &&
           fragmentArray.every((rd) => rd instanceof RecordData))
     );
@@ -297,8 +374,30 @@ class ArrayBehavior {
     this.definition = definition;
   }
 
+  getDefaultValue(key) {
+    const { options } = this.definition;
+    if (options.defaultValue === undefined) {
+      return [];
+    }
+    let defaultValue;
+    if (typeof options.defaultValue === 'function') {
+      const record = this.recordData._fragmentGetRecord();
+      defaultValue = options.defaultValue.call(null, record, options, key);
+    } else {
+      defaultValue = options.defaultValue;
+    }
+    assert(
+      "The array's default value must be an array or null",
+      defaultValue === null || isArray(defaultValue)
+    );
+    if (defaultValue === null) {
+      return null;
+    }
+    return defaultValue.slice();
+  }
+
   pushData(array, canonical) {
-    assert('Array value must be an array', array == null || isArray(array));
+    assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
       canonical === null || isArray(canonical)
@@ -397,13 +496,30 @@ export default class FragmentRecordData extends RecordData {
     this._fragmentBehavior = behavior;
   }
 
+  _getFragmentDefault(key) {
+    const behavior = this._fragmentBehavior[key];
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
+    assert(
+      'Fragment default value was already initialized',
+      !this.hasFragment(key)
+    );
+    const defaultValue = behavior.getDefaultValue(key);
+    this._fragmentData[key] = defaultValue;
+    return defaultValue;
+  }
+
   getFragment(key) {
     if (key in this._fragments) {
       return this._fragments[key];
     } else if (key in this._inFlightFragments) {
       return this._inFlightFragments[key];
-    } else {
+    } else if (key in this._fragmentData) {
       return this._fragmentData[key];
+    } else {
+      return this._getFragmentDefault(key);
     }
   }
 
@@ -421,10 +537,14 @@ export default class FragmentRecordData extends RecordData {
       `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
       behavior != null
     );
-    const originalValue =
-      key in this._inFlightFragments
-        ? this._inFlightFragments[key]
-        : this._fragmentData[key];
+    let originalValue;
+    if (key in this._inFlightFragments) {
+      originalValue = this._inFlightFragments[key];
+    } else if (key in this._fragmentData) {
+      originalValue = this._fragmentData[key];
+    } else {
+      originalValue = this._getFragmentDefault(key);
+    }
     const isDirty = behavior.isDirty(value, originalValue);
     const oldDirty = this.isFragmentDirty(key);
     if (isDirty !== oldDirty) {
@@ -508,15 +628,11 @@ export default class FragmentRecordData extends RecordData {
   getCanonicalState() {
     const result = Object.assign({}, this._data);
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
-      if (!this.hasFragment(key)) {
-        // force the fragment attribute to initialize its default value
-        internalModelFor(this).getRecord().get(key);
-        assert(
-          'Failed to initialize fragment default value',
-          this.hasFragment(key)
-        );
-      }
-      result[key] = behavior.canonicalState(this._fragmentData[key]);
+      const value =
+        key in this._fragmentData
+          ? this._fragmentData[key]
+          : this._getFragmentDefault(key);
+      result[key] = behavior.canonicalState(value);
     }
     return result;
   }
@@ -529,14 +645,6 @@ export default class FragmentRecordData extends RecordData {
       this._attributes
     );
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
-      if (!this.hasFragment(key)) {
-        // force the fragment attribute to initialize its default value
-        internalModelFor(this).getRecord().get(key);
-        assert(
-          'Failed to initialize fragment default value',
-          this.hasFragment(key)
-        );
-      }
       result[key] = behavior.currentState(this.getFragment(key));
     }
     return result;
@@ -607,7 +715,10 @@ export default class FragmentRecordData extends RecordData {
         // strip fragments from the attributes so the super call does not process them
         delete data.attributes[key];
 
-        const current = this._fragmentData[key];
+        const current =
+          key in this._fragmentData
+            ? this._fragmentData[key]
+            : this._getFragmentDefault(key);
         newCanonicalFragments[key] = behavior.pushData(current, canonical);
       }
       if (calculateChange) {
@@ -617,7 +728,12 @@ export default class FragmentRecordData extends RecordData {
     }
 
     const changedAttributeKeys = super.pushData(data, calculateChange);
-    return mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+      internalModelFor(this).notifyAttributes(changedKeys);
+    }
+    // on ember-data 2.8 - 4.4, InternalModel.setupData will notify
+    return changedKeys;
   }
 
   willCommit() {
@@ -689,7 +805,12 @@ export default class FragmentRecordData extends RecordData {
       this._fragmentArrayCache[key]?.notify()
     );
 
-    return mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+      internalModelFor(this).notifyAttributes(changedKeys);
+    }
+    // on ember-data 2.8 - 4.4, InternalModel.adapterDidCommit will notify
+    return changedKeys;
   }
 
   commitWasRejected(identifier, errors) {
@@ -787,6 +908,10 @@ export default class FragmentRecordData extends RecordData {
       // fragment owner is already dirty
       return;
     }
+    assert(
+      `Fragment '${key}' in owner '${owner.modelName}' has not been initialized`,
+      key in owner._fragmentData
+    );
 
     owner._fragments[key] = owner._fragmentData[key];
     owner.notifyStateChange(key);
@@ -835,6 +960,15 @@ export default class FragmentRecordData extends RecordData {
    * state machine and fire property change notifications on the Record
    */
 
+  _fragmentGetRecord(properties) {
+    if (gte('ember-data', '4.5.0')) {
+      return this.storeWrapper._store._instanceCache.getRecord(
+        this.identifier,
+        properties
+      );
+    }
+    return internalModelFor(this).getRecord(properties);
+  }
   _fragmentPushData(data) {
     internalModelFor(this).setupData(data);
   }
@@ -911,9 +1045,13 @@ export default class FragmentRecordData extends RecordData {
 }
 
 function internalModelFor(recordData) {
-  return recordData.storeWrapper._store._internalModelForResource(
-    recordData.identifier
-  );
+  const store = recordData.storeWrapper._store;
+  if (gte('ember-data', '4.5.0')) {
+    return store._instanceCache._internalModelForResource(
+      recordData.identifier
+    );
+  }
+  return store._internalModelForResource(recordData.identifier);
 }
 
 function isArrayEqual(a, b) {

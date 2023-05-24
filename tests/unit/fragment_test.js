@@ -6,6 +6,7 @@ import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 import Lion from 'dummy/models/lion';
 import Elephant from 'dummy/models/elephant';
+import { gte } from 'ember-compatibility-helpers';
 
 let store;
 
@@ -49,8 +50,8 @@ module('unit - `MF.Fragment`', function (hooks) {
     });
 
     const people = await all([
-      store.find('person', 1),
-      store.find('person', 2),
+      store.findRecord('person', 1),
+      store.findRecord('person', 2),
     ]);
     const copy = people[0].name.copy();
 
@@ -73,7 +74,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const copy = person.name.copy();
 
     assert.ok(copy.first, 'Jon');
@@ -84,6 +85,32 @@ module('unit - `MF.Fragment`', function (hooks) {
     const fragment = store.createFragment('name');
 
     assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
+  });
+
+  test('fragments support toString', function (assert) {
+    store.push({
+      data: {
+        type: 'vehicle',
+        id: 1,
+        attributes: {
+          passenger: {
+            name: {
+              first: 'Loras',
+              last: 'Tyrell',
+            },
+          },
+        },
+      },
+    });
+
+    const vehicle = store.peekRecord('vehicle', 1);
+
+    assert.ok(vehicle.passenger.toString().includes('owner(1)'));
+    assert.ok(vehicle.passenger.name.toString().includes('owner(null)'));
+    assert.notOk(
+      store.createFragment('name').toString().includes('owner('),
+      'fragment with no owner'
+    );
   });
 
   test('fragments are compared by reference', function (assert) {
@@ -126,7 +153,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('last', 'Baratheon');
@@ -158,7 +185,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('name', null);
 
     const [oldName, newName] = person.changedAttributes().name;
@@ -188,7 +215,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('last', 'Bolton');
@@ -304,27 +331,33 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(zoo.star !== origZoo.star, 'Fragments were not reused');
   });
 
-  test('fragments call ready callback when they are created', function (assert) {
-    const name = store.createFragment('name');
-    assert.ok(
-      name.readyWasCalled,
-      'when making fragment directly with store.createFragment'
-    );
+  if (!gte('ember-data', '4.4.0')) {
+    // lifecycle events were deprecated in ember-data 3.12 and removed in 4.4
+    // https://deprecations.emberjs.com/ember-data/v3.x/#toc_record-lifecycle-event-methods
+    // https://github.com/emberjs/data/pull/7970
 
-    const person = store.createRecord('person', {
-      name: { first: 'dan' },
-      names: [{ first: 'eric' }],
+    test('fragments call ready callback when they are created', function (assert) {
+      const name = store.createFragment('name');
+      assert.ok(
+        name.readyWasCalled,
+        'when making fragment directly with store.createFragment'
+      );
+
+      const person = store.createRecord('person', {
+        name: { first: 'dan' },
+        names: [{ first: 'eric' }],
+      });
+
+      assert.ok(
+        person.name.readyWasCalled,
+        'when creating model that has fragment'
+      );
+      assert.ok(
+        person.names.isEvery('readyWasCalled'),
+        'when creating model that has fragmentArray'
+      );
     });
-
-    assert.ok(
-      person.name.readyWasCalled,
-      'when creating model that has fragment'
-    );
-    assert.ok(
-      person.names.isEvery('readyWasCalled'),
-      'when creating model that has fragmentArray'
-    );
-  });
+  }
 
   test('can be created with null', async function (assert) {
     const person = store.push({

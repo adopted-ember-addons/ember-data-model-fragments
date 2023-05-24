@@ -82,7 +82,7 @@ module('integration - Nested fragments', function (hooks) {
       ];
     });
 
-    const user = await store.find('user', 1);
+    const user = await store.findRecord('user', 1);
 
     assert.equal(
       user.orders.firstObject.products.firstObject.name,
@@ -254,7 +254,7 @@ module('integration - Nested fragments', function (hooks) {
       },
     });
 
-    const user = await store.find('user', 1);
+    const user = await store.findRecord('user', 1);
     const info = user.info.copy();
 
     assert.deepEqual(
@@ -319,7 +319,7 @@ module('integration - Nested fragments', function (hooks) {
       },
     });
 
-    const user = await store.find('user', 1);
+    const user = await store.findRecord('user', 1);
     const info = user.info;
     const notes = info.notes;
     const orders = user.orders;

@@ -6,9 +6,9 @@ import {
 } from 'ember-data-model-fragments/attributes';
 import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
-import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
+import { HAS_ARRAY_OBSERVERS } from 'ember-data-model-fragments/array/stateful';
 
 let store;
 class Person extends Model {
@@ -38,6 +38,21 @@ module('unit - `MF.array` property', function (hooks) {
     store = null;
   });
 
+  test('arrays have an owner', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          titles: ['Hand of the King', 'Master of Coin'],
+        },
+      },
+    });
+
+    const person = await store.findRecord('person', 1);
+    assert.strictEqual(person.titles.owner, person);
+  });
+
   test('array properties are converted to an array-ish containing original values', async function (assert) {
     const values = ['Hand of the King', 'Master of Coin'];
 
@@ -52,7 +67,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const titles = person.titles;
 
     assert.ok(isArray(titles), 'property is array-like');
@@ -77,7 +92,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.equal(person.titles, null, 'property is null');
   });
 
@@ -97,7 +112,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('titles', null);
 
     assert.equal(person.titles, null, 'property is null');
@@ -119,7 +134,7 @@ module('unit - `MF.array` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('titles', ['hello', 'there']);
 
     assert.deepEqual(
@@ -160,9 +175,11 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('array properties can have default values', function (assert) {
-    Person.reopen({
-      titles: MF.array({ defaultValue: ['Ser'] }),
-    });
+    class PersonWithDefaults extends Person {
+      @array({ defaultValue: ['Ser'] })
+      titles;
+    }
+    this.owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person', {
       nickName: 'Barristan Selmy',
@@ -173,13 +190,10 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('default values can be functions', function (assert) {
-    Person.reopen({
-      titles: MF.array({
-        defaultValue() {
-          return ['Viper'];
-        },
-      }),
-    });
+    class PersonWithDefaults extends Person {
+      @array({ defaultValue: () => ['Viper'] }) titles;
+    }
+    this.owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person', {
       nickName: 'Oberyn Martell',
@@ -194,13 +208,15 @@ module('unit - `MF.array` property', function (hooks) {
   });
 
   test('default values that are functions are not deep copied', function (assert) {
-    Person.reopen({
-      titles: MF.array({
+    class PersonWithDefaults extends Person {
+      @array({
         defaultValue() {
           return ['Viper', EmberObject.create({ item: 'Longclaw' })];
         },
-      }),
-    });
+      })
+      titles;
+    }
+    this.owner.register('model:person', PersonWithDefaults);
 
     const person = store.createRecord('person', {
       nickName: 'Oberyn Martell',
@@ -214,39 +230,41 @@ module('unit - `MF.array` property', function (hooks) {
     );
   });
 
-  test('supports array observers', async function (assert) {
-    store.push({
-      data: {
-        type: 'person',
-        id: 1,
-        attributes: {
-          nickName: 'Tyrion Lannister',
-          titles: ['Hand of the King'],
+  if (HAS_ARRAY_OBSERVERS) {
+    test('supports array observers', async function (assert) {
+      store.push({
+        data: {
+          type: 'person',
+          id: 1,
+          attributes: {
+            nickName: 'Tyrion Lannister',
+            titles: ['Hand of the King'],
+          },
         },
-      },
+      });
+
+      this.arrayWillChange = function (array, start, removeCount, addCount) {
+        assert.step(`arrayWillChange(${start},${removeCount},${addCount})`);
+      };
+      this.arrayDidChange = function (array, start, removeCount, addCount) {
+        assert.step(`arrayDidChange(${start},${removeCount},${addCount})`);
+      };
+
+      const person = await store.findRecord('person', 1);
+      const titles = person.titles;
+      titles.addArrayObserver(this, {
+        willChange: 'arrayWillChange',
+        didChange: 'arrayDidChange',
+      });
+      titles.pushObject('Master of Coin');
+
+      assert.verifySteps(['arrayWillChange(1,0,1)', 'arrayDidChange(1,0,1)']);
+
+      titles.clear();
+
+      assert.verifySteps(['arrayWillChange(0,2,0)', 'arrayDidChange(0,2,0)']);
+
+      titles.removeArrayObserver(this);
     });
-
-    this.arrayWillChange = function (array, start, removeCount, addCount) {
-      assert.step(`arrayWillChange(${start},${removeCount},${addCount})`);
-    };
-    this.arrayDidChange = function (array, start, removeCount, addCount) {
-      assert.step(`arrayDidChange(${start},${removeCount},${addCount})`);
-    };
-
-    const person = await store.find('person', 1);
-    const titles = person.titles;
-    titles.addArrayObserver(this, {
-      willChange: 'arrayWillChange',
-      didChange: 'arrayDidChange',
-    });
-    titles.pushObject('Master of Coin');
-
-    assert.verifySteps(['arrayWillChange(1,0,1)', 'arrayDidChange(1,0,1)']);
-
-    titles.clear();
-
-    assert.verifySteps(['arrayWillChange(0,2,0)', 'arrayDidChange(0,2,0)']);
-
-    titles.removeArrayObserver(this);
-  });
+  }
 });

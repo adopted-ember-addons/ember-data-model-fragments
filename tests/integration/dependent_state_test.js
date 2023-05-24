@@ -66,7 +66,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('first', 'Cercei');
@@ -89,7 +89,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     person.set('name', {
@@ -114,7 +114,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     person.set('name', {
@@ -140,7 +140,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('first', 'Brynden');
@@ -164,7 +164,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     // Dirty the owner record
@@ -191,7 +191,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('last', 'Tully');
@@ -216,7 +216,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     name.set('last', '');
@@ -248,7 +248,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     // Dirty the fragment
@@ -274,7 +274,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     person.set('name', null);
@@ -298,7 +298,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     // Dirty the owner record and fragment
@@ -314,7 +314,7 @@ module('integration - Dependent State', function (hooks) {
   test('a fragment property that is set to null can be rolled back', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     person.set('name', null);
@@ -341,7 +341,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const name = person.name;
 
     assert.equal(name, undefined, 'property is null');
@@ -362,7 +362,7 @@ module('integration - Dependent State', function (hooks) {
   test('changing a fragment array property with object literals dirties the fragment and owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     person.set('addresses', [
@@ -387,7 +387,7 @@ module('integration - Dependent State', function (hooks) {
   test('adding to a fragment array property with object literals dirties the fragment and owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     addresses.pushObject({
@@ -404,7 +404,7 @@ module('integration - Dependent State', function (hooks) {
   test('setting a fragment property with object literals to the same values does not dirty the fragment or owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     person.set('addresses', people[0].addresses);
@@ -416,7 +416,7 @@ module('integration - Dependent State', function (hooks) {
   test('adding a fragment to a fragment array dirties the fragment array and owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     addresses.createFragment({
@@ -433,7 +433,7 @@ module('integration - Dependent State', function (hooks) {
   test('removing a fragment from a fragment array dirties the fragment array and owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     addresses.removeObject(addresses.firstObject);
@@ -445,7 +445,7 @@ module('integration - Dependent State', function (hooks) {
   test('reordering a fragment array dirties the fragment array and owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const length = addresses.length;
 
@@ -464,7 +464,7 @@ module('integration - Dependent State', function (hooks) {
   test('restoring a fragment array to its original order returns the fragment array owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     const address = addresses.popObject();
@@ -477,7 +477,7 @@ module('integration - Dependent State', function (hooks) {
   test("restoring a fragment array to its original order when the owner record was dirty returns the fragment array to a clean state and maintains the owner record's dirty state", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     // Dirty the owner record
@@ -493,7 +493,7 @@ module('integration - Dependent State', function (hooks) {
   test('restoring a primitive array to its original order returns the array owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const titles = person.titles;
     assert.ok(!titles.hasDirtyAttributes, 'primitive array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -510,7 +510,7 @@ module('integration - Dependent State', function (hooks) {
   test('restoring a primitive array after setting to null returns the array owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const titles = person.titles;
     assert.ok(!titles.hasDirtyAttributes, 'primitive array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -527,7 +527,7 @@ module('integration - Dependent State', function (hooks) {
   test('changing a fragment property in a fragment array dirties the fragment, fragment array, and owner record', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -545,7 +545,7 @@ module('integration - Dependent State', function (hooks) {
   test('restoring a fragment in a fragment array property to its original state returns the fragment, fragment array, and owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -560,7 +560,7 @@ module('integration - Dependent State', function (hooks) {
   test("restoring a fragment in a fragment array property to its original state when the fragment array was dirty returns the fragment to a clean state and maintains the fragment array and owner record's dirty state", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -578,7 +578,7 @@ module('integration - Dependent State', function (hooks) {
   test("restoring a fragment in a fragment array property to its original state when the owner record was dirty returns the fragment and fragment array to a clean state maintains the owner record's dirty state", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -596,7 +596,7 @@ module('integration - Dependent State', function (hooks) {
   test('rolling back the owner record returns all fragments in a fragment array property, the fragment array, and owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -615,7 +615,7 @@ module('integration - Dependent State', function (hooks) {
   test('rolling back the owner record returns all values in an array property, the array, and the owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const titles = person.titles;
     const values = titles.toArray();
 
@@ -637,7 +637,7 @@ module('integration - Dependent State', function (hooks) {
   test('rolling back an array returns the array to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const titles = person.titles;
     const values = titles.toArray();
 
@@ -666,7 +666,7 @@ module('integration - Dependent State', function (hooks) {
   test('rolling back a fragment array returns all fragments, the fragment array, and the owner record to a clean state', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -708,7 +708,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const user = await store.find('user', 1);
+    const user = await store.findRecord('user', 1);
     const orders = user.orders;
     const products = orders.firstObject.products;
 
@@ -732,7 +732,7 @@ module('integration - Dependent State', function (hooks) {
   test("rolling back a fragment array when the owner record is dirty returns all fragments and the fragment array to a clean state and retains the owner record's dirty state", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -751,7 +751,7 @@ module('integration - Dependent State', function (hooks) {
   test('rolling back a fragment in a fragment array property returns the fragment, fragment array, and owner record to a clean states', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -768,7 +768,7 @@ module('integration - Dependent State', function (hooks) {
   test("rolling back a fragment in a fragment array property when the fragment array is dirty returns the fragment to a clean state and maintains the fragment array and owner record's dirty state", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -786,7 +786,7 @@ module('integration - Dependent State', function (hooks) {
   test("rolling back a fragment in a fragment array property when the owner record is dirty returns the fragment and fragment array to a clean state and maintains the owner record's dirty state", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const address = addresses.firstObject;
 
@@ -804,7 +804,7 @@ module('integration - Dependent State', function (hooks) {
   test('a fragment array property that is set to null can be rolled back', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     person.set('addresses', null);
@@ -821,7 +821,7 @@ module('integration - Dependent State', function (hooks) {
   test('a fragment array property that is null can be rolled back', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const hobbies = person.hobbies;
 
     assert.equal(hobbies, null, 'property is null');
@@ -849,7 +849,7 @@ module('integration - Dependent State', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     assert.ok(
@@ -880,7 +880,7 @@ module('integration - Dependent State', function (hooks) {
   test("pushing a fragment update doesn't cause it to become dirty", async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.ok(!person.hasDirtyAttributes, 'person record is not dirty');
 
     store.push({
@@ -901,7 +901,7 @@ module('integration - Dependent State', function (hooks) {
   test('pushing a fragment array update doesnt cause it to become dirty', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.ok(!person.hasDirtyAttributes, 'person record is not dirty');
 
     store.push({
@@ -936,7 +936,7 @@ module('integration - Dependent State', function (hooks) {
   test('updating a fragment and a property then resetting the property', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.ok(!person.hasDirtyAttributes, 'person record is not dirty');
 
     person.name.set('first', 'Another firstname');

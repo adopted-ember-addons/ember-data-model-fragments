@@ -78,7 +78,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('properties are instances of `MF.FragmentArray`', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     assert.ok(isArray(addresses), 'property is array-like');
@@ -91,7 +91,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('arrays of object literals are converted into instances of `MF.Fragment`', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     assert.ok(
@@ -105,7 +105,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('fragments created through the store can be added to the fragment array', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const length = addresses.length;
 
@@ -133,7 +133,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('changing the fragment array is reflected in parent changedAttributes', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     const address = store.createFragment('address', {
@@ -192,7 +192,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('adding a non-fragment model or object literal throws an error', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     assert.throws(() => {
@@ -207,8 +207,8 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(2);
 
     const people = await all([
-      store.find('person', 1),
-      store.find('person', 2),
+      store.findRecord('person', 1),
+      store.findRecord('person', 2),
     ]);
     const address = people[0].addresses.firstObject;
 
@@ -220,7 +220,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('setting to an array of fragments is allowed', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
     const address = store.createFragment('address', {
@@ -266,11 +266,11 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.ok(isArray(person.addresses), 'defaults to an array');
     assert.ok(isEmpty(person.addresses), 'default array is empty');
 
-    const person2 = await store.find('person', 2);
+    const person2 = await store.findRecord('person', 2);
     assert.ok(
       person.addresses !== person2.addresses,
       'default array is unique'
@@ -280,7 +280,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('default value can be null', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.equal(person.hobbies, null, 'defaults to null');
 
     const hobbies = [
@@ -296,14 +296,14 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('null values are allowed', async function (assert) {
     pushPerson(3);
 
-    const person = await store.find('person', 3);
+    const person = await store.findRecord('person', 3);
     assert.equal(person.addresses, null, 'property is null');
   });
 
   test('setting to null is allowed', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('addresses', null);
 
     assert.equal(person.addresses, null, 'property is null');
@@ -358,7 +358,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     person.set('addresses', [address]);
 
     assert.ok(
@@ -401,7 +401,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       },
     });
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const address = person.addresses.firstObject;
 
     person.set('addresses', [newAddress]);
@@ -421,7 +421,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('setting to an array of non-fragments throws an error', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     assert.throws(() => {
       person.set('addresses', ['address']);
     }, 'error is thrown when setting to an array of non-fragments');
@@ -533,7 +533,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('destroy a fragment array which was set to null', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const firstAddress = addresses.objectAt(0);
     const secondAddress = addresses.objectAt(1);
@@ -561,7 +561,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
   test('destroy a fragment which was removed from the fragment array', async function (assert) {
     pushPerson(1);
 
-    const person = await store.find('person', 1);
+    const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
     const firstAddress = addresses.objectAt(0);
     const secondAddress = addresses.objectAt(1);

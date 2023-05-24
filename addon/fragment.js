@@ -103,14 +103,8 @@ const Fragment = Model.extend(Ember.Comparable, Copyable, {
   },
 
   toStringExtension() {
-    const internalModel = internalModelFor(this);
-    const owner = internalModel && internalModel._recordData._owner;
-    if (owner) {
-      const ownerId = owner.id;
-      return `owner(${ownerId})`;
-    } else {
-      return '';
-    }
+    const owner = recordDataFor(this).getFragmentOwner();
+    return owner ? `owner(${owner.id})` : '';
   },
 }).reopenClass({
   fragmentOwnerProperties: computed(function () {
@@ -148,11 +142,6 @@ export function getActualFragmentType(declaredType, options, data, owner) {
   return actualType || declaredType;
 }
 
-// Returns the internal model for the given record/fragment
-export function internalModelFor(record) {
-  return record._internalModel;
-}
-
 // Sets the owner/key values on a fragment
 export function setFragmentOwner(fragment, record, key) {
   const recordData = recordDataFor(fragment);
@@ -162,36 +151,6 @@ export function setFragmentOwner(fragment, record, key) {
   fragment.constructor.fragmentOwnerProperties.forEach((name) => {
     fragment.notifyPropertyChange(name);
   });
-
-  return fragment;
-}
-
-// Sets the data of a fragment and leaves the fragment in a clean state
-export function setFragmentData(fragment, data) {
-  internalModelFor(fragment).setupData({
-    attributes: data,
-  });
-}
-
-// Creates a fragment and sets its owner to the given record
-export function createFragment(
-  store,
-  declaredModelName,
-  record,
-  key,
-  options,
-  data
-) {
-  const actualModelName = getActualFragmentType(
-    declaredModelName,
-    options,
-    data,
-    record
-  );
-  const fragment = store.createFragment(actualModelName);
-
-  setFragmentOwner(fragment, record, key);
-  setFragmentData(fragment, data);
 
   return fragment;
 }

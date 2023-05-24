@@ -38,7 +38,7 @@ export default function fragmentOwner() {
     if (!owner) {
       return null;
     }
-    return this.store._internalModelForResource(owner.identifier).getRecord();
+    return owner._fragmentGetRecord();
   })
     .meta({
       isFragmentOwner: true,
