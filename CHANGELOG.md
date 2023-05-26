@@ -8,6 +8,35 @@
 
 
 
+
+## v6.0.0 (2023-05-26)
+
+#### :boom: Breaking Change
+* [#462](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/462) chore: drop node 12 ([@knownasilya](https://github.com/knownasilya))
+* [#417](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/417) record-data implementation for ember-data 3.28+ ([@dwickern](https://github.com/dwickern))
+
+#### :rocket: Enhancement
+* [#464](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/464) Add support for ember-data 4.0 - 4.6 ([@dwickern](https://github.com/dwickern))
+
+#### :bug: Bug Fix
+* [#458](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/458) Fix: trigger error on Ember >= 4.x ([@wozny1989](https://github.com/wozny1989))
+
+#### :memo: Documentation
+* [#460](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/460) Remove dead link from README.md ([@deanmarano](https://github.com/deanmarano))
+* [#456](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/456) Convert README.md examples to native classes ([@charlesfries](https://github.com/charlesfries))
+
+#### :house: Internal
+* [#463](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/463) Upgrade Ember-CLI ([@dwickern](https://github.com/dwickern))
+* [#461](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/461) chore(deps): bump minimatch from 3.0.4 to 3.1.2 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#459](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/459) chore(deps): bump minimist from 0.2.1 to 0.2.4 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 5
+- Adam Woźny ([@wozny1989](https://github.com/wozny1989))
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+- Ilya Radchenko ([@knownasilya](https://github.com/knownasilya))
+
 ## v5.0.0 (2023-02-02)
 
 #### :bug: Bug Fix
