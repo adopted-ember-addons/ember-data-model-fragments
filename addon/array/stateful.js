@@ -81,6 +81,16 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     return this._length;
   },
 
+  setObjects(objects) {
+    // this override avoids calling `length`, which sets up auto tracking
+    // see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466
+    if (this._isDirty) {
+      this.retrieveLatest();
+    }
+    this.replace(0, this._length, objects);
+    return this;
+  },
+
   objectAt(index) {
     if (this._isDirty) {
       this.retrieveLatest();
@@ -97,6 +107,10 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       'The third argument to replace needs to be an array.',
       isArray(items)
     );
+    if (deleteCount === 0 && items.length === 0) {
+      // array is unchanged
+      return;
+    }
     const data = this.currentState.slice();
     data.splice(
       start,
