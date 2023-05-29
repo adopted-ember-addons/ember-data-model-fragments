@@ -30,11 +30,6 @@ module('Integration | Rendering', function (hooks) {
           titles: ['Hand of the King', 'Master of Coin'],
         });
       }
-
-      willDestroy() {
-        this.person.unloadRecord();
-        super.willDestroy(...arguments);
-      }
     }
     setComponentTemplate(hbs`{{yield this.person}}`, PersonComponent);
 
