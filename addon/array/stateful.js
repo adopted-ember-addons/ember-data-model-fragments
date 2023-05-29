@@ -86,7 +86,6 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
    * which prevents a glimmer rendering error in some circumstances.
    * @see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466
    * @param objects the new array contents
-   * @return {StatefulArray} this instance
    * @private
    */
   _setFragments(objects) {
@@ -94,7 +93,6 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       this.retrieveLatest();
     }
     this.replace(0, this._length, objects);
-    return this;
   },
 
   objectAt(index) {
