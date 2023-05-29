@@ -81,9 +81,15 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     return this._length;
   },
 
-  setObjects(objects) {
-    // this override avoids calling `length`, which sets up auto tracking
-    // see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466
+  /**
+   * Unlike `setObjects`, this method avoids setting up auto-tracking,
+   * which prevents a glimmer rendering error in some circumstances.
+   * @see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466
+   * @param objects the new array contents
+   * @return {StatefulArray} this instance
+   * @private
+   */
+  _setFragments(objects) {
     if (this._isDirty) {
       this.retrieveLatest();
     }
