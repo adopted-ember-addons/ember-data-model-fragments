@@ -90,7 +90,7 @@ export default function array(type, options) {
         });
         recordData._fragmentArrayCache[key] = array;
       }
-      array.setObjects(value);
+      array._setFragments(value);
       return array;
     },
   }).meta(meta);

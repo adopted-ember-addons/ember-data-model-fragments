@@ -81,6 +81,20 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     return this._length;
   },
 
+  /**
+   * Unlike `setObjects`, this method avoids setting up auto-tracking,
+   * which prevents a glimmer rendering error in some circumstances.
+   * @see https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466
+   * @param objects the new array contents
+   * @private
+   */
+  _setFragments(objects) {
+    if (this._isDirty) {
+      this.retrieveLatest();
+    }
+    this.replace(0, this._length, objects);
+  },
+
   objectAt(index) {
     if (this._isDirty) {
       this.retrieveLatest();
@@ -97,6 +111,10 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       'The third argument to replace needs to be an array.',
       isArray(items)
     );
+    if (deleteCount === 0 && items.length === 0) {
+      // array is unchanged
+      return;
+    }
     const data = this.currentState.slice();
     data.splice(
       start,

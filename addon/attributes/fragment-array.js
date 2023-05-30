@@ -102,7 +102,7 @@ export default function fragmentArray(type, options) {
         });
         recordData._fragmentArrayCache[key] = fragmentArray;
       }
-      fragmentArray.setObjects(value);
+      fragmentArray._setFragments(value);
       return fragmentArray;
     },
   }).meta(meta);
