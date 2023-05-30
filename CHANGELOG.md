@@ -9,6 +9,18 @@
 
 
 
+
+## v6.0.1 (2023-05-30)
+
+#### :bug: Bug Fix
+* [#466](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466) Fix glimmer render error when creating fragment arrays ([@dwickern](https://github.com/dwickern))
+
+#### :house: Internal
+* [#465](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/465) chore(deps): bump socket.io-parser from 4.2.2 to 4.2.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 1
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+
 ## v6.0.0 (2023-05-26)
 
 #### :boom: Breaking Change
