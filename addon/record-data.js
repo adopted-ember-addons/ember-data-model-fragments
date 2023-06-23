@@ -692,7 +692,10 @@ export default class FragmentRecordData extends RecordData {
       if (this._fragments[key]) {
         continue;
       }
-      if ((updates[key] === null) !== (original[key] === null)) {
+      if (
+        (updates[key] === null) !== (original[key] === null) ||
+        updates[key] !== original[key]
+      ) {
         changedKeys.push(key);
       }
     }
@@ -724,7 +727,12 @@ export default class FragmentRecordData extends RecordData {
       if (calculateChange) {
         changedFragmentKeys = this._changedFragmentKeys(newCanonicalFragments);
       }
+
       Object.assign(this._fragmentData, newCanonicalFragments);
+      // update fragment arrays
+      Object.keys(newCanonicalFragments).forEach((key) =>
+        this._fragmentArrayCache[key]?.notify()
+      );
     }
 
     const changedAttributeKeys = super.pushData(data, calculateChange);
