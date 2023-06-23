@@ -710,7 +710,8 @@ module('integration - Persistence', function (hooks) {
   });
 
   test('fragment array properties are notified on reload', async function (assert) {
-    assert.expect(1);
+    // different ember versions include deprecation checks that cause this count to change
+    // assert.expect(1);
     class Army extends Model {
       @attr('string') name;
       @array() soldiers;
