@@ -692,10 +692,7 @@ export default class FragmentRecordData extends RecordData {
       if (this._fragments[key]) {
         continue;
       }
-      if (
-        (updates[key] === null) !== (original[key] === null) ||
-        updates[key] !== original[key]
-      ) {
+      if ((updates[key] === null) !== (original[key] === null)) {
         changedKeys.push(key);
       }
     }
