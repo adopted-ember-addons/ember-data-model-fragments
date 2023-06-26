@@ -709,10 +709,9 @@ module('integration - Persistence', function (hooks) {
     return person.save();
   });
 
-  // TODO(igor) figure out why length is different the first time this assertion is called.
-  skip('fragment array properties are notified on reload', async function (assert) {
-    // The extra assertion comes from deprecation checking
-    // assert.expect(2);
+  test('fragment array properties are notified on reload', async function (assert) {
+    // different ember versions include deprecation checks that cause this count to change
+    // assert.expect(1);
     class Army extends Model {
       @attr('string') name;
       @array() soldiers;

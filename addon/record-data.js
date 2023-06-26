@@ -724,7 +724,12 @@ export default class FragmentRecordData extends RecordData {
       if (calculateChange) {
         changedFragmentKeys = this._changedFragmentKeys(newCanonicalFragments);
       }
+
       Object.assign(this._fragmentData, newCanonicalFragments);
+      // update fragment arrays
+      Object.keys(newCanonicalFragments).forEach((key) =>
+        this._fragmentArrayCache[key]?.notify()
+      );
     }
 
     const changedAttributeKeys = super.pushData(data, calculateChange);
