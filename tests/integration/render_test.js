@@ -103,4 +103,95 @@ module('Integration | Rendering', function (hooks) {
     assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
     assert.dom('[data-product="1"]').hasText('Tears of Lys: 499.99');
   });
+
+  test('fragment array data pushed', async function (assert) {
+    this.order = store.createRecord('order', { id: 'an-id' });
+
+    await render(
+      hbs`
+        Orders
+        <ul>
+          {{#each this.order.products as |product idx|}}
+            <li data-product="{{idx}}">{{product.name}}: {{product.price}}</li>
+          {{/each}}
+        </ul>
+      `
+    );
+
+    assert.dom('[data-product]').doesNotExist();
+
+    store.push({
+      data: [
+        {
+          id: this.order.id,
+          type: 'order',
+          attributes: {
+            products: [
+              {
+                name: 'Tears of Lys',
+                price: '499.99',
+              },
+            ],
+          },
+          relationships: {},
+        },
+      ],
+    });
+
+    await settled();
+
+    assert.dom('[data-product]').exists({ count: 1 });
+    assert.dom('[data-product="0"]').hasText('Tears of Lys: 499.99');
+
+    store.push({
+      data: [
+        {
+          id: this.order.id,
+          type: 'order',
+          attributes: {
+            products: [
+              {
+                name: 'The Strangler',
+                price: '299.99',
+              },
+              {
+                name: 'Tears of Lys',
+                price: '499.99',
+              },
+            ],
+          },
+          relationships: {},
+        },
+      ],
+    });
+
+    await settled();
+
+    assert.dom('[data-product]').exists({ count: 2 });
+    assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
+    assert.dom('[data-product="1"]').hasText('Tears of Lys: 499.99');
+
+    store.push({
+      data: [
+        {
+          id: this.order.id,
+          type: 'order',
+          attributes: {
+            products: [
+              {
+                name: 'The Strangler',
+                price: '299.99',
+              },
+            ],
+          },
+          relationships: {},
+        },
+      ],
+    });
+
+    await settled();
+
+    assert.dom('[data-product]').exists({ count: 1 });
+    assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
+  });
 });
