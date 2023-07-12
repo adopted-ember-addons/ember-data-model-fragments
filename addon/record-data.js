@@ -1,5 +1,6 @@
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import { RecordData } from 'ember-data/-private';
+import { diffArray } from '@ember-data/model/-private';
 import { recordDataFor } from '@ember-data/store/-private';
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
@@ -692,7 +693,11 @@ export default class FragmentRecordData extends RecordData {
       if (this._fragments[key]) {
         continue;
       }
-      if ((updates[key] === null) !== (original[key] === null)) {
+      const eitherIsNull = original[key] === null || updates[key] === null;
+      if (
+        eitherIsNull ||
+        diffArray(original[key], updates[key]).firstChangeIndex !== null
+      ) {
         changedKeys.push(key);
       }
     }
@@ -727,7 +732,7 @@ export default class FragmentRecordData extends RecordData {
 
       Object.assign(this._fragmentData, newCanonicalFragments);
       // update fragment arrays
-      Object.keys(newCanonicalFragments).forEach((key) =>
+      changedFragmentKeys?.forEach((key) =>
         this._fragmentArrayCache[key]?.notify()
       );
     }
