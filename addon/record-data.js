@@ -721,7 +721,7 @@ export default class FragmentRecordData extends RecordData {
       }
     }
 
-    // Wee need first the attributes to be setupd before the fragment to be able to access them (for polymorphic fragments for example)
+    // Wee need first the attributes to be setup before the fragment, to be able to access them (for polymorphic fragments for example)
     const changedAttributeKeys = super.pushData(data, calculateChange);
 
     if (data.attributes) {
