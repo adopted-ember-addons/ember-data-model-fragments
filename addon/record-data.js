@@ -604,7 +604,8 @@ export default class FragmentRecordData extends RecordData {
     const type = getActualFragmentType(
       definition.modelName,
       definition.options,
-      attributes
+      attributes,
+      this._fragmentGetRecord()
     );
     const recordData = this.storeWrapper.recordDataFor(type);
     recordData.setFragmentOwner(this, definition.name);
@@ -706,12 +707,13 @@ export default class FragmentRecordData extends RecordData {
 
   pushData(data, calculateChange) {
     let changedFragmentKeys;
+
+    const subFragmentsToProcess = [];
     if (data.attributes) {
       // copy so that we don't mutate the caller's data
       const attributes = Object.assign({}, data.attributes);
       data = Object.assign({}, data, { attributes });
 
-      const newCanonicalFragments = {};
       for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
         const canonical = data.attributes[key];
         if (canonical === undefined) {
@@ -720,12 +722,24 @@ export default class FragmentRecordData extends RecordData {
         // strip fragments from the attributes so the super call does not process them
         delete data.attributes[key];
 
+        subFragmentsToProcess.push({ key, behavior, canonical, attributes });
+      }
+    }
+
+    // Wee need first the attributes to be setup before the fragment, to be able to access them (for polymorphic fragments for example)
+    const changedAttributeKeys = super.pushData(data, calculateChange);
+
+    if (data.attributes) {
+      const newCanonicalFragments = {};
+
+      subFragmentsToProcess.forEach(({ key, behavior, canonical }) => {
         const current =
           key in this._fragmentData
             ? this._fragmentData[key]
             : this._getFragmentDefault(key);
         newCanonicalFragments[key] = behavior.pushData(current, canonical);
-      }
+      });
+
       if (calculateChange) {
         changedFragmentKeys = this._changedFragmentKeys(newCanonicalFragments);
       }
@@ -737,13 +751,12 @@ export default class FragmentRecordData extends RecordData {
       );
     }
 
-    const changedAttributeKeys = super.pushData(data, calculateChange);
     const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
     if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
       internalModelFor(this).notifyAttributes(changedKeys);
     }
     // on ember-data 2.8 - 4.4, InternalModel.setupData will notify
-    return changedKeys;
+    return changedKeys || [];
   }
 
   willCommit() {
