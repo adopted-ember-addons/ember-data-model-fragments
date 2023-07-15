@@ -10,6 +10,21 @@
 
 
 
+
+## v6.0.2 (2023-07-15)
+
+#### :bug: Bug Fix
+* [#474](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/474) fix(polymorphism): fix regression introduced with ember-data-model-fragments 6.0.0 where owner is not passed to typeKey function ([@VincentMolinie](https://github.com/VincentMolinie))
+* [#472](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/472) Ensure changing arrays are notified. ([@deanmarano](https://github.com/deanmarano))
+* [#469](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/469) Fix issue with reloading array records. ([@deanmarano](https://github.com/deanmarano))
+
+#### :house: Internal
+* [#473](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/473) chore(deps): bump semver from 5.7.1 to 5.7.2 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 2
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v6.0.1 (2023-05-30)
 
 #### :bug: Bug Fix
