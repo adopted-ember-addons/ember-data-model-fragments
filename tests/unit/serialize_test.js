@@ -327,14 +327,14 @@ module('unit - Serialization', function (hooks) {
     saveHooks.beforeEach(function () {
       server = new Pretender();
     });
-  
+
     saveHooks.afterEach(function () {
       server.shutdown();
     });
 
     test('changedAttributes should have the same result when serialized as before the save is called', async function (assert) {
       assert.expect(3);
-      
+
       store.pushPayload('component', {
         data: {
           type: 'components',
@@ -354,13 +354,16 @@ module('unit - Serialization', function (hooks) {
       component.options.fontFamily = 'sans-serif';
 
       assert.deepEqual(component.changedAttributes(), {
-        options: [{
-          fontFamily: 'roman',
-          fontSize: 12,
-        }, {
-          fontFamily: 'sans-serif',
-          fontSize: 12,
-        }],
+        options: [
+          {
+            fontFamily: 'roman',
+            fontSize: 12,
+          },
+          {
+            fontFamily: 'sans-serif',
+            fontSize: 12,
+          },
+        ],
       });
 
       server.put('/components/1', (request) => {
@@ -372,8 +375,8 @@ module('unit - Serialization', function (hooks) {
                 fontFamily: 'sans-serif',
                 fontSize: 12,
               },
-            }
-          }
+            },
+          },
         });
         return [204, { 'Content-Type': 'application/json' }, '{}'];
       });
@@ -381,6 +384,6 @@ module('unit - Serialization', function (hooks) {
       await component.save();
 
       assert.deepEqual(component.changedAttributes(), {});
-    })
+    });
   });
 });

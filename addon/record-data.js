@@ -618,9 +618,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   hasChangedFragments() {
-    return (
-      this._fragmentsOrInFlight !== null && Object.keys(this._fragmentsOrInFlight).length > 0
-    );
+    return Object.keys(this._fragmentsOrInFlight).length > 0;
   }
 
   isFragmentDirty(key) {
@@ -669,7 +667,9 @@ export default class FragmentRecordData extends RecordData {
 
   changedFragments() {
     const diffData = Object.create(null);
-    for (const [key, newFragment] of Object.entries(this._fragmentsOrInFlight || {})) {
+    for (const [key, newFragment] of Object.entries(
+      this._fragmentsOrInFlight
+    )) {
       const behavior = this._fragmentBehavior[key];
       const oldFragment =
         key in this._inFlightFragments
@@ -1054,7 +1054,10 @@ export default class FragmentRecordData extends RecordData {
   }
 
   get _fragmentsOrInFlight() {
-    return (this.__inFlightFragments && Object.keys(this.__inFlightFragments).length > 0) ? this.__inFlightFragments : this.__fragments;
+    return this.__inFlightFragments &&
+      Object.keys(this.__inFlightFragments).length > 0
+      ? this.__inFlightFragments
+      : this.__fragments || {};
   }
 
   /**
