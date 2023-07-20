@@ -11,6 +11,15 @@
 
 
 
+
+## v6.0.3 (2023-07-20)
+
+#### :bug: Bug Fix
+* [#476](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/476) changedAttributes still return the dirty attributes until the record has been fully committed ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### Committers: 1
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v6.0.2 (2023-07-15)
 
 #### :bug: Bug Fix
