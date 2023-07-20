@@ -4,6 +4,7 @@ import { setupApplicationTest } from '../helpers';
 import JSONSerializer from '@ember-data/serializer/json';
 import Person from 'dummy/models/person';
 import { fragmentArray, array } from 'ember-data-model-fragments/attributes';
+import Pretender from 'pretender';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import DS from 'ember-data';
 let store, owner;
@@ -318,5 +319,71 @@ module('unit - Serialization', function (hooks) {
       }),
       'fragment property values are normalized'
     );
+  });
+
+  module('when saving the record', function (saveHooks) {
+    let server;
+
+    saveHooks.beforeEach(function () {
+      server = new Pretender();
+    });
+
+    saveHooks.afterEach(function () {
+      server.shutdown();
+    });
+
+    test('changedAttributes should have the same result when serialized as before the save is called', async function (assert) {
+      assert.expect(3);
+
+      store.pushPayload('component', {
+        data: {
+          type: 'components',
+          id: 1,
+          attributes: {
+            name: 'mine',
+            type: 'text',
+            options: {
+              fontFamily: 'roman',
+              fontSize: 12,
+            },
+          },
+        },
+      });
+      const component = store.peekRecord('component', 1);
+
+      component.options.fontFamily = 'sans-serif';
+
+      assert.deepEqual(component.changedAttributes(), {
+        options: [
+          {
+            fontFamily: 'roman',
+            fontSize: 12,
+          },
+          {
+            fontFamily: 'sans-serif',
+            fontSize: 12,
+          },
+        ],
+      });
+
+      server.put('/components/1', (request) => {
+        assert.deepEqual(JSON.parse(request.requestBody), {
+          data: {
+            type: 'components',
+            attributes: {
+              options: {
+                fontFamily: 'sans-serif',
+                fontSize: 12,
+              },
+            },
+          },
+        });
+        return [204, { 'Content-Type': 'application/json' }, '{}'];
+      });
+
+      await component.save();
+
+      assert.deepEqual(component.changedAttributes(), {});
+    });
   });
 });
