@@ -12,6 +12,15 @@
 
 
 
+
+## v6.0.4 (2023-09-01)
+
+#### :bug: Bug Fix
+* [#479](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/479) Add `copy` to type declarations ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 1
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+
 ## v6.0.3 (2023-07-20)
 
 #### :bug: Bug Fix
