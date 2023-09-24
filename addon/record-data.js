@@ -671,10 +671,7 @@ export default class FragmentRecordData extends RecordData {
       this._fragmentsOrInFlight
     )) {
       const behavior = this._fragmentBehavior[key];
-      const oldFragment =
-        key in this._inFlightFragments
-          ? this._inFlightFragments[key]
-          : this._fragmentData[key];
+      const oldFragment = this._fragmentData[key];
       diffData[key] = [
         behavior.canonicalState(oldFragment),
         behavior.currentState(newFragment),
