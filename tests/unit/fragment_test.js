@@ -244,6 +244,14 @@ module('unit - `MF.Fragment`', function (hooks) {
       { first: 'Rob', last: 'Stark', prefixes: [] },
       'new fragment is indicated in the diff object'
     );
+
+    person._internalModel.adapterDidCommit();
+
+    assert.strictEqual(
+      person.changedAttributes().name,
+      undefined,
+      'changedAttributes is reset after commit'
+    );
   });
 
   test('changes to attributes can be rolled back', async function (assert) {
