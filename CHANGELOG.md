@@ -13,6 +13,15 @@
 
 
 
+
+## v6.0.5 (2023-09-30)
+
+#### :bug: Bug Fix
+* [#480](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/480) fix(changedAttributes): initial value of property which are supposed to be null return a value when the record is in flight ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### Committers: 1
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v6.0.4 (2023-09-01)
 
 #### :bug: Bug Fix
