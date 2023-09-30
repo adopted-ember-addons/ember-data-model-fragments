@@ -201,6 +201,59 @@ module('unit - `MF.Fragment`', function (hooks) {
     );
   });
 
+  test("fragment properties that are initially null are indicated in the owner record's `changedAttributes`", async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: null,
+        },
+      },
+    });
+
+    const person = await store.findRecord('person', 1);
+    person.set('name', {
+      first: 'Rob',
+      last: 'Stark',
+    });
+
+    const [oldName, newName] = person.changedAttributes().name;
+    assert.deepEqual(
+      oldName,
+      null,
+      'old fragment is indicated in the diff object'
+    );
+    assert.deepEqual(
+      newName,
+      { first: 'Rob', last: 'Stark', prefixes: [] },
+      'new fragment is indicated in the diff object'
+    );
+
+    person._internalModel.adapterWillCommit();
+
+    const [oldNameAfterWillCommit, newNameAfterWillCommit] =
+      person.changedAttributes().name;
+    assert.deepEqual(
+      oldNameAfterWillCommit,
+      null,
+      'old fragment is indicated in the diff object'
+    );
+    assert.deepEqual(
+      newNameAfterWillCommit,
+      { first: 'Rob', last: 'Stark', prefixes: [] },
+      'new fragment is indicated in the diff object'
+    );
+
+    person._internalModel.adapterDidCommit();
+
+    assert.strictEqual(
+      person.changedAttributes().name,
+      undefined,
+      'changedAttributes is reset after commit'
+    );
+  });
+
   test('changes to attributes can be rolled back', async function (assert) {
     store.push({
       data: {
