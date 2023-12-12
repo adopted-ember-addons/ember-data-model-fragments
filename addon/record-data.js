@@ -967,7 +967,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   notifyStateChange(key) {
-    if (key) {
+    if (key && gte('ember-data', '4.5.0')) {
       this.storeWrapper.notifyPropertyChange(
         this.modelName,
         this.id,
