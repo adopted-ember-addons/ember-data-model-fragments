@@ -967,12 +967,21 @@ export default class FragmentRecordData extends RecordData {
   }
 
   notifyStateChange(key) {
-    this.storeWrapper.notifyStateChange(
-      this.modelName,
-      this.id,
-      this.clientId,
-      key
-    );
+    if (key) {
+      this.storeWrapper.notifyPropertyChange(
+        this.modelName,
+        this.id,
+        this.clientId,
+        key
+      );
+    } else {
+      this.storeWrapper.notifyStateChange(
+        this.modelName,
+        this.id,
+        this.clientId,
+        key
+      );
+    }
   }
 
   /*
