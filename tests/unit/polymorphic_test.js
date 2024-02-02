@@ -107,6 +107,7 @@ module('unit - Polymorphism', function (hooks) {
     assert.equal(newLion.name, 'Alex', "new animal's name is correct");
     assert.ok(newLion instanceof Lion, 'new lion is a lion');
     assert.ok(newLion.hasManes, 'lion has manes');
+    assert.strictEqual(newLion.zoo, record, 'set the fragment owner');
 
     const newElephant = animals.createFragment({
       $type: 'elephant',
@@ -122,6 +123,7 @@ module('unit - Polymorphism', function (hooks) {
       7,
       "elephant's trunk length is correct"
     );
+    assert.strictEqual(newElephant.zoo, record, 'set the fragment owner');
   });
 
   test("fragment array's createFragment supports polymorphism with function typeKey", async function (assert) {
