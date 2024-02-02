@@ -149,8 +149,11 @@ const FragmentArray = StatefulArray.extend({
     @return {MF.Fragment} the newly added fragment
     */
   createFragment(props) {
-    const fragment = this.store.createFragment(this.modelName, props);
-    setFragmentOwner(fragment, this.recordData, this.key);
+    const recordData = this.recordData._newFragmentRecordDataForKey(
+      this.key,
+      props
+    );
+    const fragment = recordData._fragmentGetRecord();
     return this.pushObject(fragment);
   },
 });

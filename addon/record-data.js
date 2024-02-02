@@ -600,6 +600,15 @@ export default class FragmentRecordData extends RecordData {
     this._fragmentOwner = { recordData, key };
   }
 
+  _newFragmentRecordDataForKey(key, attributes) {
+    const behavior = this._fragmentBehavior[key];
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
+    return this._newFragmentRecordData(behavior.definition, attributes);
+  }
+
   _newFragmentRecordData(definition, attributes) {
     const type = getActualFragmentType(
       definition.modelName,
