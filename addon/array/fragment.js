@@ -1,65 +1,13 @@
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
-import { get, setProperties, computed } from '@ember/object';
 import StatefulArray from './stateful';
-import {
-  internalModelFor,
-  setFragmentOwner,
-  setFragmentData,
-  createFragment,
-  isFragment,
-  getActualFragmentType
-} from '../fragment';
+import { isFragment, setFragmentOwner } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
+import { recordDataFor } from '@ember-data/store/-private';
 
 /**
   @module ember-data-model-fragments
 */
-
-// Normalizes an array of object literals or fragments into fragment instances,
-// reusing fragments from a source content array when possible
-function normalizeFragmentArray(array, content, objs, canonical) {
-  let record = get(array, 'owner');
-  let store = get(record, 'store');
-  let declaredModelName = get(array, 'type');
-  let options = get(array, 'options');
-  let key = get(array, 'name');
-  let fragment;
-
-  return objs.map((data, index) => {
-    let type = get(array, 'type');
-    assert(`You can only add '${type}' fragments or object literals to this property`, typeOf(data) === 'object' || isInstanceOfType(store.modelFor(type), data));
-
-    if (isFragment(data)) {
-      fragment = data;
-
-      let owner = internalModelFor(fragment)._recordData.getOwner();
-
-      assert('Fragments can only belong to one owner, try copying instead', !owner || owner === record);
-
-      if (!owner) {
-        setFragmentOwner(fragment, record, key);
-      }
-    } else {
-      fragment = content[index];
-
-      if (fragment) {
-        // The data could come from a property update, which should leave the
-        // fragment in a dirty state, or an adapter operation which should leave
-        // it in a clean state
-        if (canonical) {
-          setFragmentData(fragment, data);
-        } else {
-          setProperties(fragment, data);
-        }
-      } else {
-        fragment = createFragment(store, declaredModelName, record, key, options, data);
-      }
-    }
-
-    return fragment;
-  });
-}
 
 /**
   A state-aware array of fragments that is tied to an attribute of a `DS.Model`
@@ -82,15 +30,34 @@ const FragmentArray = StatefulArray.extend({
 
   options: null,
 
-  /**
-    @method _normalizeData
-    @private
-    @param {Object} data
-  */
-  _normalizeData(data) {
-    let content = this.content;
+  objectAt(index) {
+    const recordData = this._super(index);
+    if (recordData === undefined) {
+      return;
+    }
+    return recordData._fragmentGetRecord();
+  },
 
-    return normalizeFragmentArray(this, content, data, true);
+  _normalizeData(data, index) {
+    assert(
+      `You can only add '${this.modelName}' fragments or object literals to this property`,
+      typeOf(data) === 'object' ||
+        isInstanceOfType(this.store.modelFor(this.modelName), data)
+    );
+
+    if (isFragment(data)) {
+      const recordData = recordDataFor(data);
+      setFragmentOwner(data, this.recordData, this.key);
+      return recordData;
+    }
+    const existing = this.objectAt(index);
+    if (existing) {
+      existing.setProperties(data);
+      return recordDataFor(existing);
+    }
+    const fragment = this.store.createFragment(this.modelName, data);
+    setFragmentOwner(fragment, this.recordData, this.key);
+    return recordDataFor(fragment);
   },
 
   /**
@@ -99,45 +66,8 @@ const FragmentArray = StatefulArray.extend({
   */
   _createSnapshot() {
     // Snapshot each fragment
-    return this.map(fragment => {
+    return this.map((fragment) => {
       return fragment._createSnapshot();
-    });
-  },
-
-  /**
-    @method _flushChangedAttributes
-  */
-  _flushChangedAttributes() {
-    this.map(fragment => {
-      fragment._flushChangedAttributes();
-    });
-  },
-
-  /**
-    @method _didCommit
-    @private
-  */
-  _didCommit(data) {
-    this._super(...arguments);
-
-    // Notify all records of commit; if the adapter update did not contain new
-    // data, just notify each fragment so it can transition to a clean state
-    this.forEach((fragment, index) => {
-      fragment._didCommit(data && data[index]);
-    });
-  },
-
-  /**
-    @method _adapterDidError
-    @private
-  */
-  _adapterDidError(error) {
-    this._super(...arguments);
-
-    // Notify all records of the error; if the adapter update did not contain new
-    // data, just notify each fragment so it can transition to a clean state
-    this.forEach(fragment => {
-      fragment._adapterDidError(error);
     });
   },
 
@@ -158,9 +88,6 @@ const FragmentArray = StatefulArray.extend({
     @type {Boolean}
     @readOnly
   */
-  hasDirtyAttributes: computed('@each.hasDirtyAttributes', '_originalState', function() {
-    return this._super(...arguments) || this.isAny('hasDirtyAttributes');
-  }),
 
   /**
     This method reverts local changes of the array's contents to its original
@@ -178,10 +105,6 @@ const FragmentArray = StatefulArray.extend({
 
     @method rollbackAttributes
   */
-  rollbackAttributes() {
-    this._super(...arguments);
-    this.invoke('rollbackAttributes');
-  },
 
   /**
     Serializing a fragment array returns a new array containing the results of
@@ -192,20 +115,6 @@ const FragmentArray = StatefulArray.extend({
   */
   serialize() {
     return this.invoke('serialize');
-  },
-
-  /**
-    Used to normalize data since all array manipulation methods use this method.
-
-    @method replaceContent
-    @private
-  */
-  replaceContent(index, amount, objs) {
-    let content = this.content;
-    let replacedContent = content.slice(index, index + amount);
-    let fragments = normalizeFragmentArray(this, replacedContent, objs);
-
-    return content.replace(index, amount, fragments);
   },
 
   /**
@@ -240,27 +149,10 @@ const FragmentArray = StatefulArray.extend({
     @return {MF.Fragment} the newly added fragment
     */
   createFragment(props) {
-    const record = this.owner;
-    const type = getActualFragmentType(this.type, this.options, props, record);
-
-    const fragment = record.store.createFragment(type, props);
-
+    const fragment = this.store.createFragment(this.modelName, props);
+    setFragmentOwner(fragment, this.recordData, this.key);
     return this.pushObject(fragment);
   },
-
-  willDestroy() {
-    this._super(...arguments);
-
-    // destroy the current state
-    this.forEach(fragment => {
-      fragment.destroy();
-    });
-
-    // destroy the original state
-    this._originalState.forEach(fragment => {
-      fragment.destroy();
-    });
-  }
 });
 
 export default FragmentArray;

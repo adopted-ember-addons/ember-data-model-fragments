@@ -5,6 +5,135 @@
 
 
 
+
+
+
+
+
+
+
+
+
+## v6.0.6 (2023-12-13)
+
+## v6.0.5 (2023-09-30)
+
+#### :bug: Bug Fix
+* [#480](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/480) fix(changedAttributes): initial value of property which are supposed to be null return a value when the record is in flight ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### Committers: 1
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v6.0.4 (2023-09-01)
+
+#### :bug: Bug Fix
+* [#479](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/479) Add `copy` to type declarations ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 1
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+
+## v6.0.3 (2023-07-20)
+
+#### :bug: Bug Fix
+* [#476](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/476) changedAttributes still return the dirty attributes until the record has been fully committed ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### Committers: 1
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v6.0.2 (2023-07-15)
+
+#### :bug: Bug Fix
+* [#474](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/474) fix(polymorphism): fix regression introduced with ember-data-model-fragments 6.0.0 where owner is not passed to typeKey function ([@VincentMolinie](https://github.com/VincentMolinie))
+* [#472](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/472) Ensure changing arrays are notified. ([@deanmarano](https://github.com/deanmarano))
+* [#469](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/469) Fix issue with reloading array records. ([@deanmarano](https://github.com/deanmarano))
+
+#### :house: Internal
+* [#473](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/473) chore(deps): bump semver from 5.7.1 to 5.7.2 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 2
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v6.0.1 (2023-05-30)
+
+#### :bug: Bug Fix
+* [#466](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/466) Fix glimmer render error when creating fragment arrays ([@dwickern](https://github.com/dwickern))
+
+#### :house: Internal
+* [#465](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/465) chore(deps): bump socket.io-parser from 4.2.2 to 4.2.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 1
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+
+## v6.0.0 (2023-05-26)
+
+#### :boom: Breaking Change
+* [#462](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/462) chore: drop node 12 ([@knownasilya](https://github.com/knownasilya))
+* [#417](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/417) record-data implementation for ember-data 3.28+ ([@dwickern](https://github.com/dwickern))
+
+#### :rocket: Enhancement
+* [#464](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/464) Add support for ember-data 4.0 - 4.6 ([@dwickern](https://github.com/dwickern))
+
+#### :bug: Bug Fix
+* [#458](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/458) Fix: trigger error on Ember >= 4.x ([@wozny1989](https://github.com/wozny1989))
+
+#### :memo: Documentation
+* [#460](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/460) Remove dead link from README.md ([@deanmarano](https://github.com/deanmarano))
+* [#456](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/456) Convert README.md examples to native classes ([@charlesfries](https://github.com/charlesfries))
+
+#### :house: Internal
+* [#463](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/463) Upgrade Ember-CLI ([@dwickern](https://github.com/dwickern))
+* [#461](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/461) chore(deps): bump minimatch from 3.0.4 to 3.1.2 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#459](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/459) chore(deps): bump minimist from 0.2.1 to 0.2.4 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 5
+- Adam Woźny ([@wozny1989](https://github.com/wozny1989))
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+- Ilya Radchenko ([@knownasilya](https://github.com/knownasilya))
+
+## v5.0.0 (2023-02-02)
+
+#### :bug: Bug Fix
+* [#455](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/455) Remove string index from fragment registry ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 1
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+
+## v5.0.0-beta.9 (2023-01-16)
+
+#### :rocket: Enhancement
+* [#445](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/445) chore: fix typescript declarations ([@charlesfries](https://github.com/charlesfries))
+* [#443](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/443) chore: add typescript definitions files ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :bug: Bug Fix
+* [#447](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/447) Handle null record in isStateInitializing ([@richgt](https://github.com/richgt))
+
+#### :house: Internal
+* [#442](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/442) Bump terser from 4.8.0 to 4.8.1 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#440](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/440) Bump shell-quote from 1.7.2 to 1.7.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#410](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/410) Bump y18n from 4.0.0 to 4.0.3 ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#426](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/426) Bump follow-redirects from 1.14.7 to 1.14.8 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 3
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Rich Glazerman ([@richgt](https://github.com/richgt))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
+## v5.0.0-beta.8 (2022-06-07)
+
+#### :bug: Bug Fix
+* [#439](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/439) fix(array): allow resetting an array to null ([@VincentMolinie](https://github.com/VincentMolinie))
+* [#438](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/438) fix(polymorphic): update of type of a polymorphic key works ([@VincentMolinie](https://github.com/VincentMolinie))
+
+#### :house: Internal
+* [#423](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/423) Remove assign usage ([@charlesfries](https://github.com/charlesfries))
+
+#### Committers: 2
+- Charles Fries ([@charlesfries](https://github.com/charlesfries))
+- Vincent Molinié ([@VincentMolinie](https://github.com/VincentMolinie))
+
 ## v5.0.0-beta.7 (2022-04-21)
 
 ## v5.0.0-beta.6 (2022-04-14)

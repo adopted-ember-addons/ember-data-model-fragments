@@ -1,15 +1,17 @@
+import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import {
+  fragmentArray,
+  fragmentOwner,
+} from 'ember-data-model-fragments/attributes';
 
-export default MF.Fragment.extend({
-  first: attr('string'),
-  last: attr('string'),
-  prefixes: MF.fragmentArray('prefix'),
-  person: MF.fragmentOwner(),
+export default class Name extends Fragment {
+  @attr('string') first;
+  @attr('string') last;
+  @fragmentArray('prefix') prefixes;
+  @fragmentOwner() person;
 
   ready() {
-    this.set('readyWasCalled', true);
+    this.readyWasCalled = true;
   }
-
-});
-
+}

@@ -17,6 +17,7 @@ import { inject as service } from '@ember/service';
   @namespace MF
   @extends DS.Transform
 */
+// eslint-disable-next-line ember/no-classic-classes
 const ArrayTransform = Transform.extend({
   store: service(),
   type: null,
@@ -26,7 +27,7 @@ const ArrayTransform = Transform.extend({
       return null;
     }
 
-    let transform = this.transform;
+    const transform = this.transform;
 
     data = makeArray(data);
 
@@ -42,7 +43,7 @@ const ArrayTransform = Transform.extend({
       return null;
     }
 
-    let transform = this.transform;
+    const transform = this.transform;
 
     array = array.toArray ? array.toArray() : array;
 
@@ -53,18 +54,18 @@ const ArrayTransform = Transform.extend({
     return array.map(transform.serialize, transform);
   },
 
-  transform: computed('type', function() {
-    let attributeType = this.type;
+  transform: computed('type', function () {
+    const attributeType = this.type;
 
     if (!attributeType) {
       return null;
     }
 
-    let transform = getOwner(this).lookup(`transform:${attributeType}`);
+    const transform = getOwner(this).lookup(`transform:${attributeType}`);
     assert(`Unable to find transform for '${attributeType}'`, !!transform);
 
     return transform;
-  })
+  }),
 });
 
 export default ArrayTransform;

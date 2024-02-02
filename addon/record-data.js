@@ -1,368 +1,653 @@
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import { RecordData } from 'ember-data/-private';
+import { diffArray } from '@ember-data/model/-private';
+import { recordDataFor } from '@ember-data/store/-private';
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
-import { setProperties, get } from '@ember/object';
-import { copy } from 'ember-copy';
-import isInstanceOfType from './util/instance-of-type';
 import { isArray } from '@ember/array';
-import { fragmentDidDirty, fragmentDidReset } from './states';
-import StatefulArray from './array/stateful';
-import FragmentArray from './array/fragment';
-import {
-  setFragmentOwner,
-  createFragment,
-  isFragment
-} from './fragment';
-import { assign } from '@ember/polyfills';
+import { getActualFragmentType, isFragment } from './fragment';
+import isInstanceOfType from './util/instance-of-type';
 import { gte } from 'ember-compatibility-helpers';
 
-let fragmentRecordDatas = new WeakMap();
+class FragmentBehavior {
+  constructor(recordData, definition) {
+    this.recordData = recordData;
+    this.definition = definition;
+  }
 
-export default class FragmentRecordData extends RecordData {
-  constructor(identifier, store) {
-    if (gte('ember-data', '3.15.0')) {
-      super(identifier, store);
+  getDefaultValue(key) {
+    const { options } = this.definition;
+    if (options.defaultValue === undefined) {
+      return null;
+    }
+    let defaultValue;
+    if (typeof options.defaultValue === 'function') {
+      const record = this.recordData._fragmentGetRecord();
+      defaultValue = options.defaultValue.call(null, record, options, key);
     } else {
-      super(identifier.type, identifier.id, identifier.clientId, store);
+      defaultValue = options.defaultValue;
     }
-
-    // @patocallaghan - We need to keep a copy of the record so we can recreate the fragment/fragmentArray.
-    this._record = null;
-    this.fragmentData = Object.create(null);
-    this.serverFragments = Object.create(null);
-    this.inFlightFragments = Object.create(null);
-
-    this.fragments = Object.create(null);
-    // @patocallaghan - We need to keep the fragment definitions for later on in case we need recreate the fragment or fragmentArray
-    this.fragmentDefs = Object.create(null);
-    let defs = store.attributesDefinitionFor(identifier.type, identifier.id, identifier.lid);
-
-    Object.keys(defs).forEach(key => {
-      let options = defs[key];
-      if (options.isFragment) {
-        this.fragmentDefs[key] = defs[key];
-      }
-    });
-    fragmentRecordDatas.set(identifier, this);
-  }
-
-  // Returns the value of the property or the default propery
-  getFragmentDataWithDefault(key, options, type) {
-    let data = this.fragmentData[key];
-    if (data !== undefined) {
-      return data;
-    }
-    return getFragmentDefaultValue(options, type);
-  }
-
-  setupFragment(key, options, declaredModelName, record) {
-    // @patocallaghan -  This is extremely janky way of making sure we always have a copy of the record saved. There must be a better way of doing this?
-    this._record = record;
-    let data = this.getFragmentDataWithDefault(key, options, 'object');
-    let fragment = this.fragments[key];
-
-    if (!data) {
-      this.serverFragments[key] = data;
-      return data;
-    }
-
-    if (!fragment) {
-      fragment = createFragment(
-        record.store,
-        declaredModelName,
-        record,
-        key,
-        options,
-        data
-      );
-
-      this.serverFragments[key] = fragment;
-    }
-
-    return fragment;
-  }
-
-  getFragment(key, options, declaredModelName, record) {
-    this._record = record;
-    let fragment = this.getFragmentWithoutCreating(key);
-    if (fragment === undefined) {
-      return this.setupFragment(key, options, declaredModelName, record);
-    } else {
-      return fragment;
-    }
-  }
-
-  setFragmentArrayValue(key, fragments, value, record, declaredModelName, options, isFragmentArray) {
-    this._record = record;
-    if (isArray(value)) {
-      if (!fragments) {
-        if (isFragmentArray) {
-          fragments = FragmentArray.create({
-            type: declaredModelName,
-            options: options,
-            name: key,
-            owner: record
-          });
-        } else {
-          fragments = StatefulArray.create({
-            options: options,
-            name: key,
-            owner: record
-          });
-        }
-      }
-      fragments.setObjects(value);
-    } else if (value === null) {
-      fragments = null;
-      this.fragments[key] = null;
-    } else {
-      assert('A fragment array property can only be assigned an array or null');
-    }
-
-    if (!record._internalModel._recordData.isStateInitializing()) {
-      if (this.serverFragments[key] !== fragments || get(fragments, 'hasDirtyAttributes')) {
-        fragmentDidDirty(record, key, fragments);
-      } else {
-        fragmentDidReset(record, key);
-      }
-    }
-
-    return fragments;
-  }
-
-  setFragmentValue(key, fragment, value, record, declaredModelName, options) {
-
-    // Model Fragments are hard tied to DS.Model, and all DS.Models have the store on them.
-    // We need access to the store because EDMF uses the store for `createRecord`
-    this._record = record;
-    let store = record.store;
     assert(
-      `You can only assign \`null\`, an object literal or a '${declaredModelName}' fragment instance to this property`,
-      value === null ||
-        typeOf(value) === 'object' ||
-        isInstanceOfType(store.modelFor(declaredModelName), value)
+      "The fragment's default value must be an object or null",
+      defaultValue === null ||
+        typeOf(defaultValue) === 'object' ||
+        isFragment(defaultValue)
+    );
+    if (defaultValue === null) {
+      return null;
+    }
+    if (isFragment(defaultValue)) {
+      assert(
+        `The fragment's default value must be a '${this.definition.modelName}' fragment`,
+        isInstanceOfType(
+          defaultValue.store.modelFor(this.definition.modelName),
+          defaultValue
+        )
+      );
+      const recordData = recordDataFor(defaultValue);
+      recordData.setFragmentOwner(this.recordData, key);
+      return recordData;
+    }
+    return this.recordData._newFragmentRecordData(
+      this.definition,
+      defaultValue
+    );
+  }
+
+  pushData(fragment, canonical) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment === null || fragment instanceof RecordData
+    );
+    assert(
+      'Fragment canonical value must be an object or null',
+      canonical === null || typeOf(canonical) === 'object'
     );
 
-    if (!value) {
-      fragment = null;
-    } else if (isFragment(value)) {
-      // A fragment instance was given, so just replace the existing value
-      fragment = setFragmentOwner(value, record, key);
-    } else if (!fragment) {
-      // A property hash was given but the property was null, so create a new
-      // fragment with the data
-      fragment = createFragment(
-        store,
-        declaredModelName,
-        record,
-        key,
-        options,
-        value
-      );
-    } else {
-      // The fragment already exists and a property hash is given, so just set
-      // its values and let the state machine take care of the dirtiness
-      setProperties(fragment, value);
+    if (canonical === null) {
+      // server replaced fragment with null
+      return null;
+    }
 
+    if (fragment) {
+      // merge the fragment with the new data from the server
+      fragment._fragmentPushData({ attributes: canonical });
+      return fragment;
+    }
+    return this.recordData._newFragmentRecordData(this.definition, canonical);
+  }
+
+  willCommit(fragment) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment instanceof RecordData
+    );
+    fragment._fragmentWillCommit();
+  }
+
+  didCommit(fragment, canonical) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment === null || fragment instanceof RecordData
+    );
+    assert(
+      'Fragment canonical value must be an object',
+      canonical == null || typeOf(canonical) === 'object'
+    );
+
+    if (canonical == null) {
+      fragment?._fragmentDidCommit(null);
+
+      if (canonical === null) {
+        // server replaced fragment with null
+        return null;
+      }
+
+      // server confirmed in-flight fragment
       return fragment;
     }
 
-    if (!record._internalModel._recordData.isStateInitializing()) {
-      if (this.serverFragments[key] !== fragment) {
-        this.fragments[key] = fragment;
-        fragmentDidDirty(record, key, fragment);
-      } else {
-        fragmentDidReset(record, key);
-      }
+    if (fragment) {
+      // merge the fragment with the new data from the server
+      fragment._fragmentDidCommit({ attributes: canonical });
+      return fragment;
     }
-    return fragment;
+
+    return this.recordData._newFragmentRecordData(this.definition, canonical);
   }
 
-  getFragmentArray(key, options, declaredModelName, record, isFragmentArray) {
-    this._record = record;
-    let data = this.getFragmentDataWithDefault(key, options, 'array');
-    let fragmentArray = this.getFragmentWithoutCreating(key);
+  commitWasRejected(fragment) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment instanceof RecordData
+    );
+    fragment._fragmentCommitWasRejected();
+  }
 
-    // If we already have a processed fragment in _data and our current fragment is
-    // null simply reuse the one from data. We can be in this state after a rollback
-    // for example
-    if (fragmentArray === undefined) {
-      fragmentArray = this.setupFragmentArray(key, record, data, declaredModelName, options, isFragmentArray);
-      return fragmentArray;
+  rollback(fragment) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment instanceof RecordData
+    );
+    fragment._fragmentRollbackAttributes();
+  }
+
+  unload(fragment) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment instanceof RecordData
+    );
+    fragment._fragmentUnloadRecord();
+  }
+
+  isDirty(value, originalValue) {
+    assert(
+      'Fragment value must be a RecordData',
+      value === null || value instanceof RecordData
+    );
+    assert(
+      'Fragment original value must be a RecordData',
+      originalValue === null || originalValue instanceof RecordData
+    );
+    return (
+      value !== originalValue ||
+      (value !== null && value.hasChangedAttributes())
+    );
+  }
+
+  currentState(fragment) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment === null || fragment instanceof RecordData
+    );
+    return fragment === null ? null : fragment.getCurrentState();
+  }
+
+  canonicalState(fragment) {
+    assert(
+      'Fragment value must be a RecordData',
+      fragment === null || fragment instanceof RecordData
+    );
+    return fragment === null ? null : fragment.getCanonicalState();
+  }
+}
+
+class FragmentArrayBehavior {
+  constructor(recordData, definition) {
+    this.recordData = recordData;
+    this.definition = definition;
+  }
+
+  getDefaultValue(key) {
+    const { options } = this.definition;
+    if (options.defaultValue === undefined) {
+      return [];
+    }
+    let defaultValue;
+    if (typeof options.defaultValue === 'function') {
+      const record = this.recordData._fragmentGetRecord();
+      defaultValue = options.defaultValue.call(null, record, options, key);
     } else {
-      return fragmentArray;
+      defaultValue = options.defaultValue;
     }
-  }
-
-  setupFragmentArray(key, record, data, declaredModelName, options, isFragmentArray) {
-    this._record = record;
-    let fragmentArray;
-    if  (data !== null) {
-      if (isFragmentArray) {
-        fragmentArray = FragmentArray.create({
-          type: declaredModelName,
-          options: options,
-          name: key,
-          owner: record
-        });
-      } else {
-        fragmentArray = StatefulArray.create({
-          options: options,
-          name: key,
-          owner: record
-        });
+    assert(
+      "The fragment array's default value must be an array of fragments or null",
+      defaultValue === null ||
+        (isArray(defaultValue) &&
+          defaultValue.every((v) => typeOf(v) === 'object' || isFragment(v)))
+    );
+    if (defaultValue === null) {
+      return null;
+    }
+    return defaultValue.map((item) => {
+      if (isFragment(item)) {
+        assert(
+          `The fragment array's default value can only include '${this.definition.modelName}' fragments`,
+          isInstanceOfType(item.store.modelFor(this.definition.modelName), item)
+        );
+        const recordData = recordDataFor(defaultValue);
+        recordData.setFragmentOwner(this.recordData, key);
+        return recordData;
       }
-      fragmentArray.setupData(data);
-    } else {
-      fragmentArray = null;
-    }
-    this.serverFragments[key] = fragmentArray;
-    return fragmentArray;
+      return this.recordData._newFragmentRecordData(this.definition, item);
+    });
   }
 
-  getFragmentWithoutCreating(key) {
-    if (this.fragments[key] !== undefined) {
-      return this.fragments[key];
-    } else if (this.inFlightFragments[key] !== undefined) {
-      return this.inFlightFragments[key];
-    } else if (this.serverFragments[key] !== undefined) {
-      return this.serverFragments[key];
-    }
-  }
+  pushData(fragmentArray, canonical) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
+    );
+    assert(
+      'Fragment array canonical value must be an array of objects',
+      canonical === null ||
+        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object'))
+    );
 
-  isStillInitializing(key) {
-    return !this.getFragmentWithoutCreating(key) || this.isStateInitializing();
-  }
-
-  isStateInitializing() {
-    return gte('ember-data', '3.28.0') && !this._record.___recordState;
-  }
-
-  // PUBLIC API
-
-  setupFragmentData(data, calculateChange) {
-    let keys = [];
-    if (data.attributes) {
-      Object.keys(this.fragmentDefs).forEach(name => {
-        if (calculateChange && this.getFragmentWithoutCreating(name) !== undefined) {
-          keys.push(name);
-        }
-        if (name in data.attributes) {
-          this.fragmentData[name] = data.attributes[name];
-          let serverFragment = this.serverFragments[name];
-          if (serverFragment) {
-            let fragmentKeys = [];
-            if (data.attributes[name] === null) {
-              // if we have data with a Fragment set up, but now we've received null,
-              // delete the null fragment from serverFragments.
-              delete this.serverFragments[name];
-            } else if (serverFragment instanceof StatefulArray) {
-              serverFragment.setupData(data.attributes[name]);
-            } else {
-              fragmentKeys = serverFragment._internalModel._recordData.pushData({ attributes: data.attributes[name] }, calculateChange);
-            }
-            if (calculateChange) {
-              // TODO (Custom Model Classes) cleanup this api usage
-              fragmentKeys.forEach((fragmentKey) => serverFragment.notifyPropertyChange(fragmentKey));
-            }
-          } else if (serverFragment === null) {
-            // if we received data that set the fragment to null, but now we've received different data,
-            // delete the null fragment from serverFragments.
-            delete this.serverFragments[name];
-          }
-        }
-      });
-    }
-    return keys;
-  }
-
-  pushData(tempData, calculateChange) {
-    let data = tempData;
-
-    let ourAttributes = {};
-    if (data.attributes) {
-      Object.keys(this.fragmentDefs).forEach(name => {
-        if (name in data.attributes) {
-          ourAttributes[name] = data.attributes[name];
-          delete data.attributes[name];
-        }
-      });
-    }
-    let keys = this.setupFragmentData({ attributes: ourAttributes }, calculateChange);
-    let edKeys = super.pushData(data, calculateChange);
-    // TODO: for some reason, tempData is actually being modified. We need to merge
-    // the fragment data back in here so that it's not lost when we go back to the
-    // function calling pushData.
-    if (data.attributes) {
-      assign(data.attributes, ourAttributes);
+    if (canonical === null) {
+      // push replaced fragment array with null
+      return null;
     }
 
-    return keys.concat(edKeys);
-  }
-
-  willCommit() {
-    let key, fragment;
-    for (key in this.fragments) {
-      fragment = this.fragments[key];
+    // merge the fragment array with the pushed data
+    return canonical.map((attributes, i) => {
+      const fragment = fragmentArray?.[i];
       if (fragment) {
-        // TODO (Custom Model Classes) this bad, we should keep track of fragment record datas ourself
-        if (fragment.content) {
-          fragment.content.forEach(frag => {
-            // check to see if the array is a non-fragment array, if so, don't call
-            // method on _internalModel.recordData
-            // TODO: We need to add inFlight details to statefulArray, then change this.
-            if (frag._internalModel) {
-              frag._internalModel._recordData.willCommit();
-            }
-          });
-        } else {
-          fragment._internalModel._recordData.willCommit();
-        }
+        fragment._fragmentPushData({ attributes });
+        return fragment;
+      } else {
+        return this.recordData._newFragmentRecordData(
+          this.definition,
+          attributes
+        );
       }
-      delete this.fragments[key];
-      this.inFlightFragments[key] = fragment;
+    });
+  }
+
+  willCommit(fragmentArray) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
+    );
+    fragmentArray.forEach((fragment) => fragment._fragmentWillCommit());
+  }
+
+  didCommit(fragmentArray, canonical) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
+    );
+    assert(
+      'Fragment array canonical value must be an array of objects',
+      canonical == null ||
+        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object'))
+    );
+
+    if (canonical == null) {
+      fragmentArray?.forEach((fragment) => fragment._fragmentDidCommit(null));
+      if (canonical === null) {
+        // server replaced fragment array with null
+        return null;
+      }
+      // server confirmed in-flight fragments
+      return fragmentArray;
     }
-    super.willCommit();
+
+    // merge the fragment array with the new data from the server
+    const result = canonical.map((attributes, i) => {
+      const fragment = fragmentArray?.[i];
+      if (fragment) {
+        fragment._fragmentDidCommit({ attributes });
+        return fragment;
+      } else {
+        return this.recordData._newFragmentRecordData(
+          this.definition,
+          attributes
+        );
+      }
+    });
+
+    // cleanup the remaining fragments
+    for (let i = canonical.length; i < fragmentArray?.length; ++i) {
+      fragmentArray[i]._fragmentDidCommit(null);
+    }
+    return result;
+  }
+
+  commitWasRejected(fragmentArray) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
+    );
+    fragmentArray.forEach((fragment) => fragment._fragmentCommitWasRejected());
+  }
+
+  rollback(fragmentArray) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
+    );
+    fragmentArray.forEach((fragment) => fragment._fragmentRollbackAttributes());
+  }
+
+  unload(fragmentArray) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      isArray(fragmentArray) &&
+        fragmentArray.every((rd) => rd instanceof RecordData)
+    );
+    fragmentArray.forEach((fragment) => fragment._fragmentUnloadRecord());
+  }
+
+  isDirty(value, originalValue) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      value === null ||
+        (isArray(value) && value.every((rd) => rd instanceof RecordData))
+    );
+    assert(
+      'Fragment array original value must be an array of RecordData',
+      originalValue === null ||
+        (isArray(originalValue) &&
+          originalValue.every((rd) => rd instanceof RecordData))
+    );
+    return (
+      !isArrayEqual(value, originalValue) ||
+      (value !== null && value.some((rd) => rd.hasChangedAttributes()))
+    );
+  }
+
+  currentState(fragmentArray) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
+    );
+    return fragmentArray === null
+      ? null
+      : fragmentArray.map((fragment) => fragment.getCurrentState());
+  }
+
+  canonicalState(fragmentArray) {
+    assert(
+      'Fragment array value must be an array of RecordData',
+      fragmentArray === null ||
+        (isArray(fragmentArray) &&
+          fragmentArray.every((rd) => rd instanceof RecordData))
+    );
+    return fragmentArray === null
+      ? null
+      : fragmentArray.map((fragment) => fragment.getCanonicalState());
+  }
+}
+
+class ArrayBehavior {
+  constructor(recordData, definition) {
+    this.recordData = recordData;
+    this.definition = definition;
+  }
+
+  getDefaultValue(key) {
+    const { options } = this.definition;
+    if (options.defaultValue === undefined) {
+      return [];
+    }
+    let defaultValue;
+    if (typeof options.defaultValue === 'function') {
+      const record = this.recordData._fragmentGetRecord();
+      defaultValue = options.defaultValue.call(null, record, options, key);
+    } else {
+      defaultValue = options.defaultValue;
+    }
+    assert(
+      "The array's default value must be an array or null",
+      defaultValue === null || isArray(defaultValue)
+    );
+    if (defaultValue === null) {
+      return null;
+    }
+    return defaultValue.slice();
+  }
+
+  pushData(array, canonical) {
+    assert('Array value must be an array', array === null || isArray(array));
+    assert(
+      'Array canonical value must be an array',
+      canonical === null || isArray(canonical)
+    );
+    if (canonical === null) {
+      return null;
+    }
+    return canonical.slice();
+  }
+
+  willCommit(array) {
+    assert('Array value must be an array', isArray(array));
+    // nothing to do
+  }
+
+  didCommit(array, canonical) {
+    assert('Array value must be an array', array === null || isArray(array));
+    assert(
+      'Array canonical value must be an array',
+      canonical === null || canonical === undefined || isArray(canonical)
+    );
+    if (canonical === null) {
+      // server replaced array with null
+      return null;
+    }
+    if (canonical === undefined) {
+      // server confirmed in-flight array
+      return array;
+    }
+    // server returned new canonical data
+    return canonical.slice();
+  }
+
+  commitWasRejected(array) {
+    assert('Array value must be an array', isArray(array));
+    // nothing to do
+  }
+
+  rollback(array) {
+    assert('Array value must be an array', isArray(array));
+    // nothing to do
+  }
+
+  unload(array) {
+    assert('Array value must be an array', isArray(array));
+    // nothing to do
+  }
+
+  isDirty(value, originalValue) {
+    assert('Array value must be an array', value === null || isArray(value));
+    assert(
+      'Array original value must be an array',
+      originalValue === null || isArray(originalValue)
+    );
+    return !isArrayEqual(value, originalValue);
+  }
+
+  currentState(array) {
+    assert('Array value must be an array', array === null || isArray(array));
+    return array === null ? null : array.slice();
+  }
+
+  canonicalState(array) {
+    assert('Array value must be an array', array === null || isArray(array));
+    return array === null ? null : array.slice();
+  }
+}
+
+export default class FragmentRecordData extends RecordData {
+  constructor(identifier, storeWrapper) {
+    super(identifier, storeWrapper);
+
+    const behavior = Object.create(null);
+    const definitions = this.storeWrapper.attributesDefinitionFor(
+      this.modelName
+    );
+    for (const [key, definition] of Object.entries(definitions)) {
+      if (!definition.isFragment) {
+        continue;
+      }
+      switch (definition.kind) {
+        case 'fragment-array':
+          behavior[key] = new FragmentArrayBehavior(this, definition);
+          break;
+        case 'fragment':
+          behavior[key] = new FragmentBehavior(this, definition);
+          break;
+        case 'array':
+          behavior[key] = new ArrayBehavior(this, definition);
+          break;
+        default:
+          assert(`Unsupported fragment type: ${definition.kind}`);
+          break;
+      }
+    }
+    this._fragmentBehavior = behavior;
+  }
+
+  _getFragmentDefault(key) {
+    const behavior = this._fragmentBehavior[key];
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
+    assert(
+      'Fragment default value was already initialized',
+      !this.hasFragment(key)
+    );
+    const defaultValue = behavior.getDefaultValue(key);
+    this._fragmentData[key] = defaultValue;
+    return defaultValue;
+  }
+
+  getFragment(key) {
+    if (key in this._fragments) {
+      return this._fragments[key];
+    } else if (key in this._inFlightFragments) {
+      return this._inFlightFragments[key];
+    } else if (key in this._fragmentData) {
+      return this._fragmentData[key];
+    } else {
+      return this._getFragmentDefault(key);
+    }
+  }
+
+  hasFragment(key) {
+    return (
+      key in this._fragments ||
+      key in this._inFlightFragments ||
+      key in this._fragmentData
+    );
+  }
+
+  setDirtyFragment(key, value) {
+    const behavior = this._fragmentBehavior[key];
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
+    let originalValue;
+    if (key in this._inFlightFragments) {
+      originalValue = this._inFlightFragments[key];
+    } else if (key in this._fragmentData) {
+      originalValue = this._fragmentData[key];
+    } else {
+      originalValue = this._getFragmentDefault(key);
+    }
+    const isDirty = behavior.isDirty(value, originalValue);
+    const oldDirty = this.isFragmentDirty(key);
+    if (isDirty !== oldDirty) {
+      this.notifyStateChange(key);
+    }
+    if (isDirty) {
+      this._fragments[key] = value;
+      this.fragmentDidDirty();
+    } else {
+      delete this._fragments[key];
+      this.fragmentDidReset();
+    }
+    // this._fragmentArrayCache[key]?.notify();
+  }
+
+  setDirtyAttribute(key, value) {
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must not be a fragment`,
+      this._fragmentBehavior[key] == null
+    );
+    const oldDirty = this.isAttrDirty(key);
+    super.setDirtyAttribute(key, value);
+
+    const isDirty = this.isAttrDirty(key);
+    if (isDirty !== oldDirty) {
+      this.notifyStateChange(key);
+    }
+    if (isDirty) {
+      this.fragmentDidDirty();
+    } else {
+      this.fragmentDidReset();
+    }
+  }
+
+  getFragmentOwner() {
+    return this._fragmentOwner?.recordData;
+  }
+
+  setFragmentOwner(recordData, key) {
+    assert(
+      'Fragment owner must be a RecordData',
+      recordData instanceof RecordData
+    );
+    assert(
+      'Fragment owner key must be a fragment',
+      recordData._fragmentBehavior[key] != null
+    );
+    assert(
+      'Fragments can only belong to one owner, try copying instead',
+      !this._fragmentOwner || this._fragmentOwner.recordData === recordData
+    );
+    this._fragmentOwner = { recordData, key };
+  }
+
+  _newFragmentRecordData(definition, attributes) {
+    const type = getActualFragmentType(
+      definition.modelName,
+      definition.options,
+      attributes,
+      this._fragmentGetRecord()
+    );
+    const recordData = this.storeWrapper.recordDataFor(type);
+    recordData.setFragmentOwner(this, definition.name);
+    recordData._fragmentPushData({ attributes });
+    return recordData;
   }
 
   hasChangedAttributes() {
-    return super.hasChangedAttributes() ||
-      Object.keys(this.fragmentDefs).some(fragmentName => {
-        const fragment = this.getFragmentWithoutCreating(fragmentName);
-        return fragment && fragment.hasDirtyAttributes;
-      });
+    return super.hasChangedAttributes() || this.hasChangedFragments();
   }
 
-  resetRecord() {
-    super.resetRecord();
-    this.resetFragments();
+  hasChangedFragments() {
+    return Object.keys(this._fragmentsOrInFlight).length > 0;
   }
-  resetFragments() {
-    let key, fragment;
-    for (key in this.fragments) {
-      fragment = this.fragments[key];
-      if (fragment) {
-        fragment.destroy();
-        delete this.fragments[key];
-      }
-    }
 
-    for (key in this.inFlightFragments) {
-      fragment = this.inFlightFragments[key];
-      if (fragment) {
-        fragment.destroy();
-        delete this.inFlightFragments[key];
-      }
-    }
+  isFragmentDirty(key) {
+    return this.__fragments?.[key] !== undefined;
+  }
 
-    for (key in this.serverFragments) {
-      fragment = this.serverFragments[key];
-      if (fragment) {
-        fragment.destroy();
-        delete this.serverFragments[key];
-      }
+  getCanonicalState() {
+    const result = Object.assign({}, this._data);
+    for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      const value =
+        key in this._fragmentData
+          ? this._fragmentData[key]
+          : this._getFragmentDefault(key);
+      result[key] = behavior.canonicalState(value);
     }
+    return result;
+  }
+
+  getCurrentState() {
+    const result = Object.assign(
+      {},
+      this._data,
+      this._inFlightAttributes,
+      this._attributes
+    );
+    for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      result[key] = behavior.currentState(this.getFragment(key));
+    }
+    return result;
   }
 
   /*
@@ -373,170 +658,462 @@ export default class FragmentRecordData extends RecordData {
       @private
     */
   changedAttributes() {
-    // NOTE: This is currently implemented in a very odd way in the case where the property on a fragment changes
-    // In that case, the expected return of changedAttributes is [ currentFragment, currentFragment ]
-    // This seems very broken, but might be a breaking change to fix.
-    // See the test named `changes to fragments are indicated in the owner record\'s `changedAttributes`
-    // for more details
-
-    let ourChanges = super.changedAttributes();
-    for (let key of Object.keys(this.fragmentDefs)) {
-      // either the whole fragment was replaced, or a property on the fragment was replaced
-      // this is the case where we replaced the whole framgent
-      let newFragment;
-      // We give priority to client set fragments in this.fragments but fall back to inFlight ones
-      // in case the record is already on the way
-      if (this.inFlightFragments[key] !== undefined) {
-        // TODD this code path isn't tested right now
-        newFragment = this.inFlightFragments[key];
-      }
-      if (this.fragments[key] !== undefined) {
-        newFragment = this.fragments[key];
-      }
-
-      if (newFragment !== undefined) {
-        // if we have a local fragment defined that means that we set that locally, so we need to diff against whatever was on the server
-        ourChanges[key] = [this.serverFragments[key], this.fragments[key]];
-      } else {
-        // this is the case where the fragment did not change but the props on it might have
-        // TODO diff against server
-        // otherwise we check to see if there are changes on the serverFragment and in that case the whole change is just the
-        // local change of that fragment
-        let fragment = this.serverFragments[key];
-
-        let hasChanged;
-        if (fragment && fragment instanceof StatefulArray) {
-          hasChanged = get(fragment, 'hasDirtyAttributes');
-        } else if (fragment) {
-          hasChanged = fragment._internalModel._recordData.hasChangedAttributes();
-        }
-
-        if (hasChanged) {
-          // NOTE: As explained above, this is very odd, and we should probably change it.
-          ourChanges[key] = [fragment, fragment];
-        }
-      }
+    const result = super.changedAttributes();
+    if (this.hasChangedFragments()) {
+      Object.assign(result, this.changedFragments());
     }
-    return ourChanges;
+    return result;
   }
 
-  rollbackAttributes() {
-    let keys = [];
-    for (let key in this.fragments) {
-      keys.push(key);
-      delete this.fragments[key];
+  changedFragments() {
+    const diffData = Object.create(null);
+    for (const [key, newFragment] of Object.entries(
+      this._fragmentsOrInFlight
+    )) {
+      const behavior = this._fragmentBehavior[key];
+      const oldFragment = this._fragmentData[key];
+      diffData[key] = [
+        behavior.canonicalState(oldFragment),
+        behavior.currentState(newFragment),
+      ];
     }
-    Object.keys(this.fragmentDefs).forEach((key) => {
-      let fragment = this.getFragmentWithoutCreating(key);
-      if (fragment) {
-        fragment.rollbackAttributes();
-        keys.push(key);
+    return diffData;
+  }
+
+  _changedFragmentKeys(updates) {
+    const changedKeys = [];
+    const original = Object.assign(
+      {},
+      this._fragmentData,
+      this._inFlightFragments
+    );
+    for (const key of Object.keys(updates)) {
+      if (this._fragments[key]) {
+        continue;
       }
-    });
-    return keys.concat(super.rollbackAttributes());
+      const eitherIsNull = original[key] === null || updates[key] === null;
+      if (
+        eitherIsNull ||
+        diffArray(original[key], updates[key]).firstChangeIndex !== null
+      ) {
+        changedKeys.push(key);
+      }
+    }
+    return changedKeys;
+  }
+
+  pushData(data, calculateChange) {
+    let changedFragmentKeys;
+
+    const subFragmentsToProcess = [];
+    if (data.attributes) {
+      // copy so that we don't mutate the caller's data
+      const attributes = Object.assign({}, data.attributes);
+      data = Object.assign({}, data, { attributes });
+
+      for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+        const canonical = data.attributes[key];
+        if (canonical === undefined) {
+          continue;
+        }
+        // strip fragments from the attributes so the super call does not process them
+        delete data.attributes[key];
+
+        subFragmentsToProcess.push({ key, behavior, canonical, attributes });
+      }
+    }
+
+    // Wee need first the attributes to be setup before the fragment, to be able to access them (for polymorphic fragments for example)
+    const changedAttributeKeys = super.pushData(data, calculateChange);
+
+    if (data.attributes) {
+      const newCanonicalFragments = {};
+
+      subFragmentsToProcess.forEach(({ key, behavior, canonical }) => {
+        const current =
+          key in this._fragmentData
+            ? this._fragmentData[key]
+            : this._getFragmentDefault(key);
+        newCanonicalFragments[key] = behavior.pushData(current, canonical);
+      });
+
+      if (calculateChange) {
+        changedFragmentKeys = this._changedFragmentKeys(newCanonicalFragments);
+      }
+
+      Object.assign(this._fragmentData, newCanonicalFragments);
+      // update fragment arrays
+      changedFragmentKeys?.forEach((key) =>
+        this._fragmentArrayCache[key]?.notify()
+      );
+    }
+
+    const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+      internalModelFor(this).notifyAttributes(changedKeys);
+    }
+    // on ember-data 2.8 - 4.4, InternalModel.setupData will notify
+    return changedKeys || [];
+  }
+
+  willCommit() {
+    for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      const data = this.getFragment(key);
+      if (data) {
+        behavior.willCommit(data);
+      }
+    }
+    this._inFlightFragments = this._fragments;
+    this._fragments = null;
+    // this.notifyStateChange();
+    super.willCommit();
+  }
+
+  /**
+   * Checks if the fragments which are considered as changed are still
+   * different to the state which is acknowledged by the server.
+   *
+   * This method is needed when data for the internal model is pushed and the
+   * pushed data might acknowledge dirty attributes as confirmed.
+   */
+  _updateChangedFragments() {
+    for (const key of Object.keys(this._fragments)) {
+      const value = this._fragments[key];
+      const originalValue = this._fragmentData[key];
+      const behavior = this._fragmentBehavior[key];
+      const isDirty = behavior.isDirty(value, originalValue);
+      if (!isDirty) {
+        delete this._fragments[key];
+      }
+    }
   }
 
   didCommit(data) {
-    let fragment, attributes;
-    if (data && data.attributes) {
-      attributes = data.attributes;
+    if (data?.attributes) {
+      // copy so that we don't mutate the caller's data
+      const attributes = Object.assign({}, data.attributes);
+      data = Object.assign({}, data, { attributes });
+    }
+
+    const newCanonicalFragments = {};
+    for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      let canonical;
+      if (data?.attributes) {
+        // strip fragments from the attributes so the super call does not process them
+        canonical = data.attributes[key];
+        delete data.attributes[key];
+      }
+      const fragment =
+        key in this._inFlightFragments
+          ? this._inFlightFragments[key]
+          : this._fragmentData[key];
+      newCanonicalFragments[key] = behavior.didCommit(fragment, canonical);
+    }
+
+    const changedFragmentKeys = this._changedFragmentKeys(
+      newCanonicalFragments
+    );
+    Object.assign(this._fragmentData, newCanonicalFragments);
+    this._inFlightFragments = null;
+
+    this._updateChangedFragments();
+
+    const changedAttributeKeys = super.didCommit(data);
+
+    // update fragment arrays
+    Object.keys(newCanonicalFragments).forEach((key) =>
+      this._fragmentArrayCache[key]?.notify()
+    );
+
+    const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
+    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+      internalModelFor(this).notifyAttributes(changedKeys);
+    }
+    // on ember-data 2.8 - 4.4, InternalModel.adapterDidCommit will notify
+    return changedKeys;
+  }
+
+  commitWasRejected(identifier, errors) {
+    for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      const fragment =
+        key in this._inFlightFragments
+          ? this._inFlightFragments[key]
+          : this._fragmentData[key];
+      if (fragment == null) {
+        continue;
+      }
+      behavior.commitWasRejected(fragment);
+    }
+    Object.assign(this._fragments, this._inFlightFragments);
+    this._inFlightFragments = null;
+    super.commitWasRejected(identifier, errors);
+  }
+
+  rollbackAttributes() {
+    let dirtyFragmentKeys;
+    if (this.hasChangedFragments()) {
+      dirtyFragmentKeys = Object.keys(this._fragments);
+      dirtyFragmentKeys.forEach((key) => {
+        this.rollbackFragment(key);
+      });
+      this._fragments = null;
+    }
+    const dirtyAttributeKeys = super.rollbackAttributes();
+    this.notifyStateChange();
+    this.fragmentDidReset();
+    return mergeArrays(dirtyAttributeKeys, dirtyFragmentKeys);
+  }
+
+  rollbackFragment(key) {
+    const behavior = this._fragmentBehavior[key];
+    assert(
+      `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
+      behavior != null
+    );
+    if (!this.isFragmentDirty(key)) {
+      return;
+    }
+    delete this._fragments[key];
+    const fragment = this._fragmentData[key];
+    if (fragment == null) {
+      return;
+    }
+    behavior.rollback(fragment);
+    this._fragmentArrayCache[key]?.notify();
+
+    if (!this.hasChangedAttributes()) {
+      this.notifyStateChange(key);
+      this.fragmentDidReset();
+    }
+  }
+
+  reset() {
+    super.reset();
+    this.__fragments = null;
+    this.__inFlightFragments = null;
+    this.__fragmentData = null;
+    this.__fragmentArrayCache = null;
+    this._fragmentOwner = null;
+  }
+
+  unloadRecord() {
+    for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
+      const fragment = this._fragments[key];
+      if (fragment != null) {
+        behavior.unload(fragment);
+      }
+      const inFlight = this._inFlightFragments[key];
+      if (inFlight != null) {
+        behavior.unload(inFlight);
+      }
+      const fragmentData = this._fragmentData[key];
+      if (fragmentData != null) {
+        behavior.unload(fragmentData);
+      }
+      this._fragmentArrayCache[key]?.destroy();
+    }
+    super.unloadRecord();
+  }
+
+  /**
+   * When a fragment becomes dirty, update the dirty state of the fragment's owner
+   */
+  fragmentDidDirty() {
+    assert('Fragment is not dirty', this.hasChangedAttributes());
+    if (!this._fragmentOwner) {
+      return;
+    }
+    const { recordData: owner, key } = this._fragmentOwner;
+    if (owner.isFragmentDirty(key)) {
+      // fragment owner is already dirty
+      return;
+    }
+    assert(
+      `Fragment '${key}' in owner '${owner.modelName}' has not been initialized`,
+      key in owner._fragmentData
+    );
+
+    owner._fragments[key] = owner._fragmentData[key];
+    owner.notifyStateChange(key);
+    owner.fragmentDidDirty();
+  }
+
+  /**
+   * When a fragment becomes clean, update the fragment owner
+   */
+  fragmentDidReset() {
+    if (!this._fragmentOwner) {
+      return;
+    }
+    const { recordData: owner, key } = this._fragmentOwner;
+    if (!owner.isFragmentDirty(key)) {
+      // fragment owner is already clean
+      return;
+    }
+
+    const behavior = owner._fragmentBehavior[key];
+    const value = owner.getFragment(key);
+    const originalValue = owner._fragmentData[key];
+    const isDirty = behavior.isDirty(value, originalValue);
+
+    if (isDirty) {
+      // fragment is still dirty
+      return;
+    }
+
+    delete owner._fragments[key];
+    owner.notifyStateChange(key);
+    owner.fragmentDidReset();
+  }
+
+  notifyStateChange(key) {
+    if (key && gte('ember-data', '4.5.0')) {
+      this.storeWrapper.notifyPropertyChange(
+        this.modelName,
+        this.id,
+        this.clientId,
+        key
+      );
     } else {
-      attributes = Object.create(null);
+      this.storeWrapper.notifyStateChange(
+        this.modelName,
+        this.id,
+        this.clientId,
+        key
+      );
     }
-    for (let key in this.inFlightFragments) {
-      fragment = this.inFlightFragments[key];
-      delete this.inFlightFragments[key];
-      this.serverFragments[key] = fragment;
+  }
+
+  /*
+   * Ensure that any changes to the fragment record-data also update the InternalModel's
+   * state machine and fire property change notifications on the Record
+   */
+
+  _fragmentGetRecord(properties) {
+    if (gte('ember-data', '4.5.0')) {
+      return this.storeWrapper._store._instanceCache.getRecord(
+        this.identifier,
+        properties
+      );
     }
-    Object.keys(this.fragmentDefs).forEach(key => {
-      fragment = this.serverFragments[key];
-      // @patocallaghan - So basically if the existing fragment/fragmentArray is null but it is part of the response we need to recreate the fragment/fragment array and re-add it to the record.
-      // Unfortunately we have no access to the `record` (is there a way to get it from `RecordData`?) in this codepath hence why we need to do the `this._record` hack.
-      if (!fragment && attributes[key] && this._record) {
-        let def = this.fragmentDefs[key];
-        let declaredModelName = def.type.split('$')[1];
-        if (def.type.includes('-array')) {
-          fragment = this.setupFragmentArray(key, this._record, attributes[key], declaredModelName, def.options, def.type.includes('fragment-array'));
-        } else {
-          fragment = createFragment(this._record.store, def.type.split('$')[1], this._record, key, def.options, attributes[key]);
-        }
-        // @patocallaghan - Not sure of the repercussions of just re-assigning the new fragment here. Should it be done a better way?
-        this._record[key] = fragment;
-      }
-      if (fragment) {
-        fragment._didCommit(attributes[key]);
-      }
-      delete attributes[key];
-    });
-    return super.didCommit(data);
+    return internalModelFor(this).getRecord(properties);
+  }
+  _fragmentPushData(data) {
+    internalModelFor(this).setupData(data);
+  }
+  _fragmentWillCommit() {
+    internalModelFor(this).adapterWillCommit();
+  }
+  _fragmentDidCommit(data) {
+    internalModelFor(this).adapterDidCommit(data);
+  }
+  _fragmentRollbackAttributes() {
+    internalModelFor(this).rollbackAttributes();
+  }
+  _fragmentCommitWasRejected() {
+    internalModelFor(this).adapterDidInvalidate();
+  }
+  _fragmentUnloadRecord() {
+    internalModelFor(this).unloadRecord();
   }
 
-  commitWasRejected() {
-    let key, fragment;
-    for (key in this.inFlightFragments) {
-      fragment = this.inFlightFragments[key];
-      delete this.inFlightFragments[key];
-      if (this.fragments[key] === undefined) {
-        this.fragments[key] = fragment;
-      }
-      if (fragment) {
-        // TODO this bad, we should keep track of fragment record datas ourself
-        if (fragment.content) {
-          fragment.content.forEach(frag => {
-            // check to see if the array is a non-fragment array, if so, don't call
-            // method on _internalModel.recordData
-            // TODO: We need to add inFlight details to statefulArray, then change this.
-            if (frag._internalModel) {
-              frag._internalModel._recordData.commitWasRejected();
-            }
-          });
-        } else {
-          fragment._internalModel._recordData.commitWasRejected();
-        }
-      }
+  /**
+   * The current dirty state
+   */
+  get _fragments() {
+    if (this.__fragments === null) {
+      this.__fragments = Object.create(null);
     }
-    return super.commitWasRejected(...arguments);
+    return this.__fragments;
   }
 
-  setAttr(key, value) {
-    return super.setAttr(key, value);
+  set _fragments(v) {
+    this.__fragments = v;
   }
 
-  getAttr(key) {
-    return super.getAttr(key);
+  /**
+   * The current saved state
+   */
+  get _fragmentData() {
+    if (this.__fragmentData === null) {
+      this.__fragmentData = Object.create(null);
+    }
+    return this.__fragmentData;
   }
 
-  hasAttr(key) {
-    return super.hasAttr(key);
+  set _fragmentData(v) {
+    this.__fragmentData = v;
   }
 
-  didCreateLocally() {
-    return super.didCreateLocally();
+  /**
+   * The fragments which are currently being saved to the backend
+   */
+  get _inFlightFragments() {
+    if (this.__inFlightFragments === null) {
+      this.__inFlightFragments = Object.create(null);
+    }
+    return this.__inFlightFragments;
+  }
+
+  set _inFlightFragments(v) {
+    this.__inFlightFragments = v;
+  }
+
+  get _fragmentsOrInFlight() {
+    return this.__inFlightFragments &&
+      Object.keys(this.__inFlightFragments).length > 0
+      ? this.__inFlightFragments
+      : this.__fragments || {};
+  }
+
+  /**
+   * Fragment array instances
+   *
+   * This likely belongs in InternalModel, since ember-data caches its has-many
+   * arrays in `InternalModel#_manyArrayCache`. But we can't extend InternalModel.
+   */
+  get _fragmentArrayCache() {
+    if (this.__fragmentArrayCache === null) {
+      this.__fragmentArrayCache = Object.create(null);
+    }
+    return this.__fragmentArrayCache;
   }
 }
 
-export { fragmentRecordDatas };
-
-// The default value of a fragment is either an array or an object,
-// which should automatically get deep copied
-function getFragmentDefaultValue(options, type) {
-  let value;
-
-  if (typeof options.defaultValue === 'function') {
-    return options.defaultValue();
-  } else if ('defaultValue' in options) {
-    value = options.defaultValue;
-  } else if (type === 'array') {
-    value = [];
-  } else {
-    return null;
+function internalModelFor(recordData) {
+  const store = recordData.storeWrapper._store;
+  if (gte('ember-data', '4.5.0')) {
+    return store._instanceCache._internalModelForResource(
+      recordData.identifier
+    );
   }
+  return store._internalModelForResource(recordData.identifier);
+}
 
-  assert(
-    `The fragment's default value must be an ${type}`,
-    typeOf(value) == type || value === null
-  );
+function isArrayEqual(a, b) {
+  if (a === b) {
+    return true;
+  }
+  if (a === null || b === null) {
+    return false;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
-  // Create a deep copy of the resulting value to avoid shared reference errors
-  return copy(value, true);
+function mergeArrays(a, b) {
+  if (b == null) {
+    return a;
+  }
+  if (a == null) {
+    return b;
+  }
+  return [...a, ...b];
 }

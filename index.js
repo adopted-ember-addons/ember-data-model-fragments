@@ -8,12 +8,12 @@ module.exports = {
   name: require('./package').name,
 
   treeForAddon(tree) {
-    let versioned = merge([version(), tree]);
+    const versioned = merge([version(), tree]);
 
     return this._super.treeForAddon.call(this, versioned);
   },
 
   cacheKeyForTree(treeType) {
     return calculateCacheKeyForTree(treeType, this);
-  }
+  },
 };

@@ -1,9 +1,10 @@
+import Fragment from 'ember-data-model-fragments/fragment';
 import { attr } from '@ember-data/model';
-import MF from 'ember-data-model-fragments';
+import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 
-export default MF.Fragment.extend({
-  amount: attr('string'),
-  recurring: attr('boolean'),
-  products: MF.fragmentArray('product'),
-  product: MF.fragment('product')
-});
+export default class Order extends Fragment {
+  @attr('string') amount;
+  @attr('boolean') recurring;
+  @fragmentArray('product') products;
+  @fragment('product') product;
+}

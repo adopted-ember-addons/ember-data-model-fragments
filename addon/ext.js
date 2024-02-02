@@ -2,20 +2,13 @@ import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { coerceId, RecordData, InternalModel, normalizeModelName } from 'ember-data/-private';
+import { Snapshot, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentRootState from './states';
 import FragmentRecordData from './record-data';
-import {
-  internalModelFor,
-  default as Fragment
-} from './fragment';
+import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
-import { computed } from '@ember/object';
 import { getOwner } from '@ember/application';
-import { assign } from '@ember/polyfills';
-import { lte, gte } from 'ember-compatibility-helpers';
-import { get } from '@ember/object';
+import { gte } from 'ember-compatibility-helpers';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -40,104 +33,22 @@ function serializerForFragment(owner, normalizedModelName) {
   @module ember-data-model-fragments
 */
 
-const InternalModelPrototype = InternalModel.prototype;
-const RecordDataPrototype = RecordData.prototype;
-
-assign(RecordDataPrototype, {
-  eachFragmentKey(fn) {
-    this._fragments = this._fragments || Object.create({});
-    Object.keys(this._fragments).forEach(fn);
-  },
-
-  eachFragmentKeyValue(fn) {
-    this.eachFragmentKey((key) => {
-      const value = this.getFragment(key);
-      if (value) {
-        fn(key, value);
-      }
-    });
-  },
-
-  getOwner() {
-    return this._owner;
-  },
-
-  setOwner(value) {
-    this._owner = value;
-  },
-
-  setName(value) {
-    this._name = value;
-  },
-
-  getName() {
-    return this._name;
-  },
-
-  getFragment(name) {
-    this._fragments = this._fragments || Object.create({});
-    return this._fragments[name];
-  },
-
-  setFragment(name, fragment) {
-    this._fragments = this._fragments || Object.create({});
-    this._fragments[name] = fragment;
-    return this._fragments[name];
-  },
-
-  didCommit(data) {
-    if (this._attributes) {
-      // willCommit was never called
-      if (!this._inFlightAttributes) {
-        this._inFlightAttributes = this._attributes;
-      } else {
-        assign(this._inFlightAttributes, this._attributes);
-      }
-      this._attributes = null;
-    }
-    this._isNew = false;
-    if (data) {
-      if (data.relationships) {
-        this._setupRelationships(data);
-      }
-      if (data.id) {
-        // didCommit provided an ID, notify the store of it
-        this.storeWrapper.setRecordId(this.modelName, data.id, this.clientId);
-        this.id = coerceId(data.id);
-      }
-      data = data.attributes;
-
-      // Notify fragments that the record was committed
-      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit(data[key]));
-    } else {
-      this.eachFragmentKeyValue((key, fragment) => fragment._didCommit());
-    }
-
-    const changedKeys = this._changedKeys(data);
-
-    assign(this._data, this._inFlightAttributes, data);
-    this._inFlightAttributes = null;
-    this._updateChangedAttributes();
-
-    return changedKeys;
-  }
-});
-
 /**
   @class Store
   @namespace DS
 */
 Store.reopen({
   createRecordDataFor(type, id, lid, storeWrapper) {
-    let identifier;
-    if (lte('ember-data', '3.13.0')) {
-      throw new Error('This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.13. See matrix at https://github.com/lytics/ember-data-model-fragments#compatibility for details.');
+    if (!gte('ember-data', '3.28.0')) {
+      throw new Error(
+        'This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.'
+      );
     }
-    if (gte('ember-data', '3.15.0')) {
-      identifier = this.identifierCache.getOrCreateRecordIdentifier({ type, id, lid });
-    } else {
-      identifier = { type, id, clientId: lid };
-    }
+    const identifier = this.identifierCache.getOrCreateRecordIdentifier({
+      type,
+      id,
+      lid,
+    });
     return new FragmentRecordData(identifier, storeWrapper);
   },
 
@@ -162,37 +73,17 @@ Store.reopen({
     @return {MF.Fragment} fragment
   */
   createFragment(modelName, props) {
-    assert(`The '${modelName}' model must be a subclass of MF.Fragment`, this.isFragment(modelName));
-    let internalModel;
-    if (gte('ember-data', '3.15.0')) {
-      const identifier = this.identifierCache.createIdentifierForNewRecord({ type: modelName });
-      internalModel = this._internalModelForResource(identifier);
+    assert(
+      `The '${modelName}' model must be a subclass of MF.Fragment`,
+      this.isFragment(modelName)
+    );
+    let recordData;
+    if (gte('ember-data', '4.5.0')) {
+      recordData = this._instanceCache.recordDataFor({ type: modelName }, true);
     } else {
-      let identifier = { type: modelName, id: `${Math.random()}`, lid: `${Math.random()}` };
-      internalModel = this._internalModelForResource(identifier);
+      recordData = this.recordDataFor({ type: modelName }, true);
     }
-
-    // Re-wire the internal model to use the fragment state machine
-    internalModel.currentState = FragmentRootState.empty;
-
-    internalModel._recordData._name = null;
-    internalModel._recordData._owner = null;
-
-    internalModel.send('loadedData');
-
-    let fragment = internalModel.getRecord();
-
-    if (props) {
-      fragment.setProperties(props);
-    }
-
-    // invoke the ready callback ( to mimic DS.Model behaviour )
-    fragment.trigger('ready');
-
-    // Add brand to reduce usages of `instanceof`
-    fragment._isFragment = true;
-
-    return fragment;
+    return recordData._fragmentGetRecord(props);
   },
 
   /**
@@ -208,93 +99,56 @@ Store.reopen({
       return false;
     }
 
-    let type = this.modelFor(modelName);
+    const type = this.modelFor(modelName);
     return Fragment.detect(type);
   },
 
   serializerFor(modelName) {
     // this assertion is cargo-culted from ember-data TODO: update comment
-    assert('You need to pass a model name to the store\'s serializerFor method', isPresent(modelName));
-    assert(`Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`, typeof modelName === 'string');
+    assert(
+      "You need to pass a model name to the store's serializerFor method",
+      isPresent(modelName)
+    );
+    assert(
+      `Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`,
+      typeof modelName === 'string'
+    );
 
-    let owner = getOwner(this);
-    let normalizedModelName = normalizeModelName(modelName);
+    const owner = getOwner(this);
+    const normalizedModelName = normalizeModelName(modelName);
 
     if (this.isFragment(normalizedModelName)) {
       return serializerForFragment(owner, normalizedModelName);
     } else {
       return this._super(...arguments);
     }
-  }
+  },
 });
 
 /**
-  @class Model
-  @namespace DS
-  */
-Model.reopen({
-
-  willDestroy() {
-    this._super(...arguments);
-
-    let internalModel = internalModelFor(this);
-
-    // destroy the current state
-    internalModel._recordData.resetFragments();
-  }
-});
-
-Model.reopenClass({
-  fields: computed(function() {
-    let map = new Map();
-
-    this.eachComputedProperty((name, meta) => {
-      if (meta.isFragment) {
-        map.set(name, 'fragment');
-      } else if (meta.isRelationship) {
-        map.set(name, meta.kind);
-      } else if (meta.isAttribute) {
-        map.set(name, 'attribute');
-      }
-    });
-
-    return map;
-  }).readOnly()
-
-});
-
-// Replace a method on an object with a new one that calls the original and then
-// invokes a function with the result
-function decorateMethod(obj, name, fn) {
-  let originalFn = obj[name];
-
-  obj[name] = function() {
-    let value = originalFn.apply(this, arguments);
-
-    return fn.call(this, value, arguments);
-  };
-}
-
-/**
-  Override parent method to snapshot fragment attributes before they are
+  Override `Snapshot._attributes` to snapshot fragment attributes before they are
   passed to the `DS.Model#serialize`.
 
-  @method _createSnapshot
   @private
 */
-decorateMethod(InternalModelPrototype, 'createSnapshot', function createFragmentSnapshot(snapshot) {
-  let attrs = snapshot._attributes;
-  Object.keys(attrs).forEach((key) => {
-    let attr = attrs[key];
-    // If the attribute has a `_createSnapshot` method, invoke it before the
-    // snapshot gets passed to the serializer
-    if (attr && typeof attr._createSnapshot === 'function') {
+const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
+  Snapshot.prototype,
+  '_attributes'
+);
 
-      attrs[key] = attr._createSnapshot();
-    }
-  });
-
-  return snapshot;
+Object.defineProperty(Snapshot.prototype, '_attributes', {
+  get() {
+    const attrs = oldSnapshotAttributes.get.call(this);
+    Object.keys(attrs).forEach((key) => {
+      const attr = attrs[key];
+      // If the attribute has a `_createSnapshot` method, invoke it before the
+      // snapshot gets passed to the serializer
+      if (attr && typeof attr._createSnapshot === 'function') {
+        attrs[key] = attr._createSnapshot();
+      }
+    });
+    return attrs;
+  },
 });
 
 /**
@@ -318,7 +172,13 @@ JSONSerializer.reopen({
     const containerKey = `transform:${attributeType}`;
 
     if (!owner.hasRegistration(containerKey)) {
-      const match = attributeType.match(/^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/);
+      const match = attributeType.match(
+        /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/
+      );
+      assert(
+        `Failed parsing ember-data-model-fragments attribute type ${attributeType}`,
+        match != null
+      );
       const transformName = match[1];
       const type = match[2];
       const polymorphicTypeProp = match[3];
@@ -327,7 +187,7 @@ JSONSerializer.reopen({
       transformClass = transformClass.extend({
         type,
         polymorphicTypeProp,
-        store: this.store
+        store: this.store,
       });
       owner.register(containerKey, transformClass);
     }
@@ -336,20 +196,20 @@ JSONSerializer.reopen({
 
   // We need to override this to handle polymorphic with a typeKey function
   applyTransforms(typeClass, data) {
-    let attributes = get(typeClass, 'attributes');
+    const attributes = typeClass.attributes;
 
     typeClass.eachTransformedAttribute((key, typeClass) => {
       if (data[key] === undefined) {
         return;
       }
 
-      let transform = this.transformFor(typeClass);
-      let transformMeta = attributes.get(key);
+      const transform = this.transformFor(typeClass);
+      const transformMeta = attributes.get(key);
       data[key] = transform.deserialize(data[key], transformMeta.options, data);
     });
 
     return data;
-  }
+  },
 });
 
 export { Store, Model, JSONSerializer };
