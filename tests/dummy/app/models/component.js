@@ -10,5 +10,9 @@ export default class Component extends Model {
   })
   options;
 
-  @fragmentArray('component-options', { polymorphic: true, typeKey: (data, owner) => `component-options-${owner.type}` }) optionsHistory;
+  @fragmentArray('component-options', {
+    polymorphic: true,
+    typeKey: (data, owner) => `component-options-${owner.type}`,
+  })
+  optionsHistory;
 }
