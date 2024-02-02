@@ -22,13 +22,11 @@ const FragmentArray = StatefulArray.extend({
   /**
     The type of fragments the array contains
 
-    @property type
+    @property modelName
     @private
     @type {String}
   */
-  type: null,
-
-  options: null,
+  modelName: null,
 
   objectAt(index) {
     const recordData = this._super(index);
