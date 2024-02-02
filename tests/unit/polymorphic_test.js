@@ -131,7 +131,7 @@ module('unit - Polymorphism', function (hooks) {
         id: 1,
         attributes: {
           type: 'text',
-          options: [],
+          optionsHistory: [],
         },
       },
     });
