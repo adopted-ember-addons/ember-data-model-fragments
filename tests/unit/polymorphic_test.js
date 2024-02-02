@@ -85,63 +85,81 @@ module('unit - Polymorphism', function (hooks) {
     assert.equal(second.trunkLength, 4, "elephant's trunk length is correct");
   });
 
-  test('fragment array\'s createFragment supports polymorphism with string typeKey', (assert) => {
-    run(async() => {
-      store.push({
-        data: {
-          type: 'zoo',
-          id: 1,
-          attributes: zoo
-        }
-      });
-
-      const record = await store.find('zoo', 1);
-      const animals = record.get('animals');
-
-      const newLion = animals.createFragment({
-        $type: 'lion',
-        name: 'Alex',
-        hasManes: 'true'
-      });
-
-      assert.ok(newLion instanceof Animal, 'new lion is an animal');
-      assert.equal(newLion.get('name'), 'Alex', 'new animal\'s name is correct');
-      assert.ok(newLion instanceof Lion, 'new lion is a lion');
-      assert.ok(newLion.get('hasManes'), 'lion has manes');
-
-      const newElephant = animals.createFragment({
-        $type: 'elephant',
-        name: 'Heffalump',
-        trunkLength: 7
-      });
-
-      assert.ok(newElephant instanceof Animal, 'new elephant is an animal');
-      assert.equal(newElephant.get('name'), 'Heffalump', 'new animal\'s name is correct');
-      assert.ok(newElephant instanceof Elephant, 'new elephant is an elephant');
-      assert.equal(newElephant.get('trunkLength'), 7, 'elephant\'s trunk length is correct');
+  test("fragment array's createFragment supports polymorphism with string typeKey", async function (assert) {
+    store.push({
+      data: {
+        type: 'zoo',
+        id: 1,
+        attributes: zoo,
+      },
     });
+
+    const record = await store.find('zoo', 1);
+    const animals = record.animals;
+
+    const newLion = animals.createFragment({
+      $type: 'lion',
+      name: 'Alex',
+      hasManes: 'true',
+    });
+
+    assert.ok(newLion instanceof Animal, 'new lion is an animal');
+    assert.equal(newLion.name, 'Alex', "new animal's name is correct");
+    assert.ok(newLion instanceof Lion, 'new lion is a lion');
+    assert.ok(newLion.hasManes, 'lion has manes');
+
+    const newElephant = animals.createFragment({
+      $type: 'elephant',
+      name: 'Heffalump',
+      trunkLength: 7,
+    });
+
+    assert.ok(newElephant instanceof Animal, 'new elephant is an animal');
+    assert.equal(newElephant.name, 'Heffalump', "new animal's name is correct");
+    assert.ok(newElephant instanceof Elephant, 'new elephant is an elephant');
+    assert.equal(
+      newElephant.trunkLength,
+      7,
+      "elephant's trunk length is correct"
+    );
   });
 
-  test('fragment array\'s createFragment supports polymorphism with function typeKey', (assert) => {
-    run(async() => {
-      store.push({
-        data: {
-          type: 'component',
-          id: 1,
-          attributes: {
-            type: 'text',
-            options: []
-          }
-        }
-      });
-
-      const component = await store.find('component', 1);
-      const textOptions = component.optionsHistory.createFragment({ fontFamily: 'Verdana', fontSize: 12 });
-
-      assert.ok(textOptions instanceof ComponentOptionsText, 'options is ComponentOptionsText');
-      assert.equal(textOptions.fontFamily, 'Verdana', 'options has correct fontFamily attribute');
-      assert.equal(textOptions.fontSize, 12, 'options has correct fontSize attribute');
-      assert.equal(component.optionsHistory.length, 1, 'fragment object was added to fragment array');
+  test("fragment array's createFragment supports polymorphism with function typeKey", async function (assert) {
+    store.push({
+      data: {
+        type: 'component',
+        id: 1,
+        attributes: {
+          type: 'text',
+          options: [],
+        },
+      },
     });
+
+    const component = await store.find('component', 1);
+    const textOptions = component.optionsHistory.createFragment({
+      fontFamily: 'Verdana',
+      fontSize: 12,
+    });
+
+    assert.ok(
+      textOptions instanceof ComponentOptionsText,
+      'options is ComponentOptionsText'
+    );
+    assert.equal(
+      textOptions.fontFamily,
+      'Verdana',
+      'options has correct fontFamily attribute'
+    );
+    assert.equal(
+      textOptions.fontSize,
+      12,
+      'options has correct fontSize attribute'
+    );
+    assert.equal(
+      component.optionsHistory.length,
+      1,
+      'fragment object was added to fragment array'
+    );
   });
 });
