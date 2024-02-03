@@ -164,4 +164,47 @@ module('unit - Polymorphism', function (hooks) {
       'fragment object was added to fragment array'
     );
   });
+
+  test('createRecord supports polymorphic typeKey for fragment and fragment arrays', async function (assert) {
+    const zoo = store.createRecord('zoo', {
+      star: {
+        $type: 'lion',
+        name: 'Mittens',
+        hasManes: true,
+      },
+      animals: [
+        {
+          $type: 'lion',
+          name: 'Alex',
+          hasManes: false,
+        },
+        {
+          $type: 'elephant',
+          name: 'Heffalump',
+          trunkLength: 7,
+        },
+      ],
+    });
+
+    const star = zoo.star;
+    assert.ok(star instanceof Lion, 'star is a lion');
+    assert.strictEqual(star.name, 'Mittens', 'star name is correct');
+    assert.strictEqual(star.hasManes, true, 'star has manes');
+    assert.strictEqual(star.zoo, zoo, 'star fragment owner is correct');
+
+    const animals = zoo.animals;
+    assert.strictEqual(animals.length, 2);
+
+    const lion = animals.firstObject;
+    assert.ok(lion instanceof Lion, 'first animal is a lion');
+    assert.strictEqual(lion.name, 'Alex', 'lion name is correct');
+    assert.false(lion.hasManes, 'lion does not have manes');
+    assert.strictEqual(lion.zoo, zoo, 'lion fragment owner is correct');
+
+    const elephant = animals.lastObject;
+    assert.ok(elephant instanceof Elephant, 'second animal is an elephant');
+    assert.strictEqual(elephant.name, 'Heffalump', 'elephant name is correct');
+    assert.strictEqual(elephant.trunkLength, 7, 'trunk length is correct');
+    assert.strictEqual(elephant.zoo, zoo, 'elephant fragment owner is correct');
+  });
 });
