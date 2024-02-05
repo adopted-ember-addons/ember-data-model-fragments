@@ -53,9 +53,7 @@ const FragmentArray = StatefulArray.extend({
       existing.setProperties(data);
       return recordDataFor(existing);
     }
-    const fragment = this.store.createFragment(this.modelName, data);
-    setFragmentOwner(fragment, this.recordData, this.key);
-    return recordDataFor(fragment);
+    return this.recordData._newFragmentRecordDataForKey(this.key, data);
   },
 
   /**
