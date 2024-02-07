@@ -22,13 +22,11 @@ const FragmentArray = StatefulArray.extend({
   /**
     The type of fragments the array contains
 
-    @property type
+    @property modelName
     @private
     @type {String}
   */
-  type: null,
-
-  options: null,
+  modelName: null,
 
   objectAt(index) {
     const recordData = this._super(index);
@@ -55,9 +53,7 @@ const FragmentArray = StatefulArray.extend({
       existing.setProperties(data);
       return recordDataFor(existing);
     }
-    const fragment = this.store.createFragment(this.modelName, data);
-    setFragmentOwner(fragment, this.recordData, this.key);
-    return recordDataFor(fragment);
+    return this.recordData._newFragmentRecordDataForKey(this.key, data);
   },
 
   /**
@@ -142,15 +138,18 @@ const FragmentArray = StatefulArray.extend({
 
   /**
     Creates a new fragment of the fragment array's type and adds it to the end
-    of the fragment array
+    of the fragment array.
 
     @method createFragment
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the newly added fragment
     */
   createFragment(props) {
-    const fragment = this.store.createFragment(this.modelName, props);
-    setFragmentOwner(fragment, this.recordData, this.key);
+    const recordData = this.recordData._newFragmentRecordDataForKey(
+      this.key,
+      props
+    );
+    const fragment = recordData._fragmentGetRecord();
     return this.pushObject(fragment);
   },
 });

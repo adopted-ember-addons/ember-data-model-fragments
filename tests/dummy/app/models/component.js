@@ -1,5 +1,5 @@
 import Model, { attr } from '@ember-data/model';
-import { fragment } from 'ember-data-model-fragments/attributes';
+import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 
 export default class Component extends Model {
   @attr('string') name;
@@ -9,4 +9,10 @@ export default class Component extends Model {
     typeKey: (data, owner) => `component-options-${owner.type}`,
   })
   options;
+
+  @fragmentArray('component-options', {
+    polymorphic: true,
+    typeKey: (data, owner) => `component-options-${owner.type}`,
+  })
+  optionsHistory;
 }
