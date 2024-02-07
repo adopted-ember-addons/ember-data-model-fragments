@@ -801,6 +801,10 @@ module('integration - Persistence', function (hooks) {
       'Lysono Maar',
     ]);
 
+    server.put('/armies/1', () => {
+      return [400, { 'Content-Type': 'application/json' }];
+    });
+
     await assert.rejects(army.save());
 
     army.rollbackAttributes();
@@ -850,6 +854,10 @@ module('integration - Persistence', function (hooks) {
     name.set('first', 'BadFirstName');
     name.set('last', 'BadLastName');
     address.set('street', 'BadStreet');
+
+    server.put('/people/1', () => {
+      return [400, { 'Content-Type': 'application/json' }];
+    });
 
     await assert.rejects(mrStark.save());
 
