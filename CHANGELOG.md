@@ -14,6 +14,19 @@
 
 
 
+
+## v6.0.7 (2024-02-13)
+
+#### :bug: Bug Fix
+* [#483](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/483) Closes [#316](https://github.com/adopted-ember-addons/ember-data-model-fragments/issues/316) polymorphic create fragment ([@dwickern](https://github.com/dwickern))
+
+#### :house: Internal
+* [#484](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/484) allow test failures for Ember 4.8 ([@dwickern](https://github.com/dwickern))
+* [#485](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/485) use explicit error responses in tests ([@dwickern](https://github.com/dwickern))
+
+#### Committers: 1
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+
 ## v6.0.6 (2023-12-13)
 
 ## v6.0.5 (2023-09-30)
