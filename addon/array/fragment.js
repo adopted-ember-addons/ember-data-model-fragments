@@ -149,7 +149,7 @@ const FragmentArray = StatefulArray.extend({
       this.key,
       props
     );
-    const fragment = recordData._fragmentGetRecord();
+    const fragment = recordData._fragmentGetRecord(props);
     return this.pushObject(fragment);
   },
 });
