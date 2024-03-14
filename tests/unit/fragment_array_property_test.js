@@ -585,4 +585,17 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       );
     });
   });
+
+  test('pass arbitrary props to createFragment', async function (assert) {
+    pushPerson(1);
+
+    const person = await store.findRecord('person', 1);
+    const address = person.addresses.createFragment({
+      street: '1 Dungeon Cell',
+      extra: 123,
+    });
+
+    assert.equal(address.street, '1 Dungeon Cell', 'street is correct');
+    assert.equal(address.extra, 123, 'extra property is correct');
+  });
 });

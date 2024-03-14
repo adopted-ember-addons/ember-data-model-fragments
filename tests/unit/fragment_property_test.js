@@ -520,4 +520,14 @@ module('unit - `MF.fragment` property', function (hooks) {
       assert.ok(newName.isDestroying, 'the new fragment is being destroyed');
     });
   });
+
+  test('pass arbitrary props to createFragment', async function (assert) {
+    const address = store.createFragment('address', {
+      street: '1 Dungeon Cell',
+      extra: 123,
+    });
+
+    assert.equal(address.street, '1 Dungeon Cell', 'street is correct');
+    assert.equal(address.extra, 123, 'extra property is correct');
+  });
 });
