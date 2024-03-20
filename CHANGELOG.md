@@ -15,6 +15,15 @@
 
 
 
+
+## v6.0.8 (2024-03-20)
+
+#### :bug: Bug Fix
+* [#486](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/486) fix passing arbitrary props to `fragmentArray.createFragment` ([@dwickern](https://github.com/dwickern))
+
+#### Committers: 1
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+
 ## v6.0.7 (2024-02-13)
 
 #### :bug: Bug Fix
