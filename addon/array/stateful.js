@@ -115,6 +115,9 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       // array is unchanged
       return;
     }
+    if (this._isDirty) {
+      this.retrieveLatest();
+    }
     const data = this.currentState.slice();
     data.splice(
       start,
