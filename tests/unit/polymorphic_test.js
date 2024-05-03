@@ -94,7 +94,7 @@ module('unit - Polymorphism', function (hooks) {
       },
     });
 
-    const record = await store.find('zoo', 1);
+    const record = await store.findRecord('zoo', 1);
     const animals = record.animals;
 
     const newLion = animals.createFragment({
@@ -138,7 +138,7 @@ module('unit - Polymorphism', function (hooks) {
       },
     });
 
-    const component = await store.find('component', 1);
+    const component = await store.findRecord('component', 1);
     const textOptions = component.optionsHistory.createFragment({
       fontFamily: 'Verdana',
       fontSize: 12,
