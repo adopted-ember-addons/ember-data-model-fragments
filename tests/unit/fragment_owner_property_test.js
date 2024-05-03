@@ -52,13 +52,9 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
 
     const invalid = store.createRecord('invalidModel');
 
-    assert.throws(
-      () => {
-        invalid.owner;
-      },
-      /Fragment owner properties can only be used on fragments/,
-      'getting fragment owner on non-fragment throws an error'
-    );
+    assert.expectAssertion(() => {
+      invalid.owner;
+    }, 'Fragment owner properties can only be used on fragments.');
   });
 
   test("attempting to change a fragment's owner record throws an error", async function (assert) {

@@ -29,9 +29,9 @@ module('unit - `DS.Store`', function (hooks) {
   });
 
   test('attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error', function (assert) {
-    assert.throws(() => {
+    assert.expectAssertion(() => {
       store.createFragment('person');
-    }, 'an error is thrown when given a bad type');
+    }, "The 'person' model must be a subclass of MF.Fragment");
   });
 
   test('the store has an `isFragment` method', function (assert) {
