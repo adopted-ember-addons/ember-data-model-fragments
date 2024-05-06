@@ -77,7 +77,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-engines
         if: |
           steps.cache-dependencies.outputs.cache-hit != 'true'
 
@@ -121,7 +121,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-engines
         if: |
           steps.cache-dependencies.outputs.cache-hit != 'true'
 
@@ -163,7 +163,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Install Dependencies
-        run: yarn install --no-lockfile --non-interactive
+        run: yarn install --no-lockfile --non-interactive --ignore-engines
 
       - name: Test
         run: yarn test:ember --launch ${{ matrix.browser }}
@@ -217,7 +217,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-engines
         if: |
           steps.cache-dependencies.outputs.cache-hit != 'true'
 
@@ -225,3 +225,8 @@ jobs:
         env:
           EMBER_TRY_SCENARIO: ${{ matrix.ember-try-scenario }}
         run: node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
+
+      - name: Test (Prod)
+        env:
+          EMBER_TRY_SCENARIO: ${{ matrix.ember-try-scenario }}
+        run: node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO --- ember test --environment=production

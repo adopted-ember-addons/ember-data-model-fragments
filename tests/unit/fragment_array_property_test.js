@@ -195,11 +195,11 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
-    assert.throws(() => {
+    assert.expectAssertion(() => {
       const otherPerson = store.createRecord('person');
 
       addresses.addFragment(otherPerson);
-    }, 'error is thrown when adding a DS.Model instance');
+    }, "You can only add 'address' fragments or object literals to this property");
   });
 
   test('adding fragments from other records throws an error', async function (assert) {
@@ -212,9 +212,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     ]);
     const address = people[0].addresses.firstObject;
 
-    assert.throws(() => {
+    assert.expectAssertion(() => {
       people[1].addresses.addFragment(address);
-    }, 'error is thrown when adding a fragment from another record');
+    }, 'Fragments can only belong to one owner, try copying instead');
   });
 
   test('setting to an array of fragments is allowed', async function (assert) {
@@ -422,9 +422,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
 
     const person = await store.findRecord('person', 1);
-    assert.throws(() => {
+    assert.expectAssertion(() => {
       person.set('addresses', ['address']);
-    }, 'error is thrown when setting to an array of non-fragments');
+    }, "You can only add 'address' fragments or object literals to this property");
   });
 
   test('fragments can have default values', function (assert) {

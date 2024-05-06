@@ -111,9 +111,9 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     const person = await store.findRecord('person', 1);
-    assert.throws(() => {
+    assert.expectAssertion(() => {
       person.set('name', store.createRecord('person'));
-    }, 'error is thrown when setting non-fragment');
+    }, 'You must pass a fragment or null to set a fragment');
   });
 
   test('setting fragments from other records throws an error', async function (assert) {
@@ -142,9 +142,9 @@ module('unit - `MF.fragment` property', function (hooks) {
       store.findRecord('person', 1),
       store.findRecord('person', 2),
     ]);
-    assert.throws(() => {
+    assert.expectAssertion(() => {
       people[1].set('name', people[0].name);
-    }, 'error is thrown when setting to a fragment of another record');
+    }, 'Fragments can only belong to one owner, try copying instead');
   });
 
   test('null values are allowed', async function (assert) {
