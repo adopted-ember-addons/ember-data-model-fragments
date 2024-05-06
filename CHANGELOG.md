@@ -16,6 +16,15 @@
 
 
 
+
+## v6.0.9 (2024-05-06)
+
+#### :bug: Bug Fix
+* [#487](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/487) Fix updating fragment arrays multiple times in the same runloop ([@dwickern](https://github.com/dwickern))
+
+#### Committers: 1
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+
 ## v6.0.8 (2024-03-20)
 
 #### :bug: Bug Fix
