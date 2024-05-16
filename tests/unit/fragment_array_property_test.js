@@ -586,6 +586,38 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     });
   });
 
+  test('preserve fragment array when record is unloaded', async function (assert) {
+    pushPerson(1);
+
+    const person = await store.findRecord('person', 1);
+    const addresses = person.addresses;
+    assert.strictEqual(addresses.length, 2);
+
+    const addressBefore = addresses.objectAt(0);
+    assert.strictEqual(addressBefore.street, '1 Sky Cell');
+
+    person.unloadRecord();
+
+    assert.strictEqual(
+      person.addresses,
+      addresses,
+      'fragment array instance is the same after unload'
+    );
+
+    const addressAfter = addresses.objectAt(0);
+
+    assert.strictEqual(
+      addressAfter,
+      addressBefore,
+      'FragmentArray instance is the same after unload'
+    );
+    assert.strictEqual(
+      addressAfter.street,
+      '1 Sky Cell',
+      'preserve fragment attributes after unload'
+    );
+  });
+
   test('pass arbitrary props to createFragment', async function (assert) {
     pushPerson(1);
 

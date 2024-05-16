@@ -4,18 +4,21 @@ import { render, settled } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 import { setComponentTemplate } from '@ember/component';
 import Component from '@glimmer/component';
+import Pretender from 'pretender';
 
 module('Integration | Rendering', function (hooks) {
   setupRenderingTest(hooks);
 
-  let store;
+  let store, server;
 
   hooks.beforeEach(function () {
     store = this.owner.lookup('service:store');
+    server = new Pretender();
   });
 
   hooks.afterEach(function () {
     store = null;
+    server.shutdown();
   });
 
   test('construct fragments without autotracking.mutation-after-consumption error', async function (assert) {
@@ -193,5 +196,119 @@ module('Integration | Rendering', function (hooks) {
 
     assert.dom('[data-product]').exists({ count: 1 });
     assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
+  });
+
+  test('fragment is destroyed', async function (assert) {
+    this.order = store.createRecord('order', { id: 1 });
+
+    store.push({
+      data: [
+        {
+          id: this.order.id,
+          type: 'order',
+          attributes: {
+            product: {
+              name: 'The Strangler',
+              price: '299.99',
+            },
+          },
+          relationships: {},
+        },
+      ],
+    });
+
+    await render(hbs`
+      {{#let this.order.product as |product|}}
+        <span data-product>{{product.name}}: {{product.price}}</span>
+      {{/let}}
+    `);
+
+    assert.dom('[data-product]').hasText('The Strangler: 299.99');
+
+    server.delete('/orders/1', () => [204]);
+    await this.order.destroyRecord();
+
+    assert.dom('[data-product]').hasText('The Strangler: 299.99');
+  });
+
+  test('fragment array is destroyed', async function (assert) {
+    this.order = store.createRecord('order', { id: 1 });
+
+    store.push({
+      data: [
+        {
+          id: this.order.id,
+          type: 'order',
+          attributes: {
+            products: [
+              {
+                name: 'The Strangler',
+                price: '299.99',
+              },
+              {
+                name: 'Tears of Lys',
+                price: '499.99',
+              },
+            ],
+          },
+          relationships: {},
+        },
+      ],
+    });
+
+    await render(hbs`
+      <ul>
+        {{#each this.order.products as |product idx|}}
+          <li data-product="{{idx}}">{{product.name}}: {{product.price}}</li>
+        {{/each}}
+      </ul>
+    `);
+
+    assert.dom('[data-product]').exists({ count: 2 });
+    assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
+    assert.dom('[data-product="1"]').hasText('Tears of Lys: 499.99');
+
+    server.delete('/orders/1', () => [204]);
+    await this.order.destroyRecord();
+
+    assert.dom('[data-product]').exists({ count: 2 });
+    assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
+    assert.dom('[data-product="1"]').hasText('Tears of Lys: 499.99');
+  });
+
+  test('array destroyed', async function (assert) {
+    this.person = store.createRecord('person', { id: 1 });
+
+    store.push({
+      data: [
+        {
+          id: this.person.id,
+          type: 'person',
+          attributes: {
+            titles: ['Hand of the King', 'Master of Coin'],
+          },
+          relationships: {},
+        },
+      ],
+    });
+
+    await render(hbs`
+      <ul>
+        {{#each this.person.titles as |title idx|}}
+          <li data-title="{{idx}}">{{title}}</li>
+        {{/each}}
+      </ul>
+    `);
+
+    assert.dom('[data-title]').exists({ count: 2 });
+    assert.dom('[data-title="0"]').hasText('Hand of the King');
+    assert.dom('[data-title="1"]').hasText('Master of Coin');
+
+    server.delete('/people/1', () => [204]);
+    await this.person.destroyRecord();
+
+    assert.dom('[data-title]').exists({ count: 2 });
+    assert.dom('[data-title="0"]').hasText('Hand of the King');
+    assert.dom('[data-title="1"]').hasText('Master of Coin');
   });
 });
