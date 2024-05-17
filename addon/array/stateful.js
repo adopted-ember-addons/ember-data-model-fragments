@@ -119,6 +119,10 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       'The third argument to replace needs to be an array.',
       isArray(items)
     );
+    assert(
+      'Attempted to update the fragment array after it was destroyed',
+      !this.isDestroyed && !this.isDestroying
+    );
     if (deleteCount === 0 && items.length === 0) {
       // array is unchanged
       return;
