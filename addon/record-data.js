@@ -752,9 +752,9 @@ export default class FragmentRecordData extends RecordData {
 
       Object.assign(this._fragmentData, newCanonicalFragments);
       // update fragment arrays
-      changedFragmentKeys?.forEach((key) =>
-        this._fragmentArrayCache[key]?.notify()
-      );
+      changedFragmentKeys?.forEach((key) => {
+        this._fragmentArrayCache[key]?.notify();
+      });
     }
 
     const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
@@ -830,9 +830,9 @@ export default class FragmentRecordData extends RecordData {
     const changedAttributeKeys = super.didCommit(data);
 
     // update fragment arrays
-    Object.keys(newCanonicalFragments).forEach((key) =>
-      this._fragmentArrayCache[key]?.notify()
-    );
+    changedFragmentKeys.forEach((key) => {
+      this._fragmentArrayCache[key]?.notify();
+    });
 
     const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
     if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
