@@ -28,14 +28,6 @@ const FragmentArray = StatefulArray.extend({
   */
   modelName: null,
 
-  objectAt(index) {
-    const recordData = this._super(index);
-    if (recordData === undefined) {
-      return;
-    }
-    return recordData._fragmentGetRecord();
-  },
-
   _normalizeData(data, index) {
     assert(
       `You can only add '${this.modelName}' fragments or object literals to this property`,
@@ -46,14 +38,28 @@ const FragmentArray = StatefulArray.extend({
     if (isFragment(data)) {
       const recordData = recordDataFor(data);
       setFragmentOwner(data, this.recordData, this.key);
-      return recordData;
+      return recordData._fragmentGetRecord();
     }
-    const existing = this.objectAt(index);
+    const existing = this.currentState[index];
     if (existing) {
       existing.setProperties(data);
-      return recordDataFor(existing);
+      return existing;
     }
-    return this.recordData._newFragmentRecordDataForKey(this.key, data);
+    const recordData = this.recordData._newFragmentRecordDataForKey(
+      this.key,
+      data
+    );
+    return recordData._fragmentGetRecord();
+  },
+
+  _getFragmentState() {
+    const recordDatas = this._super();
+    return recordDatas?.map((recordData) => recordData._fragmentGetRecord());
+  },
+
+  _setFragmentState(fragments) {
+    const recordDatas = fragments.map((fragment) => recordDataFor(fragment));
+    this._super(recordDatas);
   },
 
   /**

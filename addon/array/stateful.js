@@ -106,6 +106,14 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     return data;
   },
 
+  _getFragmentState() {
+    return this.recordData.getFragment(this.key);
+  },
+
+  _setFragmentState(array) {
+    this.recordData.setDirtyFragment(this.key, array);
+  },
+
   replace(start, deleteCount, items) {
     assert(
       'The third argument to replace needs to be an array.',
@@ -124,7 +132,7 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
       deleteCount,
       ...items.map((item, i) => this._normalizeData(item, start + i))
     );
-    this.recordData.setDirtyFragment(this.key, data);
+    this._setFragmentState(data);
     this.notify();
   },
 
@@ -133,9 +141,9 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     if (this.isDestroyed || this.isDestroying || this._isUpdating) {
       return;
     }
-    const currentState = this.recordData.getFragment(this.key);
+    const currentState = this._getFragmentState();
     if (currentState == null) {
-      // detached
+      // detached; the underlying fragment array was set to null after this StatefulArray was accessed
       return;
     }
 
