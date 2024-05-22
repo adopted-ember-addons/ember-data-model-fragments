@@ -17,6 +17,15 @@
 
 
 
+
+## v6.0.10 (2024-05-22)
+
+#### :bug: Bug Fix
+* [#488](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/488) Preserve fragment array state after the record is unloaded ([@dwickern](https://github.com/dwickern))
+
+#### Committers: 1
+- Derek Wickern ([@dwickern](https://github.com/dwickern))
+
 ## v6.0.9 (2024-05-06)
 
 #### :bug: Bug Fix
