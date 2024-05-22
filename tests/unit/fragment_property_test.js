@@ -521,6 +521,37 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
   });
 
+  test('preserve fragment attributes when record is unloaded', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Barristan',
+            last: 'Selmy',
+          },
+        },
+      },
+    });
+
+    const person = await store.findRecord('person', 1);
+    const name = person.name;
+
+    person.unloadRecord();
+
+    assert.strictEqual(
+      person.name,
+      name,
+      'Fragment instance is the same after unload'
+    );
+    assert.strictEqual(
+      name.first,
+      'Barristan',
+      'preserve fragment attributes after unload'
+    );
+  });
+
   test('pass arbitrary props to createFragment', async function (assert) {
     const address = store.createFragment('address', {
       street: '1 Dungeon Cell',

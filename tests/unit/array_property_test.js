@@ -230,6 +230,42 @@ module('unit - `MF.array` property', function (hooks) {
     );
   });
 
+  test('preserve fragment array when record is unloaded', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          titles: ['Hand of the King', 'Master of Coin'],
+        },
+      },
+    });
+
+    const person = await store.findRecord('person', 1);
+    const titles = person.titles;
+
+    assert.strictEqual(titles.length, 2);
+
+    const titleBefore = titles.objectAt(0);
+    assert.strictEqual(titleBefore, 'Hand of the King');
+
+    person.unloadRecord();
+
+    assert.strictEqual(
+      person.titles,
+      titles,
+      'StatefulArray instance is the same after unload'
+    );
+
+    const titleAfter = titles.objectAt(0);
+
+    assert.strictEqual(
+      titleAfter,
+      titleBefore,
+      'preserve array contents after unload'
+    );
+  });
+
   if (HAS_ARRAY_OBSERVERS) {
     test('supports array observers', async function (assert) {
       store.push({
