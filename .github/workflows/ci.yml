@@ -178,7 +178,7 @@ jobs:
       fail-fast: true
       matrix:
         ember-try-scenario:
-          [ember-lts-3.28, ember-lts-4.4, ember-4.6, ember-data-4.6-ember-4.12, ember-data-4.6-ember-5.4, ember-data-4.6-ember-5.12, ember-classic]
+          [ember-lts-3.28, ember-lts-4.4, ember-4.6, ember-4.12-ember-data-4.6, ember-5.12-ember-data-4.6, ember-classic]
 
         allow-failure: [false]
         include:
