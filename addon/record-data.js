@@ -31,7 +31,7 @@ class FragmentBehavior {
       "The fragment's default value must be an object or null",
       defaultValue === null ||
         typeOf(defaultValue) === 'object' ||
-        isFragment(defaultValue)
+        isFragment(defaultValue),
     );
     if (defaultValue === null) {
       return null;
@@ -41,8 +41,8 @@ class FragmentBehavior {
         `The fragment's default value must be a '${this.definition.modelName}' fragment`,
         isInstanceOfType(
           defaultValue.store.modelFor(this.definition.modelName),
-          defaultValue
-        )
+          defaultValue,
+        ),
       );
       const recordData = recordDataFor(defaultValue);
       recordData.setFragmentOwner(this.recordData, key);
@@ -50,18 +50,18 @@ class FragmentBehavior {
     }
     return this.recordData._newFragmentRecordData(
       this.definition,
-      defaultValue
+      defaultValue,
     );
   }
 
   pushData(fragment, canonical) {
     assert(
       'Fragment value must be a RecordData',
-      fragment === null || fragment instanceof RecordData
+      fragment === null || fragment instanceof RecordData,
     );
     assert(
       'Fragment canonical value must be an object or null',
-      canonical === null || typeOf(canonical) === 'object'
+      canonical === null || typeOf(canonical) === 'object',
     );
 
     if (canonical === null) {
@@ -80,7 +80,7 @@ class FragmentBehavior {
   willCommit(fragment) {
     assert(
       'Fragment value must be a RecordData',
-      fragment instanceof RecordData
+      fragment instanceof RecordData,
     );
     fragment._fragmentWillCommit();
   }
@@ -88,11 +88,11 @@ class FragmentBehavior {
   didCommit(fragment, canonical) {
     assert(
       'Fragment value must be a RecordData',
-      fragment === null || fragment instanceof RecordData
+      fragment === null || fragment instanceof RecordData,
     );
     assert(
       'Fragment canonical value must be an object',
-      canonical == null || typeOf(canonical) === 'object'
+      canonical == null || typeOf(canonical) === 'object',
     );
 
     if (canonical == null) {
@@ -119,7 +119,7 @@ class FragmentBehavior {
   commitWasRejected(fragment) {
     assert(
       'Fragment value must be a RecordData',
-      fragment instanceof RecordData
+      fragment instanceof RecordData,
     );
     fragment._fragmentCommitWasRejected();
   }
@@ -127,7 +127,7 @@ class FragmentBehavior {
   rollback(fragment) {
     assert(
       'Fragment value must be a RecordData',
-      fragment instanceof RecordData
+      fragment instanceof RecordData,
     );
     fragment._fragmentRollbackAttributes();
   }
@@ -135,7 +135,7 @@ class FragmentBehavior {
   unload(fragment) {
     assert(
       'Fragment value must be a RecordData',
-      fragment instanceof RecordData
+      fragment instanceof RecordData,
     );
     fragment._fragmentUnloadRecord();
   }
@@ -143,11 +143,11 @@ class FragmentBehavior {
   isDirty(value, originalValue) {
     assert(
       'Fragment value must be a RecordData',
-      value === null || value instanceof RecordData
+      value === null || value instanceof RecordData,
     );
     assert(
       'Fragment original value must be a RecordData',
-      originalValue === null || originalValue instanceof RecordData
+      originalValue === null || originalValue instanceof RecordData,
     );
     return (
       value !== originalValue ||
@@ -158,7 +158,7 @@ class FragmentBehavior {
   currentState(fragment) {
     assert(
       'Fragment value must be a RecordData',
-      fragment === null || fragment instanceof RecordData
+      fragment === null || fragment instanceof RecordData,
     );
     return fragment === null ? null : fragment.getCurrentState();
   }
@@ -166,7 +166,7 @@ class FragmentBehavior {
   canonicalState(fragment) {
     assert(
       'Fragment value must be a RecordData',
-      fragment === null || fragment instanceof RecordData
+      fragment === null || fragment instanceof RecordData,
     );
     return fragment === null ? null : fragment.getCanonicalState();
   }
@@ -194,7 +194,7 @@ class FragmentArrayBehavior {
       "The fragment array's default value must be an array of fragments or null",
       defaultValue === null ||
         (isArray(defaultValue) &&
-          defaultValue.every((v) => typeOf(v) === 'object' || isFragment(v)))
+          defaultValue.every((v) => typeOf(v) === 'object' || isFragment(v))),
     );
     if (defaultValue === null) {
       return null;
@@ -203,7 +203,10 @@ class FragmentArrayBehavior {
       if (isFragment(item)) {
         assert(
           `The fragment array's default value can only include '${this.definition.modelName}' fragments`,
-          isInstanceOfType(item.store.modelFor(this.definition.modelName), item)
+          isInstanceOfType(
+            item.store.modelFor(this.definition.modelName),
+            item,
+          ),
         );
         const recordData = recordDataFor(defaultValue);
         recordData.setFragmentOwner(this.recordData, key);
@@ -218,12 +221,12 @@ class FragmentArrayBehavior {
       'Fragment array value must be an array of RecordData',
       fragmentArray === null ||
         (isArray(fragmentArray) &&
-          fragmentArray.every((rd) => rd instanceof RecordData))
+          fragmentArray.every((rd) => rd instanceof RecordData)),
     );
     assert(
       'Fragment array canonical value must be an array of objects',
       canonical === null ||
-        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object'))
+        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object')),
     );
 
     if (canonical === null) {
@@ -240,7 +243,7 @@ class FragmentArrayBehavior {
       } else {
         return this.recordData._newFragmentRecordData(
           this.definition,
-          attributes
+          attributes,
         );
       }
     });
@@ -250,7 +253,7 @@ class FragmentArrayBehavior {
     assert(
       'Fragment array value must be an array of RecordData',
       isArray(fragmentArray) &&
-        fragmentArray.every((rd) => rd instanceof RecordData)
+        fragmentArray.every((rd) => rd instanceof RecordData),
     );
     fragmentArray.forEach((fragment) => fragment._fragmentWillCommit());
   }
@@ -260,12 +263,12 @@ class FragmentArrayBehavior {
       'Fragment array value must be an array of RecordData',
       fragmentArray === null ||
         (isArray(fragmentArray) &&
-          fragmentArray.every((rd) => rd instanceof RecordData))
+          fragmentArray.every((rd) => rd instanceof RecordData)),
     );
     assert(
       'Fragment array canonical value must be an array of objects',
       canonical == null ||
-        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object'))
+        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object')),
     );
 
     if (canonical == null) {
@@ -287,7 +290,7 @@ class FragmentArrayBehavior {
       } else {
         return this.recordData._newFragmentRecordData(
           this.definition,
-          attributes
+          attributes,
         );
       }
     });
@@ -303,7 +306,7 @@ class FragmentArrayBehavior {
     assert(
       'Fragment array value must be an array of RecordData',
       isArray(fragmentArray) &&
-        fragmentArray.every((rd) => rd instanceof RecordData)
+        fragmentArray.every((rd) => rd instanceof RecordData),
     );
     fragmentArray.forEach((fragment) => fragment._fragmentCommitWasRejected());
   }
@@ -312,7 +315,7 @@ class FragmentArrayBehavior {
     assert(
       'Fragment array value must be an array of RecordData',
       isArray(fragmentArray) &&
-        fragmentArray.every((rd) => rd instanceof RecordData)
+        fragmentArray.every((rd) => rd instanceof RecordData),
     );
     fragmentArray.forEach((fragment) => fragment._fragmentRollbackAttributes());
   }
@@ -321,7 +324,7 @@ class FragmentArrayBehavior {
     assert(
       'Fragment array value must be an array of RecordData',
       isArray(fragmentArray) &&
-        fragmentArray.every((rd) => rd instanceof RecordData)
+        fragmentArray.every((rd) => rd instanceof RecordData),
     );
     fragmentArray.forEach((fragment) => fragment._fragmentUnloadRecord());
   }
@@ -330,13 +333,13 @@ class FragmentArrayBehavior {
     assert(
       'Fragment array value must be an array of RecordData',
       value === null ||
-        (isArray(value) && value.every((rd) => rd instanceof RecordData))
+        (isArray(value) && value.every((rd) => rd instanceof RecordData)),
     );
     assert(
       'Fragment array original value must be an array of RecordData',
       originalValue === null ||
         (isArray(originalValue) &&
-          originalValue.every((rd) => rd instanceof RecordData))
+          originalValue.every((rd) => rd instanceof RecordData)),
     );
     return (
       !isArrayEqual(value, originalValue) ||
@@ -349,7 +352,7 @@ class FragmentArrayBehavior {
       'Fragment array value must be an array of RecordData',
       fragmentArray === null ||
         (isArray(fragmentArray) &&
-          fragmentArray.every((rd) => rd instanceof RecordData))
+          fragmentArray.every((rd) => rd instanceof RecordData)),
     );
     return fragmentArray === null
       ? null
@@ -361,7 +364,7 @@ class FragmentArrayBehavior {
       'Fragment array value must be an array of RecordData',
       fragmentArray === null ||
         (isArray(fragmentArray) &&
-          fragmentArray.every((rd) => rd instanceof RecordData))
+          fragmentArray.every((rd) => rd instanceof RecordData)),
     );
     return fragmentArray === null
       ? null
@@ -389,7 +392,7 @@ class ArrayBehavior {
     }
     assert(
       "The array's default value must be an array or null",
-      defaultValue === null || isArray(defaultValue)
+      defaultValue === null || isArray(defaultValue),
     );
     if (defaultValue === null) {
       return null;
@@ -401,7 +404,7 @@ class ArrayBehavior {
     assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
-      canonical === null || isArray(canonical)
+      canonical === null || isArray(canonical),
     );
     if (canonical === null) {
       return null;
@@ -418,7 +421,7 @@ class ArrayBehavior {
     assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
-      canonical === null || canonical === undefined || isArray(canonical)
+      canonical === null || canonical === undefined || isArray(canonical),
     );
     if (canonical === null) {
       // server replaced array with null
@@ -451,7 +454,7 @@ class ArrayBehavior {
     assert('Array value must be an array', value === null || isArray(value));
     assert(
       'Array original value must be an array',
-      originalValue === null || isArray(originalValue)
+      originalValue === null || isArray(originalValue),
     );
     return !isArrayEqual(value, originalValue);
   }
@@ -473,7 +476,7 @@ export default class FragmentRecordData extends RecordData {
 
     const behavior = Object.create(null);
     const definitions = this.storeWrapper.attributesDefinitionFor(
-      this.modelName
+      this.modelName,
     );
     for (const [key, definition] of Object.entries(definitions)) {
       if (!definition.isFragment) {
@@ -501,11 +504,11 @@ export default class FragmentRecordData extends RecordData {
     const behavior = this._fragmentBehavior[key];
     assert(
       `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
-      behavior != null
+      behavior != null,
     );
     assert(
       'Fragment default value was already initialized',
-      !this.hasFragment(key)
+      !this.hasFragment(key),
     );
     const defaultValue = behavior.getDefaultValue(key);
     this._fragmentData[key] = defaultValue;
@@ -536,7 +539,7 @@ export default class FragmentRecordData extends RecordData {
     const behavior = this._fragmentBehavior[key];
     assert(
       `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
-      behavior != null
+      behavior != null,
     );
     let originalValue;
     if (key in this._inFlightFragments) {
@@ -564,7 +567,7 @@ export default class FragmentRecordData extends RecordData {
   setDirtyAttribute(key, value) {
     assert(
       `Attribute '${key}' for model '${this.modelName}' must not be a fragment`,
-      this._fragmentBehavior[key] == null
+      this._fragmentBehavior[key] == null,
     );
     const oldDirty = this.isAttrDirty(key);
     super.setDirtyAttribute(key, value);
@@ -587,15 +590,15 @@ export default class FragmentRecordData extends RecordData {
   setFragmentOwner(recordData, key) {
     assert(
       'Fragment owner must be a RecordData',
-      recordData instanceof RecordData
+      recordData instanceof RecordData,
     );
     assert(
       'Fragment owner key must be a fragment',
-      recordData._fragmentBehavior[key] != null
+      recordData._fragmentBehavior[key] != null,
     );
     assert(
       'Fragments can only belong to one owner, try copying instead',
-      !this._fragmentOwner || this._fragmentOwner.recordData === recordData
+      !this._fragmentOwner || this._fragmentOwner.recordData === recordData,
     );
     this._fragmentOwner = { recordData, key };
   }
@@ -604,7 +607,7 @@ export default class FragmentRecordData extends RecordData {
     const behavior = this._fragmentBehavior[key];
     assert(
       `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
-      behavior != null
+      behavior != null,
     );
     return this._newFragmentRecordData(behavior.definition, attributes);
   }
@@ -614,7 +617,7 @@ export default class FragmentRecordData extends RecordData {
       definition.modelName,
       definition.options,
       attributes,
-      this._fragmentGetRecord()
+      this._fragmentGetRecord(),
     );
     const recordData = this.storeWrapper.recordDataFor(type);
     recordData.setFragmentOwner(this, definition.name);
@@ -651,7 +654,7 @@ export default class FragmentRecordData extends RecordData {
       {},
       this._data,
       this._inFlightAttributes,
-      this._attributes
+      this._attributes,
     );
     for (const [key, behavior] of Object.entries(this._fragmentBehavior)) {
       result[key] = behavior.currentState(this.getFragment(key));
@@ -677,7 +680,7 @@ export default class FragmentRecordData extends RecordData {
   changedFragments() {
     const diffData = Object.create(null);
     for (const [key, newFragment] of Object.entries(
-      this._fragmentsOrInFlight
+      this._fragmentsOrInFlight,
     )) {
       const behavior = this._fragmentBehavior[key];
       const oldFragment = this._fragmentData[key];
@@ -694,7 +697,7 @@ export default class FragmentRecordData extends RecordData {
     const original = Object.assign(
       {},
       this._fragmentData,
-      this._inFlightFragments
+      this._inFlightFragments,
     );
     for (const key of Object.keys(updates)) {
       if (this._fragments[key]) {
@@ -820,7 +823,7 @@ export default class FragmentRecordData extends RecordData {
     }
 
     const changedFragmentKeys = this._changedFragmentKeys(
-      newCanonicalFragments
+      newCanonicalFragments,
     );
     Object.assign(this._fragmentData, newCanonicalFragments);
     this._inFlightFragments = null;
@@ -877,7 +880,7 @@ export default class FragmentRecordData extends RecordData {
     const behavior = this._fragmentBehavior[key];
     assert(
       `Attribute '${key}' for model '${this.modelName}' must be a fragment`,
-      behavior != null
+      behavior != null,
     );
     if (!this.isFragmentDirty(key)) {
       return;
@@ -939,7 +942,7 @@ export default class FragmentRecordData extends RecordData {
     }
     assert(
       `Fragment '${key}' in owner '${owner.modelName}' has not been initialized`,
-      key in owner._fragmentData
+      key in owner._fragmentData,
     );
 
     owner._fragments[key] = owner._fragmentData[key];
@@ -981,14 +984,14 @@ export default class FragmentRecordData extends RecordData {
         this.modelName,
         this.id,
         this.clientId,
-        key
+        key,
       );
     } else {
       this.storeWrapper.notifyStateChange(
         this.modelName,
         this.id,
         this.clientId,
-        key
+        key,
       );
     }
   }
@@ -1002,7 +1005,7 @@ export default class FragmentRecordData extends RecordData {
     if (gte('ember-data', '4.5.0')) {
       return this.storeWrapper._store._instanceCache.getRecord(
         this.identifier,
-        properties
+        properties,
       );
     }
     return internalModelFor(this).getRecord(properties);
@@ -1093,7 +1096,7 @@ function internalModelFor(recordData) {
   const store = recordData.storeWrapper._store;
   if (gte('ember-data', '4.5.0')) {
     return store._instanceCache._internalModelForResource(
-      recordData.identifier
+      recordData.identifier,
     );
   }
   return store._internalModelForResource(recordData.identifier);

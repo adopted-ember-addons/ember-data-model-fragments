@@ -109,7 +109,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(vehicle.passenger.name.toString().includes('owner(null)'));
     assert.notOk(
       store.createFragment('name').toString().includes('owner('),
-      'fragment with no owner'
+      'fragment with no owner',
     );
   });
 
@@ -125,11 +125,11 @@ module('unit - `MF.Fragment`', function (hooks) {
 
     assert.ok(
       fragment1.compare(fragment1, fragment2) !== 0,
-      'deeply equal objects are not the same'
+      'deeply equal objects are not the same',
     );
     assert.ok(
       fragment1.compare(fragment1, fragment1) === 0,
-      'identical objects are the same'
+      'identical objects are the same',
     );
   });
 
@@ -162,12 +162,12 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.deepEqual(
       oldName,
       { first: 'Loras', last: 'Tyrell', prefixes: [] },
-      'old fragment is indicated in the diff object'
+      'old fragment is indicated in the diff object',
     );
     assert.deepEqual(
       newName,
       { first: 'Loras', last: 'Baratheon', prefixes: [] },
-      'new fragment is indicated in the diff object'
+      'new fragment is indicated in the diff object',
     );
   });
 
@@ -192,12 +192,12 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.deepEqual(
       oldName,
       { first: 'Rob', last: 'Stark', prefixes: [] },
-      'old fragment is indicated in the diff object'
+      'old fragment is indicated in the diff object',
     );
     assert.deepEqual(
       newName,
       null,
-      'new fragment is indicated in the diff object'
+      'new fragment is indicated in the diff object',
     );
   });
 
@@ -222,12 +222,12 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.deepEqual(
       oldName,
       null,
-      'old fragment is indicated in the diff object'
+      'old fragment is indicated in the diff object',
     );
     assert.deepEqual(
       newName,
       { first: 'Rob', last: 'Stark', prefixes: [] },
-      'new fragment is indicated in the diff object'
+      'new fragment is indicated in the diff object',
     );
 
     person._internalModel.adapterWillCommit();
@@ -237,12 +237,12 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.deepEqual(
       oldNameAfterWillCommit,
       null,
-      'old fragment is indicated in the diff object'
+      'old fragment is indicated in the diff object',
     );
     assert.deepEqual(
       newNameAfterWillCommit,
       { first: 'Rob', last: 'Stark', prefixes: [] },
-      'new fragment is indicated in the diff object'
+      'new fragment is indicated in the diff object',
     );
 
     person._internalModel.adapterDidCommit();
@@ -250,7 +250,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.strictEqual(
       person.changedAttributes().name,
       undefined,
-      'changedAttributes is reset after commit'
+      'changedAttributes is reset after commit',
     );
   });
 
@@ -338,12 +338,12 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.equal(
       zoo.manager.content,
       person,
-      'Manager relationship was correctly loaded'
+      'Manager relationship was correctly loaded',
     );
     assert.equal(
       zoo.star.name,
       'Sabu',
-      'Elephant fragment has the right name.'
+      'Elephant fragment has the right name.',
     );
     assert.notOk(isUnloaded(person), 'Person is no destroyed');
     assert.notOk(isUnloaded(zoo), 'Zoo is not destroyed');
@@ -369,17 +369,17 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.equal(
       zoo.manager.content,
       person,
-      'Manager relationship was correctly loaded'
+      'Manager relationship was correctly loaded',
     );
     assert.equal(
       zoo.star.name,
       'Sabu',
-      'Elephant fragment has the right name.'
+      'Elephant fragment has the right name.',
     );
 
     assert.ok(
       zoo !== origZoo,
-      'A different instance of the zoo model was loaded'
+      'A different instance of the zoo model was loaded',
     );
     assert.ok(zoo.star !== origZoo.star, 'Fragments were not reused');
   });
@@ -393,7 +393,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       const name = store.createFragment('name');
       assert.ok(
         name.readyWasCalled,
-        'when making fragment directly with store.createFragment'
+        'when making fragment directly with store.createFragment',
       );
 
       const person = store.createRecord('person', {
@@ -403,11 +403,11 @@ module('unit - `MF.Fragment`', function (hooks) {
 
       assert.ok(
         person.name.readyWasCalled,
-        'when creating model that has fragment'
+        'when creating model that has fragment',
       );
       assert.ok(
         person.names.isEvery('readyWasCalled'),
-        'when creating model that has fragmentArray'
+        'when creating model that has fragmentArray',
       );
     });
   }
@@ -504,12 +504,12 @@ module('unit - `MF.Fragment`', function (hooks) {
           last: 'Doe',
           prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
         },
-        'name is correctly loaded'
+        'name is correctly loaded',
       );
       assert.deepEqual(
         person.names.serialize(),
         [{ first: 'John', last: 'Doe', prefixes: [] }],
-        'names is correct'
+        'names is correct',
       );
     });
 
@@ -533,12 +533,12 @@ module('unit - `MF.Fragment`', function (hooks) {
           last: 'Doe',
           prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
         },
-        'name is correctly loaded'
+        'name is correctly loaded',
       );
       assert.deepEqual(
         person.names.serialize(),
         [{ first: 'John', last: 'Doe', prefixes: [] }],
-        'names is correct'
+        'names is correct',
       );
     });
   });

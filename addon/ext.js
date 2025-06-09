@@ -41,7 +41,7 @@ Store.reopen({
   createRecordDataFor(type, id, lid, storeWrapper) {
     if (!gte('ember-data', '3.28.0')) {
       throw new Error(
-        'This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.'
+        'This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.',
       );
     }
     const identifier = this.identifierCache.getOrCreateRecordIdentifier({
@@ -75,7 +75,7 @@ Store.reopen({
   createFragment(modelName, props) {
     assert(
       `The '${modelName}' model must be a subclass of MF.Fragment`,
-      this.isFragment(modelName)
+      this.isFragment(modelName),
     );
     let recordData;
     if (gte('ember-data', '4.5.0')) {
@@ -107,11 +107,11 @@ Store.reopen({
     // this assertion is cargo-culted from ember-data TODO: update comment
     assert(
       "You need to pass a model name to the store's serializerFor method",
-      isPresent(modelName)
+      isPresent(modelName),
     );
     assert(
       `Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`,
-      typeof modelName === 'string'
+      typeof modelName === 'string',
     );
 
     const owner = getOwner(this);
@@ -133,7 +133,7 @@ Store.reopen({
 */
 const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
   Snapshot.prototype,
-  '_attributes'
+  '_attributes',
 );
 
 Object.defineProperty(Snapshot.prototype, '_attributes', {
@@ -173,11 +173,11 @@ JSONSerializer.reopen({
 
     if (!owner.hasRegistration(containerKey)) {
       const match = attributeType.match(
-        /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/
+        /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/,
       );
       assert(
         `Failed parsing ember-data-model-fragments attribute type ${attributeType}`,
-        match != null
+        match != null,
       );
       const transformName = match[1];
       const type = match[2];

@@ -38,11 +38,11 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     assert.equal(
       copy[0].first,
       data.names[0].first,
-      'child fragments are copied'
+      'child fragments are copied',
     );
     assert.ok(
       copy[0] !== person.names.firstObject,
-      'copied fragments are new fragments'
+      'copied fragments are new fragments',
     );
   });
 
@@ -95,7 +95,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     assert.equal(
       fragments.indexOf(fragment),
       length,
-      'new fragment is in correct location'
+      'new fragment is in correct location',
     );
   });
 
@@ -129,7 +129,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     assert.equal(
       fragments.indexOf(fragment),
       length,
-      'fragment is in correct location'
+      'fragment is in correct location',
     );
   });
 
@@ -218,35 +218,35 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is initially in a clean state'
+      'fragment array is initially in a clean state',
     );
 
     fragments.removeFragment(fragment);
 
     assert.ok(
       fragments.hasDirtyAttributes,
-      'fragment array is in dirty state after removal'
+      'fragment array is in dirty state after removal',
     );
 
     fragments.unshiftObject(fragment);
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state'
+      'fragment array is returned to clean state',
     );
 
     fragments.addFragment(newFragment);
 
     assert.ok(
       fragments.hasDirtyAttributes,
-      'fragment array is in dirty state after addition'
+      'fragment array is in dirty state after addition',
     );
 
     fragments.removeFragment(newFragment);
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state'
+      'fragment array is returned to clean state',
     );
 
     fragments.removeFragment(fragment);
@@ -254,7 +254,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
     assert.ok(
       fragments.hasDirtyAttributes,
-      'fragment array is in dirty state after reordering'
+      'fragment array is in dirty state after reordering',
     );
 
     fragments.removeFragment(fragment);
@@ -262,7 +262,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state'
+      'fragment array is returned to clean state',
     );
   });
 
@@ -288,21 +288,21 @@ module('unit - `MF.fragmentArray`', function (hooks) {
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is initially in a clean state'
+      'fragment array is initially in a clean state',
     );
 
     fragment.set('last', 'Stark');
 
     assert.ok(
       fragments.hasDirtyAttributes,
-      'fragment array in dirty state after change to a fragment'
+      'fragment array in dirty state after change to a fragment',
     );
 
     fragment.set('last', 'Snow');
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state'
+      'fragment array is returned to clean state',
     );
   });
 
@@ -344,12 +344,12 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     assert.ok(!fragments.hasDirtyAttributes, 'fragment array is not dirty');
     assert.ok(
       !fragments.isAny('hasDirtyAttributes'),
-      'all fragments are in clean state'
+      'all fragments are in clean state',
     );
     assert.deepEqual(
       fragments.toArray(),
       originalState,
-      'original array contents is restored'
+      'original array contents is restored',
     );
   });
 
@@ -400,7 +400,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
           last: 'Stark',
           prefixes: [],
         },
-      ]
+      ],
     );
 
     store.push({

@@ -77,7 +77,7 @@ module('Integration | Rendering', function (hooks) {
           {{/each}}
         </ul>
       `,
-      OrderListComponent
+      OrderListComponent,
     );
 
     this.OrderList = OrderListComponent;
@@ -118,7 +118,7 @@ module('Integration | Rendering', function (hooks) {
             <li data-product="{{idx}}">{{product.name}}: {{product.price}}</li>
           {{/each}}
         </ul>
-      `
+      `,
     );
 
     assert.dom('[data-product]').doesNotExist();

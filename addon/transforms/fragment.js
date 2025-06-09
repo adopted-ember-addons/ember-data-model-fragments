@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import Transform from '@ember-data/serializer/transform';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 /**
   @module ember-data-model-fragments
@@ -39,7 +39,7 @@ const FragmentTransform = Transform.extend({
       ? snapshot._createSnapshot()
       : snapshot;
     const serializer = store.serializerFor(
-      realSnapshot.modelName || realSnapshot.constructor.modelName
+      realSnapshot.modelName || realSnapshot.constructor.modelName,
     );
 
     return serializer.serialize(realSnapshot);
@@ -65,7 +65,7 @@ const FragmentTransform = Transform.extend({
 
     assert(
       'The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`',
-      !(serializer instanceof JSONAPISerializer)
+      !(serializer instanceof JSONAPISerializer),
     );
 
     const typeClass = store.modelFor(modelName);

@@ -348,7 +348,7 @@ module('integration - Dependent State', function (hooks) {
 
     person.set(
       'name',
-      store.createFragment('name', { first: 'Rob', last: 'Stark' })
+      store.createFragment('name', { first: 'Rob', last: 'Stark' }),
     );
 
     assert.ok(person.hasDirtyAttributes, 'owner record is dirty');
@@ -455,7 +455,7 @@ module('integration - Dependent State', function (hooks) {
     assert.equal(
       addresses.length,
       length,
-      'fragment array length is maintained'
+      'fragment array length is maintained',
     );
     assert.ok(addresses.hasDirtyAttributes, 'fragment array is dirty');
     assert.ok(person.hasDirtyAttributes, 'owner record is dirty');
@@ -628,7 +628,7 @@ module('integration - Dependent State', function (hooks) {
     assert.deepEqual(
       values,
       person.titles.toArray(),
-      'primitive values are reset'
+      'primitive values are reset',
     );
     assert.ok(!titles.hasDirtyAttributes, 'fragment array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -654,7 +654,7 @@ module('integration - Dependent State', function (hooks) {
     assert.deepEqual(
       values,
       person.titles.toArray(),
-      'primitive values are reset'
+      'primitive values are reset',
     );
     assert.ok(!titles.hasDirtyAttributes, 'primitive array is clean');
     assert.ok(person.hasDirtyAttributes, 'owner record is still dirty');
@@ -854,7 +854,7 @@ module('integration - Dependent State', function (hooks) {
 
     assert.ok(
       isArray(addresses) && isEmpty(addresses),
-      'property is an empty array'
+      'property is an empty array',
     );
 
     person.set('addresses', [
@@ -872,7 +872,7 @@ module('integration - Dependent State', function (hooks) {
 
     assert.ok(
       isArray(person.addresses) && isEmpty(person.addresses),
-      'property is an empty array again'
+      'property is an empty array again',
     );
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
@@ -923,12 +923,12 @@ module('integration - Dependent State', function (hooks) {
     assert.equal(
       person.addresses.lastObject.street,
       '1 Dungeon Cell',
-      'street updated'
+      'street updated',
     );
     assert.equal(
       person.addresses.lastObject.city,
       "King's Landing",
-      'city is the same'
+      'city is the same',
     );
     assert.ok(!person.hasDirtyAttributes, 'person record is not dirty');
   });

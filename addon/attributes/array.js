@@ -73,7 +73,7 @@ export default function array(type, options) {
     set(key, value) {
       assert(
         'You must pass an array or null to set an array',
-        value === null || isArray(value)
+        value === null || isArray(value),
       );
       const recordData = recordDataFor(this);
       if (value === null) {

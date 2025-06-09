@@ -117,11 +117,11 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
   replace(start, deleteCount, items) {
     assert(
       'The third argument to replace needs to be an array.',
-      isArray(items)
+      isArray(items),
     );
     assert(
       'Attempted to update the fragment array after it was destroyed',
-      !this.isDestroyed && !this.isDestroying
+      !this.isDestroyed && !this.isDestroying,
     );
     if (deleteCount === 0 && items.length === 0) {
       // array is unchanged
@@ -134,7 +134,7 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
     data.splice(
       start,
       deleteCount,
-      ...items.map((item, i) => this._normalizeData(item, start + i))
+      ...items.map((item, i) => this._normalizeData(item, start + i)),
     );
     this._setFragmentState(data);
     this.notify();
@@ -162,14 +162,14 @@ const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
         this.arrayContentWillChange(
           diff.firstChangeIndex,
           diff.removedCount,
-          diff.addedCount
+          diff.addedCount,
         );
         this._length = currentState.length;
         this.currentState = currentState;
         this.arrayContentDidChange(
           diff.firstChangeIndex,
           diff.removedCount,
-          diff.addedCount
+          diff.addedCount,
         );
       }
     } else {

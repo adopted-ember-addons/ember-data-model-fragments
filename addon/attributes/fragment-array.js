@@ -85,7 +85,7 @@ export default function fragmentArray(type, options) {
         'You must pass an array of fragments, or null to set a fragmentArray',
         value === null ||
           (isArray(value) &&
-            value.every((v) => isFragment(v) || typeOf(v) === 'object'))
+            value.every((v) => isFragment(v) || typeOf(v) === 'object')),
       );
       const recordData = recordDataFor(this);
       if (value === null) {

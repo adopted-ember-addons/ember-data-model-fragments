@@ -84,7 +84,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.ok(isArray(addresses), 'property is array-like');
     assert.ok(
       addresses instanceof MF.FragmentArray,
-      'property is an instance of `MF.FragmentArray`'
+      'property is an instance of `MF.FragmentArray`',
     );
   });
 
@@ -98,7 +98,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       addresses.every((address) => {
         return address instanceof Address;
       }),
-      'each fragment is a `MF.Fragment` instance'
+      'each fragment is a `MF.Fragment` instance',
     );
   });
 
@@ -121,12 +121,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       addresses.length,
       length + 1,
-      'address property size is correct'
+      'address property size is correct',
     );
     assert.equal(
       addresses.indexOf(address),
       length,
-      'new fragment is in correct location'
+      'new fragment is in correct location',
     );
   });
 
@@ -145,7 +145,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.deepEqual(
       person.changedAttributes(),
       {},
-      'a freshly pushed object has no changes'
+      'a freshly pushed object has no changes',
     );
     addresses.addFragment(address);
 
@@ -153,19 +153,19 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       oldAddresses.length,
       2,
-      'changedAttributes has the old length'
+      'changedAttributes has the old length',
     );
     assert.equal(
       newAddresses.length,
       3,
-      'changedAttributes has the new length'
+      'changedAttributes has the new length',
     );
 
     addresses.rollbackAttributes();
     assert.deepEqual(
       person.changedAttributes(),
       {},
-      'there are no changes after a rollback'
+      'there are no changes after a rollback',
     );
     addresses.objectAt(0).set('street', 'Changed Street');
 
@@ -173,19 +173,19 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       oldAddresses[0].street,
       '1 Sky Cell',
-      'changedAttributes has the old street'
+      'changedAttributes has the old street',
     );
     assert.equal(
       newAddresses[0].street,
       'Changed Street',
-      'changedAttributes has the new street'
+      'changedAttributes has the new street',
     );
 
     addresses.rollbackAttributes();
     assert.deepEqual(
       person.changedAttributes(),
       {},
-      'there are no changes after a rollback'
+      'there are no changes after a rollback',
     );
   });
 
@@ -235,17 +235,17 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       person.addresses,
       addresses,
-      'fragment array is the same object'
+      'fragment array is the same object',
     );
     assert.equal(
       person.addresses.length,
       1,
-      'fragment array has the correct length'
+      'fragment array has the correct length',
     );
     assert.equal(
       person.addresses.firstObject,
       address,
-      'fragment array contains the new fragment'
+      'fragment array contains the new fragment',
     );
   });
 
@@ -273,7 +273,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const person2 = await store.findRecord('person', 2);
     assert.ok(
       person.addresses !== person2.addresses,
-      'default array is unique'
+      'default array is unique',
     );
   });
 
@@ -327,12 +327,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     assert.ok(
       person.addresses.firstObject instanceof MF.Fragment,
-      'a `MF.Fragment` instance is created'
+      'a `MF.Fragment` instance is created',
     );
     assert.equal(
       person.addresses.firstObject.street,
       address.street,
-      'fragment has correct values'
+      'fragment has correct values',
     );
   });
 
@@ -363,12 +363,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     assert.ok(
       person.addresses.firstObject instanceof MF.Fragment,
-      'a `MF.Fragment` instance is created'
+      'a `MF.Fragment` instance is created',
     );
     assert.equal(
       person.addresses.firstObject.street,
       address.street,
-      'fragment has correct values'
+      'fragment has correct values',
     );
   });
 
@@ -409,12 +409,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       address,
       person.addresses.firstObject,
-      'fragment instances are reused'
+      'fragment instances are reused',
     );
     assert.equal(
       person.addresses.firstObject.street,
       newAddress.street,
-      'fragment has correct values'
+      'fragment has correct values',
     );
   });
 
@@ -449,21 +449,21 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       throne.addresses.firstObject.street,
       defaultValue[0].street,
-      'the default value is used when the value has not been specified'
+      'the default value is used when the value has not been specified',
     );
 
     throne.set('addresses', null);
     assert.equal(
       throne.addresses,
       null,
-      'the default value is not used when the value is set to null'
+      'the default value is not used when the value is set to null',
     );
 
     throne = store.createRecord('throne', { name: 'Iron', addresses: null });
     assert.equal(
       throne.addresses,
       null,
-      'the default value is not used when the value is initialized to null'
+      'the default value is not used when the value is initialized to null',
     );
   });
 
@@ -494,7 +494,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       sword.addresses.firstObject.street,
       defaultValue[0].street,
-      'the default value is correct'
+      'the default value is correct',
     );
   });
 
@@ -526,7 +526,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.equal(
       sword.addresses.firstObject.street,
       defaultValue[0].street,
-      'the default value is correct'
+      'the default value is correct',
     );
   });
 
@@ -545,15 +545,15 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       assert.ok(person.isDestroying, 'the model is being destroyed');
       assert.ok(
         addresses.isDestroying,
-        'the fragment array is being destroyed'
+        'the fragment array is being destroyed',
       );
       assert.ok(
         firstAddress.isDestroying,
-        'the first fragment is being destroyed'
+        'the first fragment is being destroyed',
       );
       assert.ok(
         secondAddress.isDestroying,
-        'the second fragment is being destroyed'
+        'the second fragment is being destroyed',
       );
     });
   });
@@ -573,15 +573,15 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
       assert.ok(person.isDestroying, 'the model is being destroyed');
       assert.ok(
         addresses.isDestroying,
-        'the fragment array is being destroyed'
+        'the fragment array is being destroyed',
       );
       assert.ok(
         firstAddress.isDestroying,
-        'the removed fragment is being destroyed'
+        'the removed fragment is being destroyed',
       );
       assert.ok(
         secondAddress.isDestroying,
-        'the remaining fragment is being destroyed'
+        'the remaining fragment is being destroyed',
       );
     });
   });
@@ -601,7 +601,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.strictEqual(
       person.addresses,
       addresses,
-      'fragment array instance is the same after unload'
+      'fragment array instance is the same after unload',
     );
 
     const addressAfter = addresses.objectAt(0);
@@ -609,12 +609,12 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     assert.strictEqual(
       addressAfter,
       addressBefore,
-      'FragmentArray instance is the same after unload'
+      'FragmentArray instance is the same after unload',
     );
     assert.strictEqual(
       addressAfter.street,
       '1 Sky Cell',
-      'preserve fragment attributes after unload'
+      'preserve fragment attributes after unload',
     );
   });
 

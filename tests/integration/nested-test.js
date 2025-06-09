@@ -87,7 +87,7 @@ module('integration - Nested fragments', function (hooks) {
     assert.equal(
       user.orders.firstObject.products.firstObject.name,
       'Tears of Lys',
-      'nested fragment array properties are converted properly'
+      'nested fragment array properties are converted properly',
     );
 
     const product = user.orders.firstObject.products.firstObject;
@@ -99,7 +99,7 @@ module('integration - Nested fragments', function (hooks) {
     assert.equal(
       product.price,
       '499.99',
-      'rollbackAttributes cascades to nested fragments'
+      'rollbackAttributes cascades to nested fragments',
     );
     assert.ok(!user.hasDirtyAttributes, 'dirty state is reset');
 
@@ -112,7 +112,7 @@ module('integration - Nested fragments', function (hooks) {
     assert.equal(
       user.orders.firstObject.products.length,
       1,
-      'fragment array length is correct'
+      'fragment array length is correct',
     );
   });
 
@@ -157,26 +157,26 @@ module('integration - Nested fragments', function (hooks) {
     assert.equal(orders.length, 2, 'fragment array length is correct');
     assert.ok(
       orders.firstObject instanceof Order,
-      'fragment instances are created'
+      'fragment instances are created',
     );
     assert.equal(
       orders.firstObject.amount,
       data.orders[0].amount,
-      'fragment properties are correct'
+      'fragment properties are correct',
     );
     assert.equal(
       orders.firstObject.products.length,
       2,
-      'nested fragment array length is correct'
+      'nested fragment array length is correct',
     );
     assert.ok(
       orders.firstObject.products.firstObject instanceof Product,
-      'nested fragment instances are created'
+      'nested fragment instances are created',
     );
     assert.equal(
       orders.firstObject.products.firstObject.name,
       data.orders[0].products[0].name,
-      'nested fragment properties are correct'
+      'nested fragment properties are correct',
     );
   });
 
@@ -210,21 +210,21 @@ module('integration - Nested fragments', function (hooks) {
     assert.deepEqual(
       user.info.notes.toArray(),
       defaultInfo.notes,
-      'a doubly nested fragment array is created with the default value'
+      'a doubly nested fragment array is created with the default value',
     );
     assert.ok(
       user.orders.firstObject,
-      'a nested fragment array is created with the default value'
+      'a nested fragment array is created with the default value',
     );
     assert.equal(
       user.orders.firstObject.amount,
       defaultOrders[0].amount,
-      'a nested fragment is created with the default value'
+      'a nested fragment is created with the default value',
     );
     assert.equal(
       user.orders.firstObject.products.firstObject.name,
       defaultOrders[0].products[0].name,
-      'a nested fragment is created with the default value'
+      'a nested fragment is created with the default value',
     );
   });
 
@@ -260,11 +260,11 @@ module('integration - Nested fragments', function (hooks) {
     assert.deepEqual(
       info.notes.toArray(),
       data.info.notes,
-      'nested fragment arrays are copied'
+      'nested fragment arrays are copied',
     );
     assert.ok(
       info.notes !== user.info.notes,
-      'nested fragment array copies are new fragment arrays'
+      'nested fragment array copies are new fragment arrays',
     );
 
     const orders = user.orders.copy();
@@ -273,11 +273,11 @@ module('integration - Nested fragments', function (hooks) {
     assert.equal(
       order.recurring,
       data.orders[0].recurring,
-      'nested fragments are copied'
+      'nested fragments are copied',
     );
     assert.ok(
       order !== user.orders.firstObject,
-      'nested fragment copies are new fragments'
+      'nested fragment copies are new fragments',
     );
 
     const product = order.product;
@@ -285,11 +285,11 @@ module('integration - Nested fragments', function (hooks) {
     assert.equal(
       product.name,
       data.orders[0].product.name,
-      'nested fragments are copied'
+      'nested fragments are copied',
     );
     assert.ok(
       product !== user.orders.firstObject.product,
-      'nested fragment copies are new fragments'
+      'nested fragment copies are new fragments',
     );
   });
 

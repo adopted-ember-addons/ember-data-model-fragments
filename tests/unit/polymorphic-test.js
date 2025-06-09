@@ -121,7 +121,7 @@ module('unit - Polymorphism', function (hooks) {
     assert.equal(
       newElephant.trunkLength,
       7,
-      "elephant's trunk length is correct"
+      "elephant's trunk length is correct",
     );
     assert.strictEqual(newElephant.zoo, record, 'set the fragment owner');
   });
@@ -146,22 +146,22 @@ module('unit - Polymorphism', function (hooks) {
 
     assert.ok(
       textOptions instanceof ComponentOptionsText,
-      'options is ComponentOptionsText'
+      'options is ComponentOptionsText',
     );
     assert.equal(
       textOptions.fontFamily,
       'Verdana',
-      'options has correct fontFamily attribute'
+      'options has correct fontFamily attribute',
     );
     assert.equal(
       textOptions.fontSize,
       12,
-      'options has correct fontSize attribute'
+      'options has correct fontSize attribute',
     );
     assert.equal(
       component.optionsHistory.length,
       1,
-      'fragment object was added to fragment array'
+      'fragment object was added to fragment array',
     );
   });
 
