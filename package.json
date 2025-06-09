@@ -81,7 +81,6 @@
     "eslint": "^9.25.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-ember": "^12.5.0",
-    "eslint-plugin-ember-suave": "^1.0.0",
     "eslint-plugin-n": "^17.17.0",
     "eslint-plugin-qunit": "^8.1.2",
     "globals": "^15.15.0",

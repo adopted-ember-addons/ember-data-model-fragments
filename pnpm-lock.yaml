@@ -136,9 +136,6 @@ importers:
       eslint-plugin-ember:
         specifier: ^12.5.0
         version: 12.5.0(@babel/core@7.27.4)(eslint@9.28.0)
-      eslint-plugin-ember-suave:
-        specifier: ^1.0.0
-        version: 1.0.0
       eslint-plugin-n:
         specifier: ^17.17.0
         version: 17.19.0(eslint@9.28.0)(typescript@5.8.3)
@@ -2967,10 +2964,6 @@ packages:
   eslint-formatter-kakoune@1.0.0:
     resolution: {integrity: sha512-Uk/TVLt6Nf6Xoz7C1iYuZjOSdJxe5aaauGRke8JhKeJwD66Y61/pY2FjtLP04Ooq9PwV34bzrkKkU2UZ5FtDRA==}
 
-  eslint-plugin-ember-suave@1.0.0:
-    resolution: {integrity: sha512-E66MjE+ylRPvSqAjZA/7tqeqlePvb0M4zlAeV2bou6b8/BvYleSUKc9v09YzF6P3L4ohMGQoZ6u40LbZCAbQpQ==}
-    engines: {node: '>=0.10.0'}
-
   eslint-plugin-ember@12.5.0:
     resolution: {integrity: sha512-DBUzsaKWDVXsujAZPpRir0O7owdlCoVzZmtaJm7g7iQeSrNtcRWI7AItsTqKSsws1XeAySH0sPsQItMdDCb9Fg==}
     engines: {node: 18.* || 20.* || >= 21}
@@ -5368,10 +5361,6 @@ packages:
 
   require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
-
-  requireindex@1.1.0:
-    resolution: {integrity: sha512-LBnkqsDE7BZKvqylbmn7lTIVdpx4K/QCduRATpO5R+wtPmky/a8pN1bO2D6wXppn1497AJF9mNjqAXr6bdl9jg==}
-    engines: {node: '>=0.10.5'}
 
   requireindex@1.2.0:
     resolution: {integrity: sha512-L9jEkOi3ASd9PYit2cwRfyppc9NoABujTP8/5gFcbERmo5jUoAKovIC3fsF17pkTnGsrByysqX+Kxd2OTNI1ww==}
@@ -10428,10 +10417,6 @@ snapshots:
 
   eslint-formatter-kakoune@1.0.0: {}
 
-  eslint-plugin-ember-suave@1.0.0:
-    dependencies:
-      requireindex: 1.1.0
-
   eslint-plugin-ember@12.5.0(@babel/core@7.27.4)(eslint@9.28.0):
     dependencies:
       '@ember-data/rfc395-data': 0.0.4
@@ -13181,8 +13166,6 @@ snapshots:
   require-from-string@2.0.2: {}
 
   require-main-filename@2.0.0: {}
-
-  requireindex@1.1.0: {}
 
   requireindex@1.2.0: {}
 
