@@ -638,7 +638,7 @@ module('integration - Persistence', function (hooks) {
 
     addObserver(personProxy, 'name.first', function () {});
 
-    // eslint-disable-next-line ember/no-get
+     
     personProxy.get('name.first');
 
     store.push({

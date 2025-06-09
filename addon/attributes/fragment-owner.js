@@ -27,7 +27,7 @@ import { recordDataFor } from '@ember-data/store/-private';
  @return {Attribute}
  */
 export default function fragmentOwner() {
-  // eslint-disable-next-line ember/require-computed-property-dependencies
+   
   return computed(function () {
     assert(
       'Fragment owner properties can only be used on fragments.',

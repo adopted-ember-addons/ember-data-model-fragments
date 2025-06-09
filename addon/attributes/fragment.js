@@ -60,7 +60,7 @@ export default function fragment(type, options) {
     options,
   };
 
-  // eslint-disable-next-line ember/require-computed-property-dependencies
+   
   return computed({
     get(key) {
       const recordData = recordDataFor(this);
