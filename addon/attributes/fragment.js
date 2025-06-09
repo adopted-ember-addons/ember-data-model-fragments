@@ -60,7 +60,6 @@ export default function fragment(type, options) {
     options,
   };
 
-   
   return computed({
     get(key) {
       const recordData = recordDataFor(this);
@@ -73,7 +72,7 @@ export default function fragment(type, options) {
     set(key, value) {
       assert(
         'You must pass a fragment or null to set a fragment',
-        value === null || isFragment(value) || typeOf(value) === 'object'
+        value === null || isFragment(value) || typeOf(value) === 'object',
       );
       const recordData = recordDataFor(this);
       if (value === null) {
@@ -83,7 +82,7 @@ export default function fragment(type, options) {
       if (isFragment(value)) {
         assert(
           `You can only set '${type}' fragments to this property`,
-          isInstanceOfType(this.store.modelFor(type), value)
+          isInstanceOfType(this.store.modelFor(type), value),
         );
         setFragmentOwner(value, recordData, key);
         recordData.setDirtyFragment(key, recordDataFor(value));

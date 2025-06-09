@@ -45,11 +45,11 @@ module('unit - `DS.Store`', function (hooks) {
 
     assert.ok(
       !(store.serializerFor('name') instanceof ApplicationSerializer),
-      'fragment serializer fallback is not `JSONAPISerializer`'
+      'fragment serializer fallback is not `JSONAPISerializer`',
     );
     assert.ok(
       store.serializerFor('name') instanceof JSONSerializer,
-      'fragment serializer fallback is correct'
+      'fragment serializer fallback is correct',
     );
   });
 
@@ -63,11 +63,11 @@ module('unit - `DS.Store`', function (hooks) {
 
       assert.ok(
         !(store.serializerFor('name') instanceof JSONAPISerializer),
-        'fragment serializer fallback is not `JSONAPISerializer`'
+        'fragment serializer fallback is not `JSONAPISerializer`',
       );
       assert.ok(
         store.serializerFor('name') instanceof JSONSerializer,
-        'fragment serializer fallback is correct'
+        'fragment serializer fallback is correct',
       );
     });
   }
@@ -78,21 +78,21 @@ module('unit - `DS.Store`', function (hooks) {
 
     assert.ok(
       store.serializerFor('name') instanceof FragmentSerializer,
-      'fragment serializer fallback is correct'
+      'fragment serializer fallback is correct',
     );
   });
 
   test('the application serializer can be looked up', function (assert) {
     assert.ok(
       store.serializerFor('application') instanceof JSONSerializer,
-      'application serializer can still be looked up'
+      'application serializer can still be looked up',
     );
   });
 
   test('the default serializer can be looked up', function (assert) {
     assert.ok(
       store.serializerFor('-default') instanceof JSONSerializer,
-      'default serializer can still be looked up'
+      'default serializer can still be looked up',
     );
   });
 

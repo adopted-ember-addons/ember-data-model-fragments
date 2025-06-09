@@ -29,7 +29,7 @@ function expectAssertion(func, expectedMessage) {
     this.strictEqual(
       actualMessage,
       expectedMessage,
-      'Expected Ember.assert message to match'
+      'Expected Ember.assert message to match',
     );
   } finally {
     // restore original assert function

@@ -76,7 +76,7 @@ module('unit - `MF.array` property', function (hooks) {
       titles.every((title, index) => {
         return title === values[index];
       }),
-      'each title matches the original value'
+      'each title matches the original value',
     );
   });
 
@@ -140,7 +140,7 @@ module('unit - `MF.array` property', function (hooks) {
     assert.deepEqual(
       person.titles.toArray(),
       ['hello', 'there'],
-      'property has correct values'
+      'property has correct values',
     );
   });
 
@@ -203,7 +203,7 @@ module('unit - `MF.array` property', function (hooks) {
     assert.equal(
       person.titles.firstObject,
       'Viper',
-      'default value is correct'
+      'default value is correct',
     );
   });
 
@@ -226,7 +226,7 @@ module('unit - `MF.array` property', function (hooks) {
     assert.equal(
       person.titles.firstObject,
       'Viper',
-      'default value is correct'
+      'default value is correct',
     );
   });
 
@@ -254,7 +254,7 @@ module('unit - `MF.array` property', function (hooks) {
     assert.strictEqual(
       person.titles,
       titles,
-      'StatefulArray instance is the same after unload'
+      'StatefulArray instance is the same after unload',
     );
 
     const titleAfter = titles.objectAt(0);
@@ -262,7 +262,7 @@ module('unit - `MF.array` property', function (hooks) {
     assert.strictEqual(
       titleAfter,
       titleBefore,
-      'preserve array contents after unload'
+      'preserve array contents after unload',
     );
   });
 

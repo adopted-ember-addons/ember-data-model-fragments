@@ -82,28 +82,28 @@ module('unit - Serialization', function (hooks) {
         const name = snapshot.attr('name');
         assert.ok(
           name instanceof DS.Snapshot,
-          'fragment snapshot attribute is a snapshot'
+          'fragment snapshot attribute is a snapshot',
         );
 
         assert.equal(
           name.attr('first'),
           person.name.first,
-          'fragment attributes are snapshoted correctly'
+          'fragment attributes are snapshoted correctly',
         );
 
         const houses = snapshot.attr('houses');
         assert.ok(
           Array.isArray(houses),
-          'fragment array attribute is an array'
+          'fragment array attribute is an array',
         );
         assert.ok(
           houses[0] instanceof DS.Snapshot,
-          'fragment array attribute is an array of snapshots'
+          'fragment array attribute is an array of snapshots',
         );
         assert.equal(
           houses[0].attr('name'),
           person.houses[0].name,
-          'fragment array attributes are snapshotted correctly'
+          'fragment array attributes are snapshotted correctly',
         );
 
         const children = snapshot.attr('children');
@@ -111,7 +111,7 @@ module('unit - Serialization', function (hooks) {
         assert.deepEqual(
           children,
           person.children,
-          'array attribute is snapshotted correctly'
+          'array attribute is snapshotted correctly',
         );
       }
     }
@@ -148,7 +148,7 @@ module('unit - Serialization', function (hooks) {
     assert.equal(
       serialized.name,
       'Mad King',
-      'serialization uses result from `fragment#serialize`'
+      'serialization uses result from `fragment#serialize`',
     );
   });
 
@@ -189,7 +189,7 @@ module('unit - Serialization', function (hooks) {
     assert.deepEqual(
       serialized.names,
       names,
-      'serializing returns array of each fragment serialized'
+      'serializing returns array of each fragment serialized',
     );
   });
 
@@ -212,17 +212,17 @@ module('unit - Serialization', function (hooks) {
     assert.strictEqual(
       attributes.name,
       null,
-      'fragment property values can be null'
+      'fragment property values can be null',
     );
     assert.strictEqual(
       attributes.houses,
       null,
-      'fragment array property values can be null'
+      'fragment array property values can be null',
     );
     assert.strictEqual(
       attributes.children,
       null,
-      '`array property values can be null'
+      '`array property values can be null',
     );
   });
 
@@ -252,17 +252,17 @@ module('unit - Serialization', function (hooks) {
     assert.strictEqual(
       serialized.name,
       null,
-      'fragment property values can be null'
+      'fragment property values can be null',
     );
     assert.strictEqual(
       serialized.houses,
       null,
-      'fragment array property values can be null'
+      'fragment array property values can be null',
     );
     assert.strictEqual(
       serialized.children,
       null,
-      '`array property values can be null'
+      '`array property values can be null',
     );
   });
 
@@ -286,7 +286,7 @@ module('unit - Serialization', function (hooks) {
           attributes.booleans[index] === Boolean(value)
         );
       }),
-      'fragment property values are normalized'
+      'fragment property values are normalized',
     );
   });
 
@@ -317,7 +317,7 @@ module('unit - Serialization', function (hooks) {
           serialized.booleans[index] === Boolean(value)
         );
       }),
-      'fragment property values are normalized'
+      'fragment property values are normalized',
     );
   });
 

@@ -96,7 +96,7 @@ module('integration - Persistence', function (hooks) {
     assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
     assert.ok(
       !addresses.isAny('hasDirtyAttributes'),
-      'all fragment array fragments are clean'
+      'all fragment array fragments are clean',
     );
     assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -147,12 +147,12 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       name.first,
       'Tywin',
-      'use person.name.first from the response'
+      'use person.name.first from the response',
     );
     assert.equal(
       name.last,
       'Lannister',
-      'use person.name.last from the response'
+      'use person.name.last from the response',
     );
     assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
   });
@@ -240,12 +240,12 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       address.street,
       '1 Godswood',
-      'fragment array change is persisted'
+      'fragment array change is persisted',
     );
     assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
     assert.ok(
       !addresses.isAny('hasDirtyAttributes'),
-      'all fragment array fragments are clean'
+      'all fragment array fragments are clean',
     );
     assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -291,7 +291,7 @@ module('integration - Persistence', function (hooks) {
     assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
     assert.ok(
       !addresses.isAny('hasDirtyAttributes'),
-      'all fragment array fragments are clean'
+      'all fragment array fragments are clean',
     );
     assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -369,7 +369,7 @@ module('integration - Persistence', function (hooks) {
     assert.ok(!name.hasDirtyAttributes, 'fragment is clean');
     assert.ok(
       !addresses.isAny('hasDirtyAttributes'),
-      'all fragment array fragments are clean'
+      'all fragment array fragments are clean',
     );
     assert.ok(!addresses.hasDirtyAttributes, 'fragment array is clean');
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
@@ -377,7 +377,7 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       addresses.firstObject.street,
       '1 Godswood',
-      'fragment array fragment correctly updated'
+      'fragment array fragment correctly updated',
     );
   });
 
@@ -425,7 +425,7 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       person.addresses.firstObject.country,
       'Westeros',
-      'fragment array initial state'
+      'fragment array initial state',
     );
 
     await person.save();
@@ -482,7 +482,7 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       person.addresses.firstObject.country,
       'Westeros',
-      'fragment array correctly updated'
+      'fragment array correctly updated',
     );
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
@@ -539,17 +539,17 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       address.street,
       '1 Red Keep',
-      'fragment array fragment correctly updated'
+      'fragment array fragment correctly updated',
     );
     assert.equal(
       addresses.lastObject.street,
       '1 Godswood',
-      'fragment array fragment correctly updated'
+      'fragment array fragment correctly updated',
     );
     assert.equal(
       addresses.length,
       2,
-      'fragment array fragment correctly updated'
+      'fragment array fragment correctly updated',
     );
   });
 
@@ -608,7 +608,7 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       addresses.firstObject.street,
       '1 Broken Tower',
-      'fragment array fragment correctly updated'
+      'fragment array fragment correctly updated',
     );
   });
 
@@ -638,7 +638,6 @@ module('integration - Persistence', function (hooks) {
 
     addObserver(personProxy, 'name.first', function () {});
 
-     
     personProxy.get('name.first');
 
     store.push({
@@ -731,7 +730,7 @@ module('integration - Persistence', function (hooks) {
         assert.equal(
           this.army.soldiers.length,
           2,
-          'The array change to was observed'
+          'The array change to was observed',
         );
       }),
     });
@@ -866,12 +865,12 @@ module('integration - Persistence', function (hooks) {
     assert.equal(
       `${name.first} ${name.last}`,
       'Eddard Stark',
-      'fragment name rolled back'
+      'fragment name rolled back',
     );
     assert.equal(
       address.street,
       '1 Great Keep',
-      'fragment array fragment correctly rolled back'
+      'fragment array fragment correctly rolled back',
     );
   });
 
@@ -900,12 +899,12 @@ module('integration - Persistence', function (hooks) {
       assert.equal(
         address._internalModel.currentState.stateName,
         'root.loaded.updated.uncommitted',
-        'fragment state before save'
+        'fragment state before save',
       );
       assert.equal(
         addresses.firstObject._internalModel.currentState.stateName,
         'root.loaded.updated.uncommitted',
-        'fragment array state before save'
+        'fragment array state before save',
       );
 
       server.post('/people', () => {
@@ -924,28 +923,28 @@ module('integration - Persistence', function (hooks) {
       assert.equal(
         address._internalModel.currentState.stateName,
         'root.loaded.updated.inFlight',
-        'fragment state during save'
+        'fragment state during save',
       );
       assert.equal(
         addresses.firstObject._internalModel.currentState.stateName,
         'root.loaded.updated.inFlight',
-        'fragment array state during save'
+        'fragment array state during save',
       );
 
       await assert.rejects(
         savePromise,
-        (ex) => ex.errors[0].code === 'custom-error-code'
+        (ex) => ex.errors[0].code === 'custom-error-code',
       );
 
       assert.equal(
         address._internalModel.currentState.stateName,
         'root.loaded.updated.uncommitted',
-        'fragment state after save'
+        'fragment state after save',
       );
       assert.equal(
         addresses.firstObject._internalModel.currentState.stateName,
         'root.loaded.updated.uncommitted',
-        'fragment array state after save'
+        'fragment array state after save',
       );
 
       // unload will fail if the record is in-flight
@@ -954,12 +953,12 @@ module('integration - Persistence', function (hooks) {
       assert.equal(
         address._internalModel.currentState.stateName,
         'root.empty',
-        'fragment state after unload'
+        'fragment state after unload',
       );
       assert.equal(
         addresses.firstObject._internalModel.currentState.stateName,
         'root.empty',
-        'fragment array state after unload'
+        'fragment array state after unload',
       );
     });
   }
@@ -1116,7 +1115,7 @@ module('integration - Persistence', function (hooks) {
 
     assert.ok(
       !component.hasDirtyAttributes,
-      'component record is not dirty after save'
+      'component record is not dirty after save',
     );
 
     component.options.lastOrder.products.createFragment({ name: 'Baby Yoda' });

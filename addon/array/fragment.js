@@ -32,7 +32,7 @@ const FragmentArray = StatefulArray.extend({
     assert(
       `You can only add '${this.modelName}' fragments or object literals to this property`,
       typeOf(data) === 'object' ||
-        isInstanceOfType(this.store.modelFor(this.modelName), data)
+        isInstanceOfType(this.store.modelFor(this.modelName), data),
     );
 
     if (isFragment(data)) {
@@ -47,7 +47,7 @@ const FragmentArray = StatefulArray.extend({
     }
     const recordData = this.recordData._newFragmentRecordDataForKey(
       this.key,
-      data
+      data,
     );
     return recordData._fragmentGetRecord();
   },
@@ -153,7 +153,7 @@ const FragmentArray = StatefulArray.extend({
   createFragment(props) {
     const recordData = this.recordData._newFragmentRecordDataForKey(
       this.key,
-      props
+      props,
     );
     const fragment = recordData._fragmentGetRecord(props);
     return this.pushObject(fragment);

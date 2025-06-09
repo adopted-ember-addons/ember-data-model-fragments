@@ -44,13 +44,13 @@ module('unit - `MF.fragment` property', function (hooks) {
     const person = await store.findRecord('person', 1);
     assert.ok(
       person.name instanceof Name,
-      'name property is an `MF.Fragment` instance'
+      'name property is an `MF.Fragment` instance',
     );
 
     assert.equal(
       person.name.first,
       'Tyrion',
-      'nested properties have original value'
+      'nested properties have original value',
     );
   });
 
@@ -193,7 +193,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     assert.ok(
       person.name instanceof MF.Fragment,
-      'a `MF.Fragment` instance is created'
+      'a `MF.Fragment` instance is created',
     );
     assert.equal(person.name.first, name.first, 'fragment has correct values');
   });
@@ -219,7 +219,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     assert.ok(
       person.name instanceof MF.Fragment,
-      'a `MF.Fragment` instance is created'
+      'a `MF.Fragment` instance is created',
     );
     assert.equal(person.name.first, name.first, 'fragment has correct values');
   });
@@ -252,7 +252,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.equal(
       person.name.first,
       newName.first,
-      'fragment has correct values'
+      'fragment has correct values',
     );
   });
 
@@ -287,14 +287,14 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.equal(
       ship.name.first,
       defaultValue.first,
-      'the value is set as it was saved'
+      'the value is set as it was saved',
     );
 
     ship.set('name.first', null);
     assert.equal(
       ship.name.first,
       null,
-      'the value is successfully set to null'
+      'the value is successfully set to null',
     );
   });
 
@@ -315,21 +315,21 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.equal(
       ship.name.first,
       defaultValue.first,
-      'the default value is used when the value has not been specified'
+      'the default value is used when the value has not been specified',
     );
 
     ship.set('name', null);
     assert.equal(
       ship.name,
       null,
-      'the default value is not used when the value is set to null'
+      'the default value is not used when the value is set to null',
     );
 
     ship = store.createRecord('ship', { name: null });
     assert.equal(
       ship.name,
       null,
-      'the default value is not used when the value is initialized to null'
+      'the default value is not used when the value is initialized to null',
     );
   });
 
@@ -355,7 +355,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.equal(
       sword.name.first,
       defaultValue.first,
-      'the default value is correct'
+      'the default value is correct',
     );
   });
 
@@ -382,12 +382,12 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.equal(
       sword.name.first,
       defaultValue.first,
-      'the default value is correct'
+      'the default value is correct',
     );
     assert.strictEqual(
       sword.name.person,
       sword,
-      'the fragment owner is assigned'
+      'the fragment owner is assigned',
     );
   });
 
@@ -413,12 +413,12 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.equal(
       sword.name.first,
       defaultValue.first,
-      'the default value is correct'
+      'the default value is correct',
     );
     assert.strictEqual(
       sword.name.person,
       sword,
-      'the fragment owner is assigned'
+      'the fragment owner is assigned',
     );
   });
 
@@ -509,7 +509,7 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     assert.ok(
       !oldName.isDestroying,
-      "don't destroy the old fragment yet because we could rollback"
+      "don't destroy the old fragment yet because we could rollback",
     );
 
     person.unloadRecord();
@@ -543,12 +543,12 @@ module('unit - `MF.fragment` property', function (hooks) {
     assert.strictEqual(
       person.name,
       name,
-      'Fragment instance is the same after unload'
+      'Fragment instance is the same after unload',
     );
     assert.strictEqual(
       name.first,
       'Barristan',
-      'preserve fragment attributes after unload'
+      'preserve fragment attributes after unload',
     );
   });
 

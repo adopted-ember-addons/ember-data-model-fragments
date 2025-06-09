@@ -43,7 +43,14 @@ export default [
    * https://eslint.org/docs/latest/use/configure/ignore
    */
   {
-    ignores: ['dist/', 'node_modules/', 'coverage/', '**/*.ts', '!**/.*'],
+    ignores: [
+      'dist/',
+      'node_modules/',
+      'coverage/',
+      '**/*.ts',
+      '!**/.*',
+      'blueprints/*/files/**/*.js',
+    ],
   },
   /**
    * https://eslint.org/docs/latest/use/configure/configuration-files#configuring-linter-options
@@ -74,8 +81,8 @@ export default [
       qunit,
     },
     rules: {
-      'ember/no-runloop': 'off'
-    }
+      'ember/no-runloop': 'off',
+    },
   },
   /**
    * CJS node files

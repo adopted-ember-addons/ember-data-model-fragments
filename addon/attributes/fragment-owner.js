@@ -27,11 +27,10 @@ import { recordDataFor } from '@ember-data/store/-private';
  @return {Attribute}
  */
 export default function fragmentOwner() {
-   
   return computed(function () {
     assert(
       'Fragment owner properties can only be used on fragments.',
-      isFragment(this)
+      isFragment(this),
     );
     const recordData = recordDataFor(this);
     const owner = recordData.getFragmentOwner();

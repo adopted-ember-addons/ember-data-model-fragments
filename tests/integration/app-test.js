@@ -8,7 +8,7 @@ module('Integration | Application', function (hooks) {
   test('the model fragments initializer causes no deprecations', function (assert) {
     assert.ok(
       this.owner.hasRegistration('transform:fragment'),
-      'the model fragments initilizer ran'
+      'the model fragments initilizer ran',
     );
     assert.deepEqual(getDeprecations(), [], 'expected no deprecations');
   });

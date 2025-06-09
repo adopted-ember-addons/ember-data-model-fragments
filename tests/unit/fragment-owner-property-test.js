@@ -39,7 +39,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
     assert.equal(
       name.person,
       person,
-      'fragment owner property is reference to the owner record'
+      'fragment owner property is reference to the owner record',
     );
   });
 
