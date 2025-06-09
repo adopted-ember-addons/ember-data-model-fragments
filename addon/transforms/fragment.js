@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import Transform from '@ember-data/serializer/transform';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 /**
   @module ember-data-model-fragments

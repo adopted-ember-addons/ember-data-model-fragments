@@ -3,7 +3,7 @@ import { getOwner } from '@ember/application';
 import { makeArray } from '@ember/array';
 import { computed } from '@ember/object';
 import Transform from '@ember-data/serializer/transform';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 /**
   @module ember-data-model-fragments
