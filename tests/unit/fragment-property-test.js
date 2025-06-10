@@ -3,7 +3,7 @@ import { fragment } from 'ember-data-model-fragments/attributes';
 import { schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
-import { copy } from 'ember-copy';
+import { copy } from 'ember-data-model-fragments/util/copy';
 import MF from 'ember-data-model-fragments';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';

@@ -8,7 +8,7 @@ import {
 import EmberObject, { observer } from '@ember/object';
 import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
-import { copy } from 'ember-copy';
+import { copy } from 'ember-data-model-fragments/util/copy';
 import MF from 'ember-data-model-fragments';
 import { module, test, skip } from 'qunit';
 import { setupApplicationTest } from '../helpers';
