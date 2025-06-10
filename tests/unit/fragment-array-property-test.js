@@ -565,7 +565,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const addresses = person.addresses;
     const firstAddress = addresses.objectAt(0);
     const secondAddress = addresses.objectAt(1);
-    addresses.removeAt(0);
+    addresses.splice(0, 1);
 
     person.unloadRecord();
 

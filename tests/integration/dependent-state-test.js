@@ -436,7 +436,7 @@ module('integration - Dependent State', function (hooks) {
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
-    addresses.removeObject(addresses.firstObject);
+    addresses.removeObject(addresses[0]);
 
     assert.ok(addresses.hasDirtyAttributes, 'fragment array is dirty');
     assert.ok(person.hasDirtyAttributes, 'owner record is dirty');
@@ -529,7 +529,7 @@ module('integration - Dependent State', function (hooks) {
 
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
-    const address = addresses.firstObject;
+    const address = addresses[0];
 
     assert.false(address.hasDirtyAttributes, 'fragment is clean');
     assert.false(addresses.hasDirtyAttributes, 'fragment array is clean');
@@ -547,7 +547,7 @@ module('integration - Dependent State', function (hooks) {
 
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
-    const address = addresses.firstObject;
+    const address = addresses[0];
 
     address.set('street', '2 Sky Cell');
     address.set('street', '1 Sky Cell');
@@ -710,7 +710,7 @@ module('integration - Dependent State', function (hooks) {
 
     const user = await store.findRecord('user', 1);
     const orders = user.orders;
-    const products = orders.firstObject.products;
+    const products = orders[0].products;
 
     assert.ok(!products.hasDirtyAttributes, 'inner fragment array is clean');
     assert.ok(!orders.hasDirtyAttributes, 'outer fragment array is clean');
@@ -921,12 +921,12 @@ module('integration - Dependent State', function (hooks) {
     });
 
     assert.equal(
-      person.addresses.lastObject.street,
+      person.addresses[person.addresses.length - 1].street,
       '1 Dungeon Cell',
       'street updated',
     );
     assert.equal(
-      person.addresses.lastObject.city,
+      person.addresses[person.addresses.length - 1].city,
       "King's Landing",
       'city is the same',
     );
