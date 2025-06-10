@@ -1,5 +1,4 @@
 import { all } from 'rsvp';
-import { Copyable } from 'ember-copy';
 import Ember from 'ember';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
@@ -19,12 +18,6 @@ module('unit - `MF.Fragment`', function (hooks) {
 
   hooks.afterEach(function () {
     store = null;
-  });
-
-  test('fragments are `Copyable`', function (assert) {
-    const fragment = store.createFragment('name');
-
-    assert.ok(Copyable.detect(fragment), 'fragments are copyable');
   });
 
   test('copied fragments can be added to any record', async function (assert) {

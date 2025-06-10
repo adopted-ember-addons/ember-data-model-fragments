@@ -3,7 +3,7 @@ import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
 import { diffArray } from '@ember-data/model/-private';
-import { copy, Copyable } from 'ember-copy';
+import { copy } from '../util/copy';
 import { gte } from 'ember-compatibility-helpers';
 
 /**
@@ -28,7 +28,7 @@ export const HAS_ARRAY_OBSERVERS = !gte('4.0.0');
   @extends Ember.MutableArray
 */
 // eslint-disable-next-line ember/no-classic-classes
-const StatefulArray = EmberObject.extend(MutableArray, Copyable, {
+const StatefulArray = EmberObject.extend(MutableArray, {
   /**
     A reference to the array's owner record.
 

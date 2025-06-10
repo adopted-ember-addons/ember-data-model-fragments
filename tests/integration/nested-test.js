@@ -1,5 +1,5 @@
 import Model from '@ember-data/model';
-import { copy } from 'ember-copy';
+import { copy } from 'ember-data-model-fragments/util/copy';
 import { schedule } from '@ember/runloop';
 import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
 import { module, test } from 'qunit';

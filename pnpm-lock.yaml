@@ -30,9 +30,6 @@ importers:
       ember-compatibility-helpers:
         specifier: ^1.2.1
         version: 1.2.7(@babel/core@7.27.4)
-      ember-copy:
-        specifier: 2.0.1
-        version: 2.0.1
       ember-template-imports:
         specifier: ^4.3.0
         version: 4.3.0
@@ -2734,10 +2731,6 @@ packages:
   ember-compatibility-helpers@1.2.7:
     resolution: {integrity: sha512-BtkjulweiXo9c3yVWrtexw2dTmBrvavD/xixNC6TKOBdrixUwU+6nuOO9dufDWsMxoid7MvtmDpzc9+mE8PdaA==}
     engines: {node: 10.* || >= 12.*}
-
-  ember-copy@2.0.1:
-    resolution: {integrity: sha512-N/XFvZszrzyyX4IcNoeK4mJvIItNuONumhPLqi64T8NDjJkxBj4Pq61rvMkJx/9eZ8alzE4I8vYKOLxT0FvRuQ==}
-    engines: {node: 10.* || >= 12}
 
   ember-data@4.6.6:
     resolution: {integrity: sha512-99QGCePP8EGvPnWIn57yfHDuUtyuHt/Ax7tyAfe2l+xrGSXweNFsTgU7MKx9Nb30TgCBMzZtIw0REPKIAep/pQ==}
@@ -10018,12 +10011,6 @@ snapshots:
       semver: 5.7.2
     transitivePeerDependencies:
       - '@babel/core'
-      - supports-color
-
-  ember-copy@2.0.1:
-    dependencies:
-      ember-cli-babel: 7.26.11
-    transitivePeerDependencies:
       - supports-color
 
   ember-data@4.6.6(@babel/core@7.27.4)(ember-source@5.12.0(@glimmer/component@2.0.0)(rsvp@4.8.5)(webpack@5.99.9))(webpack@5.99.9):
