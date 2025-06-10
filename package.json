@@ -89,8 +89,6 @@
     "prettier-plugin-ember-template-tag": "^2.0.5",
     "qunit": "^2.24.1",
     "qunit-dom": "^3.4.0",
-    "release-it": "^14.2.1",
-    "release-it-lerna-changelog": "^3.1.0",
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^36.0.1",
     "webpack": "^5.99.7"
@@ -113,24 +111,5 @@
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
-  },
-  "release-it": {
-    "plugins": {
-      "release-it-lerna-changelog": {
-        "infile": "CHANGELOG.md",
-        "launchEditor": false
-      }
-    },
-    "git": {
-      "tagName": "v${version}"
-    },
-    "github": {
-      "release": true,
-      "tokenRef": "GITHUB_AUTH"
-    }
-  },
-  "volta": {
-    "node": "14.21.3",
-    "yarn": "1.22.19"
   }
 }
