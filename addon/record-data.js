@@ -922,7 +922,7 @@ export default class FragmentRecordData extends RecordData {
       if (fragmentData != null) {
         behavior.unload(fragmentData);
       }
-      this._fragmentArrayCache[key]?.destroy();
+      this._fragmentArrayCache[key]?.teardown();
     }
     super.unloadRecord();
   }

@@ -6,10 +6,6 @@ import isInstanceOfType from '../util/instance-of-type';
 import { recordDataFor } from '@ember-data/store/-private';
 
 /**
-  @module ember-data-model-fragments
-*/
-
-/**
   A state-aware array of fragments that is tied to an attribute of a `DS.Model`
   instance. `FragmentArray` instances should not be created directly, instead
   use `MF.fragmentArray` or `MF.array`.
@@ -18,7 +14,7 @@ import { recordDataFor } from '@ember-data/store/-private';
   @namespace MF
   @extends StatefulArray
 */
-const FragmentArray = StatefulArray.extend({
+export default class FragmentArray extends StatefulArray {
   /**
     The type of fragments the array contains
 
@@ -26,8 +22,26 @@ const FragmentArray = StatefulArray.extend({
     @private
     @type {String}
   */
-  modelName: null,
+  modelName = null;
+  store = null;
 
+  constructor({ modelName, store, recordData, key }) {
+    super(recordData, key);
+    this.modelName = modelName;
+    this.store = store;
+  }
+
+  /**
+    Normalizes a new value being inserted into the array.
+    Ensures the value is either a fragment instance or a plain object
+    that can be hydrated into one.
+
+    @method _normalizeData
+    @private
+    @param {*} data
+    @param {Number} index
+    @return {MF.Fragment}
+  */
   _normalizeData(data, index) {
     assert(
       `You can only add '${this.modelName}' fragments or object literals to this property`,
@@ -40,73 +54,54 @@ const FragmentArray = StatefulArray.extend({
       setFragmentOwner(data, this.recordData, this.key);
       return recordData._fragmentGetRecord();
     }
+
     const existing = this.currentState[index];
     if (existing) {
       existing.setProperties(data);
       return existing;
     }
+
     const recordData = this.recordData._newFragmentRecordDataForKey(
       this.key,
       data,
     );
     return recordData._fragmentGetRecord();
-  },
+  }
 
+  /**
+    Retrieves the underlying fragment instances from the recordDatas.
+
+    @method _getFragmentState
+    @private
+    @return {Array<MF.Fragment>}
+  */
   _getFragmentState() {
-    const recordDatas = this._super();
+    const recordDatas = super._getFragmentState();
     return recordDatas?.map((recordData) => recordData._fragmentGetRecord());
-  },
+  }
 
+  /**
+    Stores the internal recordDatas for each fragment in the array.
+
+    @method _setFragmentState
+    @private
+    @param {Array<MF.Fragment>} fragments
+  */
   _setFragmentState(fragments) {
     const recordDatas = fragments.map((fragment) => recordDataFor(fragment));
-    this._super(recordDatas);
-  },
+    super._setFragmentState(recordDatas);
+  }
 
   /**
+    Create a snapshot of each fragment in the array.
+
     @method _createSnapshot
     @private
+    @return {Array<Object>}
   */
   _createSnapshot() {
-    // Snapshot each fragment
-    return this.map((fragment) => {
-      return fragment._createSnapshot();
-    });
-  },
-
-  /**
-    If this property is `true`, either the contents of the array do not match
-    its original state, or one or more of the fragments in the array are dirty.
-
-    Example
-
-    ```javascript
-    array.toArray(); // [ <Fragment:1>, <Fragment:2> ]
-    array.get('hasDirtyAttributes'); // false
-    array.get('firstObject').set('prop', 'newValue');
-    array.get('hasDirtyAttributes'); // true
-    ```
-
-    @property hasDirtyAttributes
-    @type {Boolean}
-    @readOnly
-  */
-
-  /**
-    This method reverts local changes of the array's contents to its original
-    state, and calls `rollbackAttributes` on each fragment.
-
-    Example
-
-    ```javascript
-    array.get('firstObject').get('hasDirtyAttributes'); // true
-    array.get('hasDirtyAttributes'); // true
-    array.rollbackAttributes();
-    array.get('firstObject').get('hasDirtyAttributes'); // false
-    array.get('hasDirtyAttributes'); // false
-    ```
-
-    @method rollbackAttributes
-  */
+    return this.currentState.map((fragment) => fragment._createSnapshot());
+  }
 
   /**
     Serializing a fragment array returns a new array containing the results of
@@ -116,8 +111,8 @@ const FragmentArray = StatefulArray.extend({
     @return {Array}
   */
   serialize() {
-    return this.invoke('serialize');
-  },
+    return this.currentState.map((fragment) => fragment.serialize());
+  }
 
   /**
     Adds an existing fragment to the end of the fragment array. Alias for
@@ -129,7 +124,7 @@ const FragmentArray = StatefulArray.extend({
   */
   addFragment(fragment) {
     return this.addObject(fragment);
-  },
+  }
 
   /**
     Removes the given fragment from the array. Alias for `removeObject`.
@@ -140,16 +135,16 @@ const FragmentArray = StatefulArray.extend({
   */
   removeFragment(fragment) {
     return this.removeObject(fragment);
-  },
+  }
 
   /**
     Creates a new fragment of the fragment array's type and adds it to the end
     of the fragment array.
 
     @method createFragment
-    @param {MF.Fragment} fragment
+    @param {Object} props
     @return {MF.Fragment} the newly added fragment
-    */
+  */
   createFragment(props) {
     const recordData = this.recordData._newFragmentRecordDataForKey(
       this.key,
@@ -157,7 +152,5 @@ const FragmentArray = StatefulArray.extend({
     );
     const fragment = recordData._fragmentGetRecord(props);
     return this.pushObject(fragment);
-  },
-});
-
-export default FragmentArray;
+  }
+}

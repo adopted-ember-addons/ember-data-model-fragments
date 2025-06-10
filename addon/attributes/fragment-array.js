@@ -70,7 +70,7 @@ export default function fragmentArray(type, options) {
       }
       let fragmentArray = recordData._fragmentArrayCache[key];
       if (!fragmentArray) {
-        fragmentArray = FragmentArray.create({
+        fragmentArray = new FragmentArray({
           modelName: type,
           store: this.store,
           recordData,
@@ -94,7 +94,7 @@ export default function fragmentArray(type, options) {
       }
       let fragmentArray = recordData._fragmentArrayCache[key];
       if (!fragmentArray) {
-        fragmentArray = FragmentArray.create({
+        fragmentArray = new FragmentArray({
           modelName: type,
           store: this.store,
           recordData,

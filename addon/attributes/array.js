@@ -61,11 +61,10 @@ export default function array(type, options) {
       }
       let array = recordData._fragmentArrayCache[key];
       if (!array) {
-        array = StatefulArray.create({
-          store: this.store,
+        array = new StatefulArray(
           recordData,
           key,
-        });
+        );
         recordData._fragmentArrayCache[key] = array;
       }
       return array;
@@ -83,11 +82,10 @@ export default function array(type, options) {
       recordData.setDirtyFragment(key, value.slice());
       let array = recordData._fragmentArrayCache[key];
       if (!array) {
-        array = StatefulArray.create({
-          store: this.store,
+        array = new StatefulArray(
           recordData,
           key,
-        });
+        );
         recordData._fragmentArrayCache[key] = array;
       }
       array._setFragments(value);
