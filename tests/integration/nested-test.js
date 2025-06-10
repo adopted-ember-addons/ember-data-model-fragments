@@ -72,7 +72,7 @@ module('integration - Nested fragments', function (hooks) {
       user: copy(data, true),
     };
     payload.user.id = 1;
-    payload.user.orders[0].products.splice(0, 1);
+    payload.user.orders[0].products.removeAt(0, 1);
 
     server.put('/users/1', () => {
       return [
@@ -103,7 +103,7 @@ module('integration - Nested fragments', function (hooks) {
     );
     assert.ok(!user.hasDirtyAttributes, 'dirty state is reset');
 
-    user.orders.firstObject.products.splice(0, 1);
+    user.orders.firstObject.products.removeAt(0, 1);
     assert.ok(user.hasDirtyAttributes, 'dirty state propagates to owner');
 
     await user.save();

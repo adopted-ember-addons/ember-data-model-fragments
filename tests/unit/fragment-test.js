@@ -273,7 +273,7 @@ module('unit - `MF.Fragment`', function (hooks) {
 
   test('fragments without an owner can be destroyed', function (assert) {
     const fragment = store.createFragment('name');
-    fragment.teardown();
+    fragment.destroy();
     assert.ok(fragment.isDestroying, 'the fragment is being destroyed');
   });
 

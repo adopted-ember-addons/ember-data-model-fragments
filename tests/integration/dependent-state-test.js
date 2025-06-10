@@ -436,7 +436,7 @@ module('integration - Dependent State', function (hooks) {
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
 
-    addresses.removeObject(addresses[0]);
+    addresses.removeObject(addresses.firstObject);
 
     assert.ok(addresses.hasDirtyAttributes, 'fragment array is dirty');
     assert.ok(person.hasDirtyAttributes, 'owner record is dirty');
@@ -529,7 +529,7 @@ module('integration - Dependent State', function (hooks) {
 
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
-    const address = addresses[0];
+    const address = addresses.firstObject;
 
     assert.false(address.hasDirtyAttributes, 'fragment is clean');
     assert.false(addresses.hasDirtyAttributes, 'fragment array is clean');
@@ -547,7 +547,7 @@ module('integration - Dependent State', function (hooks) {
 
     const person = await store.findRecord('person', 1);
     const addresses = person.addresses;
-    const address = addresses[0];
+    const address = addresses.firstObject;
 
     address.set('street', '2 Sky Cell');
     address.set('street', '1 Sky Cell');
