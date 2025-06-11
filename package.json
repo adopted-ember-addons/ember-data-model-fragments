@@ -54,6 +54,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.27.1",
     "@babel/plugin-proposal-decorators": "^7.27.1",
+    "@ember-data/store": "^4.13.0-alpha.9",
     "@ember/optional-features": "^2.2.0",
     "@ember/test-helpers": "^5.2.1",
     "@embroider/macros": "^1.17.2",
@@ -71,7 +72,8 @@
     "ember-cli-htmlbars": "^6.3.0",
     "ember-cli-inject-live-reload": "^2.1.0",
     "ember-cli-terser": "^4.0.2",
-    "ember-data": "~4.6.0",
+    "ember-data": "~4.13.0-alpha.9",
+    "ember-inflector": "^6.0.0",
     "ember-load-initializers": "^3.0.1",
     "ember-page-title": "^9.0.1",
     "ember-qunit": "^9.0.2",
