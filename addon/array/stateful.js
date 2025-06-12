@@ -2,7 +2,7 @@ import EmberObject, { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
-import { diffArray } from '@ember-data/model/-private';
+// import { diffArray } from '@ember-data/model/-private';
 import { copy } from '../util/copy';
 import { gte } from 'ember-compatibility-helpers';
 

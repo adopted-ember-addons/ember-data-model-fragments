@@ -3,7 +3,7 @@ import Ember from 'ember';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
 import { copy } from './util/copy';
-import { recordDataFor } from '@ember-data/store/-private';
+// import { recordDataFor } from '@ember-data/store/-private';
 
 /**
   @module ember-data-model-fragments
