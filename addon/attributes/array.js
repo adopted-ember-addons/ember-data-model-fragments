@@ -1,7 +1,7 @@
 import { computed } from '@ember/object';
 import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
-import { recordDataFor } from '@ember-data/store/-private';
+// import { recordDataFor } from '@ember-data/store/-private';
 import metaTypeFor from '../util/meta-type-for';
 import StatefulArray from '../array/stateful';
 

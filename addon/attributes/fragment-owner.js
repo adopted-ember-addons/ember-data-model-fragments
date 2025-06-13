@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { isFragment } from '../fragment';
-import { recordDataFor } from '@ember-data/store/-private';
+// import { recordDataFor } from '@ember-data/store/-private';
 
 /**
  `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`
