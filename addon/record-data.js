@@ -1,7 +1,7 @@
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { RecordData } from 'ember-data/-private';
-import { diffArray } from '@ember-data/model/-private';
-import { recordDataFor } from '@ember-data/store/-private';
+//import { RecordData } from 'ember-data/-private';
+//import { diffArray } from '@ember-data/model/-private';
+//import { recordDataFor } from '@ember-data/store/-private';
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';

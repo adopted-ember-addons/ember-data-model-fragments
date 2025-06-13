@@ -3,7 +3,7 @@ import { typeOf } from '@ember/utils';
 import StatefulArray from './stateful';
 import { isFragment, setFragmentOwner } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
-import { recordDataFor } from '@ember-data/store/-private';
+// import { recordDataFor } from '@ember-data/store/-private';
 
 /**
   @module ember-data-model-fragments

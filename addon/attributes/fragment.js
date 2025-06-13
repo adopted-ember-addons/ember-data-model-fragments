@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
-import { recordDataFor } from '@ember-data/store/-private';
+// import { recordDataFor } from '@ember-data/store/-private';
 import {
   getActualFragmentType,
   isFragment,

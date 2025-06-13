@@ -2,7 +2,7 @@ import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { Snapshot, normalizeModelName } from 'ember-data/-private';
+// import { Snapshot, normalizeModelName } from 'ember-data/-private';
 import JSONSerializer from '@ember-data/serializer/json';
 import FragmentRecordData from './record-data';
 import { default as Fragment } from './fragment';
