@@ -45,8 +45,8 @@
     "broccoli-file-creator": "^2.1.1",
     "broccoli-merge-trees": "^3.0.0",
     "calculate-cache-key-for-tree": "^1.1.0",
-    "ember-cli-babel": "^8.2.0",
     "ember-auto-import": "^2.10.0",
+    "ember-cli-babel": "^8.2.0",
     "ember-compatibility-helpers": "^1.2.1",
     "ember-template-imports": "^4.3.0",
     "git-repo-info": "^2.1.1",
@@ -61,8 +61,8 @@
     "@ember-data/json-api": "4.13.0-alpha.9",
     "@ember-data/legacy-compat": "4.13.0-alpha.9",
     "@ember-data/model": "4.13.0-alpha.9",
-    "@ember-data/request-utils": "4.13.0-alpha.9",
     "@ember-data/request": "4.13.0-alpha.9",
+    "@ember-data/request-utils": "4.13.0-alpha.9",
     "@ember-data/serializer": "4.13.0-alpha.9",
     "@ember-data/store": "4.13.0-alpha.9",
     "@ember-data/tracking": "4.13.0-alpha.9",
@@ -111,20 +111,20 @@
     "webpack": "^5.99.7"
   },
   "peerDependencies": {
-    "ember-source": ">= 4.0.0",
     "@ember-data/adapter": "4.13.0-alpha.9",
     "@ember-data/debug": "4.13.0-alpha.9",
     "@ember-data/graph": "4.13.0-alpha.9",
     "@ember-data/json-api": "4.13.0-alpha.9",
     "@ember-data/legacy-compat": "4.13.0-alpha.9",
     "@ember-data/model": "4.13.0-alpha.9",
-    "@ember-data/request-utils": "4.13.0-alpha.9",
     "@ember-data/request": "4.13.0-alpha.9",
+    "@ember-data/request-utils": "4.13.0-alpha.9",
     "@ember-data/serializer": "4.13.0-alpha.9",
     "@ember-data/store": "4.13.0-alpha.9",
     "@ember-data/tracking": "4.13.0-alpha.9",
     "@warp-drive/build-config": "4.13.0-alpha.9",
-    "@warp-drive/core-types": "4.13.0-alpha.9"
+    "@warp-drive/core-types": "4.13.0-alpha.9",
+    "ember-source": ">= 4.0.0"
   },
   "engines": {
     "node": ">= 18"
@@ -137,5 +137,10 @@
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js"
+    ]
   }
 }
