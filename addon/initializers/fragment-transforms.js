@@ -14,6 +14,5 @@ export function initialize(application) {
 
 export default {
   name: 'ember-data-model-fragments',
-  after: 'ember-data',
   initialize,
 };

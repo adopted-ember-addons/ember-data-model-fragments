@@ -36,14 +36,10 @@
     "test:ember": "ember test",
     "test:ember-compatibility": "ember try:each"
   },
-  "resolutions": {
-    "@embroider/addon-shim": "1.8.7",
-    "@embroider/macros": "1.16.12"
-  },
   "dependencies": {
-    "@embroider/macros": "^1.13.1",
     "@glimmer/component": "^1.1.2",
     "@glimmer/tracking": "^1.1.2",
+    "ember-auto-import": "2.10.0",
     "ember-cli-babel": "^8.2.0"
   },
   "devDependencies": {
@@ -102,6 +98,7 @@
     "release-plan": "^0.16.0",
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^36.0.1",
+    "tracked-built-ins": "^4.0.0",
     "webpack": "^5.99.7"
   },
   "peerDependencies": {
@@ -136,6 +133,10 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "core-js"
-    ]
+    ],
+    "overrides": {
+      "@embroider/addon-shim": "1.8.7",
+      "@embroider/macros": "1.16.12"
+    }
   }
 }

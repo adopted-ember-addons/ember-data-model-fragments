@@ -1,2 +1,1 @@
-import FragmentTransform from 'ember-data-model-fragments/transforms/fragment';
-export default FragmentTransform;
+export { default } from 'ember-data-model-fragments/transforms/fragment';

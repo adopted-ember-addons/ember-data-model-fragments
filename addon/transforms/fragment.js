@@ -1,7 +1,7 @@
 import Transform from '@ember-data/serializer/transform';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
-import { copy } from './util/copy';
+import { copy } from '../util/copy';
 
 export default class FragmentTransform extends Transform {
   deserialize(serialized, options = {}, record = null, key = null) {

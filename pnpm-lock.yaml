@@ -12,21 +12,18 @@ importers:
 
   .:
     dependencies:
-      '@embroider/macros':
-        specifier: 1.16.12
-        version: 1.16.12
       '@glimmer/component':
         specifier: ^1.1.2
         version: 1.1.2(@babel/core@7.27.4)
       '@glimmer/tracking':
         specifier: ^1.1.2
         version: 1.1.2
+      ember-auto-import:
+        specifier: 2.10.0
+        version: 2.10.0(webpack@5.99.9)
       ember-cli-babel:
         specifier: ^8.2.0
         version: 8.2.0(@babel/core@7.27.4)
-      tracked-built-ins:
-        specifier: '>= 3.0.0'
-        version: 4.0.0(@babel/core@7.27.4)
     devDependencies:
       '@babel/eslint-parser':
         specifier: ^7.27.1
@@ -73,6 +70,9 @@ importers:
       '@ember/test-helpers':
         specifier: ^5.2.1
         version: 5.2.2(@babel/core@7.27.4)
+      '@embroider/macros':
+        specifier: 1.16.12
+        version: 1.16.12
       '@embroider/test-setup':
         specifier: ^4.0.0
         version: 4.0.0
@@ -184,6 +184,9 @@ importers:
       stylelint-config-standard:
         specifier: ^36.0.1
         version: 36.0.1(stylelint@16.20.0(typescript@5.8.3))
+      tracked-built-ins:
+        specifier: ^4.0.0
+        version: 4.0.0(@babel/core@7.27.4)
       webpack:
         specifier: ^5.99.7
         version: 5.99.9
