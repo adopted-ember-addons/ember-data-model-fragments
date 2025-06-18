@@ -1,80 +1,161 @@
-import { assert } from '@ember/debug';
 import Transform from '@ember-data/serializer/transform';
-import JSONAPISerializer from '@ember-data/serializer/json-api';
-import { service } from '@ember/service';
+import { isPresent } from '@ember/utils';
+import { getOwner } from '@ember/application';
+import { copy } from '../util/copy';
+import Fragment from '../fragment';
 
-/**
-  @module ember-data-model-fragments
-*/
+import { inject as service } from '@ember/service';
 
-/**
-  Transform for `MF.fragment` fragment attribute which delegates work to
-  the fragment type's serializer
+export default class FragmentTransform extends Transform {
+  @service store;
+  // We're going to override the init method to force a debug message on instantiation
+  init() {
+    super.init(...arguments);
+    console.log('TRANSFORM: FragmentTransform instance created!', this);
+  }
 
-  @class FragmentTransform
-  @namespace MF
-  @extends DS.Transform
-*/
-// eslint-disable-next-line ember/no-classic-classes
-const FragmentTransform = Transform.extend({
-  store: service(),
-  type: null,
-  polymorphicTypeProp: null,
+  deserialize(serialized, options = {}, record = null, key = null) {
+    console.log('TRANSFORM: Fragment deserialize called', {
+      serialized,
+      options,
+      recordType: record && record.constructor.modelName,
+      key
+    });
+    
+    if (!isPresent(serialized)) {
+      return this._getDefaultValue(options, record, key);
+    }
 
-  deserialize: function deserializeFragment(data, options, parentData) {
-    if (data == null) {
+    const fragmentType = options.fragmentType;
+    if (!fragmentType) {
+      throw new Error('Fragment transform requires fragmentType option');
+    }
+
+    try {
+      // Get the fragment class directly
+      const FragmentClass = this._getFragmentClass(fragmentType, record);
+      console.log('TRANSFORM: Found FragmentClass', {
+        name: FragmentClass.name,
+        isFragment: Fragment.detect(FragmentClass),
+      });
+
+      // Create the fragment instance directly
+      const fragment = new FragmentClass(serialized, record, key);
+
+      console.log('TRANSFORM: Created fragment', {
+        isFragment: fragment instanceof Fragment,
+        attributes: fragment._attributes,
+        hasSetMethod: typeof fragment.set === 'function',
+      });
+
+      return fragment;
+    } catch (e) {
+      console.error('TRANSFORM: Error creating fragment:', e);
+      throw e;
+    }
+  }
+
+  serialize(fragment, options = {}) {
+    console.log('TRANSFORM: Fragment serialize called', {
+      fragment,
+      options,
+    });
+    
+    if (!isPresent(fragment)) {
       return null;
     }
 
-    return this.deserializeSingle(data, options, parentData);
-  },
-
-  serialize: function serializeFragment(snapshot) {
-    if (!snapshot) {
-      return null;
+    // Use fragment's serialize method if available
+    if (typeof fragment.serialize === 'function') {
+      return fragment.serialize();
     }
 
-    const store = this.store;
-    const realSnapshot = snapshot._createSnapshot
-      ? snapshot._createSnapshot()
-      : snapshot;
-    const serializer = store.serializerFor(
-      realSnapshot.modelName || realSnapshot.constructor.modelName,
-    );
-
-    return serializer.serialize(realSnapshot);
-  },
-
-  modelNameFor(data, options, parentData) {
-    let modelName = this.type;
-    const polymorphicTypeProp = this.polymorphicTypeProp;
-
-    if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
-      modelName = data[polymorphicTypeProp];
-    } else if (options && typeof options.typeKey === 'function') {
-      modelName = options.typeKey(data, parentData);
+    // Fallback - just return the attributes
+    if (fragment._attributes) {
+      return copy(fragment._attributes, true);
     }
 
-    return modelName;
-  },
+    return fragment;
+  }
 
-  deserializeSingle(data, options, parentData) {
-    const store = this.store;
-    const modelName = this.modelNameFor(data, options, parentData);
-    const serializer = store.serializerFor(modelName);
+  _getFragmentClass(fragmentType, record) {
+    let FragmentClass = null;
 
-    assert(
-      'The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`',
-      !(serializer instanceof JSONAPISerializer),
-    );
+    // Try to get from record's store first
+    if (record && record.store) {
+      try {
+        FragmentClass = record.store.modelFor(fragmentType);
+      } catch (e) {
+        // Fall through to container lookup
+      }
+    }
 
-    const typeClass = store.modelFor(modelName);
-    const serialized = serializer.normalize(typeClass, data);
+    // Try to get from Ember's container
+    if (!FragmentClass) {
+      const owner = getOwner(record) || getOwner(this);
+      if (owner) {
+        const factory = owner.factoryFor(`model:${fragmentType}`);
+        if (factory && factory.class) {
+          FragmentClass = factory.class;
+        }
+      }
+    }
 
-    // `JSONSerializer#normalize` returns a full JSON API document, but we only
-    // need the attributes hash
-    return serialized?.data?.attributes;
-  },
-});
+    if (!FragmentClass) {
+      throw new Error(
+        `Could not find fragment class for type: ${fragmentType}. Make sure the fragment model is defined at app/models/${fragmentType}.js`,
+      );
+    }
 
-export default FragmentTransform;
+    // Verify this is really a Fragment class
+    if (!Fragment.detect(FragmentClass)) {
+      console.warn(`Model ${fragmentType} is not a Fragment class!`);
+    }
+
+    return FragmentClass;
+  }
+
+  _getDefaultValue(options, record, key) {
+    const defaultValue = options.defaultValue;
+
+    // For function defaultValues (preferred approach)
+    if (typeof defaultValue === 'function') {
+      const value = defaultValue();
+
+      // Create fragment from returned data if needed
+      if (value && options.fragmentType) {
+        try {
+          const fragmentClass = this._getFragmentClass(
+            options.fragmentType,
+            record,
+          );
+          return new fragmentClass(value, record, key);
+        } catch (e) {
+          // If we can't create the fragment, return the raw value
+          return value;
+        }
+      }
+
+      return value;
+    }
+
+    // For object defaultValues - Ember Data complains about these but we support for backward compatibility
+    if (defaultValue !== undefined) {
+      // For primitive default values, just return them
+      if (defaultValue === null || typeof defaultValue !== 'object') {
+        return defaultValue;
+      }
+
+      // For object defaults, wrap in a function to avoid sharing references
+      // This is necessary because Ember Data warns about shared references in defaultValues
+      const wrappedDefault = () => copy(defaultValue, true);
+      return this._getDefaultValue(
+        { ...options, defaultValue: wrappedDefault },
+        record,
+        key,
+      );
+    }
+
+    return null;
+  }
+}

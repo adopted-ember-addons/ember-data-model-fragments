@@ -1,164 +1,310 @@
-import { get, computed } from '@ember/object';
-import Ember from 'ember';
-// DS.Model gets munged to add fragment support, which must be included first
-import { Model } from './ext';
+import { tracked } from '@glimmer/tracking';
+import { computed, get as emberGet, set as emberSet } from '@ember/object';
+import { defineProperty } from '@ember/object';
+import { getOwner } from '@ember/application';
 import { copy } from './util/copy';
-import { recordDataFor } from '@ember-data/store/-private';
+import { isPresent } from '@ember/utils';
 
-/**
-  @module ember-data-model-fragments
-*/
+export default class Fragment {
+  @tracked _attributes = {};
+  @tracked _owner = null;
+  @tracked _key = null;
+  @tracked _originalAttributes = {};
 
-/**
-  The class that all nested object structures, or 'fragments', descend from.
-  Fragments are bound to a single 'owner' record (an instance of `DS.Model`)
-  and cannot change owners once set. They behave like models, but they have
-  no `save` method since their persistence is managed entirely through their
-  owner. Because of this, a fragment's state directly influences its owner's
-  state, e.g. when a record's fragment `hasDirtyAttributes`, its owner
-  `hasDirtyAttributes`.
+  // Static properties that will be set by subclasses
+  static modelName = null;
+  static attributes = {};
 
-  Example:
+  constructor(data = {}, owner = null, key = null) {
+    // Initialize all tracked properties
+    this._attributes = {};
+    this._owner = owner;
+    this._key = key;
+    this._originalAttributes = {};
 
-  ```javascript
-  App.Person = DS.Model.extend({
-    name: MF.fragment('name')
-  });
+    // Setup attribute definitions as computed properties
+    this._setupAttributeProperties();
 
-  App.Name = MF.Fragment.extend({
-    first  : DS.attr('string'),
-    last   : DS.attr('string')
-  });
-  ```
+    // Set initial data
+    this._setInitialData(data);
 
-  With JSON response:
-
-  ```json
-  {
-    'id': '1',
-    'name': {
-      'first': 'Robert',
-      'last': 'Jackson'
-    }
+    // Track original state for dirty checking
+    this._originalAttributes = copy(this._attributes, true);
+    
+    // Debug constructor execution
+    console.log('Fragment constructor executed for', this.constructor.modelName);
+    console.log('Initial attributes:', this._attributes);
   }
-  ```
-
-  ```javascript
-  let person = store.getbyid('person', '1');
-  let name = person.get('name');
-
-  person.get('hasDirtyAttributes'); // false
-  name.get('hasDirtyAttributes'); // false
-  name.get('first'); // 'Robert'
-
-  name.set('first', 'The Animal');
-  name.get('hasDirtyAttributes'); // true
-  person.get('hasDirtyAttributes'); // true
-
-  person.rollbackAttributes();
-  name.get('first'); // 'Robert'
-  person.get('hasDirtyAttributes'); // false
-  person.get('hasDirtyAttributes'); // false
-  ```
-
-  @class Fragment
-  @namespace MF
-  @extends CoreModel
-  @uses Ember.Comparable
-  @uses Copyable
-*/
-const Fragment = Model.extend(Ember.Comparable, {
-  /**
-    Compare two fragments by identity to allow `FragmentArray` to diff arrays.
-
-    @method compare
-    @param a {MF.Fragment} the first fragment to compare
-    @param b {MF.Fragment} the second fragment to compare
-    @return {Integer} the result of the comparison
-  */
-  compare(f1, f2) {
-    return f1 === f2 ? 0 : 1;
-  },
 
   /**
-    Create a new fragment that is a copy of the current fragment. Copied
-    fragments do not have the same owner record set, so they may be added
-    to other records safely.
+   * This is the critical compatibility method that makes fragments work with Ember.
+   * It allows setting properties both via fragment.set('key', value) and directly.
+   * @param {string|object} keyOrObject - Either a key to set or an object of key/values
+   * @param {*} value - The value to set (if key is a string)
+   * @returns {*} The value that was set
+   */
+  set(keyOrObject, value) {
+    // Handle both set(key, value) and set({ key: value }) forms
+    if (typeof keyOrObject === 'object' && value === undefined) {
+      // Handle set({ key: value }) form
+      Object.keys(keyOrObject).forEach(key => {
+        this.setUnknownProperty(key, keyOrObject[key]);
+      });
+      return this;
+    }
+    
+    // Handle set(key, value) form - standard case
+    const key = keyOrObject;
+    
+    // Support for nested paths like 'name.first'
+    if (key && key.includes && key.includes('.')) {
+      return emberSet(this, key, value);
+    }
+    
+    return this.setUnknownProperty(key, value);
+  }
 
-    @method copy
-    @return {MF.Fragment} the newly created fragment
-  */
-  copy() {
-    const type = this.constructor;
-    const props = Object.create(null);
+  _setupAttributeProperties() {
+    const attributes = this.constructor.attributes || {};
 
-    // Loop over each attribute and copy individually to ensure nested fragments
-    // are also copied
-    type.eachAttribute((name) => {
-      props[name] = copy(get(this, name));
+    Object.keys(attributes).forEach((key) => {
+      const meta = attributes[key];
+
+      // Define direct property access with a getter/setter
+      Object.defineProperty(this, key, {
+        get() {
+          return this._attributes[key];
+        },
+        set(value) {
+          return this.setUnknownProperty(key, value);
+        },
+        enumerable: true,
+        configurable: true
+      });
     });
+  }
+  
+  // Make sure the class is compatible with Ember's expectedAttributes
+  static eachAttribute(callback) {
+    const attributes = this.attributes || {};
+    Object.keys(attributes).forEach((key) => {
+      callback(key, attributes[key]);
+    });
+  }
 
-    const modelName = type.modelName || this._internalModel.modelName;
-    return this.store.createFragment(modelName, props);
-  },
+  _setInitialData(data) {
+    // Ensure _attributes is initialized
+    if (!this._attributes) {
+      this._attributes = {};
+    }
+    
+    // Set each attribute from the data
+    Object.keys(data || {}).forEach((key) => {
+      // Use setUnknownProperty to ensure proper change tracking
+      this.setUnknownProperty(key, data[key]);
+    });
+  }
 
-  toStringExtension() {
-    const owner = recordDataFor(this).getFragmentOwner();
-    return owner ? `owner(${owner.id})` : '';
-  },
-}).reopenClass({
-  fragmentOwnerProperties: computed(function () {
-    const props = [];
+  // Public API methods (maintain backward compatibility)
+  // Support both direct property access and get() method for compatibility
+  get(key) {
+    if (key === undefined || key === null) {
+      return undefined;
+    }
 
-    this.eachComputedProperty((name, meta) => {
-      if (meta.isFragmentOwner) {
-        props.push(name);
+    // Support for nested paths like 'name.first' that tests might use
+    if (key.includes && key.includes('.')) {
+      return emberGet(this, key);
+    }
+
+    // First try the attributes
+    if (this._attributes[key] !== undefined) {
+      return this._attributes[key];
+    }
+    
+    // Then try direct property access
+    return this[key];
+  }
+
+
+  setUnknownProperty(key, value) {
+    // Ensure attributes exists
+    if (!this._attributes) {
+      this._attributes = {};
+    }
+    
+    const oldValue = this._attributes[key];
+    
+    // Set the value in _attributes
+    this._attributes[key] = value;
+    
+    // Use Object.defineProperty to avoid triggering the setter again
+    if (!Object.getOwnPropertyDescriptor(this, key)) {
+      Object.defineProperty(this, key, {
+        enumerable: true,
+        configurable: true,
+        get() { 
+          return this._attributes[key]; 
+        },
+        set(newValue) { 
+          this.setUnknownProperty(key, newValue);
+          return newValue;
+        }
+      });
+    } else {
+      // If using defineProperty directly to bypass the setter 
+      // to avoid the infinite recursion
+      Object.defineProperty(this, key, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: value
+      });
+    }
+
+    if (oldValue !== value) {
+      this._fragmentDidChange();
+    }
+
+    return value;
+  }
+
+  // Dirty tracking (maintain existing API)
+  get hasDirtyAttributes() {
+    return Object.keys(this._attributes).some((key) => {
+      const current = this._attributes[key];
+      const original = this._originalAttributes[key];
+
+      // Handle nested fragments/arrays
+      if (current && typeof current.hasDirtyAttributes === 'boolean') {
+        return current.hasDirtyAttributes;
+      }
+
+      return current !== original;
+    });
+  }
+
+  get changedAttributes() {
+    const changed = {};
+
+    Object.keys(this._attributes).forEach((key) => {
+      const current = this._attributes[key];
+      const original = this._originalAttributes[key];
+
+      if (current !== original) {
+        changed[key] = [original, current];
       }
     });
 
-    return props;
-  }).readOnly(),
-});
-
-/**
- * `getActualFragmentType` returns the actual type of a fragment based on its declared type
- * and whether it is configured to be polymorphic.
- *
- * @private
- * @param {String} declaredType the type as declared by `MF.fragment` or `MF.fragmentArray`
- * @param {Object} options the fragment options
- * @param {Object} data the fragment data
- * @return {String} the actual fragment type
- */
-export function getActualFragmentType(declaredType, options, data, owner) {
-  if (!options.polymorphic || !data) {
-    return declaredType;
+    return changed;
   }
 
-  const typeKey = options.typeKey || 'type';
-  const actualType =
-    typeof typeKey === 'function' ? typeKey(data, owner) : data[typeKey];
+  rollbackAttributes() {
+    Object.keys(this._originalAttributes).forEach((key) => {
+      const original = this._originalAttributes[key];
 
-  return actualType || declaredType;
+      // Handle nested fragments
+      const current = this._attributes[key];
+      if (current && typeof current.rollbackAttributes === 'function') {
+        current.rollbackAttributes();
+      } else {
+        this._attributes[key] = copy(original, true);
+      }
+    });
+
+    this._fragmentDidChange();
+  }
+
+  // Serialization
+  serialize(options = {}) {
+    const serializer = this._getSerializer();
+    return serializer.serialize(this, options);
+  }
+
+  _getSerializer() {
+    const modelName = this.constructor.modelName;
+    const store = getOwner(this)?.lookup('service:store');
+
+    if (store) {
+      try {
+        return store.serializerFor(modelName);
+      } catch (e) {
+        // Fall through to default serializer
+        console.warn(`Could not find serializer for fragment type: ${modelName}`, e);
+      }
+    }
+
+    // Fallback serializer - just return attributes
+    return {
+      serialize: (fragment) => {
+        // Direct serialization of attributes
+        const result = {};
+        Object.keys(fragment._attributes || {}).forEach((key) => {
+          const value = fragment._attributes[key];
+
+          // Handle nested fragments/arrays
+          if (value && typeof value.serialize === 'function') {
+            result[key] = value.serialize();
+          } else {
+            result[key] = value;
+          }
+        });
+        return result;
+      },
+    };
+  }
+
+  // Change notification
+  _fragmentDidChange() {
+    if (this._owner && this._key) {
+      // Notify parent model of change
+      if (typeof this._owner.notifyPropertyChange === 'function') {
+        this._owner.notifyPropertyChange(this._key);
+        this._owner.notifyPropertyChange('hasDirtyAttributes');
+      }
+    }
+  }
+
+  // Static method for declaring attributes (used by attr decorator)
+  static attr(type, options = {}) {
+    return function (target, key) {
+      // Ensure attributes object exists on the prototype
+      if (!target.constructor.attributes) {
+        target.constructor.attributes = {};
+      }
+
+      target.constructor.attributes[key] = { type, options };
+    };
+  }
+  
+  // Static method to detect if a class is a Fragment
+  static detect(klass) {
+    return klass === Fragment || 
+           (klass && klass.prototype instanceof Fragment);
+  }
+  
+  // RecordData interface compatibility methods - for Ember Data integration
+  getAttr(key) {
+    return this.get(key);
+  }
+  
+  setAttr(key, value) {
+    return this.set(key, value);
+  }
+  
+  // Support for Ember.get compatibility
+  unknownProperty(key) {
+    return this.get(key);
+  }
+
+  // Helper method to iterate over attributes (like DS.Model.eachAttribute)
+  eachAttribute(callback) {
+    const attributes = this.constructor.attributes || {};
+    Object.keys(attributes).forEach((key) => {
+      callback(key, attributes[key]);
+    });
+  }
 }
 
-// Sets the owner/key values on a fragment
-export function setFragmentOwner(fragment, record, key) {
-  const recordData = recordDataFor(fragment);
-  recordData.setFragmentOwner(record, key);
-
-  // Notify any observers of `fragmentOwner` properties
-  fragment.constructor.fragmentOwnerProperties.forEach((name) => {
-    fragment.notifyPropertyChange(name);
-  });
-
-  return fragment;
-}
-
-// Determine whether an object is a fragment instance using a stamp to reduce
-// the number of instanceof checks
-export function isFragment(obj) {
-  return obj instanceof Fragment;
-}
-
-export default Fragment;
+// Export attr for convenience (maintains existing import pattern)
+export const attr = Fragment.attr;

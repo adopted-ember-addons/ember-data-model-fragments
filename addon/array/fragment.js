@@ -1,163 +1,317 @@
-import { assert } from '@ember/debug';
-import { typeOf } from '@ember/utils';
-import StatefulArray from './stateful';
-import { isFragment, setFragmentOwner } from '../fragment';
-import isInstanceOfType from '../util/instance-of-type';
-import { recordDataFor } from '@ember-data/store/-private';
+import { TrackedArray } from 'tracked-built-ins';
+import { getOwner } from '@ember/application';
+import { A } from '@ember/array';
+import EmberArray from '@ember/array';
+import { copy } from '../util/copy';
 
 /**
-  @module ember-data-model-fragments
-*/
+ * FragmentArray - A reactive array that contains fragment instances
+ *
+ * Extends TrackedArray from tracked-built-ins and adds:
+ * - Fragment-specific methods (createFragment)
+ * - Parent model notification when array changes
+ * - Fragment-aware dirty tracking and rollback
+ * - Serialization support
+ */
+export default class FragmentArray extends TrackedArray {
+  constructor(content = [], owner = null, key = null, fragmentType = null) {
+    super(content);
 
-/**
-  A state-aware array of fragments that is tied to an attribute of a `DS.Model`
-  instance. `FragmentArray` instances should not be created directly, instead
-  use `MF.fragmentArray` or `MF.array`.
-
-  @class FragmentArray
-  @namespace MF
-  @extends StatefulArray
-*/
-const FragmentArray = StatefulArray.extend({
-  /**
-    The type of fragments the array contains
-
-    @property modelName
-    @private
-    @type {String}
-  */
-  modelName: null,
-
-  _normalizeData(data, index) {
-    assert(
-      `You can only add '${this.modelName}' fragments or object literals to this property`,
-      typeOf(data) === 'object' ||
-        isInstanceOfType(this.store.modelFor(this.modelName), data),
-    );
-
-    if (isFragment(data)) {
-      const recordData = recordDataFor(data);
-      setFragmentOwner(data, this.recordData, this.key);
-      return recordData._fragmentGetRecord();
+    this._owner = owner;
+    this._key = key;
+    this._fragmentType = fragmentType;
+    this._originalContent = copy(content, true); // Track original state for rollback with deep copy
+    
+    // Add required Ember Array compatibility
+    this.isEmberArray = true;
+    
+    // Fix for instanceof checks - ensure the prototype chain is properly set
+    Object.setPrototypeOf(this, FragmentArray.prototype);
+  }
+  
+  // Ember.Array compatibility - get method for property access
+  get(key) {
+    // Special cases for array properties accessed via get
+    if (key === 'firstObject') return this.firstObject;
+    if (key === 'lastObject') return this.lastObject;
+    if (key === 'length') return this.length;
+    if (key === 'hasDirtyAttributes') return this.hasDirtyAttributes;
+    
+    // Handle numeric indices
+    if (!isNaN(parseInt(key, 10))) {
+      return this[parseInt(key, 10)];
     }
-    const existing = this.currentState[index];
-    if (existing) {
-      existing.setProperties(data);
-      return existing;
+    
+    // Support getters directly on the prototype
+    if (typeof this[key] === 'function') {
+      return this[key].bind(this);
     }
-    const recordData = this.recordData._newFragmentRecordDataForKey(
-      this.key,
-      data,
-    );
-    return recordData._fragmentGetRecord();
-  },
+    
+    // Handle other properties
+    return this[key];
+  }
+  
+  // Ember.Array compatibility - set method for property access
+  set(key, value) {
+    return this.setUnknownProperty(key, value);
+  }
+  
+  setUnknownProperty(key, value) {
+    if (!isNaN(parseInt(key, 10))) {
+      this[parseInt(key, 10)] = value;
+    } else {
+      this[key] = value;
+    }
+    this._notifyParentChange();
+    return value;
+  }
 
-  _getFragmentState() {
-    const recordDatas = this._super();
-    return recordDatas?.map((recordData) => recordData._fragmentGetRecord());
-  },
+  // Fragment-specific methods
+  createFragment(data = {}) {
+    const fragmentClass = this._getFragmentClass();
+    const fragment = new fragmentClass(data, this._owner, this._key);
+    this.push(fragment);
+    this._notifyParentChange();
+    return fragment;
+  }
 
-  _setFragmentState(fragments) {
-    const recordDatas = fragments.map((fragment) => recordDataFor(fragment));
-    this._super(recordDatas);
-  },
+  // Override mutation methods to notify parent
+  push(...items) {
+    const result = super.push(...items);
+    this._notifyParentChange();
+    return result;
+  }
 
-  /**
-    @method _createSnapshot
-    @private
-  */
-  _createSnapshot() {
-    // Snapshot each fragment
-    return this.map((fragment) => {
-      return fragment._createSnapshot();
+  pop() {
+    const result = super.pop();
+    if (result !== undefined) {
+      this._notifyParentChange();
+    }
+    return result;
+  }
+
+  shift() {
+    const result = super.shift();
+    if (result !== undefined) {
+      this._notifyParentChange();
+    }
+    return result;
+  }
+
+  unshift(...items) {
+    const result = super.unshift(...items);
+    this._notifyParentChange();
+    return result;
+  }
+
+  splice(start, deleteCount, ...items) {
+    const result = super.splice(start, deleteCount, ...items);
+    if (deleteCount > 0 || items.length > 0) {
+      this._notifyParentChange();
+    }
+    return result;
+  }
+
+  // Additional Ember Array compatibility methods
+  pushObject(obj) {
+    this.push(obj);
+    return this;
+  }
+
+  pushObjects(objects) {
+    this.push(...objects);
+    return this;
+  }
+
+  removeObject(obj) {
+    const index = this.indexOf(obj);
+    if (index > -1) {
+      this.splice(index, 1);
+    }
+    return this;
+  }
+
+  removeObjects(objects) {
+    // Store indices to remove in reverse order to avoid shifting issues
+    const indices = [];
+    objects.forEach((obj) => {
+      // Find all indices of the object to remove
+      let idx = this.indexOf(obj);
+      while (idx !== -1) {
+        indices.push(idx);
+        idx = this.indexOf(obj, idx + 1);
+      }
     });
-  },
+    
+    // Sort indices in descending order to avoid shifting issues
+    indices.sort((a, b) => b - a);
+    
+    // Remove each item at the stored indices
+    indices.forEach((idx) => {
+      this.splice(idx, 1);
+    });
+    
+    return this;
+  }
 
-  /**
-    If this property is `true`, either the contents of the array do not match
-    its original state, or one or more of the fragments in the array are dirty.
+  insertAt(index, obj) {
+    this.splice(index, 0, obj);
+    return this;
+  }
 
-    Example
+  removeAt(index, len = 1) {
+    return this.splice(index, len);
+  }
 
-    ```javascript
-    array.toArray(); // [ <Fragment:1>, <Fragment:2> ]
-    array.get('hasDirtyAttributes'); // false
-    array.get('firstObject').set('prop', 'newValue');
-    array.get('hasDirtyAttributes'); // true
-    ```
+  replace(index, removeCount, objects = []) {
+    if (!Array.isArray(objects)) {
+      objects = [objects];
+    }
+    this.splice(index, removeCount, ...objects);
+    return this;
+  }
 
-    @property hasDirtyAttributes
-    @type {Boolean}
-    @readOnly
-  */
+  clear() {
+    this.splice(0, this.length);
+    return this;
+  }
+  
+  // Add these methods for EmberArray compatibility
+  mapBy(key) {
+    return this.map(item => {
+      if (item && typeof item === 'object') {
+        // Use get method if available, otherwise direct property access
+        return typeof item.get === 'function' ? item.get(key) : item[key];
+      }
+      return undefined;
+    });
+  }
+  
+  findBy(key, value) {
+    return this.find(item => {
+      if (item && typeof item === 'object') {
+        // Use get method if available, otherwise direct property access
+        const itemValue = typeof item.get === 'function' ? item.get(key) : item[key];
+        return itemValue === value;
+      }
+      return false;
+    });
+  }
+  
+  filterBy(key, value) {
+    return this.filter(item => {
+      if (item && typeof item === 'object') {
+        // Use get method if available, otherwise direct property access
+        const itemValue = typeof item.get === 'function' ? item.get(key) : item[key];
+        if (value === undefined) {
+          return Boolean(itemValue);
+        }
+        return itemValue === value;
+      }
+      return false;
+    });
+  }
 
-  /**
-    This method reverts local changes of the array's contents to its original
-    state, and calls `rollbackAttributes` on each fragment.
+  // Utility methods
+  get firstObject() {
+    return this[0];
+  }
 
-    Example
+  get lastObject() {
+    return this[this.length - 1];
+  }
 
-    ```javascript
-    array.get('firstObject').get('hasDirtyAttributes'); // true
-    array.get('hasDirtyAttributes'); // true
-    array.rollbackAttributes();
-    array.get('firstObject').get('hasDirtyAttributes'); // false
-    array.get('hasDirtyAttributes'); // false
-    ```
+  objectAt(index) {
+    return this[index];
+  }
+  
+  // Ember compatibility for enumerable
+  forEach(callback, thisArg) {
+    return Array.prototype.forEach.call(this, callback, thisArg);
+  }
+  
+  toArray() {
+    return Array.prototype.slice.call(this);
+  }
 
-    @method rollbackAttributes
-  */
-
-  /**
-    Serializing a fragment array returns a new array containing the results of
-    calling `serialize` on each fragment in the array.
-
-    @method serialize
-    @return {Array}
-  */
+  // Serialization
   serialize() {
-    return this.invoke('serialize');
-  },
+    return this.map((fragment) => {
+      if (fragment && typeof fragment.serialize === 'function') {
+        return fragment.serialize();
+      }
+      return fragment;
+    });
+  }
 
-  /**
-    Adds an existing fragment to the end of the fragment array. Alias for
-    `addObject`.
+  // Dirty tracking
+  get hasDirtyAttributes() {
+    // Check if array length changed
+    if (this.length !== this._originalContent.length) {
+      return true;
+    }
 
-    @method addFragment
-    @param {MF.Fragment} fragment
-    @return {MF.Fragment} the newly added fragment
-  */
-  addFragment(fragment) {
-    return this.addObject(fragment);
-  },
+    // Check if any fragments are dirty
+    return this.some((fragment) => {
+      return fragment && fragment.hasDirtyAttributes;
+    });
+  }
 
-  /**
-    Removes the given fragment from the array. Alias for `removeObject`.
+  get changedAttributes() {
+    // For arrays, we return a simplified change object
+    if (this.hasDirtyAttributes) {
+      return {
+        [this._key]: [this._originalContent.slice(), this.slice()],
+      };
+    }
+    return {};
+  }
 
-    @method removeFragment
-    @param {MF.Fragment} fragment
-    @return {MF.Fragment} the removed fragment
-  */
-  removeFragment(fragment) {
-    return this.removeObject(fragment);
-  },
+  rollbackAttributes() {
+    // Rollback individual fragments first
+    this.forEach((fragment) => {
+      if (fragment && typeof fragment.rollbackAttributes === 'function') {
+        fragment.rollbackAttributes();
+      }
+    });
 
-  /**
-    Creates a new fragment of the fragment array's type and adds it to the end
-    of the fragment array.
+    // Restore original array contents
+    this.splice(0, this.length, ...this._originalContent);
+    this._notifyParentChange();
+  }
 
-    @method createFragment
-    @param {MF.Fragment} fragment
-    @return {MF.Fragment} the newly added fragment
-    */
-  createFragment(props) {
-    const recordData = this.recordData._newFragmentRecordDataForKey(
-      this.key,
-      props,
+  // Private methods
+  _getFragmentClass() {
+    if (this._owner && this._owner.store && this._fragmentType) {
+      return this._owner.store.modelFor(this._fragmentType);
+    }
+
+    // Try to get from Ember's container
+    const owner = getOwner(this._owner);
+    if (owner && this._fragmentType) {
+      const factory = owner.factoryFor(`model:${this._fragmentType}`);
+      if (factory && factory.class) {
+        return factory.class;
+      }
+    }
+
+    throw new Error(
+      `Could not find fragment class for type: ${this._fragmentType}`,
     );
-    const fragment = recordData._fragmentGetRecord(props);
-    return this.pushObject(fragment);
-  },
-});
+  }
 
-export default FragmentArray;
+  _notifyParentChange() {
+    if (this._owner && this._key) {
+      // Notify parent model of change
+      if (typeof this._owner.notifyPropertyChange === 'function') {
+        this._owner.notifyPropertyChange(this._key);
+        this._owner.notifyPropertyChange('hasDirtyAttributes');
+      }
+    }
+  }
+
+  // Update original content when parent model is saved/committed
+  _updateOriginalContent() {
+    this._originalContent = this.slice();
+  }
+}

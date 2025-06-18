@@ -1,34 +1,10 @@
 import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
-// eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { Snapshot, normalizeModelName } from 'ember-data/-private';
-import JSONSerializer from '@ember-data/serializer/json';
-import FragmentRecordData from './record-data';
-import { default as Fragment } from './fragment';
-import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
-import { gte } from 'ember-compatibility-helpers';
+import { isPresent } from '@ember/utils';
+import Fragment from './fragment';
 
-function serializerForFragment(owner, normalizedModelName) {
-  let serializer = owner.lookup(`serializer:${normalizedModelName}`);
-
-  if (serializer !== undefined) {
-    return serializer;
-  }
-
-  // no serializer found for the specific model, fallback and check for application serializer
-  serializer = owner.lookup('serializer:-fragment');
-  if (serializer !== undefined) {
-    return serializer;
-  }
-
-  // final fallback, no model specific serializer, no application serializer, no
-  // `serializer` property on store: use json-api serializer
-  serializer = owner.lookup('serializer:-default');
-
-  return serializer;
-}
 /**
   @module ember-data-model-fragments
 */
@@ -37,179 +13,236 @@ function serializerForFragment(owner, normalizedModelName) {
   @class Store
   @namespace DS
 */
-Store.reopen({
-  createRecordDataFor(type, id, lid, storeWrapper) {
-    if (!gte('ember-data', '3.28.0')) {
-      throw new Error(
-        'This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.',
-      );
-    }
-    const identifier = this.identifierCache.getOrCreateRecordIdentifier({
-      type,
-      id,
-      lid,
-    });
-    return new FragmentRecordData(identifier, storeWrapper);
-  },
 
-  /**
-    Create a new fragment that does not yet have an owner record.
-    The properties passed to this method are set on the newly created
-    fragment.
+// Add methods to Store prototype
+Store.prototype.createFragment = function(modelName, props = {}) {
+  if (!this.isFragment(modelName)) {
+    throw new Error(`Could not find fragment class for type: ${modelName}`);
+  }
 
-    To create a new instance of the `name` fragment:
-
-    ```js
-    store.createFragment('name', {
-      first: 'Alex',
-      last: 'Routé'
-    });
-    ```
-
-    @method createRecord
-    @param {String} type
-    @param {Object} properties a hash of properties to set on the
-      newly created fragment.
-    @return {MF.Fragment} fragment
-  */
-  createFragment(modelName, props) {
-    assert(
-      `The '${modelName}' model must be a subclass of MF.Fragment`,
-      this.isFragment(modelName),
-    );
-    let recordData;
-    if (gte('ember-data', '4.5.0')) {
-      recordData = this._instanceCache.recordDataFor({ type: modelName }, true);
-    } else {
-      recordData = this.recordDataFor({ type: modelName }, true);
-    }
-    return recordData._fragmentGetRecord(props);
-  },
-
-  /**
-    Returns true if the modelName is a fragment, false if not
-
-    @method isFragment
-    @private
-    @param {String} the modelName to check if a fragment
-    @return {boolean}
-  */
-  isFragment(modelName) {
-    if (modelName === 'application' || modelName === '-default') {
-      return false;
-    }
-
-    const type = this.modelFor(modelName);
-    return Fragment.detect(type);
-  },
-
-  serializerFor(modelName) {
-    // this assertion is cargo-culted from ember-data TODO: update comment
-    assert(
-      "You need to pass a model name to the store's serializerFor method",
-      isPresent(modelName),
-    );
-    assert(
-      `Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`,
-      typeof modelName === 'string',
-    );
-
+  try {
+    // Get the fragment factory from the container
     const owner = getOwner(this);
-    const normalizedModelName = normalizeModelName(modelName);
-
-    if (this.isFragment(normalizedModelName)) {
-      return serializerForFragment(owner, normalizedModelName);
-    } else {
-      return this._super(...arguments);
+    const factory = owner.factoryFor(`model:${modelName}`);
+    
+    if (!factory) {
+      throw new Error(`Could not find fragment class for type: ${modelName}`);
     }
-  },
-});
 
-/**
-  Override `Snapshot._attributes` to snapshot fragment attributes before they are
-  passed to the `DS.Model#serialize`.
+    const FragmentClass = factory.class;
+    
+    // Debug logging
+    console.log('Creating fragment with class:', FragmentClass.name, 'modelName:', modelName);
+    console.log('Fragment prototype:', Object.getPrototypeOf(FragmentClass.prototype));
+    console.log('Fragment has set:', typeof FragmentClass.prototype.set);
+    
+    // Ensure props is an object
+    const safeProps = props || {};
+    
+    // Create a new instance of the fragment
+    const fragment = new FragmentClass(safeProps, null, null);
+    
+    // Debug the created instance
+    console.log('Created fragment instanceof Fragment:', fragment instanceof Fragment);
+    console.log('fragment.set type:', typeof fragment.set);
+    console.log('fragment attributes:', fragment._attributes);
+    
+    // Initialize if needed
+    if (!fragment._attributes) {
+      fragment._attributes = {};
+      // Copy properties to attributes
+      Object.keys(safeProps).forEach(key => {
+        fragment._attributes[key] = safeProps[key];
+      });
+    }
+    
+    // Make sure properties are properly accessible
+    Object.keys(safeProps).forEach(key => {
+      if (fragment[key] === undefined) {
+        Object.defineProperty(fragment, key, {
+          enumerable: true,
+          configurable: true,
+          get() { return fragment._attributes[key]; },
+          set(value) { 
+            fragment._attributes[key] = value;
+            fragment._fragmentDidChange();
+            return value;
+          }
+        });
+      }
+    });
+    
+    return fragment;
+  } catch (e) {
+    console.error('Error creating fragment:', e);
+    throw e;
+  }
+};
 
-  @private
-*/
-const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
-  Snapshot.prototype,
-  '_attributes',
+Store.prototype.isFragment = function(modelName) {
+  if (modelName === 'application' || modelName === '-default') {
+    return false;
+  }
+
+  try {
+    const type = this.modelFor(modelName);
+    
+    // More robust checking method
+    // 1. Check if it's literally our Fragment class
+    if (type === Fragment) {
+      return true;
+    }
+    
+    // 2. Check inheritance chain
+    if (type && type.prototype instanceof Fragment) {
+      return true;
+    }
+    
+    // 3. Check for static modelName property pattern used by fragments
+    if (type && type.modelName && !type.modelFor) {
+      // If it has modelName but not modelFor (Model static method),
+      // it's likely a fragment
+      return true;
+    }
+    
+    return false;
+  } catch (e) {
+    return false;
+  }
+};
+
+// Store original methods so we can call them
+const originalRollbackAttributes = Model.prototype.rollbackAttributes;
+const originalHasDirtyAttributes = Object.getOwnPropertyDescriptor(
+  Model.prototype,
+  'hasDirtyAttributes'
+);
+const originalChangedAttributes = Object.getOwnPropertyDescriptor(
+  Model.prototype,
+  'changedAttributes'
 );
 
-Object.defineProperty(Snapshot.prototype, '_attributes', {
+/**
+ * Add createFragment method to all DS.Model instances
+ */
+Model.prototype.createFragment = function (type, data = {}) {
+  const store = this.store;
+  
+  if (!store) {
+    throw new Error('Could not access store to create fragment');
+  }
+  
+  const fragment = store.createFragment(type, data);
+  
+  // Set the owner to support dirty tracking propagation
+  if (fragment) {
+    fragment._owner = this;
+  }
+  
+  return fragment;
+};
+
+/**
+ * Override rollbackAttributes to handle fragments
+ */
+Model.prototype.rollbackAttributes = function () {
+  // First rollback fragment attributes
+  this.eachAttribute((key, meta) => {
+    if (
+      meta.type === 'fragment' ||
+      meta.type === 'fragment-array' ||
+      meta.type === 'array'
+    ) {
+      const value = this.get(key);
+      if (value && typeof value.rollbackAttributes === 'function') {
+        value.rollbackAttributes();
+      }
+    }
+  });
+
+  // Then call the original rollback
+  return originalRollbackAttributes.call(this);
+};
+
+/**
+ * Override hasDirtyAttributes to include fragment dirty state
+ */
+Object.defineProperty(Model.prototype, 'hasDirtyAttributes', {
   get() {
-    const attrs = oldSnapshotAttributes.get.call(this);
-    Object.keys(attrs).forEach((key) => {
-      const attr = attrs[key];
-      // If the attribute has a `_createSnapshot` method, invoke it before the
-      // snapshot gets passed to the serializer
-      if (attr && typeof attr._createSnapshot === 'function') {
-        attrs[key] = attr._createSnapshot();
+    // Check regular attributes first
+    if (originalHasDirtyAttributes.get.call(this)) {
+      return true;
+    }
+
+    // Check fragment attributes
+    let hasFragmentChanges = false;
+    this.eachAttribute((key, meta) => {
+      if (
+        meta.type === 'fragment' ||
+        meta.type === 'fragment-array' ||
+        meta.type === 'array'
+      ) {
+        const value = this.get(key);
+        if (value && value.hasDirtyAttributes) {
+          hasFragmentChanges = true;
+        }
       }
     });
-    return attrs;
+
+    return hasFragmentChanges;
   },
+  configurable: true
 });
 
 /**
-  @class JSONSerializer
-  @namespace DS
-*/
-JSONSerializer.reopen({
-  /**
-    Enables fragment properties to have custom transforms based on the fragment
-    type, so that deserialization does not have to happen on the fly
+ * Override changedAttributes to include fragment changes
+ */
+Object.defineProperty(Model.prototype, 'changedAttributes', {
+  get() {
+    // Get regular changed attributes
+    const changes = originalChangedAttributes.get.call(this) || {};
 
-    @method transformFor
-    @private
-  */
-  transformFor(attributeType) {
-    if (attributeType.indexOf('-mf-') !== 0) {
-      return this._super(...arguments);
-    }
-
-    const owner = getOwner(this);
-    const containerKey = `transform:${attributeType}`;
-
-    if (!owner.hasRegistration(containerKey)) {
-      const match = attributeType.match(
-        /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/,
-      );
-      assert(
-        `Failed parsing ember-data-model-fragments attribute type ${attributeType}`,
-        match != null,
-      );
-      const transformName = match[1];
-      const type = match[2];
-      const polymorphicTypeProp = match[3];
-      let transformClass = owner.factoryFor(`transform:${transformName}`);
-      transformClass = transformClass && transformClass.class;
-      transformClass = transformClass.extend({
-        type,
-        polymorphicTypeProp,
-        store: this.store,
-      });
-      owner.register(containerKey, transformClass);
-    }
-    return owner.lookup(containerKey);
-  },
-
-  // We need to override this to handle polymorphic with a typeKey function
-  applyTransforms(typeClass, data) {
-    const attributes = typeClass.attributes;
-
-    typeClass.eachTransformedAttribute((key, typeClass) => {
-      if (data[key] === undefined) {
-        return;
+    // Add fragment changes
+    this.eachAttribute((key, meta) => {
+      if (
+        meta.type === 'fragment' ||
+        meta.type === 'fragment-array' ||
+        meta.type === 'array'
+      ) {
+        const value = this.get(key);
+        if (
+          value &&
+          value.hasDirtyAttributes &&
+          typeof value.changedAttributes === 'function'
+        ) {
+          const fragmentChanges = value.changedAttributes();
+          if (Object.keys(fragmentChanges).length > 0) {
+            changes[key] = fragmentChanges;
+          }
+        }
       }
-
-      const transform = this.transformFor(typeClass);
-      const transformMeta = attributes.get(key);
-      data[key] = transform.deserialize(data[key], transformMeta.options, data);
     });
 
-    return data;
+    return changes;
   },
+  configurable: true
 });
 
-export { Store, Model, JSONSerializer };
+/**
+ * Helper method to check if a model has any fragment attributes
+ */
+Model.prototype.hasFragmentAttributes = function () {
+  let hasFragments = false;
+  this.eachAttribute((key, meta) => {
+    if (
+      meta.type === 'fragment' ||
+      meta.type === 'fragment-array' ||
+      meta.type === 'array'
+    ) {
+      hasFragments = true;
+    }
+  });
+  return hasFragments;
+};
+
+export { Store, Model };

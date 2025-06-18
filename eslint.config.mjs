@@ -92,7 +92,6 @@ export default [
       '**/*.cjs',
       'blueprints/**/*.js',
       'config/**/*.js',
-      'lib/**/*.js',
       'tests/dummy/config/**/*.js',
       'testem.js',
       'testem*.js',
