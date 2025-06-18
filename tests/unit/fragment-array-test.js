@@ -1,11 +1,13 @@
 import { module, test } from 'qunit';
-import { FragmentArray } from 'ember-data-model-fragments/transforms/fragment-array';
+import FragmentArray from 'ember-data-model-fragments/array/fragment';
 import Fragment from 'ember-data-model-fragments/fragment';
 
 module('Unit | FragmentArray', function () {
   test('FragmentArray can be instantiated', function (assert) {
     const array = new FragmentArray();
-    assert.ok(array instanceof FragmentArray, 'Array instance created');
+    // Using custom property for type checking, which is more reliable with 
+    // extended built-in classes like Array
+    assert.ok(array.constructor === FragmentArray, 'Array instance created');
     assert.ok(Array.isArray(array), 'Is an array');
     assert.strictEqual(array.length, 0, 'Starts empty');
   });

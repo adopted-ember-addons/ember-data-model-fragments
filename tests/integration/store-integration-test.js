@@ -9,7 +9,7 @@ import {
 } from 'ember-data-model-fragments/attributes';
 
 // Import our initializer to manually setup fragments in tests
-import fragmentInitializer from 'ember-data-model-fragments/initializers/fragment-transforms';
+import edmfInitializer from 'ember-data-model-fragments/initializers/ember-data-model-fragments';
 
 module('Integration | Store Integration', function (hooks) {
   setupTest(hooks);
@@ -17,7 +17,7 @@ module('Integration | Store Integration', function (hooks) {
   hooks.beforeEach(function () {
     // Manually initialize fragment transforms for integration tests
     // This is required because integration tests don't automatically run initializers
-    fragmentInitializer.initialize(this.owner);
+    edmfInitializer.initialize(this.owner);
 
     // Define test fragment models
     class NameFragment extends Fragment {

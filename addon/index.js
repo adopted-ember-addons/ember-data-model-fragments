@@ -1,34 +1,30 @@
-import Namespace from '@ember/application/namespace';
-import Ember from 'ember';
-import VERSION from './version';
 import Fragment from './fragment';
 import FragmentArray from './array/fragment';
 import FragmentTransform from './transforms/fragment';
 import FragmentArrayTransform from './transforms/fragment-array';
 import ArrayTransform from './transforms/array';
-import { fragment, fragmentArray, array, fragmentOwner } from './attributes';
+import { fragment, fragmentArray, array } from './attributes/index';
 
-/**
-  Ember Data Model Fragments
+// Re-export everything directly
+export { 
+  Fragment,
+  FragmentArray,
+  FragmentTransform,
+  FragmentArrayTransform,
+  ArrayTransform,
+  fragment,
+  fragmentArray,
+  array
+};
 
-  @module ember-data-model-fragments
-  @main ember-data-model-fragments
-*/
-const MF = Namespace.create({
-  VERSION: VERSION,
-  Fragment: Fragment,
-  FragmentArray: FragmentArray,
-  FragmentTransform: FragmentTransform,
-  FragmentArrayTransform: FragmentArrayTransform,
-  ArrayTransform: ArrayTransform,
-  fragment: fragment,
-  fragmentArray: fragmentArray,
-  array: array,
-  fragmentOwner: fragmentOwner,
-});
-
-if (Ember.libraries) {
-  Ember.libraries.register('Model Fragments', MF.VERSION);
-}
-
-export default MF;
+// Also export as default for compatibility
+export default { 
+  Fragment,
+  FragmentArray,
+  FragmentTransform,
+  FragmentArrayTransform,
+  ArrayTransform,
+  fragment,
+  fragmentArray,
+  array
+};

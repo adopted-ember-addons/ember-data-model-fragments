@@ -20,10 +20,17 @@ import { attr } from '@ember-data/model';
  * ```
  */
 export function fragment(fragmentType, options = {}) {
-  return attr('fragment', {
+  console.log('FRAGMENT DECORATOR CALLED:', fragmentType, options);
+  
+  // Log the attr function to see what it returns
+  const attrDecorator = attr('fragment', {
     fragmentType,
     ...options
   });
+  
+  console.log('ATTR DECORATOR RETURNED:', typeof attrDecorator);
+  
+  return attrDecorator;
 }
 
 /**
@@ -74,7 +81,7 @@ export function fragmentArray(fragmentType, options = {}) {
  */
 export function array(type, options = {}) {
   // Handle both array() and array('string') syntax
-  if (typeof type === 'object' && options === {}) {
+  if (typeof type === 'object' && Object.keys(options).length === 0) {
     options = type;
     type = undefined;
   }

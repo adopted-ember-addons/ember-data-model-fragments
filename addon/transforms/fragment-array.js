@@ -1,213 +1,13 @@
 import Transform from '@ember-data/serializer/transform';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
-import { TrackedArray } from 'tracked-built-ins';
 import { copy } from '../util/copy';
+import FragmentArray from '../array/fragment';
 
-/**
- * FragmentArray - A reactive array that contains fragment instances
- *
- * Extends TrackedArray from tracked-built-ins and adds:
- * - Fragment-specific methods (createFragment)
- * - Parent model notification when array changes
- * - Fragment-aware dirty tracking and rollback
- * - Serialization support
- */
-class FragmentArray extends TrackedArray {
-  constructor(content = [], owner = null, key = null, fragmentType = null) {
-    super(content);
-
-    this._owner = owner;
-    this._key = key;
-    this._fragmentType = fragmentType;
-    this._originalContent = content.slice(); // Track original state for rollback
-  }
-
-  // Fragment-specific methods
-  createFragment(data = {}) {
-    const fragmentClass = this._getFragmentClass();
-    const fragment = new fragmentClass(data, this._owner, this._key);
-    this.push(fragment);
-    this._notifyParentChange();
-    return fragment;
-  }
-
-  // Override mutation methods to notify parent
-  push(...items) {
-    const result = super.push(...items);
-    this._notifyParentChange();
-    return result;
-  }
-
-  pop() {
-    const result = super.pop();
-    if (result !== undefined) {
-      this._notifyParentChange();
-    }
-    return result;
-  }
-
-  shift() {
-    const result = super.shift();
-    if (result !== undefined) {
-      this._notifyParentChange();
-    }
-    return result;
-  }
-
-  unshift(...items) {
-    const result = super.unshift(...items);
-    this._notifyParentChange();
-    return result;
-  }
-
-  splice(start, deleteCount, ...items) {
-    const result = super.splice(start, deleteCount, ...items);
-    if (deleteCount > 0 || items.length > 0) {
-      this._notifyParentChange();
-    }
-    return result;
-  }
-
-  // Additional Ember Array compatibility methods
-  pushObject(obj) {
-    this.push(obj);
-    return this;
-  }
-
-  pushObjects(objects) {
-    this.push(...objects);
-    return this;
-  }
-
-  removeObject(obj) {
-    const index = this.indexOf(obj);
-    if (index > -1) {
-      this.splice(index, 1);
-    }
-    return this;
-  }
-
-  removeObjects(objects) {
-    objects.forEach((obj) => this.removeObject(obj));
-    return this;
-  }
-
-  insertAt(index, obj) {
-    this.splice(index, 0, obj);
-    return this;
-  }
-
-  removeAt(index, len = 1) {
-    return this.splice(index, len);
-  }
-
-  replace(index, removeCount, objects = []) {
-    this.splice(index, removeCount, ...objects);
-    return this;
-  }
-
-  clear() {
-    this.splice(0, this.length);
-    return this;
-  }
-
-  // Utility methods
-  get firstObject() {
-    return this[0];
-  }
-
-  get lastObject() {
-    return this[this.length - 1];
-  }
-
-  objectAt(index) {
-    return this[index];
-  }
-
-  // Serialization
-  serialize() {
-    return this.map((fragment) => {
-      if (fragment && typeof fragment.serialize === 'function') {
-        return fragment.serialize();
-      }
-      return fragment;
-    });
-  }
-
-  // Dirty tracking
-  get hasDirtyAttributes() {
-    // Check if array length changed
-    if (this.length !== this._originalContent.length) {
-      return true;
-    }
-
-    // Check if any fragments are dirty
-    return this.some((fragment) => {
-      return fragment && fragment.hasDirtyAttributes;
-    });
-  }
-
-  get changedAttributes() {
-    // For arrays, we return a simplified change object
-    if (this.hasDirtyAttributes) {
-      return {
-        [this._key]: [this._originalContent.slice(), this.slice()],
-      };
-    }
-    return {};
-  }
-
-  rollbackAttributes() {
-    // Rollback individual fragments first
-    this.forEach((fragment) => {
-      if (fragment && typeof fragment.rollbackAttributes === 'function') {
-        fragment.rollbackAttributes();
-      }
-    });
-
-    // Restore original array contents
-    this.splice(0, this.length, ...this._originalContent);
-    this._notifyParentChange();
-  }
-
-  // Private methods
-  _getFragmentClass() {
-    if (this._owner && this._owner.store && this._fragmentType) {
-      return this._owner.store.modelFor(this._fragmentType);
-    }
-
-    // Try to get from Ember's container
-    const owner = getOwner(this._owner);
-    if (owner && this._fragmentType) {
-      const factory = owner.factoryFor(`model:${this._fragmentType}`);
-      if (factory && factory.class) {
-        return factory.class;
-      }
-    }
-
-    throw new Error(
-      `Could not find fragment class for type: ${this._fragmentType}`,
-    );
-  }
-
-  _notifyParentChange() {
-    if (this._owner && this._key) {
-      // Notify parent model of change
-      if (typeof this._owner.notifyPropertyChange === 'function') {
-        this._owner.notifyPropertyChange(this._key);
-        this._owner.notifyPropertyChange('hasDirtyAttributes');
-      }
-    }
-  }
-
-  // Update original content when parent model is saved/committed
-  _updateOriginalContent() {
-    this._originalContent = this.slice();
-  }
-}
+import { inject as service } from '@ember/service';
 
 export default class FragmentArrayTransform extends Transform {
+  @service store;
   deserialize(serialized, options = {}, record = null, key = null) {
     if (!isPresent(serialized)) {
       return this._getDefaultValue(options, record, key);
@@ -218,14 +18,21 @@ export default class FragmentArrayTransform extends Transform {
       throw new Error('Fragment array transform requires fragmentType option');
     }
 
-    const fragmentClass = this._getFragmentClass(fragmentType, record);
+    try {
+      // Create fragment instances from serialized data using the store service
+      const fragments = serialized.map((data) => {
+        const fragment = this.store.createFragment(fragmentType, data);
+        // Set owner and key after creation to link it to the parent
+        fragment._owner = record;
+        fragment._key = key;
+        return fragment;
+      });
 
-    // Create fragment instances from serialized data
-    const fragments = serialized.map((data) => {
-      return new fragmentClass(data, record, key);
-    });
-
-    return new FragmentArray(fragments, record, key, fragmentType);
+      return new FragmentArray(fragments, record, key, fragmentType);
+    } catch (e) {
+      console.error('Error creating fragment array:', e);
+      throw e;
+    }
   }
 
   serialize(fragmentArray, options = {}) {

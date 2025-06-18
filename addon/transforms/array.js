@@ -19,6 +19,12 @@ class PrimitiveArray extends TrackedArray {
     this._key = key;
     this._itemType = itemType;
     this._originalContent = content.slice();
+    
+    // Fix for instanceof checks - ensure the prototype chain is properly set
+    Object.setPrototypeOf(this, PrimitiveArray.prototype);
+    
+    // Add a specific identity flag for more reliable type checking
+    this.isPrimitiveArray = true;
   }
 
   // Override mutation methods to notify parent
@@ -78,7 +84,25 @@ class PrimitiveArray extends TrackedArray {
   }
 
   removeObjects(objects) {
-    objects.forEach((obj) => this.removeObject(obj));
+    // Store indices to remove in reverse order to avoid shifting issues
+    const indices = [];
+    objects.forEach((obj) => {
+      // Find all indices of the object to remove
+      let idx = this.indexOf(obj);
+      while (idx !== -1) {
+        indices.push(idx);
+        idx = this.indexOf(obj, idx + 1);
+      }
+    });
+    
+    // Sort indices in descending order to avoid shifting issues
+    indices.sort((a, b) => b - a);
+    
+    // Remove each item at the stored indices
+    indices.forEach((idx) => {
+      this.splice(idx, 1);
+    });
+    
     return this;
   }
 

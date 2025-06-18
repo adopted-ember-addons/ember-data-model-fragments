@@ -10,14 +10,14 @@ import {
 import JSONSerializer from '@ember-data/serializer/json';
 
 // Import our initializer to manually setup fragments in tests
-import fragmentInitializer from 'ember-data-model-fragments/initializers/fragment-transforms';
+import edmfInitializer from 'ember-data-model-fragments/initializers/ember-data-model-fragments';
 
 module('Integration | Serialization', function (hooks) {
   setupTest(hooks);
 
   hooks.beforeEach(function () {
     // Manually initialize fragment transforms for integration tests
-    fragmentInitializer.initialize(this.owner);
+    edmfInitializer.initialize(this.owner);
 
     // Define test fragment models
     class NameFragment extends Fragment {
