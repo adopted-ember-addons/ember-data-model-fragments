@@ -4,7 +4,7 @@
  * (and linting)
  */
 const { buildMacros } = require('@embroider/macros/babel');
-import { setConfig } from '@warp-drive/core/build-config';
+const { setConfig } = require('@warp-drive/core/build-config');
 
 const {
   babelCompatSupport,
