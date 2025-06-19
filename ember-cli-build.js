@@ -2,10 +2,13 @@
 
 const EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
-module.exports = function (defaults) {
+module.exports = async function (defaults) {
+  const { setConfig } = await import('@warp-drive/build-config');
   const app = new EmberAddon(defaults, {
     // Add options here
   });
+
+  setConfig(app, __dirname, {});
 
   /*
     This build file specifies the options for the dummy test app of this
