@@ -1,13 +1,20 @@
 {
-  "name": "",
-  "version": "0.0.0",
-  "description": "The default blueprint for Embroider v2 addons.",
+  "name": "ember-data-model-fragments",
+  "version": "6.0.10",
+  "description": "Ember Data addon to support nested JSON documents",
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "ember",
+    "ember-data",
+    "ember-cli",
+    "fragments"
   ],
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adopted-ember-addons/ember-data-model-fragments.git"
+  },
   "license": "MIT",
-  "author": "",
+  "author": "Steven Lindberg <steven@lytics.io>",
   "files": [
     "addon-main.cjs",
     "declarations",
