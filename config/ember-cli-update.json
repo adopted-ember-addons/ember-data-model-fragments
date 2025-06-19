@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectName": "ember-data-model-fragments",
+  "packages": [
+    {
+      "name": "@ember/addon-blueprint",
+      "version": "0.7.0",
+      "blueprints": [
+        {
+          "name": "@ember/addon-blueprint",
+          "isBaseBlueprint": true,
+          "options": [
+            "--ci-provider=github",
+            "--pnpm",
+            "--typescript"
+          ]
+        }
+      ]
+    }
+  ]
+}

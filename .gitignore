@@ -1,18 +1,17 @@
 # compiled output
-/dist/
-/declarations/
+dist/
+dist-tests/
+declarations/
 
-# dependencies
-/node_modules/
+# from scenarios
+tmp/
+config/optional-features.json
+ember-cli-build.js
 
-# misc
-/.env*
-/.pnp*
-/.eslintcache
-/coverage/
-/npm-debug.log*
-/testem.log
-/yarn-error.log
+# npm/pnpm/yarn pack output
+*.tgz
 
-# broccoli-debug
-/DEBUG/
+# deps & caches
+node_modules/
+.eslintcache
+.prettiercache

@@ -1,115 +1,108 @@
 {
-  "name": "ember-data-model-fragments",
-  "version": "6.0.10",
-  "description": "Ember Data addon to support nested JSON documents",
+  "name": "",
+  "version": "0.0.0",
+  "description": "The default blueprint for Embroider v2 addons.",
   "keywords": [
-    "ember-addon",
-    "ember",
-    "ember-data",
-    "ember-cli",
-    "fragments"
+    "ember-addon"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/adopted-ember-addons/ember-data-model-fragments.git"
-  },
+  "repository": "",
   "license": "MIT",
-  "author": "Steven Lindberg <steven@lytics.io>",
-  "directories": {
-    "doc": "doc",
-    "test": "tests"
-  },
+  "author": "",
+  "files": [
+    "addon-main.cjs",
+    "declarations",
+    "dist"
+  ],
   "scripts": {
-    "build": "ember build --environment=production",
+    "build": "rollup --config",
     "format": "prettier . --cache --write",
     "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
-    "lint:css": "stylelint \"**/*.css\"",
-    "lint:css:fix": "concurrently \"pnpm:lint:css -- --fix\"",
-    "lint:fix": "concurrently \"pnpm:lint:*:fix\" --names \"fix:\" --prefixColors auto && pnpm format",
+    "lint:fix": "concurrently \"pnpm:lint:*:fix\" --names \"fix:\" --prefixColors auto && pnpm run format",
     "lint:format": "prettier . --cache --check",
-    "lint:hbs": "ember-template-lint .",
-    "lint:hbs:fix": "ember-template-lint . --fix",
+    "lint:hbs": "ember-template-lint . --no-error-on-unmatched-pattern",
     "lint:js": "eslint . --cache",
+    "lint:hbs:fix": "ember-template-lint . --fix --no-error-on-unmatched-pattern",
     "lint:js:fix": "eslint . --fix",
-    "start": "ember serve",
-    "test": "concurrently \"pnpm:lint\" \"pnpm:test:*\" --names \"lint,test:\" --prefixColors auto",
-    "test:ember": "ember test",
-    "test:ember-compatibility": "ember try:each"
-  },
-  "resolutions": {
-    "@embroider/addon-shim": "1.8.7",
-    "@embroider/macros": "1.16.12"
+    "lint:types": "glint",
+    "start": "vite dev",
+    "test": "vite build --mode=development --out-dir dist-tests && testem --file testem.cjs ci --port 0",
+    "prepack": "rollup --config"
   },
   "dependencies": {
-    "@babel/core": "^7.27.1",
-    "broccoli-file-creator": "^2.1.1",
-    "broccoli-merge-trees": "^3.0.0",
-    "calculate-cache-key-for-tree": "^1.1.0",
-    "ember-cli-babel": "^8.2.0",
-    "ember-compatibility-helpers": "^1.2.1",
-    "ember-template-imports": "^4.3.0",
-    "git-repo-info": "^2.1.1",
-    "npm-git-info": "^1.0.3"
+    "@embroider/addon-shim": "^1.8.9",
+    "decorator-transforms": "^2.2.2"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.27.1",
-    "@babel/plugin-proposal-decorators": "^7.27.1",
-    "@ember/optional-features": "^2.2.0",
+    "@babel/core": "^7.25.2",
+    "@babel/eslint-parser": "^7.25.1",
+    "@babel/plugin-transform-typescript": "^7.25.2",
+    "@babel/runtime": "^7.25.6",
     "@ember/test-helpers": "^5.2.1",
-    "@embroider/macros": "^1.17.2",
-    "@embroider/test-setup": "^4.0.0",
-    "@eslint/js": "^9.25.1",
+    "@embroider/addon-dev": "^8.1.0",
+    "@embroider/core": "^4.1.0",
+    "@embroider/compat": "^4.1.0",
+    "@embroider/macros": "^1.18.0",
+    "@embroider/vite": "^1.1.5",
+    "@eslint/js": "^9.17.0",
     "@glimmer/component": "^2.0.0",
-    "@glimmer/tracking": "^1.1.2",
-    "broccoli-asset-rev": "^3.0.0",
-    "concurrently": "^9.1.2",
-    "ember-auto-import": "^2.10.0",
-    "ember-cli": "~6.4.0",
-    "ember-cli-clean-css": "^3.0.0",
-    "ember-cli-dependency-checker": "^3.3.3",
-    "ember-cli-deprecation-workflow": "^3.3.0",
-    "ember-cli-htmlbars": "^6.3.0",
-    "ember-cli-inject-live-reload": "^2.1.0",
-    "ember-cli-terser": "^4.0.2",
-    "ember-data": "~4.6.0",
-    "ember-load-initializers": "^3.0.1",
-    "ember-page-title": "^9.0.1",
+    "@glint/core": "^2.0.0-alpha.2",
+    "@glint/environment-ember-loose": "^2.0.0-alpha.2",
+    "@glint/environment-ember-template-imports": "^2.0.0-alpha.2",
+    "@glint/tsserver-plugin": "^2.0.0-alpha.2",
+    "@glint/template": "^1.6.0-alpha.1",
+    "@ember/app-tsconfig": "^1.0.0",
+    "@ember/library-tsconfig": "^1.0.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@types/qunit": "^2.19.12",
+    "babel-plugin-ember-template-compilation": "^2.2.5",
+    "concurrently": "^9.0.1",
     "ember-qunit": "^9.0.2",
     "ember-resolver": "^13.1.0",
-    "ember-source": "^5.12.0",
-    "ember-source-channel-url": "^3.0.0",
-    "ember-template-lint": "^6.1.0",
-    "ember-try": "^4.0.0",
-    "eslint": "^9.25.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-ember": "^12.5.0",
-    "eslint-plugin-n": "^17.17.0",
-    "eslint-plugin-qunit": "^8.1.2",
-    "globals": "^15.15.0",
-    "loader.js": "^4.7.0",
-    "pretender": "^3.4.3",
-    "prettier": "^3.5.3",
-    "prettier-plugin-ember-template-tag": "^2.0.5",
+    "ember-source": "^6.3.0",
+    "ember-template-lint": "^7.9.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-ember": "^12.3.3",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^17.15.1",
+    "globals": "^16.1.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-ember-template-tag": "^2.0.4",
     "qunit": "^2.24.1",
     "qunit-dom": "^3.4.0",
-    "release-plan": "^0.16.0",
-    "stylelint": "^16.19.1",
-    "stylelint-config-standard": "^36.0.1",
-    "webpack": "^5.99.7"
-  },
-  "peerDependencies": {
-    "ember-source": ">= 4.0.0"
-  },
-  "engines": {
-    "node": ">= 18"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "rollup": "^4.22.5",
+    "testem": "^3.15.1",
+    "typescript-eslint": "^8.19.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.2.4"
   },
   "ember": {
     "edition": "octane"
   },
   "ember-addon": {
-    "configPath": "tests/dummy/config"
+    "version": 2,
+    "type": "addon",
+    "main": "addon-main.cjs"
+  },
+  "imports": {
+    "#src/*": "./src/*"
+  },
+  "exports": {
+    ".": {
+      "types": "./declarations/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./declarations/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./addon-main.js": "./addon-main.cjs"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "declarations/*"
+      ]
+    }
   }
 }
