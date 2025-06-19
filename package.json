@@ -73,6 +73,7 @@
     "@rollup/plugin-babel": "^6.0.4",
     "@types/qunit": "^2.19.12",
     "@warp-drive/build-config": "5.6.0-alpha.13",
+    "@warp-drive/core": "5.6.0-alpha.13",
     "@warp-drive/core-types": "5.6.0-alpha.13",
     "babel-plugin-ember-template-compilation": "^2.2.5",
     "concurrently": "^9.0.1",
@@ -109,6 +110,7 @@
     "@ember-data/store": "5.6.0-alpha.13",
     "@ember-data/tracking": "5.6.0-alpha.13",
     "@warp-drive/build-config": "5.6.0-alpha.13",
+    "@warp-drive/core": "5.6.0-alpha.13",
     "@warp-drive/core-types": "5.6.0-alpha.13"
   },
   "ember": {

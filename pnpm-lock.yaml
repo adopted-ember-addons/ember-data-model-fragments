@@ -114,6 +114,9 @@ importers:
       '@warp-drive/build-config':
         specifier: 5.6.0-alpha.13
         version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
+      '@warp-drive/core':
+        specifier: 5.6.0-alpha.13
+        version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
       '@warp-drive/core-types':
         specifier: 5.6.0-alpha.13
         version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
