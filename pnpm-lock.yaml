@@ -32,7 +32,7 @@ importers:
         version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
       '@ember-data/debug':
         specifier: 5.6.0-alpha.13
-        version: 5.6.0-alpha.13(@ember-data/model@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))(@ember-data/request-utils@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))(@ember-data/store@5.6.0-alpha.13(@ember-data/tracking@5.6.0-alpha.13(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)(@warp-drive/core-types@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))
+        version: 5.6.0-alpha.13(@ember-data/model@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))(@ember-data/request-utils@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/store@5.6.0-alpha.13(@ember-data/tracking@5.6.0-alpha.13(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)(@warp-drive/core-types@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))
       '@ember-data/graph':
         specifier: 5.6.0-alpha.13
         version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
@@ -50,7 +50,7 @@ importers:
         version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
       '@ember-data/request-utils':
         specifier: 5.6.0-alpha.13
-        version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
+        version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)(ember-inflector@6.0.0(@babel/core@7.27.4))
       '@ember-data/serializer':
         specifier: 5.6.0-alpha.13
         version: 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
@@ -132,6 +132,9 @@ importers:
       concurrently:
         specifier: ^9.0.1
         version: 9.1.2
+      ember-inflector:
+        specifier: ^6.0.0
+        version: 6.0.0(@babel/core@7.27.4)
       ember-qunit:
         specifier: ^9.0.2
         version: 9.0.3(@ember/test-helpers@5.2.2(@babel/core@7.27.4)(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)(qunit@2.24.1)
@@ -2741,6 +2744,9 @@ packages:
     peerDependenciesMeta:
       '@typescript-eslint/parser':
         optional: true
+
+  ember-inflector@6.0.0:
+    resolution: {integrity: sha512-g6trqBhQHRwlq9bBmoyxhAl0tD0/CaTKK0xWPUgi3BfxFOgGG1bbiwAx+tjyiAkLzDqU+ihyjtT+sd41y6K1hA==}
 
   ember-qunit@9.0.3:
     resolution: {integrity: sha512-t+FD5/EWAR3WvGVj1etblFJJ6CaJqddDxusNcYYFZmW7zrQpCnQ9ziwpXM5/sw1sWabkhJZgYPXCn8bDRRhOfg==}
@@ -6352,10 +6358,10 @@ snapshots:
       - '@glint/template'
       - supports-color
 
-  '@ember-data/debug@5.6.0-alpha.13(@ember-data/model@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))(@ember-data/request-utils@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))(@ember-data/store@5.6.0-alpha.13(@ember-data/tracking@5.6.0-alpha.13(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)(@warp-drive/core-types@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))':
+  '@ember-data/debug@5.6.0-alpha.13(@ember-data/model@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))(@ember-data/request-utils@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/store@5.6.0-alpha.13(@ember-data/tracking@5.6.0-alpha.13(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)(@warp-drive/core-types@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))':
     dependencies:
       '@ember-data/model': 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
-      '@ember-data/request-utils': 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
+      '@ember-data/request-utils': 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)(ember-inflector@6.0.0(@babel/core@7.27.4))
       '@ember-data/store': 5.6.0-alpha.13(@ember-data/tracking@5.6.0-alpha.13(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1))(@ember/test-waiters@4.1.0(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)
       '@ember/edition-utils': 1.2.0
       '@embroider/macros': 1.18.0(@glint/template@1.6.0-alpha.1)
@@ -6407,11 +6413,13 @@ snapshots:
       - '@glint/template'
       - supports-color
 
-  '@ember-data/request-utils@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)':
+  '@ember-data/request-utils@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)(ember-inflector@6.0.0(@babel/core@7.27.4))':
     dependencies:
       '@embroider/macros': 1.18.0(@glint/template@1.6.0-alpha.1)
       '@warp-drive/core': 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)
       '@warp-drive/utilities': 5.6.0-alpha.13(@glint/template@1.6.0-alpha.1)(@warp-drive/core@5.6.0-alpha.13(@glint/template@1.6.0-alpha.1))
+    optionalDependencies:
+      ember-inflector: 6.0.0(@babel/core@7.27.4)
     transitivePeerDependencies:
       - '@glint/template'
       - supports-color
@@ -8851,6 +8859,14 @@ snapshots:
       '@typescript-eslint/parser': 8.34.1(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
     transitivePeerDependencies:
       - eslint
+
+  ember-inflector@6.0.0(@babel/core@7.27.4):
+    dependencies:
+      '@embroider/addon-shim': 1.10.0
+      decorator-transforms: 2.3.0(@babel/core@7.27.4)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
 
   ember-qunit@9.0.3(@ember/test-helpers@5.2.2(@babel/core@7.27.4)(@glint/template@1.6.0-alpha.1))(@glint/template@1.6.0-alpha.1)(qunit@2.24.1):
     dependencies:

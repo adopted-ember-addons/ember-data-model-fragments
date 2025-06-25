@@ -79,6 +79,7 @@
     "@warp-drive/schema-record": "5.6.0-alpha.13",
     "babel-plugin-ember-template-compilation": "^2.2.5",
     "concurrently": "^9.0.1",
+    "ember-inflector": "^6.0.0",
     "ember-qunit": "^9.0.2",
     "ember-resolver": "^13.1.0",
     "ember-source": "^6.3.0",
@@ -115,7 +116,8 @@
     "@warp-drive/core": "5.6.0-alpha.13",
     "@warp-drive/core-types": "5.6.0-alpha.13",
     "@warp-drive/ember": "5.6.0-alpha.13",
-    "@warp-drive/schema-record": "5.6.0-alpha.13"
+    "@warp-drive/schema-record": "5.6.0-alpha.13",
+    "ember-inflector": ">= 5.0.0"
   },
   "ember": {
     "edition": "octane"
