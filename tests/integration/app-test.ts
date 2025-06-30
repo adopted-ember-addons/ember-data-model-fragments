@@ -6,8 +6,7 @@ import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
 import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
 import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
 
-// @ts-expect-error TODO: not yet typed
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 
 let store: Store;
 

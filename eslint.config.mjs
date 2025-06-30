@@ -100,6 +100,7 @@ const config = [
     files: [
       '**/*.cjs',
       '.prettierrc.cjs',
+      '.stylelintrc.js',
       '.template-lintrc.cjs',
       'addon-main.cjs',
     ],
