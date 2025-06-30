@@ -7,7 +7,7 @@
  */
 export function withFragmentDefaults(fragmentName: string) {
   return {
-    kind: 'schema-object',
+    kind: 'schema-object' as const,
     type: `fragment:${fragmentName}`,
     name: fragmentName,
     options: {

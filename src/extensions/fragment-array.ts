@@ -1,8 +1,7 @@
-// @ts-expect-error TODO: fix this import when it is ready
-import { type CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/schema-record';
+import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reactive';
 
 export const FragmentArrayExtension = {
-  kind: 'array',
+  kind: 'array' as const,
   name: 'fragment-array' as const,
   features: {
     isFragment() {

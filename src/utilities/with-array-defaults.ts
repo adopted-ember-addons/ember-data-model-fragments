@@ -1,3 +1,5 @@
+import { singularize } from 'ember-inflector';
+
 /**
  * Used as a helper to setup the relevant parts of an array
  * schema and add extensions etc.
@@ -7,8 +9,9 @@
  */
 export function withArrayDefaults(arrayName: string) {
   return {
-    kind: 'array',
+    kind: 'array' as const,
     name: arrayName,
+    type: `array:${singularize(arrayName)}`,
     options: {
       arrayExtensions: ['ember-object', 'ember-array-like', 'fragment-array'],
     },

@@ -8,7 +8,7 @@ import { singularize } from 'ember-inflector';
  */
 export function withFragmentArrayDefaults(fragmentArrayName: string) {
   return {
-    kind: 'schema-array',
+    kind: 'schema-array' as const,
     type: `fragment:${singularize(fragmentArrayName)}`,
     name: fragmentArrayName,
     options: {

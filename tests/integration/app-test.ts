@@ -23,11 +23,8 @@ module('Integration | Application', function (hooks) {
     const PersonSchema = withLegacy({
       type: 'person',
       fields: [
-        // @ts-expect-error TODO: fix this
         withFragmentDefaults('name'),
-        // @ts-expect-error TODO: fix this
         withFragmentArrayDefaults('addresses'),
-        // @ts-expect-error TODO: fix this
         withArrayDefaults('titles'),
       ],
     });

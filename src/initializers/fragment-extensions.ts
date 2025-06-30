@@ -4,12 +4,8 @@ import FragmentArrayExtension from '../extensions/fragment-array.ts';
 import type Owner from '@ember/owner';
 
 export function registerFragmentExtensions(store: Store) {
-  // @ts-expect-error This type is not yet exposed
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension(FragmentExtension);
-  // @ts-expect-error This type is not yet exposed
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension(
+  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(FragmentExtension);
+  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
     FragmentArrayExtension,
   );
 }

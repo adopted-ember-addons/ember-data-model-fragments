@@ -8,7 +8,6 @@ export function withLegacy(
   return withDefaults({
     ...schema,
     identity: { kind: '@id', name: 'id' },
-    // @ts-expect-error TODO: this will not error when this lands in WarpDrive
     objectExtensions: ['ember-object', 'fragment'],
   });
 }
