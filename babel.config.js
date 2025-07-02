@@ -19,7 +19,7 @@ const macros = buildMacros({
 });
 
 // For scenario testing
-const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);
+const isCompat = Boolean(import.meta.env.ENABLE_COMPAT_BUILD);
 
 export default {
   plugins: [
