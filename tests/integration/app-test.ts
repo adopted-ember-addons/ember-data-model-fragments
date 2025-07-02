@@ -76,7 +76,6 @@ module('Integration | Application', function (hooks) {
   });
 
   test('the fragment and fragment-array extenions are registered', function (this: AppTestContext, assert) {
-    debugger;
     assert.ok(
       this.store.schema.CAUTION_MEGA_DANGER_ZONE_hasExtension(
         FragmentExtension,
