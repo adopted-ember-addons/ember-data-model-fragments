@@ -3,13 +3,12 @@
  * It's only for the local editing experience
  * (and linting)
  */
-const { buildMacros } = require('@embroider/macros/babel');
-const { setConfig } = require('@warp-drive/build-config');
-
-const {
+import { setConfig } from '@warp-drive/core/build-config';
+import { buildMacros } from '@embroider/macros/babel';
+import {
   babelCompatSupport,
   templateCompatSupport,
-} = require('@embroider/compat/babel');
+} from '@embroider/compat/babel';
 
 const macros = buildMacros({
   configure: (config) => {
@@ -22,7 +21,7 @@ const macros = buildMacros({
 // For scenario testing
 const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);
 
-module.exports = {
+export default {
   plugins: [
     [
       '@babel/plugin-transform-typescript',
@@ -44,7 +43,7 @@ module.exports = {
       'module:decorator-transforms',
       {
         runtime: {
-          import: require.resolve('decorator-transforms/runtime-esm'),
+          import: import.meta.resolve('decorator-transforms/runtime-esm'),
         },
       },
     ],
