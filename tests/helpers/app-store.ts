@@ -12,11 +12,19 @@ import {
   SchemaService,
   teardownRecord,
 } from '@warp-drive/schema-record';
-import { adapterFor, LegacyNetworkHandler, pushPayload, serializeRecord, serializerFor } from '@ember-data/legacy-compat';
+import {
+  adapterFor,
+  LegacyNetworkHandler,
+  pushPayload,
+  serializeRecord,
+  serializerFor,
+} from '@ember-data/legacy-compat';
 import { registerDerivations } from '@ember-data/model/migration-support';
 
 export class Store extends BaseStore {
-  requestManager = new RequestManager().use([LegacyNetworkHandler, Fetch]).useCache(CacheHandler);
+  requestManager = new RequestManager()
+    .use([LegacyNetworkHandler, Fetch])
+    .useCache(CacheHandler);
 
   createSchemaService() {
     const schema = new SchemaService();
