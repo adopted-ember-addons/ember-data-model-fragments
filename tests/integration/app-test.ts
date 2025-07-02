@@ -1,24 +1,30 @@
-import { module, skip, test } from 'qunit';
-import Store from '@ember-data/store';
+import { module, test } from 'qunit';
+import { type TestContext } from '@ember/test-helpers';
 
+import FragmentExtension from '#src/extensions/fragment.ts';
+import FragmentArrayExtension from '#src/extensions/fragment-array.ts';
 import { withLegacy } from '#src/utilities/with-legacy.ts';
 import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
 import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
 import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
 
 import { setupApplicationTest } from '../helpers/index.ts';
+import { Store } from '../helpers/app-store.ts';
+import type { ObjectSchema } from '@warp-drive/core-types/schema/fields';
 
-let store: Store;
+interface AppTestContext extends TestContext {
+  store: Store;
+}
 
 module('Integration | Application', function (hooks) {
   setupApplicationTest(hooks);
 
-  hooks.beforeEach(function () {
+  hooks.beforeEach(function (this: AppTestContext) {
     this.owner.register('service:store', Store);
-    store = this.owner.lookup('service:store') as Store;
+    this.store = this.owner.lookup('service:store') as Store;
   });
 
-  test('Fragment and FragmentArray are setup correctly', function (assert) {
+  test('Fragment and FragmentArray are setup correctly', function (this: AppTestContext, assert) {
     const PersonSchema = withLegacy({
       type: 'person',
       fields: [
@@ -36,7 +42,7 @@ module('Integration | Application', function (hooks) {
         { kind: 'field', name: 'last' },
       ],
       objectExtensions: ['ember-object', 'fragment'],
-    };
+    } satisfies ObjectSchema;
 
     const AddressSchema = {
       type: 'fragment:address',
@@ -47,23 +53,39 @@ module('Integration | Application', function (hooks) {
         { kind: 'field', name: 'region' },
         { kind: 'field', name: 'country' },
       ],
-    };
+    } satisfies ObjectSchema;
 
-    // @ts-expect-error TODO: fix this
-    store.schema.registerResources([PersonSchema, NameSchema, AddressSchema]);
+    this.store.schema.registerResources([
+      PersonSchema,
+      NameSchema,
+      AddressSchema,
+    ]);
 
     assert.ok(
-      store.schema.hasResource(PersonSchema),
+      this.store.schema.hasResource(PersonSchema),
       'PersonSchema is registered',
     );
-    assert.ok(store.schema.hasResource(NameSchema), 'NameSchema is registered');
     assert.ok(
-      store.schema.hasResource(AddressSchema),
+      this.store.schema.hasResource(NameSchema),
+      'NameSchema is registered',
+    );
+    assert.ok(
+      this.store.schema.hasResource(AddressSchema),
       'AddressSchema is registered',
     );
   });
 
-  skip('the fragment and fragment-array extenions are registered', function () {
-    // TODO: test that the initializer registers the correct things
+  test('the fragment and fragment-array extenions are registered', function (this: AppTestContext, assert) {
+    debugger;
+    assert.ok(
+      this.store.schema.CAUTION_MEGA_DANGER_ZONE_hasExtension(
+        FragmentExtension,
+      ),
+    );
+    assert.ok(
+      this.store.schema.CAUTION_MEGA_DANGER_ZONE_hasExtension(
+        FragmentArrayExtension,
+      ),
+    );
   });
 });
