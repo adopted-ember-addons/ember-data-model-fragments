@@ -3,7 +3,7 @@ export default scenarios();
 function scenarios() {
   return {
     scenarios: [
-      compatEmberScenario('ember-lts-5.8', '~5.4.0'),
+      compatEmberScenario('ember-lts-5.8', '~5.8.0'),
       compatEmberScenario('ember-lts-5.12', '~5.12.0'),
       emberScenario('~6.4.0'),
       emberScenario('latest'),
