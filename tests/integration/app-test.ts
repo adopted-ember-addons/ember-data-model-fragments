@@ -9,7 +9,7 @@ import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-de
 import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
 
 import { setupApplicationTest } from '../helpers/index.ts';
-import { Store } from '../helpers/app-store.ts';
+import { Store } from '../dummy/services/app-store.ts';
 import type { ObjectSchema } from '@warp-drive/core-types/schema/fields';
 
 interface AppTestContext extends TestContext {

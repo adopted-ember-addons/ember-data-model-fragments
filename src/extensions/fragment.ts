@@ -4,7 +4,7 @@ export const FragmentExtension = {
   kind: 'object' as const,
   name: 'fragment' as const,
   features: {
-    isFragment() {
+    get isFragment() {
       return true;
     },
   },

@@ -7,7 +7,7 @@ import * as QUnit from 'qunit';
 import { setApplication } from '@ember/test-helpers';
 import { setup } from 'qunit-dom';
 import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
-import { Store } from './helpers/app-store';
+import { Store } from './dummy/services/app-store';
 
 class Router extends EmberRouter {
   location = 'none';
