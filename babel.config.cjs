@@ -15,6 +15,7 @@ const macros = buildMacros({
   configure: (config) => {
     setConfig(config, {
       compatWith: '5.7',
+      deprecations: {},
     });
   },
 });
