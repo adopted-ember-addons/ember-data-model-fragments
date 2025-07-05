@@ -4,7 +4,11 @@ import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 import { Store } from '../dummy/services/app-store';
 import { PersonSchema } from '../dummy/models/person';
+import { NameSchema } from '../dummy/models/name';
+import { PassengerSchema } from '../dummy/models/passenger';
+import { PrefixSchema } from '../dummy/models/prefix';
 import { VehicleSchema } from '../dummy/models/vehicle';
+import { ZooSchema } from '../dummy/models/zoo';
 
 interface AppTestContext extends TestContext {
   store: Store;
@@ -16,7 +20,14 @@ module('Unit - `Fragment`', function (hooks) {
   hooks.beforeEach(function (this: AppTestContext) {
     this.owner.register('service:store', Store);
     this.store = this.owner.lookup('service:store') as Store;
-    this.store.schema.registerResources([PersonSchema, VehicleSchema]);
+    this.store.schema.registerResources([
+      PersonSchema,
+      NameSchema,
+      PassengerSchema,
+      PrefixSchema,
+      VehicleSchema,
+      ZooSchema,
+    ]);
   });
 
   test('fragments support toString', function (this: AppTestContext, assert) {
@@ -37,8 +48,14 @@ module('Unit - `Fragment`', function (hooks) {
 
     const vehicle = this.store.peekRecord('vehicle', 1);
 
-    assert.ok(vehicle.passenger.toString().includes('owner(1)'));
-    assert.ok(vehicle.passenger.name.toString().includes('owner(null)'));
+    assert.strictEqual(
+      vehicle.passenger.toString(),
+      'Record<vehicle:1 (@lid:vehicle-1)>',
+    );
+    assert.strictEqual(
+      vehicle.passenger.name.toString(),
+      'Record<vehicle:1 (@lid:vehicle-1)>',
+    );
   });
 
   test("changes to fragments are indicated in the owner record's `changedAttributes`", async function (this: AppTestContext, assert) {
@@ -308,7 +325,7 @@ module('Unit - `Fragment`', function (hooks) {
       },
     });
 
-    assert.equal(person.name.first, 'Eddard');
+    assert.strictEqual(person.name.first, 'Eddard');
 
     this.store.push({
       data: {
@@ -320,7 +337,7 @@ module('Unit - `Fragment`', function (hooks) {
       },
     });
 
-    assert.equal(person.name, null);
+    assert.strictEqual(person.name, null);
   });
 
   module('fragment bug when initially set to `null`', function (hooks) {

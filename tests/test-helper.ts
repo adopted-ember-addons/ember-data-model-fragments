@@ -7,6 +7,7 @@ import * as QUnit from 'qunit';
 import { setApplication } from '@ember/test-helpers';
 import { setup } from 'qunit-dom';
 import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
+import ApplicationAdapter from './dummy/adapters/application';
 import { Store } from './dummy/services/app-store';
 
 class Router extends EmberRouter {
@@ -16,6 +17,7 @@ class Router extends EmberRouter {
 Router.map(function () {});
 
 const registry = {
+  'test-app/adapters/application': ApplicationAdapter,
   'test-app/router': { default: Router },
   'test-app/instance-initializers/fragment-extensions': FragmentInitializer,
   'test-app/services/store': { default: Store },

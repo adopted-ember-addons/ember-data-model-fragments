@@ -2,11 +2,25 @@ import type { Store } from '@warp-drive/core';
 import FragmentExtension from '../extensions/fragment.ts';
 import FragmentArrayExtension from '../extensions/fragment-array.ts';
 import type ApplicationInstance from '@ember/application/instance';
+import {
+  EmberArrayLikeExtension,
+  EmberObjectArrayExtension,
+  EmberObjectExtension,
+} from '@warp-drive/legacy/compat/extensions';
 
 export function registerFragmentExtensions(store: Store) {
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(FragmentExtension);
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
     FragmentArrayExtension,
+  );
+  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
+    EmberArrayLikeExtension,
+  );
+  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
+    EmberObjectArrayExtension,
+  );
+  store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
+    EmberObjectExtension,
   );
 }
 

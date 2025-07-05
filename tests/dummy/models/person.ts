@@ -6,8 +6,8 @@ import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
 export const PersonSchema = withLegacy({
   type: 'person',
   fields: [
-    { kind: 'field', name: 'title', type: 'string' },
-    { kind: 'field', name: 'nickName', type: 'string' },
+    { kind: 'field', name: 'title' },
+    { kind: 'field', name: 'nickName' },
     withFragmentDefaults('name'),
     withFragmentArrayDefaults('addresses'),
     withArrayDefaults('titles'),

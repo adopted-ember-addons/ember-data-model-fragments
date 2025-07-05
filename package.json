@@ -118,6 +118,7 @@
     "@warp-drive/core": "5.7.0-alpha.2",
     "@warp-drive/core-types": "5.7.0-alpha.2",
     "@warp-drive/ember": "5.7.0-alpha.2",
+    "@warp-drive/legacy": "5.7.0-alpha.2",
     "@warp-drive/schema-record": "5.7.0-alpha.2",
     "ember-inflector": ">= 5.0.0"
   },

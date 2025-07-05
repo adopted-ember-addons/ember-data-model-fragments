@@ -11,6 +11,9 @@ importers:
       '@embroider/addon-shim':
         specifier: ^1.8.9
         version: 1.10.0
+      '@warp-drive/legacy':
+        specifier: 5.7.0-alpha.2
+        version: 5.7.0-alpha.2(@glint/template@1.6.0-alpha.1)(@warp-drive/core@5.7.0-alpha.2(@glint/template@1.6.0-alpha.1))(@warp-drive/utilities@5.7.0-alpha.2(@glint/template@1.6.0-alpha.1)(@warp-drive/core@5.7.0-alpha.2(@glint/template@1.6.0-alpha.1)))
       decorator-transforms:
         specifier: ^2.2.2
         version: 2.3.0(@babel/core@7.27.4)
