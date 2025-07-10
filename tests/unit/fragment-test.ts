@@ -205,7 +205,7 @@ module('Unit - `Fragment`', function (hooks) {
       return recordOrFragment.isDestroyed;
     }
 
-    function pushPerson() {
+    const pushPerson = () => {
       this.store.push({
         data: {
           type: 'person',
@@ -218,7 +218,7 @@ module('Unit - `Fragment`', function (hooks) {
       return this.store.peekRecord('person', 1);
     }
 
-    function pushZoo() {
+    const pushZoo = () => {
       this.store.push({
         data: {
           type: 'zoo',
