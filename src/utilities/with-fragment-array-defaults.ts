@@ -13,6 +13,7 @@ export function withFragmentArrayDefaults(fragmentArrayName: string) {
     name: fragmentArrayName,
     options: {
       arrayExtensions: ['ember-object', 'ember-array-like', 'fragment-array'],
+      defaultValue: true,
     },
   };
 }

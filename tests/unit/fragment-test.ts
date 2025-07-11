@@ -3,12 +3,13 @@ import { type TestContext } from '@ember/test-helpers';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 import { Store } from '../dummy/services/app-store';
-import { PersonSchema } from '../dummy/models/person';
-import { NameSchema } from '../dummy/models/name';
+import { PersonSchema, type Person } from '../dummy/models/person';
+import { NameSchema, type Name } from '../dummy/models/name';
 import { PassengerSchema } from '../dummy/models/passenger';
 import { PrefixSchema } from '../dummy/models/prefix';
 import { VehicleSchema } from '../dummy/models/vehicle';
 import { ZooSchema } from '../dummy/models/zoo';
+import { recordIdentifierFor } from '@ember-data/store';
 
 interface AppTestContext extends TestContext {
   store: Store;
@@ -72,7 +73,10 @@ module('Unit - `Fragment`', function (hooks) {
       },
     });
 
-    const person = await this.store.findRecord('person', 1);
+    // Open question: is it important to preserve fragmentArrays on fragments
+    // getting their value defaulted to `[]` in the json representation in the cache.
+    // if so, we should do that via normalization.
+    const person = await this.store.findRecord<Person>('person', '1');
     const name = person.name;
 
     name.set('last', 'Baratheon');
@@ -80,13 +84,42 @@ module('Unit - `Fragment`', function (hooks) {
     const [oldName, newName] = person.changedAttributes().name;
     assert.deepEqual(
       oldName,
-      { first: 'Loras', last: 'Tyrell', prefixes: [] },
+      { first: 'Loras', last: 'Tyrell' },
       'old fragment is indicated in the diff object',
     );
     assert.deepEqual(
       newName,
-      { first: 'Loras', last: 'Baratheon', prefixes: [] },
+      { first: 'Loras', last: 'Baratheon' },
       'new fragment is indicated in the diff object',
+    );
+  });
+
+  test('fragmentArrays default to empty arrays on access and can be mutated', async function (this: AppTestContext, assert) {
+    this.store.push({
+      data: {
+        type: 'person',
+        id: '1',
+        attributes: {
+          name: {
+            first: 'Loras',
+            last: 'Tyrell',
+            // we intentionally left prefixes off
+          },
+        },
+      },
+    });
+
+    const person = await this.store.findRecord<Person>('person', '1');
+    const { prefixes } = person.name as Name;
+
+    assert.propEqual(prefixes, [], 'fragment array defaults to an empty array');
+
+    prefixes.push({ name: 'Lord' });
+
+    assert.propEqual(
+      prefixes,
+      [{ name: 'Lord' }],
+      'new prefix is added to the fragment array',
     );
   });
 
@@ -104,13 +137,13 @@ module('Unit - `Fragment`', function (hooks) {
       },
     });
 
-    const person = await this.store.findRecord('person', 1);
+    const person = await this.store.findRecord<Person>('person', '1');
     person.set('name', null);
 
     const [oldName, newName] = person.changedAttributes().name;
     assert.deepEqual(
       oldName,
-      { first: 'Rob', last: 'Stark', prefixes: [] },
+      { first: 'Rob', last: 'Stark' },
       'old fragment is indicated in the diff object',
     );
     assert.deepEqual(
@@ -131,7 +164,7 @@ module('Unit - `Fragment`', function (hooks) {
       },
     });
 
-    const person = await this.store.findRecord('person', 1);
+    const person = await this.store.findRecord<Person>('person', '1');
     person.set('name', {
       first: 'Rob',
       last: 'Stark',
@@ -145,11 +178,12 @@ module('Unit - `Fragment`', function (hooks) {
     );
     assert.deepEqual(
       newName,
-      { first: 'Rob', last: 'Stark', prefixes: [] },
+      { first: 'Rob', last: 'Stark' },
       'new fragment is indicated in the diff object',
     );
 
-    person._internalModel.adapterWillCommit();
+    const identifier = recordIdentifierFor(person);
+    this.store.cache.willCommit(identifier);
 
     const [oldNameAfterWillCommit, newNameAfterWillCommit] =
       person.changedAttributes().name;
@@ -160,11 +194,76 @@ module('Unit - `Fragment`', function (hooks) {
     );
     assert.deepEqual(
       newNameAfterWillCommit,
-      { first: 'Rob', last: 'Stark', prefixes: [] },
+      { first: 'Rob', last: 'Stark' },
       'new fragment is indicated in the diff object',
     );
 
-    person._internalModel.adapterDidCommit();
+    this.store.cache.didCommit(identifier, {
+      request: {},
+      response: new Response(),
+      content: {
+        data: { type: identifier.type, id: identifier.id!, attributes: {} },
+      },
+    });
+
+    assert.strictEqual(
+      person.changedAttributes().name,
+      undefined,
+      'changedAttributes is reset after commit',
+    );
+  });
+
+  test("(redux) fragment properties that are initially null are indicated in the owner record's `changedAttributes`", async function (this: AppTestContext, assert) {
+    this.store.push({
+      data: {
+        type: 'person',
+        id: '1',
+        attributes: {
+          name: null,
+        },
+      },
+    });
+
+    const person = await this.store.findRecord<Person>('person', '1');
+    person.set('name', {
+      first: 'Rob',
+      last: 'Stark',
+    });
+
+    const [oldName, newName] = person.changedAttributes().name;
+    assert.deepEqual(
+      oldName,
+      null,
+      'old fragment is indicated in the diff object',
+    );
+    assert.deepEqual(
+      newName,
+      { first: 'Rob', last: 'Stark' },
+      'new fragment is indicated in the diff object',
+    );
+
+    const [oldNameAfterWillCommit, newNameAfterWillCommit] =
+      person.changedAttributes().name;
+    assert.deepEqual(
+      oldNameAfterWillCommit,
+      null,
+      'old fragment is indicated in the diff object',
+    );
+    assert.deepEqual(
+      newNameAfterWillCommit,
+      { first: 'Rob', last: 'Stark' },
+      'new fragment is indicated in the diff object',
+    );
+
+    this.store.push({
+      data: {
+        type: 'person',
+        id: '1',
+        attributes: {
+          name: { first: 'Rob', last: 'Stark' },
+        },
+      },
+    });
 
     assert.strictEqual(
       person.changedAttributes().name,
@@ -187,10 +286,16 @@ module('Unit - `Fragment`', function (hooks) {
       },
     });
 
-    const person = await this.store.findRecord('person', 1);
+    const person = await this.store.findRecord<Person>('person', '1');
     const name = person.name;
 
+    /**
+     * const value = cache.getRemoteAttr(identifier, path)
+     * cache.setAttr(identifier, path, value)
+     */
     name.set('last', 'Bolton');
+    // getREmoteAttr(myField)
+    // setAttr
     name.rollbackAttributes();
 
     assert.strictEqual(name.last, 'Snow', 'fragment properties are restored');
@@ -216,7 +321,7 @@ module('Unit - `Fragment`', function (hooks) {
         },
       });
       return this.store.peekRecord('person', 1);
-    }
+    };
 
     const pushZoo = () => {
       this.store.push({
@@ -238,7 +343,7 @@ module('Unit - `Fragment`', function (hooks) {
         },
       });
       return this.store.peekRecord('zoo', 1);
-    }
+    };
 
     const person = pushPerson();
     let zoo = pushZoo();
@@ -370,7 +475,7 @@ module('Unit - `Fragment`', function (hooks) {
     });
 
     test('`person` fragments/fragment arrays are not initially `null`', async function (this: AppTestContext, assert) {
-      const person = this.store.createRecord('person', {
+      const person = this.store.createRecord<Person>('person', {
         title: 'Mr.',
         name: {},
       });

@@ -1,6 +1,8 @@
 import type { ObjectSchema } from '@warp-drive/core-types/schema/fields';
+import type { Type } from '@warp-drive/core-types/symbols';
 
 import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
+import type { Prefix } from './prefix';
 
 export const NameSchema = {
   type: 'fragment:name',
@@ -12,3 +14,11 @@ export const NameSchema = {
   ],
   objectExtensions: ['ember-object', 'fragment'],
 } satisfies ObjectSchema;
+
+export interface Name {
+  id: null;
+  first: string;
+  last: string;
+  prefixes: Array<Prefix>;
+  [Type]: 'fragment:name';
+}

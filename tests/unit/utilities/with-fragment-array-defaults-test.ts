@@ -9,6 +9,7 @@ module('Unit | withFragmentArrayDefaults', function () {
       name: 'addresses',
       options: {
         arrayExtensions: ['ember-object', 'ember-array-like', 'fragment-array'],
+        defaultValue: true,
       },
     });
   });
