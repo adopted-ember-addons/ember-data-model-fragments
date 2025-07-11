@@ -483,7 +483,7 @@ module('Unit - `Fragment`', function (hooks) {
 
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
       assert.deepEqual(
-        person.name.serialize(),
+        person.name!.serialize(),
         {
           first: 'John',
           last: 'Doe',
@@ -492,7 +492,7 @@ module('Unit - `Fragment`', function (hooks) {
         'name is correctly loaded',
       );
       assert.deepEqual(
-        person.names.serialize(),
+        person.names!.serialize(),
         [{ first: 'John', last: 'Doe', prefixes: [] }],
         'names is correct',
       );
@@ -512,7 +512,7 @@ module('Unit - `Fragment`', function (hooks) {
 
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
       assert.deepEqual(
-        person.name.serialize(),
+        person.name!.serialize(),
         {
           first: 'John',
           last: 'Doe',
@@ -521,7 +521,7 @@ module('Unit - `Fragment`', function (hooks) {
         'name is correctly loaded',
       );
       assert.deepEqual(
-        person.names.serialize(),
+        person.names!.serialize(),
         [{ first: 'John', last: 'Doe', prefixes: [] }],
         'names is correct',
       );
