@@ -1,6 +1,6 @@
 import { Context } from '@warp-drive/schema-record/-private';
 import { recordIdentifierFor, storeFor } from '@ember-data/store';
-import { tracked } from '@glimmer/tracking';
+import { cached, tracked } from '@glimmer/tracking';
 import type { StableRecordIdentifier } from '@warp-drive/core-types';
 import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reactive';
 import type { SchemaRecord } from '@warp-drive/schema-record';
@@ -10,6 +10,21 @@ export class Fragment {
   // We might want to check the parent values once we move this code to warp-drive.
   @tracked isDestroying = false;
   @tracked isDestroyed = false;
+
+  @cached
+  get hasDirtyAttributes() {
+    const { path, resourceKey, store } = (this as unknown as SchemaRecord)[
+      Context
+    ];
+    const record = store.peekRecord(resourceKey);
+
+    if (record.hasDirtyAttributes) {
+      const root = path?.at(0);
+      return root in record.changedAttributes();
+    }
+
+    return false;
+  }
 
   get isFragment() {
     return true;
