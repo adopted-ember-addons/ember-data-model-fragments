@@ -3,6 +3,7 @@ import { cached, tracked } from '@glimmer/tracking';
 import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reactive';
 import type { SchemaRecord } from '@warp-drive/schema-record';
 import type { Value } from '@warp-drive/core-types/json/raw';
+import type Model from '@ember-data/model';
 
 export class Fragment {
   // We might want to check the parent values once we move this code to warp-drive.
@@ -14,10 +15,10 @@ export class Fragment {
     const { path, resourceKey, store } = (this as unknown as SchemaRecord)[
       Context
     ];
-    const record = store.peekRecord(resourceKey);
+    const record = store.peekRecord(resourceKey) as Model;
 
-    if (record.hasDirtyAttributes) {
-      const root = path?.at(0);
+    if (record.hasDirtyAttributes && path) {
+      const root = path.at(0) as string;
       return root in record.changedAttributes();
     }
 

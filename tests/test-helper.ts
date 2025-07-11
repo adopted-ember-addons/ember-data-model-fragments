@@ -29,7 +29,8 @@ class TestApp extends EmberApp {
   Resolver = Resolver.withModules(registry);
 }
 
-loadInitializers(TestApp, 'test-app', registry);
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+loadInitializers(TestApp, 'test-app', registry as any);
 
 export function start() {
   setApplication(
