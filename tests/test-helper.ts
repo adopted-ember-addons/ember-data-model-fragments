@@ -9,6 +9,7 @@ import { setup } from 'qunit-dom';
 import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
 import ApplicationAdapter from './dummy/adapters/application';
 import { Store } from './dummy/services/app-store';
+import ApplicationSerializer from './dummy/serializers/application';
 
 class Router extends EmberRouter {
   location = 'none';
@@ -20,6 +21,7 @@ const registry = {
   'test-app/adapters/application': ApplicationAdapter,
   'test-app/router': { default: Router },
   'test-app/instance-initializers/fragment-extensions': FragmentInitializer,
+  'test-app/serializers/application': { default: ApplicationSerializer },
   'test-app/services/store': { default: Store },
   // add any custom services here
 };
