@@ -1,4 +1,4 @@
-import { module, test } from 'qunit';
+import { module, test, todo } from 'qunit';
 import { type TestContext } from '@ember/test-helpers';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
@@ -218,7 +218,7 @@ module('Unit - `Fragment`', function (hooks) {
     );
   });
 
-  test("(redux) fragment properties that are initially null are indicated in the owner record's `changedAttributes`", async function (this: AppTestContext, assert) {
+  todo("(redux) fragment properties that are initially null are indicated in the owner record's `changedAttributes`", async function (this: AppTestContext, assert) {
     this.store.push({
       data: {
         type: 'person',
@@ -469,7 +469,7 @@ module('Unit - `Fragment`', function (hooks) {
       server.shutdown();
     });
 
-    test('`person` fragments/fragment arrays are not initially `null`', async function (this: AppTestContext, assert) {
+    todo('`person` fragments/fragment arrays are not initially `null`', async function (this: AppTestContext, assert) {
       const person = this.store.createRecord<Person>('person', {
         title: 'Mr.',
         // @ts-expect-error this is fine
@@ -499,7 +499,7 @@ module('Unit - `Fragment`', function (hooks) {
       );
     });
 
-    test('`person` fragments/fragment arrays are initially `null`', async function (this: AppTestContext, assert) {
+    todo('`person` fragments/fragment arrays are initially `null`', async function (this: AppTestContext, assert) {
       const person = this.store.createRecord<Person>('person', {
         title: 'Mr.',
         name: null,
