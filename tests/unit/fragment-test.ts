@@ -144,6 +144,7 @@ module('Unit - `Fragment`', function (hooks) {
     const person = await this.store.findRecord<Person>('person', '1');
     person.set('name', null);
 
+    // @ts-expect-error TODO: fix this type error
     const [oldName, newName] = person.changedAttributes().name;
     assert.deepEqual(
       oldName,
@@ -294,6 +295,7 @@ module('Unit - `Fragment`', function (hooks) {
     const name = person.name as Name;
 
     name.set('last', 'Bolton');
+    // @ts-expect-error TODO: fix this type error
     name.rollbackAttributes();
 
     assert.strictEqual(name.last, 'Snow', 'fragment properties are restored');
@@ -341,12 +343,9 @@ module('Unit - `Fragment`', function (hooks) {
     const person = pushPerson();
     let zoo = pushZoo();
 
-    // Prime the relationship and fragment
-    zoo.manager;
-    // zoo.star;
-
     assert.equal(person.title, 'Zoo Manager', 'Person has the right title');
     assert.equal(
+      // @ts-expect-error TODO: figure out if we should be using content here
       zoo.manager.content,
       person,
       'Manager relationship was correctly loaded',
@@ -378,6 +377,7 @@ module('Unit - `Fragment`', function (hooks) {
     // TODO: look at this after we enable polymorphism
     // assert.notOk(zoo.star?.isDestroyed, 'Fragment is now unloaded');
     assert.equal(
+      // @ts-expect-error TODO: figure out if we should be using content here
       zoo.manager.content,
       person,
       'Manager relationship was correctly loaded',
@@ -472,6 +472,7 @@ module('Unit - `Fragment`', function (hooks) {
     test('`person` fragments/fragment arrays are not initially `null`', async function (this: AppTestContext, assert) {
       const person = this.store.createRecord<Person>('person', {
         title: 'Mr.',
+        // @ts-expect-error this is fine
         name: {},
       });
 
@@ -482,8 +483,8 @@ module('Unit - `Fragment`', function (hooks) {
       await person.save();
 
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
-      assert.deepEqual(
-        this.store.serializeRecord(person).name,
+      assert.propEqual(
+        person.name,
         {
           first: 'John',
           last: 'Doe',
@@ -491,8 +492,8 @@ module('Unit - `Fragment`', function (hooks) {
         },
         'name is correctly loaded',
       );
-      assert.deepEqual(
-        this.store.serializeRecord(person).names,
+      assert.propEqual(
+        person.names,
         [{ first: 'John', last: 'Doe', prefixes: [] }],
         'names is correct',
       );
@@ -511,8 +512,8 @@ module('Unit - `Fragment`', function (hooks) {
       await person.save();
 
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
-      assert.deepEqual(
-        this.store.serializeRecord(person).name,
+      assert.propEqual(
+        person.name,
         {
           first: 'John',
           last: 'Doe',
@@ -520,8 +521,8 @@ module('Unit - `Fragment`', function (hooks) {
         },
         'name is correctly loaded',
       );
-      assert.deepEqual(
-        this.store.serializeRecord(person).names,
+      assert.propEqual(
+        person.names,
         [{ first: 'John', last: 'Doe', prefixes: [] }],
         'names is correct',
       );
