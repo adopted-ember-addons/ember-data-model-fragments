@@ -126,16 +126,6 @@ person.get("hasDirtyAttributes"); // true
 person.rollbackAttributes();
 name.get("first"); // 'Tyrion'
 
-// New fragments are created through the store and assigned directly
-person.set(
-  "name",
-  store.createFragment("name", {
-    first: "Hugor",
-    last: "Hill",
-  }),
-);
-person.get("hasDirtyAttributes"); // true
-
 // Fragments can also be set with hashes
 person.set("name", {
   first: "Tyrion",
