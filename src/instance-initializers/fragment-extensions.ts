@@ -7,6 +7,7 @@ import {
   EmberObjectArrayExtension,
   EmberObjectExtension,
 } from '@warp-drive/legacy/compat/extensions';
+import { modelFor } from '#src/hooks/model-for.ts';
 
 export function registerFragmentExtensions(store: Store) {
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(FragmentExtension);
@@ -22,6 +23,7 @@ export function registerFragmentExtensions(store: Store) {
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
     EmberObjectExtension,
   );
+  store.modelFor = modelFor;
 }
 
 export function initialize(application: ApplicationInstance) {

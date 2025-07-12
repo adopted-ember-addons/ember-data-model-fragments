@@ -483,7 +483,7 @@ module('Unit - `Fragment`', function (hooks) {
 
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
       assert.deepEqual(
-        this.store.serializeRecord(person.name),
+        this.store.serializeRecord(person).name,
         {
           first: 'John',
           last: 'Doe',
@@ -492,7 +492,7 @@ module('Unit - `Fragment`', function (hooks) {
         'name is correctly loaded',
       );
       assert.deepEqual(
-        this.store.serializeRecord(person.names),
+        this.store.serializeRecord(person).names,
         [{ first: 'John', last: 'Doe', prefixes: [] }],
         'names is correct',
       );
@@ -512,7 +512,7 @@ module('Unit - `Fragment`', function (hooks) {
 
       assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
       assert.deepEqual(
-        this.store.serializeRecord(person.name),
+        this.store.serializeRecord(person).name,
         {
           first: 'John',
           last: 'Doe',
@@ -521,7 +521,7 @@ module('Unit - `Fragment`', function (hooks) {
         'name is correctly loaded',
       );
       assert.deepEqual(
-        this.store.serializeRecord(person.names),
+        this.store.serializeRecord(person).names,
         [{ first: 'John', last: 'Doe', prefixes: [] }],
         'names is correct',
       );
