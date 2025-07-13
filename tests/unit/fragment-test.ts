@@ -218,64 +218,67 @@ module('Unit - `Fragment`', function (hooks) {
     );
   });
 
-  todo("(redux) fragment properties that are initially null are indicated in the owner record's `changedAttributes`", async function (this: AppTestContext, assert) {
-    this.store.push({
-      data: {
-        type: 'person',
-        id: '1',
-        attributes: {
-          name: null,
+  todo(
+    "(redux) fragment properties that are initially null are indicated in the owner record's `changedAttributes`",
+    async function (this: AppTestContext, assert) {
+      this.store.push({
+        data: {
+          type: 'person',
+          id: '1',
+          attributes: {
+            name: null,
+          },
         },
-      },
-    });
+      });
 
-    const person = await this.store.findRecord<Person>('person', '1');
-    person.set('name', {
-      first: 'Rob',
-      last: 'Stark',
-    });
+      const person = await this.store.findRecord<Person>('person', '1');
+      person.set('name', {
+        first: 'Rob',
+        last: 'Stark',
+      });
 
-    const [oldName, newName] = person.changedAttributes().name;
-    assert.deepEqual(
-      oldName,
-      null,
-      'old fragment is indicated in the diff object',
-    );
-    assert.deepEqual(
-      newName,
-      { first: 'Rob', last: 'Stark' },
-      'new fragment is indicated in the diff object',
-    );
+      const [oldName, newName] = person.changedAttributes().name;
+      assert.deepEqual(
+        oldName,
+        null,
+        'old fragment is indicated in the diff object',
+      );
+      assert.deepEqual(
+        newName,
+        { first: 'Rob', last: 'Stark' },
+        'new fragment is indicated in the diff object',
+      );
 
-    const [oldNameAfterWillCommit, newNameAfterWillCommit] =
-      person.changedAttributes().name;
-    assert.deepEqual(
-      oldNameAfterWillCommit,
-      null,
-      'old fragment is indicated in the diff object',
-    );
-    assert.deepEqual(
-      newNameAfterWillCommit,
-      { first: 'Rob', last: 'Stark' },
-      'new fragment is indicated in the diff object',
-    );
+      const [oldNameAfterWillCommit, newNameAfterWillCommit] =
+        person.changedAttributes().name;
+      assert.deepEqual(
+        oldNameAfterWillCommit,
+        null,
+        'old fragment is indicated in the diff object',
+      );
+      assert.deepEqual(
+        newNameAfterWillCommit,
+        { first: 'Rob', last: 'Stark' },
+        'new fragment is indicated in the diff object',
+      );
 
-    this.store.push({
-      data: {
-        type: 'person',
-        id: '1',
-        attributes: {
-          name: { first: 'Rob', last: 'Stark' },
+      this.store.push({
+        data: {
+          type: 'person',
+          id: '1',
+          attributes: {
+            name: { first: 'Rob', last: 'Stark' },
+          },
         },
-      },
-    });
+      });
 
-    assert.strictEqual(
-      person.changedAttributes().name,
-      undefined,
-      'changedAttributes is reset after commit',
-    );
-  });
+      assert.strictEqual(
+        person.changedAttributes().name,
+        undefined,
+        'changedAttributes is reset after commit',
+      );
+    },
+  );
 
   test('changes to attributes can be rolled back', async function (this: AppTestContext, assert) {
     this.store.push({
@@ -469,63 +472,77 @@ module('Unit - `Fragment`', function (hooks) {
       server.shutdown();
     });
 
-    todo('`person` fragments/fragment arrays are not initially `null`', async function (this: AppTestContext, assert) {
-      const person = this.store.createRecord<Person>('person', {
-        title: 'Mr.',
-        // @ts-expect-error this is fine
-        name: {},
-      });
+    todo(
+      '`person` fragments/fragment arrays are not initially `null`',
+      async function (this: AppTestContext, assert) {
+        const person = this.store.createRecord<Person>('person', {
+          title: 'Mr.',
+          // @ts-expect-error this is fine
+          name: {},
+        });
 
-      assert.ok(person.name, 'name is not null');
-      assert.ok(person.names, 'names is not null');
-      assert.notOk(person.nickName, 'nickName is not set');
+        assert.ok(person.name, 'name is not null');
+        assert.ok(person.names, 'names is not null');
+        assert.notOk(person.nickName, 'nickName is not set');
 
-      await person.save();
+        await person.save();
 
-      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
-      assert.propEqual(
-        person.name,
-        {
-          first: 'John',
-          last: 'Doe',
-          prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
-        },
-        'name is correctly loaded',
-      );
-      assert.propEqual(
-        person.names,
-        [{ first: 'John', last: 'Doe', prefixes: [] }],
-        'names is correct',
-      );
-    });
+        assert.equal(
+          person.nickName,
+          'Johnner',
+          'nickName is correctly loaded',
+        );
+        assert.propEqual(
+          person.name,
+          {
+            first: 'John',
+            last: 'Doe',
+            prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
+          },
+          'name is correctly loaded',
+        );
+        assert.propEqual(
+          person.names,
+          [{ first: 'John', last: 'Doe', prefixes: [] }],
+          'names is correct',
+        );
+      },
+    );
 
-    todo('`person` fragments/fragment arrays are initially `null`', async function (this: AppTestContext, assert) {
-      const person = this.store.createRecord<Person>('person', {
-        title: 'Mr.',
-        name: null,
-        names: null,
-      });
+    todo(
+      '`person` fragments/fragment arrays are initially `null`',
+      async function (this: AppTestContext, assert) {
+        const person = this.store.createRecord<Person>('person', {
+          title: 'Mr.',
+          name: null,
+          names: null,
+        });
 
-      assert.notOk(person.names, 'names is null');
-      assert.notOk(person.nickName, 'nickName is not set');
+        assert.notOk(person.names, 'names is null');
+        assert.notOk(person.nickName, 'nickName is not set');
 
-      await person.save();
+        await person.save();
 
-      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
-      assert.propEqual(
-        person.name,
-        {
-          first: 'John',
-          last: 'Doe',
-          prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
-        },
-        'name is correctly loaded',
-      );
-      assert.propEqual(
-        person.names,
-        [{ first: 'John', last: 'Doe', prefixes: [] }],
-        'names is correct',
-      );
-    });
+        assert.equal(
+          person.nickName,
+          'Johnner',
+          'nickName is correctly loaded',
+        );
+        assert.propEqual(
+          person.name,
+          {
+            first: 'John',
+            last: 'Doe',
+            prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
+          },
+          'name is correctly loaded',
+        );
+        assert.propEqual(
+          person.names,
+          [{ first: 'John', last: 'Doe', prefixes: [] }],
+          'names is correct',
+        );
+      },
+    );
   });
 });

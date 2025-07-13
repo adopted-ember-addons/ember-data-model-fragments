@@ -43,6 +43,7 @@ module('Unit - `FragmentArray`', function (hooks) {
     });
 
     const person = await this.store.findRecord<Person>('person', '1');
+    // @ts-expect-error TODO: do we actually have owner and do we need it?
     assert.strictEqual(person.names.owner, person);
   });
 
@@ -326,10 +327,12 @@ module('Unit - `FragmentArray`', function (hooks) {
       last: 'Stonehart',
     } as Name);
 
+    // @ts-expect-error TODO: fix this type error
     fragments.rollbackAttributes();
 
     assert.ok(!fragments.hasDirtyAttributes, 'fragment array is not dirty');
     assert.ok(
+      // @ts-expect-error TODO: shouldn't the array extensions have this?
       !fragments.isAny('hasDirtyAttributes'),
       'all fragments are in clean state',
     );
