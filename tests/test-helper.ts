@@ -1,15 +1,18 @@
-import EmberApp from '@ember/application';
-import Resolver from 'ember-resolver';
-import EmberRouter from '@ember/routing/router';
-import * as FragmentInitializer from '#src/instance-initializers/fragment-extensions.ts';
-import loadInitializers from 'ember-load-initializers';
-import * as QUnit from 'qunit';
 import { setApplication } from '@ember/test-helpers';
-import { setup } from 'qunit-dom';
 import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
+import * as QUnit from 'qunit';
+import { setup } from 'qunit-dom';
+
+import EmberApp from '@ember/application';
+import EmberRouter from '@ember/routing/router';
+
+import loadInitializers from 'ember-load-initializers';
+import Resolver from 'ember-resolver';
+
+import * as FragmentInitializer from '#src/instance-initializers/fragment-extensions.ts';
 import ApplicationAdapter from './dummy/adapters/application';
-import { Store } from './dummy/services/app-store';
 import ApplicationSerializer from './dummy/serializers/application';
+import { Store } from './dummy/services/app-store';
 
 class Router extends EmberRouter {
   location = 'none';
@@ -39,7 +42,7 @@ export function start() {
     TestApp.create({
       autoboot: false,
       rootElement: '#ember-testing',
-    }),
+    })
   );
   setup(QUnit.assert);
   setupEmberOnerrorValidation();

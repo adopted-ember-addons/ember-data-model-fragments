@@ -8,7 +8,7 @@ import { singularize } from 'ember-inflector';
  * @returns The schema for an array
  */
 export function withArrayDefaults<ArrayName extends string>(
-  arrayName: ArrayName,
+  arrayName: ArrayName
 ) {
   return {
     kind: 'array' as const,

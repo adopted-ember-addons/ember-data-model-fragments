@@ -2,9 +2,8 @@ import { type WithLegacy } from '@ember-data/model/migration-support';
 import type { Type } from '@warp-drive/core-types/symbols';
 import type { WithEmberObject } from '@warp-drive/legacy/compat/extensions';
 
-import { withLegacy } from '#src/utilities/with-legacy.ts';
 import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
-
+import { withLegacy } from '#src/utilities/with-legacy.ts';
 import type { Person } from './person';
 
 export const ZooSchema = withLegacy({

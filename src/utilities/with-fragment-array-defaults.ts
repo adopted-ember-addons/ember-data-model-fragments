@@ -1,4 +1,5 @@
-import { singularize, pluralize } from 'ember-inflector';
+import { pluralize, singularize } from 'ember-inflector';
+
 /**
  * Used as a helper to setup the relevant parts of a fragment-array
  * schema and add extensions etc.

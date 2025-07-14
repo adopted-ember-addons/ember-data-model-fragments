@@ -1,8 +1,8 @@
 import {
+  type SetupTestOptions,
   setupApplicationTest as upstreamSetupApplicationTest,
   setupRenderingTest as upstreamSetupRenderingTest,
   setupTest as upstreamSetupTest,
-  type SetupTestOptions,
 } from 'ember-qunit';
 
 // This file exists to provide wrappers around ember-qunit's
@@ -11,7 +11,7 @@ import {
 
 function setupApplicationTest(
   hooks: NestedHooks,
-  options: SetupTestOptions = {},
+  options: SetupTestOptions = {}
 ) {
   upstreamSetupApplicationTest(hooks, options);
 
@@ -33,7 +33,7 @@ function setupApplicationTest(
 
 function setupRenderingTest(
   hooks: NestedHooks,
-  options: SetupTestOptions = {},
+  options: SetupTestOptions = {}
 ) {
   upstreamSetupRenderingTest(hooks, options);
 

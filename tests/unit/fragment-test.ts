@@ -1,15 +1,17 @@
-import { module, test, todo } from 'qunit';
 import { type TestContext } from '@ember/test-helpers';
+import { module, test, todo } from 'qunit';
+
+import { recordIdentifierFor } from '@ember-data/store';
+
+import { type Name, NameSchema } from '../dummy/models/name';
+import { type Passenger, PassengerSchema } from '../dummy/models/passenger';
+import { type Person, PersonSchema } from '../dummy/models/person';
+import { type Prefix, PrefixSchema } from '../dummy/models/prefix';
+import { type Vehicle, VehicleSchema } from '../dummy/models/vehicle';
+import { type Zoo, ZooSchema } from '../dummy/models/zoo';
+import { Store } from '../dummy/services/app-store';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
-import { Store } from '../dummy/services/app-store';
-import { PersonSchema, type Person } from '../dummy/models/person';
-import { NameSchema, type Name } from '../dummy/models/name';
-import { PassengerSchema, type Passenger } from '../dummy/models/passenger';
-import { PrefixSchema, type Prefix } from '../dummy/models/prefix';
-import { VehicleSchema, type Vehicle } from '../dummy/models/vehicle';
-import { ZooSchema, type Zoo } from '../dummy/models/zoo';
-import { recordIdentifierFor } from '@ember-data/store';
 
 interface AppTestContext extends TestContext {
   store: Store;
@@ -54,12 +56,12 @@ module('Unit - `Fragment`', function (hooks) {
     assert.strictEqual(
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       passenger.toString(),
-      'Record<vehicle:1 (@lid:vehicle-1)>',
+      'Record<vehicle:1 (@lid:vehicle-1)>'
     );
     assert.strictEqual(
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       name.toString(),
-      'Record<vehicle:1 (@lid:vehicle-1)>',
+      'Record<vehicle:1 (@lid:vehicle-1)>'
     );
   });
 
@@ -89,12 +91,12 @@ module('Unit - `Fragment`', function (hooks) {
     assert.deepEqual(
       oldName,
       { first: 'Loras', last: 'Tyrell' },
-      'old fragment is indicated in the diff object',
+      'old fragment is indicated in the diff object'
     );
     assert.deepEqual(
       newName,
       { first: 'Loras', last: 'Baratheon' },
-      'new fragment is indicated in the diff object',
+      'new fragment is indicated in the diff object'
     );
   });
 
@@ -123,7 +125,7 @@ module('Unit - `Fragment`', function (hooks) {
     assert.propEqual(
       prefixes,
       [{ name: 'Lord' }],
-      'new prefix is added to the fragment array',
+      'new prefix is added to the fragment array'
     );
   });
 
@@ -149,12 +151,12 @@ module('Unit - `Fragment`', function (hooks) {
     assert.deepEqual(
       oldName,
       { first: 'Rob', last: 'Stark' },
-      'old fragment is indicated in the diff object',
+      'old fragment is indicated in the diff object'
     );
     assert.deepEqual(
       newName,
       null,
-      'new fragment is indicated in the diff object',
+      'new fragment is indicated in the diff object'
     );
   });
 
@@ -179,12 +181,12 @@ module('Unit - `Fragment`', function (hooks) {
     assert.deepEqual(
       oldName,
       null,
-      'old fragment is indicated in the diff object',
+      'old fragment is indicated in the diff object'
     );
     assert.deepEqual(
       newName,
       { first: 'Rob', last: 'Stark' },
-      'new fragment is indicated in the diff object',
+      'new fragment is indicated in the diff object'
     );
 
     const identifier = recordIdentifierFor(person);
@@ -195,12 +197,12 @@ module('Unit - `Fragment`', function (hooks) {
     assert.deepEqual(
       oldNameAfterWillCommit,
       null,
-      'old fragment is indicated in the diff object',
+      'old fragment is indicated in the diff object'
     );
     assert.deepEqual(
       newNameAfterWillCommit,
       { first: 'Rob', last: 'Stark' },
-      'new fragment is indicated in the diff object',
+      'new fragment is indicated in the diff object'
     );
 
     this.store.cache.didCommit(identifier, {
@@ -214,7 +216,7 @@ module('Unit - `Fragment`', function (hooks) {
     assert.strictEqual(
       person.changedAttributes().name,
       undefined,
-      'changedAttributes is reset after commit',
+      'changedAttributes is reset after commit'
     );
   });
 
@@ -241,12 +243,12 @@ module('Unit - `Fragment`', function (hooks) {
       assert.deepEqual(
         oldName,
         null,
-        'old fragment is indicated in the diff object',
+        'old fragment is indicated in the diff object'
       );
       assert.deepEqual(
         newName,
         { first: 'Rob', last: 'Stark' },
-        'new fragment is indicated in the diff object',
+        'new fragment is indicated in the diff object'
       );
 
       const [oldNameAfterWillCommit, newNameAfterWillCommit] =
@@ -254,12 +256,12 @@ module('Unit - `Fragment`', function (hooks) {
       assert.deepEqual(
         oldNameAfterWillCommit,
         null,
-        'old fragment is indicated in the diff object',
+        'old fragment is indicated in the diff object'
       );
       assert.deepEqual(
         newNameAfterWillCommit,
         { first: 'Rob', last: 'Stark' },
-        'new fragment is indicated in the diff object',
+        'new fragment is indicated in the diff object'
       );
 
       this.store.push({
@@ -275,9 +277,9 @@ module('Unit - `Fragment`', function (hooks) {
       assert.strictEqual(
         person.changedAttributes().name,
         undefined,
-        'changedAttributes is reset after commit',
+        'changedAttributes is reset after commit'
       );
-    },
+    }
   );
 
   test('changes to attributes can be rolled back', async function (this: AppTestContext, assert) {
@@ -351,7 +353,7 @@ module('Unit - `Fragment`', function (hooks) {
       // @ts-expect-error TODO: figure out if we should be using content here
       zoo.manager.content,
       person,
-      'Manager relationship was correctly loaded',
+      'Manager relationship was correctly loaded'
     );
     // TODO: look at this after we enable polymorphism
     // assert.equal(
@@ -383,7 +385,7 @@ module('Unit - `Fragment`', function (hooks) {
       // @ts-expect-error TODO: figure out if we should be using content here
       zoo.manager.content,
       person,
-      'Manager relationship was correctly loaded',
+      'Manager relationship was correctly loaded'
     );
     // TODO: look at this after we enable polymorphism
     // assert.equal(
@@ -394,7 +396,7 @@ module('Unit - `Fragment`', function (hooks) {
 
     assert.ok(
       zoo !== origZoo,
-      'A different instance of the zoo model was loaded',
+      'A different instance of the zoo model was loaded'
     );
     // TODO: look at this after we enable polymorphism
     // assert.ok(zoo.star !== origZoo.star, 'Fragments were not reused');
@@ -490,7 +492,7 @@ module('Unit - `Fragment`', function (hooks) {
         assert.equal(
           person.nickName,
           'Johnner',
-          'nickName is correctly loaded',
+          'nickName is correctly loaded'
         );
         assert.propEqual(
           person.name,
@@ -499,14 +501,14 @@ module('Unit - `Fragment`', function (hooks) {
             last: 'Doe',
             prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
           },
-          'name is correctly loaded',
+          'name is correctly loaded'
         );
         assert.propEqual(
           person.names,
           [{ first: 'John', last: 'Doe', prefixes: [] }],
-          'names is correct',
+          'names is correct'
         );
-      },
+      }
     );
 
     todo(
@@ -526,7 +528,7 @@ module('Unit - `Fragment`', function (hooks) {
         assert.equal(
           person.nickName,
           'Johnner',
-          'nickName is correctly loaded',
+          'nickName is correctly loaded'
         );
         assert.propEqual(
           person.name,
@@ -535,14 +537,14 @@ module('Unit - `Fragment`', function (hooks) {
             last: 'Doe',
             prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
           },
-          'name is correctly loaded',
+          'name is correctly loaded'
         );
         assert.propEqual(
           person.names,
           [{ first: 'John', last: 'Doe', prefixes: [] }],
-          'names is correct',
+          'names is correct'
         );
-      },
+      }
     );
   });
 });

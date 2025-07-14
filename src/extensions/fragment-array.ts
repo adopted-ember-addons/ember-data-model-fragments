@@ -1,8 +1,8 @@
-import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reactive';
 import { cached, tracked } from '@glimmer/tracking';
+import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reactive';
 
-import { Fragment } from './fragment.js';
 import type { WithFragmentArray } from '../index.js';
+import { Fragment } from './fragment.js';
 
 export class FragmentArray<T extends Fragment> {
   // We might want to check the parent values once we move this code to warp-drive.

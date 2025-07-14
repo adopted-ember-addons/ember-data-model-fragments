@@ -1,21 +1,21 @@
 import { type TestContext } from '@ember/test-helpers';
-import { type WithLegacy } from '@ember-data/model/migration-support';
-import type { WithEmberObject } from '@warp-drive/legacy/compat/extensions';
 import { module, todo } from 'qunit';
-import { setupApplicationTest } from '../helpers';
-import { OrderSchema, type Order } from '../dummy/models/order.js';
-import { ProductSchema, type Product } from '../dummy/models/product.js';
-import { UserSchema, type User } from '../dummy/models/user.js';
-import Pretender from 'pretender';
-import { withLegacy } from '#src/utilities/with-legacy.ts';
+
+import { type WithLegacy } from '@ember-data/model/migration-support';
 import { Type } from '@warp-drive/core-types/symbols';
+import type { WithEmberObject } from '@warp-drive/legacy/compat/extensions';
 
-import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
-import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
-
-import { Store } from '../dummy/services/app-store.ts';
 import type { WithFragmentArray } from '#src/index.ts';
-import { InfoSchema, type Info } from '../dummy/models/info.ts';
+import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
+import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
+import { withLegacy } from '#src/utilities/with-legacy.ts';
+import { type Info, InfoSchema } from '../dummy/models/info.ts';
+import { type Order, OrderSchema } from '../dummy/models/order.js';
+import { type Product, ProductSchema } from '../dummy/models/product.js';
+import { type User, UserSchema } from '../dummy/models/user.js';
+import { Store } from '../dummy/services/app-store.ts';
+import { setupApplicationTest } from '../helpers';
+import Pretender from 'pretender';
 
 interface AppTestContext extends TestContext {
   store: Store;
@@ -94,7 +94,7 @@ module('Integration - Nested fragments', function (hooks) {
       payload.user.id = '1';
       (payload.user.orders as WithFragmentArray<Order>)[0]!.products.splice(
         0,
-        1,
+        1
       );
 
       server.put('/users/1', () => {
@@ -110,7 +110,7 @@ module('Integration - Nested fragments', function (hooks) {
       assert.equal(
         user.orders!.firstObject!.products.firstObject!.name,
         'Tears of Lys',
-        'nested fragment array properties are converted properly',
+        'nested fragment array properties are converted properly'
       );
 
       const product = user.orders!.firstObject!.products.firstObject as Product;
@@ -122,7 +122,7 @@ module('Integration - Nested fragments', function (hooks) {
       assert.equal(
         product.price,
         '499.99',
-        'rollbackAttributes cascades to nested fragments',
+        'rollbackAttributes cascades to nested fragments'
       );
       assert.ok(!user.hasDirtyAttributes, 'dirty state is reset');
 
@@ -135,9 +135,9 @@ module('Integration - Nested fragments', function (hooks) {
       assert.equal(
         user.orders!.firstObject!.products.length,
         1,
-        'fragment array length is correct',
+        'fragment array length is correct'
       );
-    },
+    }
   );
 
   todo(
@@ -183,28 +183,28 @@ module('Integration - Nested fragments', function (hooks) {
       assert.equal(orders.length, 2, 'fragment array length is correct');
       assert.ok(
         orders.firstObject![Type] === 'fragment:order',
-        'fragment instances are created',
+        'fragment instances are created'
       );
       assert.equal(
         orders.firstObject!.amount,
         data.orders[0]!.amount,
-        'fragment properties are correct',
+        'fragment properties are correct'
       );
       assert.equal(
         orders.firstObject!.products.length,
         2,
-        'nested fragment array length is correct',
+        'nested fragment array length is correct'
       );
       assert.ok(
         orders.firstObject!.products.firstObject![Type] === 'fragment:product',
-        'nested fragment instances are created',
+        'nested fragment instances are created'
       );
       assert.equal(
         orders.firstObject!.products.firstObject!.name,
         data.orders[0]!.products[0]!.name,
-        'nested fragment properties are correct',
+        'nested fragment properties are correct'
       );
-    },
+    }
   );
 
   todo(
@@ -255,27 +255,27 @@ module('Integration - Nested fragments', function (hooks) {
 
       assert.ok(
         user.info,
-        'a nested fragment is created with the default value',
+        'a nested fragment is created with the default value'
       );
       assert.deepEqual(
         user.info!.notes.toArray(),
         defaultInfo.notes,
-        'a doubly nested fragment array is created with the default value',
+        'a doubly nested fragment array is created with the default value'
       );
       assert.ok(
         user.orders!.firstObject,
-        'a nested fragment array is created with the default value',
+        'a nested fragment array is created with the default value'
       );
       assert.equal(
         user.orders!.firstObject!.amount,
         defaultOrders[0]!.amount,
-        'a nested fragment is created with the default value',
+        'a nested fragment is created with the default value'
       );
       assert.equal(
         user.orders!.firstObject!.products.firstObject!.name,
         defaultOrders[0]!.products[0]!.name,
-        'a nested fragment is created with the default value',
+        'a nested fragment is created with the default value'
       );
-    },
+    }
   );
 });

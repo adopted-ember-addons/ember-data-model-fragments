@@ -1,25 +1,22 @@
-import BaseStore, { CacheHandler } from '@ember-data/store';
-import type { CacheCapabilitiesManager } from '@ember-data/store/types';
-
-import RequestManager from '@ember-data/request';
-import Fetch from '@ember-data/request/fetch';
-
 import JSONAPICache from '@ember-data/json-api';
-
-import type { ResourceKey } from '@warp-drive/core-types';
 import {
-  instantiateRecord,
-  SchemaService,
-  teardownRecord,
-} from '@warp-drive/schema-record';
-import {
-  adapterFor,
   LegacyNetworkHandler,
+  adapterFor,
   pushPayload,
   serializeRecord,
   serializerFor,
 } from '@ember-data/legacy-compat';
 import { registerDerivations } from '@ember-data/model/migration-support';
+import RequestManager from '@ember-data/request';
+import Fetch from '@ember-data/request/fetch';
+import BaseStore, { CacheHandler } from '@ember-data/store';
+import type { CacheCapabilitiesManager } from '@ember-data/store/types';
+import type { ResourceKey } from '@warp-drive/core-types';
+import {
+  SchemaService,
+  instantiateRecord,
+  teardownRecord,
+} from '@warp-drive/schema-record';
 
 export class Store extends BaseStore {
   requestManager = new RequestManager()
@@ -38,7 +35,7 @@ export class Store extends BaseStore {
 
   instantiateRecord(
     identifier: ResourceKey,
-    createArgs?: Record<string, unknown>,
+    createArgs?: Record<string, unknown>
   ) {
     return instantiateRecord(this, identifier, createArgs);
   }

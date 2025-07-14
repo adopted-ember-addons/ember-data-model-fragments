@@ -1,27 +1,28 @@
-import type { Store } from '@warp-drive/core';
-import FragmentExtension from '../extensions/fragment.ts';
-import FragmentArrayExtension from '../extensions/fragment-array.ts';
 import type ApplicationInstance from '@ember/application/instance';
+import type { Store } from '@warp-drive/core';
 import {
   EmberArrayLikeExtension,
   EmberObjectArrayExtension,
   EmberObjectExtension,
 } from '@warp-drive/legacy/compat/extensions';
+
 import { modelFor } from '#src/hooks/model-for.ts';
+import FragmentArrayExtension from '../extensions/fragment-array.ts';
+import FragmentExtension from '../extensions/fragment.ts';
 
 export function registerFragmentExtensions(store: Store) {
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(FragmentExtension);
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
-    FragmentArrayExtension,
+    FragmentArrayExtension
   );
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
-    EmberArrayLikeExtension,
+    EmberArrayLikeExtension
   );
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
-    EmberObjectArrayExtension,
+    EmberObjectArrayExtension
   );
   store.schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(
-    EmberObjectExtension,
+    EmberObjectExtension
   );
   store.modelFor = modelFor;
 }
@@ -33,7 +34,7 @@ export function initialize(application: ApplicationInstance) {
     registerFragmentExtensions(store);
   } else {
     console.warn(
-      'No store service was found, you will need to call `registerFragmentExtensions` manually in your app.',
+      'No store service was found, you will need to call `registerFragmentExtensions` manually in your app.'
     );
   }
 }

@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+
 import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
 
 module('Unit | withArrayDefaults', function () {

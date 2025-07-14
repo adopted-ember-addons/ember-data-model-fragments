@@ -1,15 +1,15 @@
+import type Store from '@ember-data/store';
+import type { ModelSchema } from '@warp-drive/core-types';
+import type { Value } from '@warp-drive/core-types/json/raw';
 import type {
-  TypedRecordInstance,
   TypeFromInstance,
+  TypedRecordInstance,
 } from '@warp-drive/core-types/record';
 import type {
   LegacyAttributeField,
   LegacyRelationshipField,
 } from '@warp-drive/core-types/schema/fields';
 
-import type Store from '@ember-data/store';
-import type { ModelSchema } from '@warp-drive/core-types';
-import type { Value } from '@warp-drive/core-types/json/raw';
 type KeyOrString<T> = keyof T & string extends never
   ? string
   : keyof T & string;
@@ -20,7 +20,7 @@ const AvailableShims = new WeakMap<Store, Record<string, ShimModelClass>>();
 
 export function getShimClass<T>(
   store: Store,
-  modelName: T extends TypedRecordInstance ? TypeFromInstance<T> : string,
+  modelName: T extends TypedRecordInstance ? TypeFromInstance<T> : string
 ): ShimModelClass<T> {
   let shims = AvailableShims.get(store);
 
@@ -54,7 +54,7 @@ export class ShimModelClass<T = unknown> implements ModelSchema<T> {
     : string;
   constructor(
     store: Store,
-    modelName: T extends TypedRecordInstance ? TypeFromInstance<T> : string,
+    modelName: T extends TypedRecordInstance ? TypeFromInstance<T> : string
   ) {
     this.__store = store;
     this.modelName = modelName;
@@ -115,7 +115,7 @@ export class ShimModelClass<T = unknown> implements ModelSchema<T> {
 
   eachAttribute<K extends KeyOrString<T>>(
     callback: (key: K, attribute: LegacyAttributeField) => void,
-    binding?: T,
+    binding?: T
   ): void {
     this.attributes.forEach((schema, key) => {
       callback.call(binding, key as K, schema);
@@ -124,7 +124,7 @@ export class ShimModelClass<T = unknown> implements ModelSchema<T> {
 
   eachRelationship<K extends KeyOrString<T>>(
     callback: (key: K, relationship: LegacyRelationshipField) => void,
-    binding?: T,
+    binding?: T
   ): void {
     this.__store.schema
       .fields({ type: this.modelName })
@@ -137,7 +137,7 @@ export class ShimModelClass<T = unknown> implements ModelSchema<T> {
 
   eachTransformedAttribute<K extends KeyOrString<T>>(
     callback: (key: K, type: string | null) => void,
-    binding?: T,
+    binding?: T
   ): void {
     this.__store.schema
       .fields({ type: this.modelName })
@@ -152,7 +152,7 @@ export class ShimModelClass<T = unknown> implements ModelSchema<T> {
 
 export function modelFor<T extends TypedRecordInstance>(
   this: Store,
-  modelName: T extends TypedRecordInstance ? TypeFromInstance<T> : string,
+  modelName: T extends TypedRecordInstance ? TypeFromInstance<T> : string
 ): ShimModelClass<T> {
   return getShimClass(this, modelName);
 }

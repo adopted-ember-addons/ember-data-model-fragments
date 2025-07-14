@@ -1,7 +1,7 @@
-import { babel } from '@rollup/plugin-babel';
 import { Addon } from '@embroider/addon-dev/rollup';
+import { babel } from '@rollup/plugin-babel';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolve, dirname } from 'node:path';
 
 const addon = new Addon({
   srcDir: 'src',
@@ -63,7 +63,7 @@ export default {
     // Emit .d.ts declaration files
     addon.declarations(
       'declarations',
-      `npx glint --declaration --project ${tsConfig}`,
+      `npx glint --declaration --project ${tsConfig}`
     ),
 
     // addons are allowed to contain imports of .css files, which we want rollup

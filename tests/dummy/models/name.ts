@@ -3,7 +3,6 @@ import type { Type } from '@warp-drive/core-types/symbols';
 
 import type { WithFragment } from '#src/index.ts';
 import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
-
 import type { Prefix } from './prefix';
 
 export const NameSchema = {

@@ -9,10 +9,7 @@
 export function withFragmentDefaults<
   FragmentType extends string,
   FragmentName extends string,
->(
-  fragmentType: FragmentType,
-  fragmentName?: FragmentName,
-) {
+>(fragmentType: FragmentType, fragmentName?: FragmentName) {
   return {
     kind: 'schema-object' as const,
     type: `fragment:${fragmentType}` as const,

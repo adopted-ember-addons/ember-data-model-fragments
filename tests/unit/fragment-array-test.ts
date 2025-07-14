@@ -1,13 +1,12 @@
+import { type TestContext } from '@ember/test-helpers';
 import { module, test, todo } from 'qunit';
 
-import { type TestContext } from '@ember/test-helpers';
-
-import { setupApplicationTest } from '../helpers';
-import { Store } from '../dummy/services/app-store';
-import { PersonSchema, type Person } from '../dummy/models/person';
-import { NameSchema, type Name } from '../dummy/models/name';
-import { PrefixSchema } from '../dummy/models/prefix';
 import type { WithFragmentArray } from '#src/index.ts';
+import { type Name, NameSchema } from '../dummy/models/name';
+import { type Person, PersonSchema } from '../dummy/models/person';
+import { PrefixSchema } from '../dummy/models/prefix';
+import { Store } from '../dummy/services/app-store';
+import { setupApplicationTest } from '../helpers';
 
 interface AppTestContext extends TestContext {
   store: Store;
@@ -80,7 +79,7 @@ module('Unit - `FragmentArray`', function (hooks) {
         last: 'Hill',
         prefixes: [],
       },
-      'new fragment is in correct location',
+      'new fragment is in correct location'
     );
   });
 
@@ -117,7 +116,7 @@ module('Unit - `FragmentArray`', function (hooks) {
         last: undefined,
         prefixes: [],
       },
-      'fragment is in correct location',
+      'fragment is in correct location'
     );
   });
 
@@ -176,83 +175,86 @@ module('Unit - `FragmentArray`', function (hooks) {
     assert.ok(!fragments.includes(fragment), 'fragment is removed');
   });
 
-  todo('changes to array contents change the fragment array `hasDirtyAttributes` property', async function (this: AppTestContext, assert) {
-    this.store.push({
-      data: {
-        type: 'person',
-        id: '1',
-        attributes: {
-          names: [
-            {
-              first: 'Aegon',
-              last: 'Targaryen',
-            },
-            {
-              first: 'Visenya',
-              last: 'Targaryen',
-            },
-          ],
+  todo(
+    'changes to array contents change the fragment array `hasDirtyAttributes` property',
+    async function (this: AppTestContext, assert) {
+      this.store.push({
+        data: {
+          type: 'person',
+          id: '1',
+          attributes: {
+            names: [
+              {
+                first: 'Aegon',
+                last: 'Targaryen',
+              },
+              {
+                first: 'Visenya',
+                last: 'Targaryen',
+              },
+            ],
+          },
         },
-      },
-    });
+      });
 
-    const person = await this.store.findRecord<Person>('person', '1');
-    const fragments = person.names as WithFragmentArray<Name>;
-    const fragment = fragments.firstObject as Name;
-    const newFragment = {
-      first: 'Rhaenys',
-      last: 'Targaryen',
-    } as Name;
+      const person = await this.store.findRecord<Person>('person', '1');
+      const fragments = person.names as WithFragmentArray<Name>;
+      const fragment = fragments.firstObject as Name;
+      const newFragment = {
+        first: 'Rhaenys',
+        last: 'Targaryen',
+      } as Name;
 
-    assert.ok(
-      !fragments.hasDirtyAttributes,
-      'fragment array is initially in a clean state',
-    );
+      assert.ok(
+        !fragments.hasDirtyAttributes,
+        'fragment array is initially in a clean state'
+      );
 
-    fragments.removeFragment(fragment);
+      fragments.removeFragment(fragment);
 
-    assert.ok(
-      fragments.hasDirtyAttributes,
-      'fragment array is in dirty state after removal',
-    );
+      assert.ok(
+        fragments.hasDirtyAttributes,
+        'fragment array is in dirty state after removal'
+      );
 
-    fragments.unshiftObject(fragment);
+      fragments.unshiftObject(fragment);
 
-    assert.ok(
-      !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state',
-    );
+      assert.ok(
+        !fragments.hasDirtyAttributes,
+        'fragment array is returned to clean state'
+      );
 
-    fragments.addFragment(newFragment);
+      fragments.addFragment(newFragment);
 
-    assert.ok(
-      fragments.hasDirtyAttributes,
-      'fragment array is in dirty state after addition',
-    );
+      assert.ok(
+        fragments.hasDirtyAttributes,
+        'fragment array is in dirty state after addition'
+      );
 
-    fragments.removeFragment(newFragment);
+      fragments.removeFragment(newFragment);
 
-    assert.ok(
-      !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state',
-    );
+      assert.ok(
+        !fragments.hasDirtyAttributes,
+        'fragment array is returned to clean state'
+      );
 
-    fragments.removeFragment(fragment);
-    fragments.addFragment(fragment);
+      fragments.removeFragment(fragment);
+      fragments.addFragment(fragment);
 
-    assert.ok(
-      fragments.hasDirtyAttributes,
-      'fragment array is in dirty state after reordering',
-    );
+      assert.ok(
+        fragments.hasDirtyAttributes,
+        'fragment array is in dirty state after reordering'
+      );
 
-    fragments.removeFragment(fragment);
-    fragments.unshiftObject(fragment);
+      fragments.removeFragment(fragment);
+      fragments.unshiftObject(fragment);
 
-    assert.ok(
-      !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state',
-    );
-  });
+      assert.ok(
+        !fragments.hasDirtyAttributes,
+        'fragment array is returned to clean state'
+      );
+    }
+  );
 
   test('changes to array contents change the fragment array `hasDirtyAttributes` property', async function (this: AppTestContext, assert) {
     this.store.push({
@@ -276,21 +278,21 @@ module('Unit - `FragmentArray`', function (hooks) {
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is initially in a clean state',
+      'fragment array is initially in a clean state'
     );
 
     fragment.set('last', 'Stark');
 
     assert.ok(
       fragments.hasDirtyAttributes,
-      'fragment array in dirty state after change to a fragment',
+      'fragment array in dirty state after change to a fragment'
     );
 
     fragment.set('last', 'Snow');
 
     assert.ok(
       !fragments.hasDirtyAttributes,
-      'fragment array is returned to clean state',
+      'fragment array is returned to clean state'
     );
   });
 
@@ -334,12 +336,12 @@ module('Unit - `FragmentArray`', function (hooks) {
     assert.ok(
       // @ts-expect-error TODO: shouldn't the array extensions have this?
       !fragments.isAny('hasDirtyAttributes'),
-      'all fragments are in clean state',
+      'all fragments are in clean state'
     );
     assert.deepEqual(
       fragments.toArray(),
       originalState,
-      'original array contents is restored',
+      'original array contents is restored'
     );
   });
 
@@ -357,7 +359,7 @@ module('Unit - `FragmentArray`', function (hooks) {
     assert.propEqual(
       person.names,
       [] as unknown as WithFragmentArray<Name>,
-      'when set to null, fragment array is [] (empty array)',
+      'when set to null, fragment array is [] (empty array)'
     );
   });
 
@@ -407,7 +409,7 @@ module('Unit - `FragmentArray`', function (hooks) {
     assert.propEqual(
       person.names,
       [] as unknown as WithFragmentArray<Name>,
-      'when set to null, fragment array is [] (empty array)',
+      'when set to null, fragment array is [] (empty array)'
     );
   });
 });

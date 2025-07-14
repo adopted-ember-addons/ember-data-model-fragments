@@ -1,4 +1,5 @@
 import { module, test } from 'qunit';
+
 import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
 
 module('Unit | withFragmentDefaults', function () {

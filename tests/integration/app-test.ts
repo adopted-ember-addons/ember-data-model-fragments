@@ -1,16 +1,16 @@
-import { module, test } from 'qunit';
 import { type TestContext } from '@ember/test-helpers';
+import { module, test } from 'qunit';
 
-import FragmentExtension from '#src/extensions/fragment.ts';
-import FragmentArrayExtension from '#src/extensions/fragment-array.ts';
-import { withLegacy } from '#src/utilities/with-legacy.ts';
-import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
-import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
-import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
-
-import { setupApplicationTest } from '../helpers/index.ts';
-import { Store } from '../dummy/services/app-store.ts';
 import type { ObjectSchema } from '@warp-drive/core-types/schema/fields';
+
+import FragmentArrayExtension from '#src/extensions/fragment-array.ts';
+import FragmentExtension from '#src/extensions/fragment.ts';
+import { withArrayDefaults } from '#src/utilities/with-array-defaults.ts';
+import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
+import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
+import { withLegacy } from '#src/utilities/with-legacy.ts';
+import { Store } from '../dummy/services/app-store.ts';
+import { setupApplicationTest } from '../helpers/index.ts';
 
 interface AppTestContext extends TestContext {
   store: Store;
@@ -63,28 +63,26 @@ module('Integration | Application', function (hooks) {
 
     assert.ok(
       this.store.schema.hasResource(PersonSchema),
-      'PersonSchema is registered',
+      'PersonSchema is registered'
     );
     assert.ok(
       this.store.schema.hasResource(NameSchema),
-      'NameSchema is registered',
+      'NameSchema is registered'
     );
     assert.ok(
       this.store.schema.hasResource(AddressSchema),
-      'AddressSchema is registered',
+      'AddressSchema is registered'
     );
   });
 
   test('the fragment and fragment-array extenions are registered', function (this: AppTestContext, assert) {
     assert.ok(
-      this.store.schema.CAUTION_MEGA_DANGER_ZONE_hasExtension(
-        FragmentExtension,
-      ),
+      this.store.schema.CAUTION_MEGA_DANGER_ZONE_hasExtension(FragmentExtension)
     );
     assert.ok(
       this.store.schema.CAUTION_MEGA_DANGER_ZONE_hasExtension(
-        FragmentArrayExtension,
-      ),
+        FragmentArrayExtension
+      )
     );
   });
 });

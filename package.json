@@ -71,6 +71,7 @@
     "@glint/template": "^1.6.0-alpha.1",
     "@glint/tsserver-plugin": "^2.0.0-alpha.2",
     "@rollup/plugin-babel": "^6.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/qunit": "^2.19.12",
     "@warp-drive/build-config": "5.7.0-alpha.12",
     "@warp-drive/core": "5.7.0-alpha.12",
