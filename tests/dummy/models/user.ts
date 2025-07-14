@@ -1,0 +1,27 @@
+import { type WithLegacy } from '@ember-data/model/migration-support';
+import type { Type } from '@warp-drive/core-types/symbols';
+
+import type { WithFragmentArray } from '#src/index.ts';
+import { withLegacy } from '#src/utilities/with-legacy.ts';
+import { withFragmentDefaults } from '#src/utilities/with-fragment-defaults.ts';
+import { withFragmentArrayDefaults } from '#src/utilities/with-fragment-array-defaults.ts';
+import type { Name } from './name';
+import type { WithEmberObject } from '@warp-drive/legacy/compat/extensions';
+import type { Order } from './order';
+
+export const UserSchema = withLegacy({
+  type: 'user',
+  fields: [
+    withFragmentDefaults('info'),
+    withFragmentArrayDefaults('order', 'orders'),
+  ],
+});
+
+export type User = WithLegacy<
+  WithEmberObject<{
+    id: string;
+    info: Name | null;
+    orders: WithFragmentArray<Order> | null;
+    [Type]: 'user';
+  }>
+>;

@@ -7,11 +7,13 @@ import { singularize } from 'ember-inflector';
  * @param arrayName The name of the array
  * @returns The schema for an array
  */
-export function withArrayDefaults(arrayName: string) {
+export function withArrayDefaults<ArrayName extends string>(
+  arrayName: ArrayName,
+) {
   return {
     kind: 'array' as const,
     name: arrayName,
-    type: `array:${singularize(arrayName)}`,
+    type: `array:${singularize(arrayName)}` as const,
     options: {
       arrayExtensions: ['ember-object', 'ember-array-like', 'fragment-array'],
     },

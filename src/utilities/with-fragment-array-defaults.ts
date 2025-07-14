@@ -7,13 +7,13 @@ import { singularize, pluralize } from 'ember-inflector';
  * @param fragmentArrayName The name of the fragment-array
  * @returns The schema for a fragment-array
  */
-export function withFragmentArrayDefaults(
-  fragmentArrayType: string,
-  fragmentArrayName?: string,
-) {
+export function withFragmentArrayDefaults<
+  FragmentArrayType extends string,
+  FragmentArrayName extends string,
+>(fragmentArrayType: FragmentArrayType, fragmentArrayName?: FragmentArrayName) {
   return {
     kind: 'schema-array' as const,
-    type: `fragment:${singularize(fragmentArrayType)}`,
+    type: `fragment:${singularize(fragmentArrayType)}` as const,
     name: fragmentArrayName ?? pluralize(fragmentArrayType),
     options: {
       arrayExtensions: ['ember-object', 'ember-array-like', 'fragment-array'],
