@@ -29,6 +29,11 @@ export class Fragment {
     return true;
   }
 
+  get $type() {
+    const { field } = (this as unknown as SchemaRecord)[Context];
+    return field?.type;
+  }
+
   rollbackAttributes(this: SchemaRecord) {
     const { path, resourceKey, store } = this[Context];
 
