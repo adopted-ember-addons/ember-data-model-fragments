@@ -33,7 +33,7 @@ module.exports = async function (defaults) {
   let app = new EmberApp(defaults);
 
   setConfig(app, __dirname, {
-    compatWith: '5.7',
+    compatWith: '5.4',
     deprecations: {}
   });
 
