@@ -1,11 +1,11 @@
+import type Model from '@ember-data/model';
 import { cached, tracked } from '@glimmer/tracking';
 import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reactive';
+import type { ManagedArray } from '@warp-drive/core/reactive/-private/fields/managed-array';
+import { Context } from '@warp-drive/schema-record/-private';
 
 import type { WithFragmentArray } from '../index.js';
 import { Fragment } from './fragment.js';
-import type { ManagedArray } from '@warp-drive/core/reactive/-private/fields/managed-array';
-import { Context } from '@warp-drive/schema-record/-private';
-import type Model from '@ember-data/model';
 
 export class FragmentArray<T extends Fragment> {
   // We might want to check the parent values once we move this code to warp-drive.

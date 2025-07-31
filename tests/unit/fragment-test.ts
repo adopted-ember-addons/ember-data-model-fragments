@@ -475,77 +475,63 @@ module('Unit - `Fragment`', function (hooks) {
       server.shutdown();
     });
 
-    test(
-      '`person` fragments/fragment arrays are not initially `null`',
-      async function (this: AppTestContext, assert) {
-        const person = this.store.createRecord<Person>('person', {
-          title: 'Mr.',
-          // @ts-expect-error this is fine
-          name: {},
-        });
+    test('`person` fragments/fragment arrays are not initially `null`', async function (this: AppTestContext, assert) {
+      const person = this.store.createRecord<Person>('person', {
+        title: 'Mr.',
+        // @ts-expect-error this is fine
+        name: {},
+      });
 
-        assert.ok(person.name, 'name is not null');
-        assert.ok(person.names, 'names is not null');
-        assert.notOk(person.nickName, 'nickName is not set');
+      assert.ok(person.name, 'name is not null');
+      assert.ok(person.names, 'names is not null');
+      assert.notOk(person.nickName, 'nickName is not set');
 
-        await person.save();
+      await person.save();
 
-        assert.equal(
-          person.nickName,
-          'Johnner',
-          'nickName is correctly loaded'
-        );
-        assert.propEqual(
-          person.name,
-          {
-            first: 'John',
-            last: 'Doe',
-            prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
-          },
-          'name is correctly loaded'
-        );
-        assert.propEqual(
-          person.names?.slice(),
-          [{ first: 'John', last: 'Doe', prefixes: [] }],
-          'names is correct'
-        );
-      }
-    );
+      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
+      assert.propEqual(
+        person.name,
+        {
+          first: 'John',
+          last: 'Doe',
+          prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
+        },
+        'name is correctly loaded'
+      );
+      assert.propEqual(
+        person.names?.slice(),
+        [{ first: 'John', last: 'Doe', prefixes: [] }],
+        'names is correct'
+      );
+    });
 
-    test(
-      '`person` fragments/fragment arrays are initially `null`',
-      async function (this: AppTestContext, assert) {
-        const person = this.store.createRecord<Person>('person', {
-          title: 'Mr.',
-          name: null,
-          names: null,
-        });
+    test('`person` fragments/fragment arrays are initially `null`', async function (this: AppTestContext, assert) {
+      const person = this.store.createRecord<Person>('person', {
+        title: 'Mr.',
+        name: null,
+        names: null,
+      });
 
-        assert.strictEqual(person.names, null, 'names is null');
-        assert.notOk(person.nickName, 'nickName is not set');
+      assert.strictEqual(person.names, null, 'names is null');
+      assert.notOk(person.nickName, 'nickName is not set');
 
-        await person.save();
+      await person.save();
 
-        assert.equal(
-          person.nickName,
-          'Johnner',
-          'nickName is correctly loaded'
-        );
-        assert.propEqual(
-          person.name,
-          {
-            first: 'John',
-            last: 'Doe',
-            prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
-          },
-          'name is correctly loaded'
-        );
-        assert.propEqual(
-          person.names?.slice(),
-          [{ first: 'John', last: 'Doe', prefixes: [] }],
-          'names is correct'
-        );
-      }
-    );
+      assert.equal(person.nickName, 'Johnner', 'nickName is correctly loaded');
+      assert.propEqual(
+        person.name,
+        {
+          first: 'John',
+          last: 'Doe',
+          prefixes: [{ name: 'Mr.' }, { name: 'Sir' }],
+        },
+        'name is correctly loaded'
+      );
+      assert.propEqual(
+        person.names?.slice(),
+        [{ first: 'John', last: 'Doe', prefixes: [] }],
+        'names is correct'
+      );
+    });
   });
 });
