@@ -3,6 +3,9 @@ import type { CAUTION_MEGA_DANGER_ZONE_Extension } from '@warp-drive/core/reacti
 
 import type { WithFragmentArray } from '../index.js';
 import { Fragment } from './fragment.js';
+import type { ManagedArray } from '@warp-drive/core/reactive/-private/fields/managed-array';
+import { Context } from '@warp-drive/schema-record/-private';
+import type Model from '@ember-data/model';
 
 export class FragmentArray<T extends Fragment> {
   // We might want to check the parent values once we move this code to warp-drive.
@@ -11,10 +14,14 @@ export class FragmentArray<T extends Fragment> {
 
   @cached
   get hasDirtyAttributes() {
-    for (const fragment of this as unknown as WithFragmentArray<T>) {
-      if (fragment?.hasDirtyAttributes) {
-        return true;
-      }
+    const { path, resourceKey, store } = (this as unknown as ManagedArray)[
+      Context
+    ];
+    const record = store.peekRecord(resourceKey) as Model;
+
+    if (record.hasDirtyAttributes && path) {
+      const root = path.at(0) as string;
+      return root in record.changedAttributes();
     }
 
     return false;

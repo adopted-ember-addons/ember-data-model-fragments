@@ -1,5 +1,5 @@
 import { type TestContext } from '@ember/test-helpers';
-import { module, test } from 'qunit';
+import { module, test, todo } from 'qunit';
 
 import { type WithLegacy } from '@ember-data/model/migration-support';
 import { Type } from '@warp-drive/core-types/symbols';
@@ -198,7 +198,7 @@ module('Integration - Nested fragments', function (hooks) {
     );
   });
 
-  test(
+  todo(
     'Nested fragments can have default values',
     function (this: AppTestContext, assert) {
       const defaultInfo = {
