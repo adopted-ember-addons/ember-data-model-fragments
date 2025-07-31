@@ -1,5 +1,5 @@
 import { type TestContext } from '@ember/test-helpers';
-import { module, test, todo } from 'qunit';
+import { module, test } from 'qunit';
 
 import type { WithFragmentArray } from '#src/index.ts';
 import { type Name, NameSchema } from '../dummy/models/name';
@@ -175,7 +175,7 @@ module('Unit - `FragmentArray`', function (hooks) {
     assert.ok(!fragments.includes(fragment), 'fragment is removed');
   });
 
-  todo(
+  test(
     'changes to array contents change the fragment array `hasDirtyAttributes` property',
     async function (this: AppTestContext, assert) {
       this.store.push({
@@ -363,7 +363,7 @@ module('Unit - `FragmentArray`', function (hooks) {
     );
   });
 
-  todo('can be updated to null', function (this: AppTestContext, assert) {
+  test('can be updated to null', function (this: AppTestContext, assert) {
     const person = this.store.push<Person>({
       data: {
         type: 'person',

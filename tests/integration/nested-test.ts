@@ -1,5 +1,5 @@
 import { type TestContext } from '@ember/test-helpers';
-import { module, test, todo } from 'qunit';
+import { module, test } from 'qunit';
 
 import { type WithLegacy } from '@ember-data/model/migration-support';
 import { Type } from '@warp-drive/core-types/symbols';
@@ -42,7 +42,7 @@ module('Integration - Nested fragments', function (hooks) {
     server.shutdown();
   });
 
-  todo('properties can be nested', async function (this: AppTestContext, assert) {
+  test('properties can be nested', async function (this: AppTestContext, assert) {
     const data = {
       info: {
         name: 'Tyrion Lannister',
@@ -86,7 +86,7 @@ module('Integration - Nested fragments', function (hooks) {
     });
 
     const payload = {
-      user: data as unknown as User,
+      user: structuredClone(data as unknown as User),
     };
 
     payload.user.id = '1';
@@ -198,7 +198,7 @@ module('Integration - Nested fragments', function (hooks) {
     );
   });
 
-  todo(
+  test(
     'Nested fragments can have default values',
     function (this: AppTestContext, assert) {
       const defaultInfo = {

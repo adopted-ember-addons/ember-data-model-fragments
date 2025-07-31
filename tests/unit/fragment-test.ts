@@ -1,5 +1,5 @@
 import { type TestContext } from '@ember/test-helpers';
-import { module, test, todo } from 'qunit';
+import { module, test } from 'qunit';
 
 import { recordIdentifierFor } from '@ember-data/store';
 
@@ -220,7 +220,7 @@ module('Unit - `Fragment`', function (hooks) {
     );
   });
 
-  todo(
+  test(
     "(redux) fragment properties that are initially null are indicated in the owner record's `changedAttributes`",
     async function (this: AppTestContext, assert) {
       this.store.push({
@@ -474,7 +474,7 @@ module('Unit - `Fragment`', function (hooks) {
       server.shutdown();
     });
 
-    todo(
+    test(
       '`person` fragments/fragment arrays are not initially `null`',
       async function (this: AppTestContext, assert) {
         const person = this.store.createRecord<Person>('person', {
@@ -504,14 +504,14 @@ module('Unit - `Fragment`', function (hooks) {
           'name is correctly loaded'
         );
         assert.propEqual(
-          person.names,
+          person.names?.slice(),
           [{ first: 'John', last: 'Doe', prefixes: [] }],
           'names is correct'
         );
       }
     );
 
-    todo(
+    test(
       '`person` fragments/fragment arrays are initially `null`',
       async function (this: AppTestContext, assert) {
         const person = this.store.createRecord<Person>('person', {
@@ -520,7 +520,7 @@ module('Unit - `Fragment`', function (hooks) {
           names: null,
         });
 
-        assert.notOk(person.names, 'names is null');
+        assert.strictEqual(person.names, null, 'names is null');
         assert.notOk(person.nickName, 'nickName is not set');
 
         await person.save();
@@ -540,7 +540,7 @@ module('Unit - `Fragment`', function (hooks) {
           'name is correctly loaded'
         );
         assert.propEqual(
-          person.names,
+          person.names?.slice(),
           [{ first: 'John', last: 'Doe', prefixes: [] }],
           'names is correct'
         );
