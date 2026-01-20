@@ -68,6 +68,7 @@ jobs:
           - ember-release
           - ember-beta
           - ember-canary
+          - ember-data-4.12
           - embroider-safe
           - embroider-optimized
 

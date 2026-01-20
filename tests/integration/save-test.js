@@ -970,6 +970,7 @@ module('integration - Persistence', function (hooks) {
     }
 
     const data = {
+      id: 1,
       soldiers: ['Aegor Rivers', 'Jon Connington', 'Tristan Rivers'],
     };
     const payload = {

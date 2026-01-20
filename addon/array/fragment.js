@@ -3,7 +3,7 @@ import { typeOf } from '@ember/utils';
 import StatefulArray from './stateful';
 import { isFragment, setFragmentOwner } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
-import { recordDataFor } from '@ember-data/store/-private';
+import { recordIdentifierFor } from '@ember-data/store';
 
 /**
   @module ember-data-model-fragments
@@ -36,30 +36,40 @@ const FragmentArray = StatefulArray.extend({
     );
 
     if (isFragment(data)) {
-      const recordData = recordDataFor(data);
-      setFragmentOwner(data, this.recordData, this.key);
-      return recordData._fragmentGetRecord();
+      const fragmentIdentifier = recordIdentifierFor(data);
+      setFragmentOwner(data, this.identifier, this.key);
+      // Return the fragment record itself
+      return this.store._instanceCache.getRecord(fragmentIdentifier);
     }
     const existing = this.currentState[index];
     if (existing) {
       existing.setProperties(data);
       return existing;
     }
-    const recordData = this.recordData._newFragmentRecordDataForKey(
+    // Create a new fragment via the cache
+    const fragmentIdentifier = this.cache.newFragmentIdentifierForKey(
+      this.identifier,
       this.key,
       data,
     );
-    return recordData._fragmentGetRecord();
+    return this.store._instanceCache.getRecord(fragmentIdentifier);
   },
 
   _getFragmentState() {
-    const recordDatas = this._super();
-    return recordDatas?.map((recordData) => recordData._fragmentGetRecord());
+    const fragmentIdentifiers = this._super();
+    if (fragmentIdentifiers === null) {
+      return null;
+    }
+    return fragmentIdentifiers?.map((fragmentIdentifier) =>
+      this.store._instanceCache.getRecord(fragmentIdentifier),
+    );
   },
 
   _setFragmentState(fragments) {
-    const recordDatas = fragments.map((fragment) => recordDataFor(fragment));
-    this._super(recordDatas);
+    const fragmentIdentifiers = fragments.map((fragment) =>
+      recordIdentifierFor(fragment),
+    );
+    this._super(fragmentIdentifiers);
   },
 
   /**
@@ -151,11 +161,15 @@ const FragmentArray = StatefulArray.extend({
     @return {MF.Fragment} the newly added fragment
     */
   createFragment(props) {
-    const recordData = this.recordData._newFragmentRecordDataForKey(
+    const fragmentIdentifier = this.cache.newFragmentIdentifierForKey(
+      this.identifier,
       this.key,
       props,
     );
-    const fragment = recordData._fragmentGetRecord(props);
+    const fragment = this.store._instanceCache.getRecord(
+      fragmentIdentifier,
+      props,
+    );
     return this.pushObject(fragment);
   },
 });

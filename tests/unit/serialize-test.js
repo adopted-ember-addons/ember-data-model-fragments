@@ -277,16 +277,31 @@ module('unit - Serialization', function (hooks) {
 
     const attributes = normalized.data.attributes;
 
-    assert.ok(
-      values.every((value, index) => {
-        return (
-          attributes.strings[index] === String(value) &&
-          attributes.numbers[index] ===
-            (isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
-          attributes.booleans[index] === Boolean(value)
-        );
-      }),
-      'fragment property values are normalized',
+    // String transform converts falsy values (except '') to null
+    const expectedStrings = values.map((v) =>
+      !v && v !== '' ? null : String(v),
+    );
+    // Number transform: isEmpty or NaN -> null, otherwise Number
+    const expectedNumbers = values.map((v) =>
+      isEmpty(v) || isNaN(Number(v)) ? null : Number(v),
+    );
+    // Boolean transform: just Boolean(v)
+    const expectedBooleans = values.map((v) => Boolean(v));
+
+    assert.deepEqual(
+      attributes.strings,
+      expectedStrings,
+      'string values are normalized',
+    );
+    assert.deepEqual(
+      attributes.numbers,
+      expectedNumbers,
+      'number values are normalized',
+    );
+    assert.deepEqual(
+      attributes.booleans,
+      expectedBooleans,
+      'boolean values are normalized',
     );
   });
 
@@ -308,16 +323,31 @@ module('unit - Serialization', function (hooks) {
     const person = await store.findRecord('person', 1);
     const serialized = person.serialize();
 
-    assert.ok(
-      values.every((value, index) => {
-        return (
-          serialized.strings[index] === String(value) &&
-          serialized.numbers[index] ===
-            (isEmpty(value) || isNaN(Number(value)) ? null : Number(value)) &&
-          serialized.booleans[index] === Boolean(value)
-        );
-      }),
-      'fragment property values are normalized',
+    // String transform converts falsy values (except '') to null
+    const expectedStrings = values.map((v) =>
+      !v && v !== '' ? null : String(v),
+    );
+    // Number transform: isEmpty or NaN -> null, otherwise Number
+    const expectedNumbers = values.map((v) =>
+      isEmpty(v) || isNaN(Number(v)) ? null : Number(v),
+    );
+    // Boolean transform: just Boolean(v)
+    const expectedBooleans = values.map((v) => Boolean(v));
+
+    assert.deepEqual(
+      serialized.strings,
+      expectedStrings,
+      'string values are serialized',
+    );
+    assert.deepEqual(
+      serialized.numbers,
+      expectedNumbers,
+      'number values are serialized',
+    );
+    assert.deepEqual(
+      serialized.booleans,
+      expectedBooleans,
+      'boolean values are serialized',
     );
   });
 

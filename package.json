@@ -38,7 +38,7 @@
   },
   "resolutions": {
     "@embroider/addon-shim": "1.8.7",
-    "@embroider/macros": "1.16.12"
+    "@embroider/macros": "^1.17.2"
   },
   "dependencies": {
     "@babel/core": "^7.27.1",
@@ -54,8 +54,11 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.27.1",
     "@babel/plugin-proposal-decorators": "^7.27.1",
+    "@babel/preset-env": "^7.27.1",
     "@ember/optional-features": "^2.2.0",
+    "@ember/string": "^3.1.1",
     "@ember/test-helpers": "^5.2.1",
+    "@ember/test-waiters": "^3.1.0",
     "@embroider/macros": "^1.17.2",
     "@embroider/test-setup": "^4.0.0",
     "@eslint/js": "^9.25.1",
@@ -71,7 +74,8 @@
     "ember-cli-htmlbars": "^6.3.0",
     "ember-cli-inject-live-reload": "^2.1.0",
     "ember-cli-terser": "^4.0.2",
-    "ember-data": "~4.6.0",
+    "ember-data": "~4.12.0",
+    "@ember-data/json-api": "~4.12.0",
     "ember-load-initializers": "^3.0.1",
     "ember-page-title": "^9.0.1",
     "ember-qunit": "^9.0.2",
@@ -95,10 +99,15 @@
     "release-plan": "^0.16.0",
     "stylelint": "^16.19.1",
     "stylelint-config-standard": "^36.0.1",
-    "webpack": "^5.99.7"
+    "webpack": "^5.0.0",
+    "@embroider/core": "^3.4.8",
+    "@embroider/webpack": "^4.0.0",
+    "@embroider/compat": "^3.4.8"
   },
   "peerDependencies": {
-    "ember-source": ">= 4.0.0"
+    "ember-source": ">= 5.0.0",
+    "ember-data": ">= 4.12.0",
+    "@ember-data/json-api": ">= 4.12.0"
   },
   "engines": {
     "node": ">= 18"

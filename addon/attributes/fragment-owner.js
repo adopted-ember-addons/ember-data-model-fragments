@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { isFragment } from '../fragment';
-import { recordDataFor } from '@ember-data/store/-private';
+import { recordIdentifierFor } from '@ember-data/store';
 
 /**
  `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`
@@ -27,17 +27,18 @@ import { recordDataFor } from '@ember-data/store/-private';
  @return {Attribute}
  */
 export default function fragmentOwner() {
-  return computed(function () {
+  return computed('store.{_instanceCache,cache}', function () {
     assert(
       'Fragment owner properties can only be used on fragments.',
       isFragment(this),
     );
-    const recordData = recordDataFor(this);
-    const owner = recordData.getFragmentOwner();
+    const identifier = recordIdentifierFor(this);
+    const owner = this.store.cache.getFragmentOwner(identifier);
     if (!owner) {
       return null;
     }
-    return owner._fragmentGetRecord();
+    // Get the owner record from the identifier
+    return this.store._instanceCache.getRecord(owner.ownerIdentifier);
   })
     .meta({
       isFragmentOwner: true,
