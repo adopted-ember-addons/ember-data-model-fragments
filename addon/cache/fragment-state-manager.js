@@ -511,18 +511,29 @@ export default class FragmentStateManager {
   }
 
   _getFragmentDefault(identifier, key) {
+    const fragmentData = this._getFragmentDataMap(identifier);
+
+    // Guard against re-entrant calls during fragment creation.
+    // When creating a fragment identifier, ember-data may trigger notifications
+    // that cause getAttr to be called again before we've finished initializing.
+    // By checking if the key exists (even as undefined), we prevent infinite recursion.
+    if (key in fragmentData) {
+      return fragmentData[key];
+    }
+
     const behaviors = this._getBehaviors(identifier);
     const behavior = behaviors[key];
     assert(
       `Attribute '${key}' for model '${identifier.type}' must be a fragment`,
       behavior != null,
     );
-    assert(
-      'Fragment default value was already initialized',
-      !this.hasFragment(identifier, key),
-    );
+
+    // Set sentinel value BEFORE creating the fragment to prevent re-entrancy.
+    // This ensures any re-entrant calls to getFragment will find this key
+    // and return early instead of trying to create another default.
+    fragmentData[key] = undefined;
+
     const defaultValue = behavior.getDefaultValue(key);
-    const fragmentData = this._getFragmentDataMap(identifier);
     fragmentData[key] = defaultValue;
     return defaultValue;
   }

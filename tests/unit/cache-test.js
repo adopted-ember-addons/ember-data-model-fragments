@@ -619,6 +619,69 @@ module('unit - Fragment Edge Cases', function (hooks) {
     server.shutdown();
   });
 
+  test('accessing fragment default value does not cause infinite recursion', async function (assert) {
+    // This test verifies the fix for a re-entrancy bug where creating a fragment's
+    // default value would trigger ember-data notifications, which would call getAttr
+    // again before the default was stored, causing infinite recursion.
+    //
+    // The fix stores a sentinel value before creating the fragment to prevent
+    // re-entrant calls from trying to create another default.
+
+    store.push({
+      data: {
+        type: 'person',
+        id: '1',
+        attributes: {
+          title: 'Test',
+          // Intentionally NOT providing 'name' fragment - will use default
+        },
+      },
+    });
+
+    const person = store.peekRecord('person', '1');
+    const identifier = recordIdentifierFor(person);
+
+    // Access the fragment multiple times in quick succession
+    // This simulates what happens when observers/computeds chain together
+    const name1 = store.cache.getAttr(identifier, 'name');
+    const name2 = store.cache.getAttr(identifier, 'name');
+    const name3 = person.name;
+
+    // All accesses should return the same fragment instance (or null if default is null)
+    assert.strictEqual(name1, name2, 'repeated getAttr returns same value');
+    assert.strictEqual(
+      name2,
+      name3,
+      'property access returns same value as getAttr',
+    );
+
+    // The test passing without a stack overflow means the fix works
+    assert.ok(true, 'no infinite recursion occurred');
+  });
+
+  test('concurrent fragment access during record instantiation does not cause recursion', async function (assert) {
+    // This test creates a record and immediately accesses multiple fragment properties
+    // to ensure there's no re-entrancy issue during the initial instantiation
+
+    const person = store.createRecord('person', {
+      title: 'Test',
+      // name will be default (null or empty fragment)
+      // addresses will be default (null or empty array)
+    });
+
+    // Access all fragment properties - this would cause stack overflow before the fix
+    const name = person.name;
+    const addresses = person.addresses;
+
+    // Access them again to ensure caching works
+    const name2 = person.name;
+    const addresses2 = person.addresses;
+
+    assert.strictEqual(name, name2, 'name fragment is cached');
+    assert.strictEqual(addresses, addresses2, 'addresses fragment is cached');
+    assert.ok(true, 'no infinite recursion during record creation');
+  });
+
   test('pushing data to record with dirty fragment merges correctly', async function (assert) {
     store.push({
       data: {
