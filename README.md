@@ -30,7 +30,7 @@ When using ember-data 4.12, you must add the following entry to your app's depre
 self.deprecationWorkflow = self.deprecationWorkflow || {};
 self.deprecationWorkflow.config = {
   workflow: [
-    { handler: 'silence', matchId: 'ember-data:deprecate-model-reopenclass' },
+    { handler: "silence", matchId: "ember-data:deprecate-model-reopenclass" },
   ],
 };
 ```
