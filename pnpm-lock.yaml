@@ -28,7 +28,7 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0(@babel/core@7.27.4)
       ember-compatibility-helpers:
-        specifier: ^1.2.1
+        specifier: ^1.2.7
         version: 1.2.7(@babel/core@7.27.4)
       ember-template-imports:
         specifier: ^4.3.0

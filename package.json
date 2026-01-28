@@ -46,7 +46,7 @@
     "broccoli-merge-trees": "^3.0.0",
     "calculate-cache-key-for-tree": "^1.1.0",
     "ember-cli-babel": "^8.2.0",
-    "ember-compatibility-helpers": "^1.2.1",
+    "ember-compatibility-helpers": "^1.2.7",
     "ember-template-imports": "^4.3.0",
     "git-repo-info": "^2.1.1",
     "npm-git-info": "^1.0.3"

@@ -100,14 +100,17 @@ const Fragment = Model.extend(Ember.Comparable, {
   copy() {
     const type = this.constructor;
     const props = Object.create(null);
+    const modelName = type.modelName || this._internalModel.modelName;
+
+    // Look up model via store to avoid schema access deprecation in ember-data 4.12+
+    const modelClass = this.store.modelFor(modelName);
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
-    type.eachAttribute((name) => {
+    modelClass.eachAttribute((name) => {
       props[name] = copy(get(this, name));
     });
 
-    const modelName = type.modelName || this._internalModel.modelName;
     return this.store.createFragment(modelName, props);
   },
 
@@ -175,7 +178,9 @@ export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
   );
 
   // Notify any observers of `fragmentOwner` properties
-  fragment.constructor.fragmentOwnerProperties.forEach((name) => {
+  // Look up model via store to avoid schema access deprecation in ember-data 4.12+
+  const modelClass = fragment.store.modelFor(fragment.constructor.modelName);
+  modelClass.fragmentOwnerProperties.forEach((name) => {
     fragment.notifyPropertyChange(name);
   });
 
