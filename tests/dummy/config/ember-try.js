@@ -48,11 +48,29 @@ module.exports = async function () {
         },
       },
       {
+        name: 'ember-data-4.8',
+        npm: {
+          devDependencies: {
+            'ember-data': '~4.8.0',
+            '@ember-data/json-api': '~4.8.0',
+          },
+        },
+      },
+      {
         name: 'ember-data-4.12',
         npm: {
           devDependencies: {
             'ember-data': '~4.12.0',
             '@ember-data/json-api': '~4.12.0',
+          },
+        },
+      },
+      {
+        name: 'ember-data-4.13',
+        npm: {
+          devDependencies: {
+            'ember-data': '~4.13.0-alpha.9',
+            '@ember-data/json-api': '~4.13.0-alpha.9',
           },
         },
       },
