@@ -271,7 +271,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(fragment.isDestroying, 'the fragment is being destroyed');
   });
 
-  test('fragments unloaded/reload w/ relationship', function (assert) {
+  test('fragments unloaded/reload w/ relationship', async function (assert) {
     // Related to: https://github.com/lytics/ember-data-model-fragments/issues/261
 
     function isUnloaded(recordOrFragment) {
@@ -318,15 +318,11 @@ module('unit - `MF.Fragment`', function (hooks) {
     let zoo = pushZoo();
 
     // Prime the relationship and fragment
-    zoo.manager;
+    const manager = await zoo.manager;
     zoo.star;
 
     assert.equal(person.title, 'Zoo Manager', 'Person has the right title');
-    assert.equal(
-      zoo.manager.content,
-      person,
-      'Manager relationship was correctly loaded',
-    );
+    assert.equal(manager, person, 'Manager relationship was correctly loaded');
     assert.equal(
       zoo.star.name,
       'Sabu',
@@ -353,8 +349,9 @@ module('unit - `MF.Fragment`', function (hooks) {
     // Make sure the reloaded record is new and has the right data
     assert.notOk(isUnloaded(zoo), 'Zoo was unloaded');
     assert.notOk(isUnloaded(zoo.star), 'Fragment is now unloaded');
+    const reloadedManager = await zoo.manager;
     assert.equal(
-      zoo.manager.content,
+      reloadedManager,
       person,
       'Manager relationship was correctly loaded',
     );

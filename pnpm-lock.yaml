@@ -27,9 +27,6 @@ importers:
       ember-cli-babel:
         specifier: ^8.2.0
         version: 8.2.0(@babel/core@7.27.4)
-      ember-compatibility-helpers:
-        specifier: ^1.2.7
-        version: 1.2.7(@babel/core@7.27.4)
       ember-template-imports:
         specifier: ^4.3.0
         version: 4.3.0
@@ -52,6 +49,12 @@ importers:
       '@ember-data/json-api':
         specifier: ~4.13.0-alpha.9
         version: 4.13.0-alpha.9(@ember-data/graph@4.13.0-alpha.9(@ember-data/store@4.13.0-alpha.9(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/request@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@ember-data/tracking@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9))(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/store@4.13.0-alpha.9(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/request@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@ember-data/tracking@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9)
+      '@ember-data/model':
+        specifier: ~4.13.0-alpha.9
+        version: 4.13.0-alpha.9(28d7247ae793456ad31c1824cc98f4f3)
+      '@ember-data/store':
+        specifier: ~4.13.0-alpha.9
+        version: 4.13.0-alpha.9(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/request@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@ember-data/tracking@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9)
       '@ember/optional-features':
         specifier: ^2.2.0
         version: 2.2.0
@@ -1837,12 +1840,6 @@ packages:
       '@babel/core': ^7.12.0
       webpack: '>=5'
 
-  babel-plugin-debug-macros@0.2.0:
-    resolution: {integrity: sha512-Wpmw4TbhR3Eq2t3W51eBAQSdKlr+uAyF0GI4GtPfMCD12Y4cIdpKC9l0RjNTH/P9isFypSqqewMPm7//fnZlNA==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-beta.42
-
   babel-plugin-debug-macros@0.3.4:
     resolution: {integrity: sha512-wfel/vb3pXfwIDZUrkoDrn5FHmlWI96PCJ3UCDv2a86poJ3EQrnArNW5KfHSVJ9IOgxHbo748cQt7sDU+0KCEw==}
     engines: {node: '>=6'}
@@ -2906,10 +2903,6 @@ packages:
     resolution: {integrity: sha512-adcz01uGDrqBPniZrrYx6+tHe58ikc6j+cbX4+3aTG2OVJvQSL+LeisI6ixxtEZeklHRFB6FE6U1etTS6nRVfQ==}
     engines: {node: '>= 18'}
     hasBin: true
-
-  ember-compatibility-helpers@1.2.7:
-    resolution: {integrity: sha512-BtkjulweiXo9c3yVWrtexw2dTmBrvavD/xixNC6TKOBdrixUwU+6nuOO9dufDWsMxoid7MvtmDpzc9+mE8PdaA==}
-    engines: {node: 10.* || >= 12.*}
 
   ember-data@4.13.0-alpha.9:
     resolution: {integrity: sha512-3lAg1z3uvsGjui8om4Y9mQ+q3+YYxwZN/0BpCQSxSqrKPbWe3tMs3BOp93r/+Aeq55AJfflsfvWjl0KyouRVoA==}
@@ -8773,11 +8766,6 @@ snapshots:
       schema-utils: 4.3.2
       webpack: 5.99.9
 
-  babel-plugin-debug-macros@0.2.0(@babel/core@7.27.4):
-    dependencies:
-      '@babel/core': 7.27.4(supports-color@8.1.1)
-      semver: 5.7.2
-
   babel-plugin-debug-macros@0.3.4(@babel/core@7.27.4):
     dependencies:
       '@babel/core': 7.27.4(supports-color@8.1.1)
@@ -10248,17 +10236,6 @@ snapshots:
       - velocityjs
       - walrus
       - whiskers
-
-  ember-compatibility-helpers@1.2.7(@babel/core@7.27.4):
-    dependencies:
-      babel-plugin-debug-macros: 0.2.0(@babel/core@7.27.4)
-      ember-cli-version-checker: 5.1.2
-      find-up: 5.0.0
-      fs-extra: 9.1.0
-      semver: 5.7.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
 
   ember-data@4.13.0-alpha.9(@ember/string@3.1.1)(@ember/test-helpers@5.2.2(@babel/core@7.27.4))(@ember/test-waiters@3.1.0)(ember-inflector@6.0.0(@babel/core@7.27.4))(qunit@2.24.1):
     dependencies:

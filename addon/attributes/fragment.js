@@ -60,7 +60,9 @@ export default function fragment(type, options) {
     options,
   };
 
-  return computed('store.{_instanceCache,cache}', {
+  // Use computed with a dependency on hasDirtyAttributes which changes on rollback
+  // This ensures the computed property is re-evaluated when dirty state changes
+  const cp = computed('hasDirtyAttributes', 'currentState', {
     get(key) {
       const identifier = recordIdentifierFor(this);
       const cache = this.store.cache;
@@ -109,4 +111,6 @@ export default function fragment(type, options) {
       return fragment;
     },
   }).meta(meta);
+
+  return cp;
 }

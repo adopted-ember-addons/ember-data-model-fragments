@@ -2,6 +2,7 @@ import { isEmpty } from '@ember/utils';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import JSONSerializer from '@ember-data/serializer/json';
+import FragmentSerializer from 'ember-data-model-fragments/serializer';
 import Person from 'dummy/models/person';
 import { fragmentArray, array } from 'ember-data-model-fragments/attributes';
 import Pretender from 'pretender';
@@ -49,31 +50,26 @@ module('unit - Serialization', function (hooks) {
 
   test('fragment properties are snapshotted as normal attributes on the owner record snapshot', async function (assert) {
     assert.expect(7);
-    const person = {
-      name: {
-        first: 'Catelyn',
-        last: 'Stark',
-      },
-      houses: [
-        {
-          name: 'Tully',
-          region: 'Riverlands',
-          exiled: true,
-        },
-        {
-          name: 'Stark',
-          region: 'North',
-          exiled: true,
-        },
-      ],
-      children: ['Robb', 'Sansa', 'Arya', 'Brandon', 'Rickon'],
-    };
+    // Store expected values before pushing - store.push may mutate the source object
+    const expectedName = { first: 'Catelyn', last: 'Stark' };
+    const expectedHouses = [
+      { name: 'Tully', region: 'Riverlands', exiled: true },
+      { name: 'Stark', region: 'North', exiled: true },
+    ];
+    const expectedChildren = ['Robb', 'Sansa', 'Arya', 'Brandon', 'Rickon'];
 
     store.push({
       data: {
         type: 'person',
         id: 1,
-        attributes: person,
+        attributes: {
+          name: { first: 'Catelyn', last: 'Stark' },
+          houses: [
+            { name: 'Tully', region: 'Riverlands', exiled: true },
+            { name: 'Stark', region: 'North', exiled: true },
+          ],
+          children: ['Robb', 'Sansa', 'Arya', 'Brandon', 'Rickon'],
+        },
       },
     });
 
@@ -87,7 +83,7 @@ module('unit - Serialization', function (hooks) {
 
         assert.equal(
           name.attr('first'),
-          person.name.first,
+          expectedName.first,
           'fragment attributes are snapshoted correctly',
         );
 
@@ -102,7 +98,7 @@ module('unit - Serialization', function (hooks) {
         );
         assert.equal(
           houses[0].attr('name'),
-          person.houses[0].name,
+          expectedHouses[0].name,
           'fragment array attributes are snapshotted correctly',
         );
 
@@ -110,7 +106,7 @@ module('unit - Serialization', function (hooks) {
         assert.ok(Array.isArray(children), 'array attribute is an array');
         assert.deepEqual(
           children,
-          person.children,
+          expectedChildren,
           'array attribute is snapshotted correctly',
         );
       }
@@ -181,7 +177,8 @@ module('unit - Serialization', function (hooks) {
       },
     });
 
-    owner.register('serializer:name', JSONSerializer);
+    // Use FragmentSerializer to ensure proper fragment transform handling
+    owner.register('serializer:name', FragmentSerializer);
 
     const person = await store.findRecord('person', 1);
     const serialized = person.serialize();

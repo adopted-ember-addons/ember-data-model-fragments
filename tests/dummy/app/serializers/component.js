@@ -1,6 +1,7 @@
 import JSONAPISerializer from '@ember-data/serializer/json-api';
+import { FragmentSerializerMixin } from 'ember-data-model-fragments/serializer';
 
-export default class extends JSONAPISerializer {
+export default class extends JSONAPISerializer.extend(FragmentSerializerMixin) {
   serialize(snapshot, ...args) {
     const data = super.serialize(snapshot, ...args);
     const { record } = snapshot;
