@@ -5,7 +5,6 @@ import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
 import Lion from 'dummy/models/lion';
 import Elephant from 'dummy/models/elephant';
-import { gte } from 'ember-compatibility-helpers';
 
 let store;
 
@@ -272,7 +271,7 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(fragment.isDestroying, 'the fragment is being destroyed');
   });
 
-  test('fragments unloaded/reload w/ relationship', function (assert) {
+  test('fragments unloaded/reload w/ relationship', async function (assert) {
     // Related to: https://github.com/lytics/ember-data-model-fragments/issues/261
 
     function isUnloaded(recordOrFragment) {
@@ -319,15 +318,11 @@ module('unit - `MF.Fragment`', function (hooks) {
     let zoo = pushZoo();
 
     // Prime the relationship and fragment
-    zoo.manager;
+    const manager = await zoo.manager;
     zoo.star;
 
     assert.equal(person.title, 'Zoo Manager', 'Person has the right title');
-    assert.equal(
-      zoo.manager.content,
-      person,
-      'Manager relationship was correctly loaded',
-    );
+    assert.equal(manager, person, 'Manager relationship was correctly loaded');
     assert.equal(
       zoo.star.name,
       'Sabu',
@@ -354,8 +349,9 @@ module('unit - `MF.Fragment`', function (hooks) {
     // Make sure the reloaded record is new and has the right data
     assert.notOk(isUnloaded(zoo), 'Zoo was unloaded');
     assert.notOk(isUnloaded(zoo.star), 'Fragment is now unloaded');
+    const reloadedManager = await zoo.manager;
     assert.equal(
-      zoo.manager.content,
+      reloadedManager,
       person,
       'Manager relationship was correctly loaded',
     );
@@ -371,34 +367,6 @@ module('unit - `MF.Fragment`', function (hooks) {
     );
     assert.ok(zoo.star !== origZoo.star, 'Fragments were not reused');
   });
-
-  if (!gte('ember-data', '4.4.0')) {
-    // lifecycle events were deprecated in ember-data 3.12 and removed in 4.4
-    // https://deprecations.emberjs.com/ember-data/v3.x/#toc_record-lifecycle-event-methods
-    // https://github.com/emberjs/data/pull/7970
-
-    test('fragments call ready callback when they are created', function (assert) {
-      const name = store.createFragment('name');
-      assert.ok(
-        name.readyWasCalled,
-        'when making fragment directly with store.createFragment',
-      );
-
-      const person = store.createRecord('person', {
-        name: { first: 'dan' },
-        names: [{ first: 'eric' }],
-      });
-
-      assert.ok(
-        person.name.readyWasCalled,
-        'when creating model that has fragment',
-      );
-      assert.ok(
-        person.names.isEvery('readyWasCalled'),
-        'when creating model that has fragmentArray',
-      );
-    });
-  }
 
   test('can be created with null', async function (assert) {
     const person = store.push({

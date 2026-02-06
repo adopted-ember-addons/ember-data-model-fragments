@@ -1,3 +1,4 @@
+import { assert } from '@ember/debug';
 import JSONAPICache from '@ember-data/json-api';
 import FragmentStateManager from './fragment-state-manager';
 import FragmentRecordDataProxy from './fragment-record-data-proxy';
@@ -17,10 +18,38 @@ export default class FragmentCache {
     this.__innerCache = new JSONAPICache(storeWrapper);
     this.__fragmentState = new FragmentStateManager(storeWrapper);
     this.__recordDataProxies = new Map();
+    this.__storeValidated = false;
   }
 
   get store() {
     return this.__storeWrapper._store;
+  }
+
+  /**
+   * Validates that the store service extends FragmentStore
+   * This validation is lazy - only checked when fragment functionality is first needed
+   */
+  _validateStore() {
+    if (this.__storeValidated) {
+      return;
+    }
+    this.__storeValidated = true;
+
+    const store = this.store;
+
+    // Check if the store has the required fragment methods
+    const hasFragmentMethods =
+      typeof store.createFragment === 'function' &&
+      typeof store.isFragment === 'function';
+
+    assert(
+      `ember-data-model-fragments requires your store service to extend FragmentStore.\n\n` +
+        `Create app/services/store.js with the following:\n\n` +
+        `import FragmentStore from 'ember-data-model-fragments/store';\n` +
+        `export default class extends FragmentStore {}\n\n` +
+        `See the ember-data-model-fragments documentation for more information.`,
+      hasFragmentMethods,
+    );
   }
 
   /**
@@ -41,6 +70,7 @@ export default class FragmentCache {
   // ==================
 
   getFragment(identifier, key) {
+    this._validateStore();
     return this.__fragmentState.getFragment(identifier, key);
   }
 
@@ -109,10 +139,136 @@ export default class FragmentCache {
   // ==================
 
   /**
-   * Cache the response to a request
+   * Cache the response to a request.
+   *
+   * In ember-data 4.13+, this is the primary entry point for caching data.
+   * We intercept to extract fragment attributes before passing to the inner cache.
+   *
+   * The document structure is:
+   * {
+   *   request: {...},
+   *   response: {...},
+   *   content: {
+   *     data: { type, id, attributes, relationships } | [...],
+   *     included: [...],
+   *     meta: {...}
+   *   }
+   * }
    */
   put(doc) {
-    return this.__innerCache.put(doc);
+    // Normalize id to string to ensure consistent comparison
+    if (doc?.content?.data) {
+      if (Array.isArray(doc.content.data)) {
+        doc.content.data.forEach((resource) => {
+          if (resource.id != null && typeof resource.id !== 'string') {
+            resource.id = String(resource.id);
+          }
+        });
+      } else if (
+        doc.content.data.id != null &&
+        typeof doc.content.data.id !== 'string'
+      ) {
+        doc.content.data.id = String(doc.content.data.id);
+      }
+    }
+
+    // NEW APPROACH: Store fragment data separately, push to inner cache first, then process fragments
+    // This is needed because polymorphic fragment type resolution may require accessing owner attributes,
+    // which requires the owner record to exist in the cache first.
+
+    // Step 1: Extract fragment data from resources WITHOUT creating fragment identifiers
+    const fragmentDataByIdentifier = new Map();
+    if (doc && doc.content && doc.content.data) {
+      this._collectFragmentsFromDocument(doc.content, fragmentDataByIdentifier);
+    }
+
+    // Step 2: Push to inner cache (this creates the owner records)
+    const result = this.__innerCache.put(doc);
+
+    // Step 3: Now that owner records exist, push fragment data to create fragment identifiers
+    for (const [identifier, data] of fragmentDataByIdentifier) {
+      this.__fragmentState.pushFragmentData(identifier, data, false);
+    }
+
+    return result;
+  }
+
+  /**
+   * Collect fragment attributes from a JSON:API document WITHOUT creating fragment identifiers.
+   * This just stores the raw fragment data and removes fragment attributes from resources.
+   * Fragment identifiers will be created later after owner records are in the cache.
+   *
+   * @private
+   */
+  _collectFragmentsFromDocument(jsonApiDoc, fragmentDataByIdentifier) {
+    const { data, included } = jsonApiDoc;
+
+    // Handle single resource
+    if (data && !Array.isArray(data)) {
+      this._collectFragmentsFromResource(data, fragmentDataByIdentifier);
+    }
+
+    // Handle array of resources
+    if (Array.isArray(data)) {
+      for (const resource of data) {
+        this._collectFragmentsFromResource(resource, fragmentDataByIdentifier);
+      }
+    }
+
+    // Handle included resources
+    if (included) {
+      for (const resource of included) {
+        this._collectFragmentsFromResource(resource, fragmentDataByIdentifier);
+      }
+    }
+  }
+
+  /**
+   * Collect fragment attributes from a single resource WITHOUT creating fragment identifiers.
+   *
+   * @private
+   */
+  _collectFragmentsFromResource(resource, fragmentDataByIdentifier) {
+    if (!resource || !resource.attributes || !resource.type) {
+      return;
+    }
+
+    // Get or create identifier for this resource
+    const identifier =
+      this.__storeWrapper.identifierCache.getOrCreateRecordIdentifier({
+        type: resource.type,
+        id: resource.id,
+      });
+
+    const definitions = this.__storeWrapper
+      .getSchemaDefinitionService()
+      .attributesDefinitionFor(identifier);
+
+    const fragmentData = {};
+    const fragmentKeys = [];
+
+    for (const [key, definition] of Object.entries(definitions)) {
+      const isFragment =
+        definition.isFragment || definition.options?.isFragment;
+
+      if (isFragment && resource.attributes[key] !== undefined) {
+        fragmentData[key] = resource.attributes[key];
+        fragmentKeys.push(key);
+      }
+    }
+
+    // Store fragment data for later processing (AFTER inner cache put)
+    if (fragmentKeys.length > 0) {
+      fragmentDataByIdentifier.set(identifier, { attributes: fragmentData });
+
+      // Clone attributes and remove fragment keys to avoid mutating original data
+      // This is necessary because resource.attributes may reference user-provided data
+      const cleanedAttributes = { ...resource.attributes };
+      for (const key of fragmentKeys) {
+        delete cleanedAttributes[key];
+      }
+      resource.attributes = cleanedAttributes;
+    }
   }
 
   /**
@@ -146,8 +302,13 @@ export default class FragmentCache {
   /**
    * Push resource data from a remote source into the cache.
    * Intercepts to handle fragment attributes.
+   *
+   * In ember-data 4.13+, the signature is:
+   *   upsert(identifier, resource, hasRecord) where resource is the JSON:API resource object
+   * In ember-data 4.12, the signature was:
+   *   upsert(identifier, data, calculateChanges) where data = { attributes: {...} }
    */
-  upsert(identifier, data, calculateChanges) {
+  upsert(identifier, data, hasRecordOrCalculateChanges) {
     // Normalize the id to string to match identifier.id (which is always coerced to string)
     // This ensures cached.id matches identifier.id type when didCommit compares them
     if (data.id != null && typeof data.id !== 'string') {
@@ -164,7 +325,9 @@ export default class FragmentCache {
         .attributesDefinitionFor(identifier);
 
       for (const [key, definition] of Object.entries(definitions)) {
-        if (definition.isFragment && data.attributes[key] !== undefined) {
+        const isFragment =
+          definition.isFragment || definition.options?.isFragment;
+        if (isFragment && data.attributes[key] !== undefined) {
           fragmentData[key] = data.attributes[key];
           fragmentAttributeKeys.push(key);
         }
@@ -187,7 +350,7 @@ export default class FragmentCache {
     const changedKeys = this.__innerCache.upsert(
       identifier,
       data,
-      calculateChanges,
+      hasRecordOrCalculateChanges,
     );
 
     // Handle fragment attributes
@@ -195,9 +358,9 @@ export default class FragmentCache {
       const changedFragmentKeys = this.__fragmentState.pushFragmentData(
         identifier,
         { attributes: fragmentData },
-        calculateChanges,
+        hasRecordOrCalculateChanges,
       );
-      if (calculateChanges && changedFragmentKeys?.length) {
+      if (hasRecordOrCalculateChanges && changedFragmentKeys?.length) {
         return [...(changedKeys || []), ...changedFragmentKeys];
       }
     }
@@ -209,6 +372,48 @@ export default class FragmentCache {
    * Signal to the cache that a new record has been instantiated on the client
    */
   clientDidCreate(identifier, options) {
+    // Extract fragment attributes from options before passing to inner cache
+    if (options) {
+      const definitions = this.__storeWrapper
+        .getSchemaDefinitionService()
+        .attributesDefinitionFor(identifier);
+
+      const fragmentData = {};
+      const regularOptions = {};
+      let hasFragmentData = false;
+
+      for (const [key, value] of Object.entries(options)) {
+        const definition = definitions[key];
+        const isFragmentAttr =
+          definition?.isFragment || definition?.options?.isFragment;
+
+        if (isFragmentAttr && value !== undefined) {
+          fragmentData[key] = value;
+          hasFragmentData = true;
+        } else {
+          regularOptions[key] = value;
+        }
+      }
+
+      // IMPORTANT: Create the inner cache entry first, so the owner's attributes
+      // are available when fragment typeKey functions try to access them
+      const result = this.__innerCache.clientDidCreate(
+        identifier,
+        regularOptions,
+      );
+
+      // Push fragment data to our fragment state manager AFTER the cache entry exists
+      if (hasFragmentData) {
+        this.__fragmentState.pushFragmentData(
+          identifier,
+          { attributes: fragmentData },
+          false,
+        );
+      }
+
+      return result;
+    }
+
     return this.__innerCache.clientDidCreate(identifier, options);
   }
 
@@ -263,7 +468,9 @@ export default class FragmentCache {
       fragmentData = { attributes: {} };
 
       for (const [key, definition] of Object.entries(definitions)) {
-        if (definition.isFragment && attributes[key] !== undefined) {
+        const isFragment =
+          definition.isFragment || definition.options?.isFragment;
+        if (isFragment && attributes[key] !== undefined) {
           fragmentData.attributes[key] = attributes[key];
         }
       }
@@ -315,7 +522,13 @@ export default class FragmentCache {
       .attributesDefinitionFor(identifier);
     const definition = definitions[attr];
 
-    if (definition?.isFragment) {
+    // Check for fragment attribute - support both metadata formats:
+    // - Direct: definition.isFragment (ember-data 4.12 or original metadata)
+    // - Transformed: definition.options?.isFragment (from FragmentSchemaService in 4.13)
+    const isFragmentAttr =
+      definition?.isFragment || definition?.options?.isFragment;
+
+    if (isFragmentAttr) {
       // Fragment attributes are handled by fragment state manager
       // getFragment returns identifier(s), we need to convert to Fragment instance(s)
       const fragmentValue = this.__fragmentState.getFragment(identifier, attr);
@@ -324,29 +537,45 @@ export default class FragmentCache {
         return fragmentValue;
       }
 
+      // Get the fragment kind from the appropriate location:
+      // - Direct: definition.kind (original metadata)
+      // - Transformed: definition.options?.fragmentKind (from FragmentSchemaService)
+      const fragmentKind = definition.options?.fragmentKind || definition.kind;
+
       // For single fragments, convert identifier to Fragment instance
-      if (definition.kind === 'fragment') {
+      if (fragmentKind === 'fragment') {
         if (fragmentValue.lid) {
           // It's an identifier, get the record instance
-          return this.store._instanceCache.getRecord(fragmentValue);
+          const record = this.store._instanceCache.getRecord(fragmentValue);
+          return record;
         }
         return fragmentValue;
       }
 
-      // For fragment arrays, convert array of identifiers to Fragment instances
-      if (
-        definition.kind === 'fragment-array' &&
-        Array.isArray(fragmentValue)
-      ) {
-        return fragmentValue.map((item) => {
-          if (item?.lid) {
-            return this.store._instanceCache.getRecord(item);
-          }
-          return item;
-        });
+      // For fragment arrays and primitive arrays, return the wrapper object
+      // This is needed for Snapshot._attributes which expects objects with _createSnapshot
+      if (fragmentKind === 'fragment-array' || fragmentKind === 'array') {
+        // Get the cached wrapper if it exists
+        let arrayWrapper = this.getFragmentArrayCache(identifier, attr);
+        if (arrayWrapper) {
+          return arrayWrapper;
+        }
+        // If no wrapper exists yet, convert identifiers to Fragment instances
+        // so ext.js patch can call _createSnapshot on each fragment
+        if (fragmentKind === 'fragment-array' && Array.isArray(fragmentValue)) {
+          const fragments = fragmentValue.map((item) => {
+            if (item?.lid) {
+              return this.store._instanceCache.getRecord(item);
+            }
+            return item;
+          });
+          return fragments;
+        }
+        // For primitive arrays, return as-is
+        return fragmentValue;
       }
 
-      // For primitive arrays, return as-is
+      // For single fragment type that fell through, return as-is
       return fragmentValue;
     }
 
@@ -362,7 +591,10 @@ export default class FragmentCache {
       .attributesDefinitionFor(identifier);
     const definition = definitions[attr];
 
-    if (definition?.isFragment) {
+    const isFragmentAttr =
+      definition?.isFragment || definition?.options?.isFragment;
+
+    if (isFragmentAttr) {
       return this.__fragmentState.setDirtyFragment(identifier, attr, value);
     }
 

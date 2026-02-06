@@ -2,9 +2,7 @@ import { schedule } from '@ember/runloop';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Name from 'dummy/models/name';
-import JSONAPISerializer from '@ember-data/serializer/json-api';
 import JSONSerializer from '@ember-data/serializer/json';
-import { gte } from 'ember-compatibility-helpers';
 
 let store, owner;
 
@@ -39,46 +37,16 @@ module('unit - `DS.Store`', function (hooks) {
     assert.notOk(store.isFragment('person', 'a model should return false'));
   });
 
-  test('the default fragment serializer does not use the application serializer', function (assert) {
-    class ApplicationSerializer extends JSONAPISerializer {}
-    owner.register('serializer:application', ApplicationSerializer);
+  test('fragments use the application serializer as fallback', function (assert) {
+    // The dummy app's application serializer is FragmentRESTSerializer
+    // Fragments without specific serializers should use the application serializer
+    const fragmentSerializer = store.serializerFor('name');
+    const applicationSerializer = store.serializerFor('application');
 
-    assert.ok(
-      !(store.serializerFor('name') instanceof ApplicationSerializer),
-      'fragment serializer fallback is not `JSONAPISerializer`',
-    );
-    assert.ok(
-      store.serializerFor('name') instanceof JSONSerializer,
-      'fragment serializer fallback is correct',
-    );
-  });
-
-  if (!gte('ember-data', '4.4.0')) {
-    // default adapter was deprecated in ember-data 3.15 and removed in 4.4
-    // https://deprecations.emberjs.com/ember-data/v3.x/#toc_ember-data-default-adapter
-    // https://github.com/emberjs/data/pull/7861
-
-    test("the default fragment serializer does not use the adapter's `defaultSerializer`", function (assert) {
-      store.set('defaultAdapter.defaultSerializer', '-json-api');
-
-      assert.ok(
-        !(store.serializerFor('name') instanceof JSONAPISerializer),
-        'fragment serializer fallback is not `JSONAPISerializer`',
-      );
-      assert.ok(
-        store.serializerFor('name') instanceof JSONSerializer,
-        'fragment serializer fallback is correct',
-      );
-    });
-  }
-
-  test('the default fragment serializer is `serializer:-fragment` if registered', function (assert) {
-    class FragmentSerializer extends JSONSerializer {}
-    owner.register('serializer:-fragment', FragmentSerializer);
-
-    assert.ok(
-      store.serializerFor('name') instanceof FragmentSerializer,
-      'fragment serializer fallback is correct',
+    assert.strictEqual(
+      fragmentSerializer,
+      applicationSerializer,
+      'fragment serializer falls back to application serializer',
     );
   });
 

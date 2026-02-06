@@ -60,53 +60,63 @@ export default function fragment(type, options) {
     options,
   };
 
-  return computed('store.{_instanceCache,cache}', {
-    get(key) {
-      const identifier = recordIdentifierFor(this);
-      const cache = this.store.cache;
-      const fragmentIdentifier = cache.getFragment(identifier, key);
-      if (fragmentIdentifier === null) {
-        return null;
-      }
-      // Get the fragment record from the identifier
-      return this.store._instanceCache.getRecord(fragmentIdentifier);
-    },
-    set(key, value) {
-      assert(
-        'You must pass a fragment or null to set a fragment',
-        value === null || isFragment(value) || typeOf(value) === 'object',
-      );
-      const identifier = recordIdentifierFor(this);
-      const cache = this.store.cache;
-      if (value === null) {
-        cache.setDirtyFragment(identifier, key, null);
-        return null;
-      }
-      if (isFragment(value)) {
+  // Use computed with a dependency on hasDirtyAttributes which changes on rollback
+  // This ensures the computed property is re-evaluated when dirty state changes
+  const cp = computed(
+    'currentState',
+    'hasDirtyAttributes',
+    'store.{_instanceCache,cache}',
+    {
+      get(key) {
+        const identifier = recordIdentifierFor(this);
+        const cache = this.store.cache;
+        const fragmentIdentifier = cache.getFragment(identifier, key);
+        if (fragmentIdentifier === null) {
+          return null;
+        }
+        // Get the fragment record from the identifier
+        return this.store._instanceCache.getRecord(fragmentIdentifier);
+      },
+      set(key, value) {
         assert(
-          `You can only set '${type}' fragments to this property`,
-          isInstanceOfType(this.store.modelFor(type), value),
+          'You must pass a fragment or null to set a fragment',
+          value === null || isFragment(value) || typeOf(value) === 'object',
         );
-        const fragmentIdentifier = recordIdentifierFor(value);
-        setFragmentOwner(value, identifier, key);
-        cache.setDirtyFragment(identifier, key, fragmentIdentifier);
-        return value;
-      }
-      // Value is a plain object - update existing fragment or create new one
-      const fragmentIdentifier = cache.getFragment(identifier, key);
-      const actualType = getActualFragmentType(type, options, value, this);
-      if (fragmentIdentifier?.type !== actualType) {
-        // Create a new fragment
-        const fragment = this.store.createFragment(actualType, value);
-        const newFragmentIdentifier = recordIdentifierFor(fragment);
-        setFragmentOwner(fragment, identifier, key);
-        cache.setDirtyFragment(identifier, key, newFragmentIdentifier);
+        const identifier = recordIdentifierFor(this);
+        const cache = this.store.cache;
+        if (value === null) {
+          cache.setDirtyFragment(identifier, key, null);
+          return null;
+        }
+        if (isFragment(value)) {
+          assert(
+            `You can only set '${type}' fragments to this property`,
+            isInstanceOfType(this.store.modelFor(type), value),
+          );
+          const fragmentIdentifier = recordIdentifierFor(value);
+          setFragmentOwner(value, identifier, key);
+          cache.setDirtyFragment(identifier, key, fragmentIdentifier);
+          return value;
+        }
+        // Value is a plain object - update existing fragment or create new one
+        const fragmentIdentifier = cache.getFragment(identifier, key);
+        const actualType = getActualFragmentType(type, options, value, this);
+        if (fragmentIdentifier?.type !== actualType) {
+          // Create a new fragment
+          const fragment = this.store.createFragment(actualType, value);
+          const newFragmentIdentifier = recordIdentifierFor(fragment);
+          setFragmentOwner(fragment, identifier, key);
+          cache.setDirtyFragment(identifier, key, newFragmentIdentifier);
+          return fragment;
+        }
+        // Update existing fragment
+        const fragment =
+          this.store._instanceCache.getRecord(fragmentIdentifier);
+        fragment.setProperties(value);
         return fragment;
-      }
-      // Update existing fragment
-      const fragment = this.store._instanceCache.getRecord(fragmentIdentifier);
-      fragment.setProperties(value);
-      return fragment;
+      },
     },
-  }).meta(meta);
+  ).meta(meta);
+
+  return cp;
 }

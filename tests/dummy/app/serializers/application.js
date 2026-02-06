@@ -1,3 +1,3 @@
-import RESTSerializer from '@ember-data/serializer/rest';
+import { FragmentRESTSerializer } from 'ember-data-model-fragments/serializer';
 
-export default class ApplicationSerializer extends RESTSerializer {}
+export default class ApplicationSerializer extends FragmentRESTSerializer {}
