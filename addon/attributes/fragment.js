@@ -60,8 +60,9 @@ export default function fragment(type, options) {
     options,
   };
 
-  // eslint-disable-next-line ember/require-computed-property-dependencies -- isDestroying/isDestroyed are guards, not dependencies
-  return computed('store.{_instanceCache,cache}', {
+  // Use computed with a dependency on hasDirtyAttributes which changes on rollback
+  // This ensures the computed property is re-evaluated when dirty state changes
+  const cp = computed('hasDirtyAttributes', 'currentState', {
     get(key) {
       if (this.isDestroying || this.isDestroyed) {
         return null;
@@ -113,4 +114,6 @@ export default function fragment(type, options) {
       return fragment;
     },
   }).meta(meta);
+
+  return cp;
 }

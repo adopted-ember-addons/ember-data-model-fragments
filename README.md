@@ -21,20 +21,6 @@ Use the following table to decide which version of this project to use with your
 | >= v3.28.x < v4.7.x  | v6.0.x          | 14+     |
 | v4.12.x              | v7.x            | 18+     |
 
-### Upgrading to ember-data 4.12
-
-When using ember-data 4.12, you must add the following entry to your app's deprecation workflow to allow the app to boot. This addon uses `reopenClass` internally, which ember-data 4.12 deprecates:
-
-```javascript
-// config/deprecation-workflow.js
-self.deprecationWorkflow = self.deprecationWorkflow || {};
-self.deprecationWorkflow.config = {
-  workflow: [
-    { handler: "silence", matchId: "ember-data:deprecate-model-reopenclass" },
-  ],
-};
-```
-
 ## Installation
 
 To install as an Ember CLI addon:
@@ -50,6 +36,36 @@ $ ember generate fragment foo someAttr:string anotherAttr:boolean
 ```
 
 Which will create the module `app/models/foo.js` which exports a `Fragment` class with the given attributes.
+
+## Setup
+
+This addon requires you to extend the provided `FragmentStore` and a fragment-aware serializer in your application.
+
+### Store
+
+Create or update your application's store service to extend `FragmentStore`:
+
+```javascript
+// app/services/store.js
+
+import FragmentStore from "ember-data-model-fragments/store";
+
+export default class Store extends FragmentStore {}
+```
+
+### Serializer
+
+Create or update your application serializer to extend one of the fragment-aware serializers:
+
+```javascript
+// app/serializers/application.js
+
+import FragmentSerializer from "ember-data-model-fragments/serializer";
+
+export default class ApplicationSerializer extends FragmentSerializer {}
+```
+
+See the [Serialization](#serialization) section for more options if you're using `RESTSerializer` or `JSONAPISerializer`.
 
 ## Example
 
@@ -297,31 +313,39 @@ export default class NameSerializer extends JSONSerializer {
 }
 ```
 
-Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used with fragments. Because of this, auto-generated fragment serializers **do not use the application serializer** and instead use `JSONSerializer`.
+Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used directly with fragments.
 
-If common logic must be added to auto-generated fragment serializers, apps can register a custom `serializer:-fragment` with the application in an initializer.
+Your application serializer should extend one of the fragment-aware serializers provided by this addon:
 
 ```javascript
-// app/serializers/fragment.js
+// app/serializers/application.js
 
-import JSONSerializer from "@ember-data/serializer/json";
+import FragmentSerializer from "ember-data-model-fragments/serializer";
 
-export default class FragmentSerializer extends JSONSerializer {}
+export default class ApplicationSerializer extends FragmentSerializer {}
 ```
 
+If you're using `RESTSerializer`, use `FragmentRESTSerializer` instead:
+
 ```javascript
-// app/initializers/fragment-serializer.js
+// app/serializers/application.js
 
-import FragmentSerializer from "../serializers/fragment";
+import { FragmentRESTSerializer } from "ember-data-model-fragments/serializer";
 
-export function initialize(application) {
-  application.register("serializer:-fragment", FragmentSerializer);
-}
+export default class ApplicationSerializer extends FragmentRESTSerializer {}
+```
 
-export default {
-  name: "fragment-serializer",
-  initialize: initialize,
-};
+If you're using `JSONAPISerializer` or another serializer, use the `FragmentSerializerMixin`:
+
+```javascript
+// app/serializers/application.js
+
+import JSONAPISerializer from "@ember-data/serializer/json-api";
+import { FragmentSerializerMixin } from "ember-data-model-fragments/serializer";
+
+export default class ApplicationSerializer extends JSONAPISerializer.extend(
+  FragmentSerializerMixin,
+) {}
 ```
 
 If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.Snapshot.html) can be accessed using the [`Snapshot#attr`](http://emberjs.com/api/data/classes/DS.Snapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
