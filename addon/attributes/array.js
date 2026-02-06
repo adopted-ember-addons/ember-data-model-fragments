@@ -1,7 +1,7 @@
 import { computed } from '@ember/object';
 import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
-import { recordDataFor } from '@ember-data/store/-private';
+import { recordIdentifierFor } from '@ember-data/store';
 import metaTypeFor from '../util/meta-type-for';
 import StatefulArray from '../array/stateful';
 
@@ -55,18 +55,19 @@ export default function array(type, options) {
   // eslint-disable-next-line ember/require-computed-property-dependencies
   return computed({
     get(key) {
-      const recordData = recordDataFor(this);
-      if (recordData.getFragment(key) === null) {
+      const identifier = recordIdentifierFor(this);
+      const cache = this.store.cache;
+      if (cache.getFragment(identifier, key) === null) {
         return null;
       }
-      let array = recordData._fragmentArrayCache[key];
+      let array = cache.getFragmentArrayCache(identifier, key);
       if (!array) {
         array = StatefulArray.create({
           store: this.store,
-          recordData,
+          identifier,
           key,
         });
-        recordData._fragmentArrayCache[key] = array;
+        cache.setFragmentArrayCache(identifier, key, array);
       }
       return array;
     },
@@ -75,20 +76,21 @@ export default function array(type, options) {
         'You must pass an array or null to set an array',
         value === null || isArray(value),
       );
-      const recordData = recordDataFor(this);
+      const identifier = recordIdentifierFor(this);
+      const cache = this.store.cache;
       if (value === null) {
-        recordData.setDirtyFragment(key, null);
+        cache.setDirtyFragment(identifier, key, null);
         return null;
       }
-      recordData.setDirtyFragment(key, value.slice());
-      let array = recordData._fragmentArrayCache[key];
+      cache.setDirtyFragment(identifier, key, value.slice());
+      let array = cache.getFragmentArrayCache(identifier, key);
       if (!array) {
         array = StatefulArray.create({
           store: this.store,
-          recordData,
+          identifier,
           key,
         });
-        recordData._fragmentArrayCache[key] = array;
+        cache.setFragmentArrayCache(identifier, key, array);
       }
       array._setFragments(value);
       return array;

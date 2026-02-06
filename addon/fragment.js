@@ -3,11 +3,20 @@ import Ember from 'ember';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
 import { copy } from './util/copy';
-import { recordDataFor } from '@ember-data/store/-private';
+import { recordIdentifierFor } from '@ember-data/store';
 
 /**
   @module ember-data-model-fragments
 */
+
+/**
+ * Helper to get the FragmentRecordDataProxy for a fragment.
+ * This provides backwards compatibility with existing code.
+ */
+export function fragmentRecordDataFor(fragment) {
+  const identifier = recordIdentifierFor(fragment);
+  return fragment.store.cache.createFragmentRecordData(identifier);
+}
 
 /**
   The class that all nested object structures, or 'fragments', descend from.
@@ -91,20 +100,35 @@ const Fragment = Model.extend(Ember.Comparable, {
   copy() {
     const type = this.constructor;
     const props = Object.create(null);
+    const modelName = type.modelName || this._internalModel.modelName;
+
+    // Look up model via store to avoid schema access deprecation in ember-data 4.12+
+    const modelClass = this.store.modelFor(modelName);
 
     // Loop over each attribute and copy individually to ensure nested fragments
     // are also copied
-    type.eachAttribute((name) => {
+    modelClass.eachAttribute((name) => {
       props[name] = copy(get(this, name));
     });
 
-    const modelName = type.modelName || this._internalModel.modelName;
     return this.store.createFragment(modelName, props);
   },
 
   toStringExtension() {
-    const owner = recordDataFor(this).getFragmentOwner();
-    return owner ? `owner(${owner.id})` : '';
+    const identifier = recordIdentifierFor(this);
+    const owner = this.store.cache.getFragmentOwner(identifier);
+    return owner ? `owner(${owner.ownerIdentifier?.id})` : '';
+  },
+
+  /**
+    Override toString to include the toStringExtension output.
+    ember-data 4.12+ doesn't call toStringExtension in Model.toString().
+  */
+  toString() {
+    const identifier = recordIdentifierFor(this);
+    const extension = this.toStringExtension();
+    const extensionStr = extension ? `:${extension}` : '';
+    return `<${identifier.type}:${identifier.id}${extensionStr}>`;
   },
 }).reopenClass({
   fragmentOwnerProperties: computed(function () {
@@ -143,12 +167,20 @@ export function getActualFragmentType(declaredType, options, data, owner) {
 }
 
 // Sets the owner/key values on a fragment
-export function setFragmentOwner(fragment, record, key) {
-  const recordData = recordDataFor(fragment);
-  recordData.setFragmentOwner(record, key);
+export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
+  const fragmentIdentifier = recordIdentifierFor(fragment);
+  const ownerIdentifier =
+    ownerRecordDataOrIdentifier.identifier || ownerRecordDataOrIdentifier;
+  fragment.store.cache.setFragmentOwner(
+    fragmentIdentifier,
+    ownerIdentifier,
+    key,
+  );
 
   // Notify any observers of `fragmentOwner` properties
-  fragment.constructor.fragmentOwnerProperties.forEach((name) => {
+  // Look up model via store to avoid schema access deprecation in ember-data 4.12+
+  const modelClass = fragment.store.modelFor(fragment.constructor.modelName);
+  modelClass.fragmentOwnerProperties.forEach((name) => {
     fragment.notifyPropertyChange(name);
   });
 
@@ -160,5 +192,17 @@ export function setFragmentOwner(fragment, record, key) {
 export function isFragment(obj) {
   return obj instanceof Fragment;
 }
+
+// Override hasDirtyAttributes on Fragment prototype to directly query our cache.
+// This ensures we always get fresh dirty state even for fragments in fragment
+// arrays where ember-data's tracking might not invalidate properly.
+// We use Object.defineProperty to override the inherited getter from Model.
+Object.defineProperty(Fragment.prototype, 'hasDirtyAttributes', {
+  get() {
+    const identifier = recordIdentifierFor(this);
+    return this.store.cache.hasChangedAttrs(identifier);
+  },
+  configurable: true,
+});
 
 export default Fragment;

@@ -36,8 +36,17 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @type {DS.Model}
   */
   get owner() {
-    return this.recordData._fragmentGetRecord();
+    return this.store._instanceCache.getRecord(this.identifier);
   },
+
+  /**
+    The identifier of the owner record.
+
+    @property identifier
+    @private
+    @type {StableRecordIdentifier}
+  */
+  identifier: null,
 
   /**
     The array's property name on the owner record.
@@ -47,6 +56,25 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @type {String}
   */
   key: null,
+
+  /**
+    Reference to the store
+
+    @property store
+    @private
+    @type {Store}
+  */
+  store: null,
+
+  /**
+    Get the cache from the store
+
+    @property cache
+    @private
+  */
+  get cache() {
+    return this.store.cache;
+  },
 
   init() {
     this._super(...arguments);
@@ -107,11 +135,11 @@ const StatefulArray = EmberObject.extend(MutableArray, {
   },
 
   _getFragmentState() {
-    return this.recordData.getFragment(this.key);
+    return this.cache.getFragment(this.identifier, this.key);
   },
 
   _setFragmentState(array) {
-    this.recordData.setDirtyFragment(this.key, array);
+    this.cache.setDirtyFragment(this.identifier, this.key, array);
   },
 
   replace(start, deleteCount, items) {
@@ -141,7 +169,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
   },
 
   retrieveLatest() {
-    // It’s possible the parent side of the relationship may have been destroyed by this point
+    // It's possible the parent side of the relationship may have been destroyed by this point
     if (this.isDestroyed || this.isDestroying || this._isUpdating) {
       return;
     }
@@ -218,7 +246,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @readOnly
   */
   get hasDirtyAttributes() {
-    return this.recordData.isFragmentDirty(this.key);
+    return this.cache.isFragmentDirty(this.identifier, this.key);
   },
 
   /**
@@ -238,7 +266,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @method rollbackAttributes
   */
   rollbackAttributes() {
-    this.recordData.rollbackFragment(this.key);
+    this.cache.rollbackFragment(this.identifier, this.key);
   },
 
   /**

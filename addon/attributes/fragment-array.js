@@ -2,7 +2,7 @@ import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
-import { recordDataFor } from '@ember-data/store/-private';
+import { recordIdentifierFor } from '@ember-data/store';
 import { isFragment } from '../fragment';
 import metaTypeFor from '../util/meta-type-for';
 import FragmentArray from '../array/fragment';
@@ -64,19 +64,20 @@ export default function fragmentArray(type, options) {
   // eslint-disable-next-line ember/require-computed-property-dependencies
   return computed({
     get(key) {
-      const recordData = recordDataFor(this);
-      if (recordData.getFragment(key) === null) {
+      const identifier = recordIdentifierFor(this);
+      const cache = this.store.cache;
+      if (cache.getFragment(identifier, key) === null) {
         return null;
       }
-      let fragmentArray = recordData._fragmentArrayCache[key];
+      let fragmentArray = cache.getFragmentArrayCache(identifier, key);
       if (!fragmentArray) {
         fragmentArray = FragmentArray.create({
           modelName: type,
           store: this.store,
-          recordData,
+          identifier,
           key,
         });
-        recordData._fragmentArrayCache[key] = fragmentArray;
+        cache.setFragmentArrayCache(identifier, key, fragmentArray);
       }
       return fragmentArray;
     },
@@ -87,20 +88,21 @@ export default function fragmentArray(type, options) {
           (isArray(value) &&
             value.every((v) => isFragment(v) || typeOf(v) === 'object')),
       );
-      const recordData = recordDataFor(this);
+      const identifier = recordIdentifierFor(this);
+      const cache = this.store.cache;
       if (value === null) {
-        recordData.setDirtyFragment(key, null);
+        cache.setDirtyFragment(identifier, key, null);
         return null;
       }
-      let fragmentArray = recordData._fragmentArrayCache[key];
+      let fragmentArray = cache.getFragmentArrayCache(identifier, key);
       if (!fragmentArray) {
         fragmentArray = FragmentArray.create({
           modelName: type,
           store: this.store,
-          recordData,
+          identifier,
           key,
         });
-        recordData._fragmentArrayCache[key] = fragmentArray;
+        cache.setFragmentArrayCache(identifier, key, fragmentArray);
       }
       fragmentArray._setFragments(value);
       return fragmentArray;

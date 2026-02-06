@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
-import { recordDataFor } from '@ember-data/store/-private';
+import { recordIdentifierFor } from '@ember-data/store';
 import {
   getActualFragmentType,
   isFragment,
@@ -60,23 +60,26 @@ export default function fragment(type, options) {
     options,
   };
 
-  return computed({
+  return computed('store.{_instanceCache,cache}', {
     get(key) {
-      const recordData = recordDataFor(this);
-      const fragment = recordData.getFragment(key);
-      if (fragment === null) {
+      const identifier = recordIdentifierFor(this);
+      const cache = this.store.cache;
+      const fragmentIdentifier = cache.getFragment(identifier, key);
+      if (fragmentIdentifier === null) {
         return null;
       }
-      return fragment._fragmentGetRecord();
+      // Get the fragment record from the identifier
+      return this.store._instanceCache.getRecord(fragmentIdentifier);
     },
     set(key, value) {
       assert(
         'You must pass a fragment or null to set a fragment',
         value === null || isFragment(value) || typeOf(value) === 'object',
       );
-      const recordData = recordDataFor(this);
+      const identifier = recordIdentifierFor(this);
+      const cache = this.store.cache;
       if (value === null) {
-        recordData.setDirtyFragment(key, null);
+        cache.setDirtyFragment(identifier, key, null);
         return null;
       }
       if (isFragment(value)) {
@@ -84,19 +87,24 @@ export default function fragment(type, options) {
           `You can only set '${type}' fragments to this property`,
           isInstanceOfType(this.store.modelFor(type), value),
         );
-        setFragmentOwner(value, recordData, key);
-        recordData.setDirtyFragment(key, recordDataFor(value));
+        const fragmentIdentifier = recordIdentifierFor(value);
+        setFragmentOwner(value, identifier, key);
+        cache.setDirtyFragment(identifier, key, fragmentIdentifier);
         return value;
       }
-      const fragmentRecordData = recordData.getFragment(key);
+      // Value is a plain object - update existing fragment or create new one
+      const fragmentIdentifier = cache.getFragment(identifier, key);
       const actualType = getActualFragmentType(type, options, value, this);
-      if (fragmentRecordData?.modelName !== actualType) {
+      if (fragmentIdentifier?.type !== actualType) {
+        // Create a new fragment
         const fragment = this.store.createFragment(actualType, value);
-        setFragmentOwner(fragment, recordData, key);
-        recordData.setDirtyFragment(key, recordDataFor(fragment));
+        const newFragmentIdentifier = recordIdentifierFor(fragment);
+        setFragmentOwner(fragment, identifier, key);
+        cache.setDirtyFragment(identifier, key, newFragmentIdentifier);
         return fragment;
       }
-      const fragment = fragmentRecordData._fragmentGetRecord();
+      // Update existing fragment
+      const fragment = this.store._instanceCache.getRecord(fragmentIdentifier);
       fragment.setProperties(value);
       return fragment;
     },

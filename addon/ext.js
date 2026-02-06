@@ -2,13 +2,13 @@ import { assert } from '@ember/debug';
 import Store from '@ember-data/store';
 import Model from '@ember-data/model';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
-import { Snapshot, normalizeModelName } from 'ember-data/-private';
+import { Snapshot } from 'ember-data/-private';
+import { dasherize } from '@ember/string';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentRecordData from './record-data';
+import FragmentCache from './cache/fragment-cache';
 import { default as Fragment } from './fragment';
 import { isPresent } from '@ember/utils';
 import { getOwner } from '@ember/application';
-import { gte } from 'ember-compatibility-helpers';
 
 function serializerForFragment(owner, normalizedModelName) {
   let serializer = owner.lookup(`serializer:${normalizedModelName}`);
@@ -38,18 +38,38 @@ function serializerForFragment(owner, normalizedModelName) {
   @namespace DS
 */
 Store.reopen({
-  createRecordDataFor(type, id, lid, storeWrapper) {
-    if (!gte('ember-data', '3.28.0')) {
-      throw new Error(
-        'This version of Ember Data Model Fragments is incompatible with Ember Data Versions below 3.28. See matrix at https://github.com/adopted-ember-addons/ember-data-model-fragments#compatibility for details.',
-      );
+  /**
+   * Override createCache to return our FragmentCache
+   * This is the V2 Cache hook introduced in ember-data 4.7+
+   */
+  createCache(storeWrapper) {
+    return new FragmentCache(storeWrapper);
+  },
+
+  /**
+   * Override teardownRecord to handle fragments in a disconnected state.
+   * In ember-data 4.12+, fragments can end up disconnected during unload,
+   * and the default teardownRecord fails when trying to destroy them.
+   */
+  teardownRecord(record) {
+    // Check if record is a fragment (by checking if it has no id or by model type)
+    // We need to handle the case where the fragment's store is disconnected
+    if (record.isDestroyed || record.isDestroying) {
+      return;
     }
-    const identifier = this.identifierCache.getOrCreateRecordIdentifier({
-      type,
-      id,
-      lid,
-    });
-    return new FragmentRecordData(identifier, storeWrapper);
+    try {
+      record.destroy();
+    } catch (e) {
+      // If the error is about disconnected state, just let it go
+      // The fragment will be cleaned up by ember's garbage collection
+      if (
+        e?.message?.includes?.('disconnected state') ||
+        e?.message?.includes?.('cannot utilize the store')
+      ) {
+        return;
+      }
+      throw e;
+    }
   },
 
   /**
@@ -66,7 +86,7 @@ Store.reopen({
     });
     ```
 
-    @method createRecord
+    @method createFragment
     @param {String} type
     @param {Object} properties a hash of properties to set on the
       newly created fragment.
@@ -77,13 +97,14 @@ Store.reopen({
       `The '${modelName}' model must be a subclass of MF.Fragment`,
       this.isFragment(modelName),
     );
-    let recordData;
-    if (gte('ember-data', '4.5.0')) {
-      recordData = this._instanceCache.recordDataFor({ type: modelName }, true);
-    } else {
-      recordData = this.recordDataFor({ type: modelName }, true);
-    }
-    return recordData._fragmentGetRecord(props);
+    // Create a new identifier for the fragment
+    const identifier = this.identifierCache.createIdentifierForNewRecord({
+      type: modelName,
+    });
+    // Signal to cache that this is a new record
+    this.cache.clientDidCreate(identifier, props || {});
+    // Get the record instance
+    return this._instanceCache.getRecord(identifier, props);
   },
 
   /**
@@ -115,7 +136,7 @@ Store.reopen({
     );
 
     const owner = getOwner(this);
-    const normalizedModelName = normalizeModelName(modelName);
+    const normalizedModelName = dasherize(modelName);
 
     if (this.isFragment(normalizedModelName)) {
       return serializerForFragment(owner, normalizedModelName);
@@ -145,6 +166,15 @@ Object.defineProperty(Snapshot.prototype, '_attributes', {
       // snapshot gets passed to the serializer
       if (attr && typeof attr._createSnapshot === 'function') {
         attrs[key] = attr._createSnapshot();
+      }
+      // Handle arrays of fragments (fragment arrays)
+      else if (Array.isArray(attr)) {
+        attrs[key] = attr.map((item) => {
+          if (item && typeof item._createSnapshot === 'function') {
+            return item._createSnapshot();
+          }
+          return item;
+        });
       }
     });
     return attrs;

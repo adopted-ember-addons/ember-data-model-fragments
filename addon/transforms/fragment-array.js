@@ -1,4 +1,5 @@
 import FragmentTransform from './fragment';
+import { recordIdentifierFor } from '@ember-data/store';
 
 /**
   @module ember-data-model-fragments
@@ -31,13 +32,31 @@ const FragmentArrayTransform = FragmentTransform.extend({
     const store = this.store;
 
     return snapshots.map((snapshot) => {
-      const realSnapshot = snapshot._createSnapshot
-        ? snapshot._createSnapshot()
-        : snapshot;
-      const serializer = store.serializerFor(
-        realSnapshot.modelName || realSnapshot.constructor.modelName,
-      );
-      return serializer.serialize(realSnapshot);
+      // In ember-data 4.12+, fragment attributes in Snapshot._attributes may be:
+      // 1. A Fragment instance (has _createSnapshot method)
+      // 2. A Snapshot (has eachAttribute method) - from ext.js patch
+      // 3. Raw data object (plain Object) - when cache returns raw data
+
+      if (typeof snapshot._createSnapshot === 'function') {
+        // It's a Fragment instance - create snapshot and serialize
+        const realSnapshot = snapshot._createSnapshot();
+        const identifier = recordIdentifierFor(snapshot);
+        const modelName = identifier.type;
+        const serializer = store.serializerFor(modelName);
+        return serializer.serialize(realSnapshot);
+      }
+
+      if (typeof snapshot.eachAttribute === 'function') {
+        // It's already a Snapshot - serialize directly
+        const modelName =
+          snapshot.modelName || snapshot.identifier?.type || this.type;
+        const serializer = store.serializerFor(modelName);
+        return serializer.serialize(snapshot);
+      }
+
+      // It's raw data (plain object) - return as-is
+      // This happens in ember-data 4.12+ where fragment data is stored as plain objects
+      return snapshot;
     });
   },
 });
