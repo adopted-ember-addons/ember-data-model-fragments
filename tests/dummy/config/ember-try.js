@@ -68,6 +68,7 @@ module.exports = async function () {
             'ember-data': '~4.13.0-alpha.9',
             '@ember-data/json-api': '~4.13.0-alpha.9',
             '@ember-data/model': '~4.13.0-alpha.9',
+            '@ember-data/serializer': '~4.13.0-alpha.9',
             '@ember-data/store': '~4.13.0-alpha.9',
           },
         },
