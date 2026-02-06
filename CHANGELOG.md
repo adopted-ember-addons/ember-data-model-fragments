@@ -1,5 +1,26 @@
 # Changelog
 
+## Release (2026-02-06)
+
+* ember-data-model-fragments 7.0.0 (major)
+
+#### :boom: Breaking Change
+* `ember-data-model-fragments`
+  * [#506](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/506) Upgrade to ember-data 4.12 with V2 Cache architecture ([@deanmarano](https://github.com/deanmarano))
+  * [#499](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/499) Remove ember-copy ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### :house: Internal
+* `ember-data-model-fragments`
+  * [#500](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/500) Add release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#498](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/498) Use pnpm, ember-cli-update to 6.4 ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#492](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/492) Remove unused licenses ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#491](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/491) Pin ember-data to 4.6.6 in ember-try ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#490](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/490) Add new versions of ember-source to test matrix and compat. ([@deanmarano](https://github.com/deanmarano))
+
+#### Committers: 2
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
 ### v5.0.0-beta.3 (December 22, 2021)
 
 ## v6.0.10 (2024-05-22)
