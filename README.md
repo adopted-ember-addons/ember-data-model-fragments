@@ -19,7 +19,7 @@ Use the following table to decide which version of this project to use with your
 | >= v3.5.x < v3.12.x  | v4.x            | 10+     |
 | >= v3.13.x < v3.27.x | v5.x            | 12+     |
 | >= v3.28.x < v4.7.x  | v6.0.x          | 14+     |
-| >= v4.12.x           | v6.1.x          | 18+     |
+| v4.12.x              | v7.x            | 18+     |
 
 ### Upgrading to ember-data 4.12
 
