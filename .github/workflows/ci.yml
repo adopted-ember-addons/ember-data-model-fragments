@@ -69,6 +69,7 @@ jobs:
           - ember-beta
           - ember-canary
           - ember-data-4.12
+          - ember-data-4.13
           - embroider-safe
           - embroider-optimized
 
