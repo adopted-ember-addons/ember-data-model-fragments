@@ -1,5 +1,4 @@
 import Namespace from '@ember/application/namespace';
-import Ember from 'ember';
 import VERSION from './version';
 import Fragment from './fragment';
 import FragmentArray from './array/fragment';
@@ -37,9 +36,5 @@ const MF = Namespace.create({
   array: array,
   fragmentOwner: fragmentOwner,
 });
-
-if (Ember.libraries) {
-  Ember.libraries.register('Model Fragments', MF.VERSION);
-}
 
 export default MF;

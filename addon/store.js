@@ -10,7 +10,6 @@ import { default as Fragment } from './fragment';
 
 // Import side-effects to ensure monkey-patches are applied
 // These must be imported before any store instances are created
-import 'ember-data-model-fragments'; // Registers with Ember.libraries
 import './ext'; // Applies Snapshot monkey-patch for fragment serialization
 
 /**
