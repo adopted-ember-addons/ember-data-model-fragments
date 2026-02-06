@@ -335,17 +335,14 @@ import { FragmentRESTSerializer } from "ember-data-model-fragments/serializer";
 export default class ApplicationSerializer extends FragmentRESTSerializer {}
 ```
 
-If you're using `JSONAPISerializer` or another serializer, use the `FragmentSerializerMixin`:
+If you're using `JSONAPISerializer`, use `FragmentJSONAPISerializer`:
 
 ```javascript
 // app/serializers/application.js
 
-import JSONAPISerializer from "@ember-data/serializer/json-api";
-import { FragmentSerializerMixin } from "ember-data-model-fragments/serializer";
+import { FragmentJSONAPISerializer } from "ember-data-model-fragments/serializer";
 
-export default class ApplicationSerializer extends JSONAPISerializer.extend(
-  FragmentSerializerMixin,
-) {}
+export default class ApplicationSerializer extends FragmentJSONAPISerializer {}
 ```
 
 If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.Snapshot.html) can be accessed using the [`Snapshot#attr`](http://emberjs.com/api/data/classes/DS.Snapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
@@ -354,9 +351,9 @@ If custom serialization of the owner record is needed, fragment [snapshots](http
 // apps/serializers/person.js
 // Fragment snapshots are accessed using `snapshot.attr()`
 
-import JSONSerializer from "@ember-data/serializer/json";
+import FragmentSerializer from "ember-data-model-fragments/serializer";
 
-export default JSONSerializer.extend({
+export default class PersonSerializer extends FragmentSerializer {
   serialize(snapshot, options) {
     const json = super.serialize(...arguments);
 
@@ -379,8 +376,8 @@ export default JSONSerializer.extend({
     json.title_count = titlesSnapshot.length;
 
     return json;
-  },
-});
+  }
+}
 ```
 
 ## Nesting

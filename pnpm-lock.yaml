@@ -52,6 +52,9 @@ importers:
       '@ember-data/model':
         specifier: ~4.13.0-alpha.9
         version: 4.13.0-alpha.9(28d7247ae793456ad31c1824cc98f4f3)
+      '@ember-data/serializer':
+        specifier: ~4.13.0-alpha.9
+        version: 4.13.0-alpha.9(@ember-data/legacy-compat@4.13.0-alpha.9(c7ad85e53b9587cb1a558efa86bed54f))(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/store@4.13.0-alpha.9(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/request@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@ember-data/tracking@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9)
       '@ember-data/store':
         specifier: ~4.13.0-alpha.9
         version: 4.13.0-alpha.9(@ember-data/request-utils@4.13.0-alpha.9(@ember/string@3.1.1)(@warp-drive/core-types@4.13.0-alpha.9)(ember-inflector@6.0.0(@babel/core@7.27.4)))(@ember-data/request@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@ember-data/tracking@4.13.0-alpha.9(@warp-drive/core-types@4.13.0-alpha.9))(@warp-drive/core-types@4.13.0-alpha.9)
