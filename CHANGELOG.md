@@ -2,6 +2,17 @@
 
 ## Release (2026-02-06)
 
+* ember-data-model-fragments 7.0.1 (patch)
+
+#### :house: Internal
+* `ember-data-model-fragments`
+  * [#509](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/509) Update release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### Committers: 1
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+## Release (2026-02-06)
+
 * ember-data-model-fragments 7.0.0 (major)
 
 #### :boom: Breaking Change
