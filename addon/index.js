@@ -10,7 +10,7 @@ import { fragment, fragmentArray, array, fragmentOwner } from './attributes';
 import FragmentStore from './store';
 import FragmentSerializer, {
   FragmentRESTSerializer,
-  FragmentSerializerMixin,
+  FragmentJSONAPISerializer,
 } from './serializer';
 import FragmentSchemaService from './schema-service';
 
@@ -30,7 +30,7 @@ const MF = Namespace.create({
   FragmentStore: FragmentStore,
   FragmentSerializer: FragmentSerializer,
   FragmentRESTSerializer: FragmentRESTSerializer,
-  FragmentSerializerMixin: FragmentSerializerMixin,
+  FragmentJSONAPISerializer: FragmentJSONAPISerializer,
   FragmentSchemaService: FragmentSchemaService,
   fragment: fragment,
   fragmentArray: fragmentArray,

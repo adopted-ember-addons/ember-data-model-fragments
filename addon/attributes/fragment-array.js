@@ -63,7 +63,7 @@ export default function fragmentArray(type, options) {
 
   // Use computed with a dependency on hasDirtyAttributes which changes on rollback
   // This ensures the computed property is re-evaluated when dirty state changes
-  return computed('hasDirtyAttributes', 'currentState', {
+  return computed('currentState', 'hasDirtyAttributes', 'store.cache', {
     get(key) {
       const identifier = recordIdentifierFor(this);
       const cache = this.store.cache;

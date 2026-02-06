@@ -56,6 +56,7 @@
     "@babel/preset-env": "^7.27.1",
     "@ember-data/json-api": "~4.13.0-alpha.9",
     "@ember-data/model": "~4.13.0-alpha.9",
+    "@ember-data/serializer": "~4.13.0-alpha.9",
     "@ember-data/store": "~4.13.0-alpha.9",
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^3.1.1",
@@ -109,6 +110,7 @@
   "peerDependencies": {
     "@ember-data/json-api": ">= 4.12.0",
     "@ember-data/model": ">= 4.12.0",
+    "@ember-data/serializer": ">= 4.12.0",
     "@ember-data/store": ">= 4.12.0",
     "ember-data": ">= 4.12.0",
     "ember-source": ">= 5.0.0"
