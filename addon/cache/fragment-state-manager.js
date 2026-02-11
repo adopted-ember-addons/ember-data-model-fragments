@@ -1161,13 +1161,15 @@ export default class FragmentStateManager {
       }
     }
 
+    // Upsert the committed values as new canonical state BEFORE rollback.
+    // This clears isNew on the inner cache, which prevents rollbackAttrs
+    // from incorrectly setting isDeleted=true for newly created fragments.
+    // (rollbackAttrs treats isNew records as "discard new record" and marks
+    // them deleted, but here we want to transition them to saved state.)
+    innerCache.upsert(identifier, { attributes: commitAttrs }, false);
+
     // Rollback the inner cache to clear dirty/in-flight tracking
     innerCache.rollbackAttrs(identifier);
-
-    // Push the committed values as the new canonical state
-    if (Object.keys(commitAttrs).length > 0) {
-      innerCache.upsert(identifier, { attributes: commitAttrs }, false);
-    }
 
     // Re-apply any new dirty changes made during in-flight
     for (const [key, value] of Object.entries(newDirtyAttrs)) {
