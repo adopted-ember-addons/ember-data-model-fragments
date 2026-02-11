@@ -61,6 +61,64 @@ module('integration - Persistence', function (hooks) {
     assert.ok(!person.name.isNew, 'fragments are not new after save');
   });
 
+  test('newly created fragments are not marked as deleted after save', async function (assert) {
+    const data = {
+      name: {
+        first: 'Viserys',
+        last: 'Targaryen',
+      },
+      addresses: [
+        {
+          street: '1 Stone Drum',
+          city: 'Dragonstone',
+          region: 'Crownlands',
+          country: 'Westeros',
+        },
+      ],
+    };
+
+    const person = store.createRecord('person');
+    person.set('name', store.createFragment('name', data.name));
+    person.set('addresses', data.addresses);
+
+    const payload = {
+      person: copy(data, true),
+    };
+    payload.person.id = 3;
+
+    server.post('/people', () => {
+      return [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify(payload),
+      ];
+    });
+
+    await person.save();
+
+    const name = person.name;
+    const addresses = person.addresses;
+
+    assert.ok(!name.isNew, 'fragment is not new after save');
+    assert.ok(!name.isDeleted, 'fragment is not deleted after save');
+    assert.ok(!name.hasDirtyAttributes, 'fragment is clean after save');
+
+    assert.ok(
+      !addresses.isAny('isNew'),
+      'fragment array fragments are not new after save',
+    );
+    assert.ok(
+      !addresses.isAny('isDeleted'),
+      'fragment array fragments are not deleted after save',
+    );
+    assert.ok(
+      !addresses.isAny('hasDirtyAttributes'),
+      'fragment array fragments are clean after save',
+    );
+    assert.ok(!person.hasDirtyAttributes, 'owner record is clean after save');
+    assert.ok(!person.isDeleted, 'owner record is not deleted after save');
+  });
+
   test('persisting the owner record in a clean state maintains clean state', async function (assert) {
     store.push({
       data: {
