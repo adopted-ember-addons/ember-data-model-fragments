@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-02-11)
+
+* ember-data-model-fragments 7.0.2 (patch)
+
+#### :bug: Bug Fix
+* `ember-data-model-fragments`
+  * [#512](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/512) Prevent newly created fragments from being marked deleted after save ([@deanmarano](https://github.com/deanmarano))
+
+#### Committers: 1
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+
 ## Release (2026-02-06)
 
 * ember-data-model-fragments 7.0.1 (patch)
