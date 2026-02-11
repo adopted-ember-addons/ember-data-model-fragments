@@ -2,17 +2,17 @@
   "solution": {
     "ember-data-model-fragments": {
       "impact": "patch",
-      "oldVersion": "7.0.0",
-      "newVersion": "7.0.1",
+      "oldVersion": "7.0.1",
+      "newVersion": "7.0.2",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
     }
   },
-  "description": "## Release (2026-02-06)\n\n* ember-data-model-fragments 7.0.1 (patch)\n\n#### :house: Internal\n* `ember-data-model-fragments`\n  * [#509](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/509) Update release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### Committers: 1\n- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n"
+  "description": "## Release (2026-02-11)\n\n* ember-data-model-fragments 7.0.2 (patch)\n\n#### :bug: Bug Fix\n* `ember-data-model-fragments`\n  * [#512](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/512) Prevent newly created fragments from being marked deleted after save ([@deanmarano](https://github.com/deanmarano))\n\n#### Committers: 1\n- Dean Marano ([@deanmarano](https://github.com/deanmarano))\n"
 }
