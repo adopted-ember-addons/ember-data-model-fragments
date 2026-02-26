@@ -1,5 +1,6 @@
 import { get, computed } from '@ember/object';
 import Ember from 'ember';
+import { isDestroying, isDestroyed } from '@ember/destroyable';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
 import { copy } from './util/copy';
@@ -115,6 +116,9 @@ const Fragment = Model.extend(Ember.Comparable, {
   },
 
   toStringExtension() {
+    if (isDestroying(this) || isDestroyed(this)) {
+      return '';
+    }
     const identifier = recordIdentifierFor(this);
     const owner = this.store.cache.getFragmentOwner(identifier);
     return owner ? `owner(${owner.ownerIdentifier?.id})` : '';
@@ -125,6 +129,9 @@ const Fragment = Model.extend(Ember.Comparable, {
     ember-data 4.12+ doesn't call toStringExtension in Model.toString().
   */
   toString() {
+    if (isDestroying(this) || isDestroyed(this)) {
+      return `<fragment(destroyed)>`;
+    }
     const identifier = recordIdentifierFor(this);
     const extension = this.toStringExtension();
     const extensionStr = extension ? `:${extension}` : '';

@@ -55,6 +55,9 @@ export default function array(type, options) {
   // eslint-disable-next-line ember/require-computed-property-dependencies
   return computed({
     get(key) {
+      if (this.isDestroying || this.isDestroyed) {
+        return null;
+      }
       const identifier = recordIdentifierFor(this);
       const cache = this.store.cache;
       if (cache.getFragment(identifier, key) === null) {
