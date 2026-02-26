@@ -32,6 +32,7 @@ export default function fragmentOwner() {
   // setFragmentOwner(). Omitting dependent keys also avoids Ember's
   // "Attempted to access the computed ... on a destroyed object" assertion
   // when a fragment is torn down.
+  // eslint-disable-next-line ember/require-computed-property-dependencies
   return computed(function () {
     if (isDestroying(this) || isDestroyed(this)) {
       return null;
