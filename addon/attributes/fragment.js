@@ -60,8 +60,12 @@ export default function fragment(type, options) {
     options,
   };
 
+  // eslint-disable-next-line ember/require-computed-property-dependencies -- isDestroying/isDestroyed are guards, not dependencies
   return computed('store.{_instanceCache,cache}', {
     get(key) {
+      if (this.isDestroying || this.isDestroyed) {
+        return null;
+      }
       const identifier = recordIdentifierFor(this);
       const cache = this.store.cache;
       const fragmentIdentifier = cache.getFragment(identifier, key);

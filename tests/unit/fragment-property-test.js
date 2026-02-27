@@ -558,6 +558,78 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
   });
 
+  test('accessing a fragment property on a destroyed record returns null', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: { first: 'Eddard', last: 'Stark' },
+        },
+      },
+    });
+
+    const person = store.peekRecord('person', 1);
+    const name = person.name;
+    assert.equal(name.first, 'Eddard', 'fragment is accessible before unload');
+
+    person.unloadRecord();
+
+    // Access the fragment during the destroy phase - this previously caused
+    // "recordIdentifierFor is not a record instantiated by @ember-data/store"
+    // and an infinite recursion in Fragment.toString()
+    schedule('destroy', () => {
+      assert.ok(
+        name.isDestroying,
+        'fragment is destroying after owner is unloaded',
+      );
+      // toString should not cause infinite recursion on destroyed fragment
+      assert.strictEqual(
+        name.toString(),
+        '<fragment(destroyed)>',
+        'toString returns safe string on destroyed fragment',
+      );
+    });
+  });
+
+  test('accessing a fragmentArray property on a destroyed record does not crash', async function (assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          names: [
+            { first: 'Eddard', last: 'Stark' },
+            { first: 'Ned', last: 'Stark' },
+          ],
+        },
+      },
+    });
+
+    const person = store.peekRecord('person', 1);
+    const names = person.names;
+    assert.equal(names.length, 2, 'fragmentArray is accessible before unload');
+
+    person.unloadRecord();
+
+    schedule('destroy', () => {
+      const firstFragment = names.objectAt(0);
+      if (firstFragment) {
+        assert.ok(
+          firstFragment.isDestroying,
+          'fragment in array is destroying after owner is unloaded',
+        );
+        assert.strictEqual(
+          firstFragment.toString(),
+          '<fragment(destroyed)>',
+          'toString returns safe string on destroyed fragment in array',
+        );
+      } else {
+        assert.ok(true, 'fragment array contents are already cleaned up');
+      }
+    });
+  });
+
   test('pass arbitrary props to createFragment', async function (assert) {
     const address = store.createFragment('address', {
       street: '1 Dungeon Cell',

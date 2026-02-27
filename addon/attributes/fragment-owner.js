@@ -1,5 +1,6 @@
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
+import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { isFragment } from '../fragment';
 import { recordIdentifierFor } from '@ember-data/store';
 
@@ -27,7 +28,15 @@ import { recordIdentifierFor } from '@ember-data/store';
  @return {Attribute}
  */
 export default function fragmentOwner() {
-  return computed('store.{_instanceCache,cache}', function () {
+  // No dependent keys: the value is invalidated via notifyPropertyChange in
+  // setFragmentOwner(). Omitting dependent keys also avoids Ember's
+  // "Attempted to access the computed ... on a destroyed object" assertion
+  // when a fragment is torn down.
+  // eslint-disable-next-line ember/require-computed-property-dependencies
+  return computed(function () {
+    if (isDestroying(this) || isDestroyed(this)) {
+      return null;
+    }
     assert(
       'Fragment owner properties can only be used on fragments.',
       isFragment(this),
