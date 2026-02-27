@@ -65,7 +65,7 @@ import FragmentSerializer from "ember-data-model-fragments/serializer";
 export default class ApplicationSerializer extends FragmentSerializer {}
 ```
 
-See the [Serialization](#serialization) section for more options if you're using `RESTSerializer` or `JSONAPISerializer`.
+See the [Serialization](#serializing) section for more options if you're using `RESTSerializer` or `JSONAPISerializer`.
 
 ## Example
 

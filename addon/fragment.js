@@ -33,7 +33,7 @@ export function fragmentRecordDataFor(fragment) {
   ```javascript
   import Model from '@ember-data/model';
   import MF from 'ember-data-model-fragments';
-  
+
   class Person extends Model {
     @MF.fragment('name') name;
   }
@@ -70,7 +70,6 @@ export function fragmentRecordDataFor(fragment) {
 
   person.rollbackAttributes();
   name.first; // 'Robert'
-  person.hasDirtyAttributes; // false
   person.hasDirtyAttributes; // false
   ```
 
@@ -173,7 +172,7 @@ const Fragment = Model.extend(Comparable, {
   /**
     Override toString to include the toStringExtension output.
     ember-data 4.12+ doesn't call toStringExtension in Model.toString().
-    
+
     @method toString
     @return {String}
     @public
