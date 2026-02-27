@@ -65,9 +65,14 @@ export default function fragment(type, options) {
   const cp = computed(
     'currentState',
     'hasDirtyAttributes',
+    'isDestroyed',
+    'isDestroying',
     'store.{_instanceCache,cache}',
     {
       get(key) {
+        if (this.isDestroying || this.isDestroyed) {
+          return null;
+        }
         const identifier = recordIdentifierFor(this);
         const cache = this.store.cache;
         const fragmentIdentifier = cache.getFragment(identifier, key);
