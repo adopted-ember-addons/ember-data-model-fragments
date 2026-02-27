@@ -54,50 +54,57 @@ export default function array(type, options) {
 
   // Use computed with a dependency on hasDirtyAttributes which changes on rollback
   // This ensures the computed property is re-evaluated when dirty state changes
-  return computed('currentState', 'hasDirtyAttributes', 'store.cache', {
-    get(key) {
-      if (this.isDestroying || this.isDestroyed) {
-        return null;
-      }
-      const identifier = recordIdentifierFor(this);
-      const cache = this.store.cache;
-      if (cache.getFragment(identifier, key) === null) {
-        return null;
-      }
-      let array = cache.getFragmentArrayCache(identifier, key);
-      if (!array) {
-        array = StatefulArray.create({
-          store: this.store,
-          identifier,
-          key,
-        });
-        cache.setFragmentArrayCache(identifier, key, array);
-      }
-      return array;
+  return computed(
+    'currentState',
+    'hasDirtyAttributes',
+    'isDestroyed',
+    'isDestroying',
+    'store.cache',
+    {
+      get(key) {
+        if (this.isDestroying || this.isDestroyed) {
+          return null;
+        }
+        const identifier = recordIdentifierFor(this);
+        const cache = this.store.cache;
+        if (cache.getFragment(identifier, key) === null) {
+          return null;
+        }
+        let array = cache.getFragmentArrayCache(identifier, key);
+        if (!array) {
+          array = StatefulArray.create({
+            store: this.store,
+            identifier,
+            key,
+          });
+          cache.setFragmentArrayCache(identifier, key, array);
+        }
+        return array;
+      },
+      set(key, value) {
+        assert(
+          'You must pass an array or null to set an array',
+          value === null || isArray(value),
+        );
+        const identifier = recordIdentifierFor(this);
+        const cache = this.store.cache;
+        if (value === null) {
+          cache.setDirtyFragment(identifier, key, null);
+          return null;
+        }
+        cache.setDirtyFragment(identifier, key, value.slice());
+        let array = cache.getFragmentArrayCache(identifier, key);
+        if (!array) {
+          array = StatefulArray.create({
+            store: this.store,
+            identifier,
+            key,
+          });
+          cache.setFragmentArrayCache(identifier, key, array);
+        }
+        array._setFragments(value);
+        return array;
+      },
     },
-    set(key, value) {
-      assert(
-        'You must pass an array or null to set an array',
-        value === null || isArray(value),
-      );
-      const identifier = recordIdentifierFor(this);
-      const cache = this.store.cache;
-      if (value === null) {
-        cache.setDirtyFragment(identifier, key, null);
-        return null;
-      }
-      cache.setDirtyFragment(identifier, key, value.slice());
-      let array = cache.getFragmentArrayCache(identifier, key);
-      if (!array) {
-        array = StatefulArray.create({
-          store: this.store,
-          identifier,
-          key,
-        });
-        cache.setFragmentArrayCache(identifier, key, array);
-      }
-      array._setFragments(value);
-      return array;
-    },
-  }).meta(meta);
+  ).meta(meta);
 }
