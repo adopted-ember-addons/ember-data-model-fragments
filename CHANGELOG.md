@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-02-27)
+
+* ember-data-model-fragments 7.0.3 (patch)
+
+#### :bug: Bug Fix
+* `ember-data-model-fragments`
+  * [#514](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/514) Guard fragment access on destroyed/unloaded records ([@deanmarano](https://github.com/deanmarano))
+
+#### Committers: 1
+- Dean Marano ([@deanmarano](https://github.com/deanmarano))
+
 ## Release (2026-02-11)
 
 * ember-data-model-fragments 7.0.2 (patch)
