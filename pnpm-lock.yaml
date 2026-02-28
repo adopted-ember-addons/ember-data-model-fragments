@@ -52,6 +52,9 @@ importers:
       '@ember-data/json-api':
         specifier: ~4.12.0
         version: 4.12.8(@ember-data/graph@4.12.8)(@ember-data/store@4.12.8)
+      '@ember-data/legacy-compat':
+        specifier: ~4.12.0
+        version: 4.12.8(@ember-data/graph@4.12.8)(@ember-data/json-api@4.12.8)(@ember/string@3.1.1)
       '@ember/optional-features':
         specifier: ^2.2.0
         version: 2.2.0

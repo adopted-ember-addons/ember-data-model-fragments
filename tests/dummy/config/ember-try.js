@@ -53,6 +53,7 @@ module.exports = async function () {
           devDependencies: {
             'ember-data': '~4.12.0',
             '@ember-data/json-api': '~4.12.0',
+            '@ember-data/legacy-compat': '~4.12.0',
           },
         },
       },
@@ -62,6 +63,7 @@ module.exports = async function () {
           devDependencies: {
             'ember-data': '~5.8.0',
             '@ember-data/json-api': '~5.8.0',
+            '@ember-data/legacy-compat': '~5.8.0',
           },
         },
       },
