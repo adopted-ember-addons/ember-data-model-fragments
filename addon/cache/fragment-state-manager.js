@@ -465,9 +465,7 @@ export default class FragmentStateManager {
             behaviors[key] = new ArrayBehavior(this, identifier, definition);
             break;
           default:
-            assert(
-              `Unsupported fragment type: ${definition.kind}`,
-            );
+            assert(`Unsupported fragment type: ${definition.kind}`);
             break;
         }
       }
@@ -677,7 +675,7 @@ export default class FragmentStateManager {
     // Explicitly return boolean to ensure false instead of undefined
     return Boolean(
       (fragments && Object.keys(fragments).length > 0) ||
-        (inFlight && Object.keys(inFlight).length > 0),
+      (inFlight && Object.keys(inFlight).length > 0),
     );
   }
 

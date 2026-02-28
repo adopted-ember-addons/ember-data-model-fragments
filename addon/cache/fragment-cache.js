@@ -205,12 +205,10 @@ export default class FragmentCache {
     // Let inner cache handle non-fragment attributes
     // Use __originalInnerUpsert when available to avoid infinite recursion
     // (since we may have patched innerCache.upsert to route through us)
-    const innerUpsert = this.__originalInnerUpsert || this.__innerCache.upsert.bind(this.__innerCache);
-    const changedKeys = innerUpsert(
-      identifier,
-      data,
-      calculateChanges,
-    );
+    const innerUpsert =
+      this.__originalInnerUpsert ||
+      this.__innerCache.upsert.bind(this.__innerCache);
+    const changedKeys = innerUpsert(identifier, data, calculateChanges);
 
     // Handle fragment attributes
     if (fragmentAttributeKeys.length > 0) {
