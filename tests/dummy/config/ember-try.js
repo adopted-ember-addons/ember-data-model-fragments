@@ -64,6 +64,7 @@ module.exports = async function () {
             'ember-data': '~5.8.0',
             '@ember-data/json-api': '~5.8.0',
             '@ember-data/legacy-compat': '~5.8.0',
+            '@warp-drive/build-config': '~5.8.0',
             'ember-inflector': '^4.0.0',
           },
         },
