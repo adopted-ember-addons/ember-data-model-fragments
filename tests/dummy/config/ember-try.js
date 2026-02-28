@@ -56,6 +56,15 @@ module.exports = async function () {
           },
         },
       },
+      {
+        name: 'ember-data-5.8',
+        npm: {
+          devDependencies: {
+            'ember-data': '~5.8.0',
+            '@ember-data/json-api': '~5.8.0',
+          },
+        },
+      },
       embroiderSafe(),
       embroiderOptimized(),
     ],
