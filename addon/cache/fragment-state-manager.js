@@ -465,7 +465,9 @@ export default class FragmentStateManager {
             behaviors[key] = new ArrayBehavior(this, identifier, definition);
             break;
           default:
-            assert(`Unsupported fragment type: ${definition.kind}`);
+            assert(
+              `Unsupported fragment type: ${definition.kind}`,
+            );
             break;
         }
       }

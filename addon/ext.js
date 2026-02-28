@@ -142,11 +142,130 @@ const storeMixin = {
 
 const _originalSerializerFor = Store.prototype.serializerFor;
 
+// Apply non-cache methods via reopen (when available) or prototype patching
+const { createCache: _createCache, ...otherStoreMixin } = storeMixin;
+
 if (typeof Store.reopen === 'function') {
-  Store.reopen(storeMixin);
+  Store.reopen(otherStoreMixin);
 } else {
-  for (const [key, value] of Object.entries(storeMixin)) {
+  for (const [key, value] of Object.entries(otherStoreMixin)) {
     Store.prototype[key] = value;
+  }
+}
+
+// In warp-drive 5.8+, `isAttributeSchema(meta)` checks `kind === 'attribute'`,
+// excluding our fragment/fragment-array/array kinds from Model.attributes,
+// eachAttribute, transformedAttributes, eachTransformedAttribute, and the schema
+// service's attributesDefinitionFor. We patch at two levels:
+// 1. Model.attributes (static getter) - the root that feeds everything else
+// 2. Store.schema (getter) - to patch attributesDefinitionFor on the schema service
+
+// Patch Model.attributes to include fragment-kind computed properties.
+// In 4.12, isAttributeSchema checks `isAttribute: true` (which our meta has),
+// so this patch is a no-op. In 5.8+, it checks `kind === 'attribute'` which
+// excludes our fragment kinds.
+const _originalAttributesDescriptor = Object.getOwnPropertyDescriptor(
+  Model,
+  'attributes',
+);
+if (_originalAttributesDescriptor && _originalAttributesDescriptor.get) {
+  Object.defineProperty(Model, 'attributes', {
+    get() {
+      const map = _originalAttributesDescriptor.get.call(this);
+      // Add any fragment attributes that were excluded
+      this.eachComputedProperty((name, meta) => {
+        if (meta.isFragment && !map.has(name)) {
+          meta.key = name;
+          meta.name = name;
+          map.set(name, meta);
+        }
+      });
+      return map;
+    },
+    configurable: true,
+  });
+}
+
+// Patch Store.schema getter to also patch attributesDefinitionFor on the
+// schema service. We must patch the getter (not createSchemaService) because
+// the ember-data 5.8 Store subclass defines its own createSchemaService()
+// that shadows prototype patches.
+const _originalSchemaDescriptor = Object.getOwnPropertyDescriptor(
+  Store.prototype,
+  'schema',
+);
+
+function _patchSchemaService(schemaService, store) {
+  if (schemaService.__fragmentPatched) {
+    return schemaService;
+  }
+  const _origAttrsFor =
+    schemaService.attributesDefinitionFor.bind(schemaService);
+  schemaService.attributesDefinitionFor = function (identifier) {
+    const definitions = _origAttrsFor(identifier);
+    // Check if fragment attributes are missing (5.8+ filters by kind)
+    try {
+      const modelClass = store.modelFor(identifier.type);
+      if (modelClass) {
+        modelClass.eachComputedProperty((name, meta) => {
+          if (meta.isFragment && !(name in definitions)) {
+            definitions[name] = Object.assign({ name }, meta);
+          }
+        });
+      }
+    } catch {
+      // modelFor may fail for non-existent types
+    }
+    return definitions;
+  };
+  schemaService.__fragmentPatched = true;
+  return schemaService;
+}
+
+if (_originalSchemaDescriptor && _originalSchemaDescriptor.get) {
+  Object.defineProperty(Store.prototype, 'schema', {
+    get() {
+      const schema = _originalSchemaDescriptor.get.call(this);
+      if (schema) {
+        _patchSchemaService(schema, this);
+      }
+      return schema;
+    },
+    configurable: true,
+  });
+}
+
+// Always use cache getter override for createCache. In ember-data 5.8+,
+// the ember-data package defines a Store subclass with its own createCache
+// that returns JSONAPICache, shadowing any reopen/prototype patch on the
+// base Store. By overriding the cache getter, we intercept at a higher
+// level and wrap whatever cache was created in our FragmentCache.
+const _originalCacheDescriptor = Object.getOwnPropertyDescriptor(
+  Store.prototype,
+  'cache',
+);
+if (_originalCacheDescriptor && _originalCacheDescriptor.get) {
+  Object.defineProperty(Store.prototype, 'cache', {
+    get() {
+      const cache = _originalCacheDescriptor.get.call(this);
+      if (cache && !(cache instanceof FragmentCache)) {
+        const fragmentCache = new FragmentCache(
+          this._instanceCache._storeWrapper,
+          cache,
+        );
+        this._instanceCache.cache = fragmentCache;
+        return fragmentCache;
+      }
+      return cache;
+    },
+    configurable: true,
+  });
+} else {
+  // Fallback for older ember-data without cache getter (shouldn't happen)
+  if (typeof Store.reopen === 'function') {
+    Store.reopen({ createCache: _createCache });
+  } else {
+    Store.prototype.createCache = _createCache;
   }
 }
 
@@ -164,6 +283,22 @@ const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
 Object.defineProperty(Snapshot.prototype, '_attributes', {
   get() {
     const attrs = oldSnapshotAttributes.get.call(this);
+
+    // In warp-drive 5.8+, eachAttribute only iterates kind === 'attribute',
+    // so fragment attributes are missing. Add them from the cache.
+    const cache = this._store.cache;
+    if (cache && typeof cache.getFragment === 'function') {
+      const schema = this._store.schema;
+      if (schema) {
+        const definitions = schema.attributesDefinitionFor(this.identifier);
+        for (const [key, definition] of Object.entries(definitions)) {
+          if (definition.isFragment && !(key in attrs)) {
+            attrs[key] = cache.getAttr(this.identifier, key);
+          }
+        }
+      }
+    }
+
     Object.keys(attrs).forEach((key) => {
       const attr = attrs[key];
       // If the attribute has a `_createSnapshot` method, invoke it before the

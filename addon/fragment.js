@@ -138,6 +138,16 @@ const Fragment = Model.extend(Ember.Comparable, {
     return `<${identifier.type}:${identifier.id}${extensionStr}>`;
   },
 }).reopenClass({
+  /**
+    Override static toString to avoid warp-drive 5.8's assert that checks
+    this.modelName before allowing schema access. Ember's Namespace.create()
+    calls toString() on all registered classes during initialization, before
+    store.modelFor() has a chance to set modelName.
+  */
+  toString() {
+    return `model:${this.modelName || 'fragment'}`;
+  },
+
   fragmentOwnerProperties: computed(function () {
     const props = [];
 

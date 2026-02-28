@@ -2,7 +2,7 @@
 
 const EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
-module.exports = function (defaults) {
+module.exports = async function (defaults) {
   const app = new EmberAddon(defaults, {
     // Add options here
   });
@@ -15,9 +15,10 @@ module.exports = function (defaults) {
   */
 
   // Configure warp-drive build settings for ember-data 5.7+
-  // This keeps deprecated APIs available that we still rely on
+  // This keeps deprecated APIs available that we still rely on.
+  // @warp-drive/build-config is ESM-only, so we must use dynamic import().
   try {
-    const { setConfig } = require('@warp-drive/build-config');
+    const { setConfig } = await import('@warp-drive/build-config');
     setConfig(app, __dirname, {
       deprecations: {
         DEPRECATE_EARLY_STATIC: true,
