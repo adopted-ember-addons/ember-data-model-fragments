@@ -37,112 +37,118 @@ function serializerForFragment(owner, normalizedModelName) {
   @namespace DS
 */
 
-/**
- * Override createCache to return our FragmentCache
- * This is the V2 Cache hook introduced in ember-data 4.7+
- */
-Store.prototype.createCache = function createCache(storeWrapper) {
-  return new FragmentCache(storeWrapper);
-};
+const storeMixin = {
+  /**
+   * Override createCache to return our FragmentCache
+   * This is the V2 Cache hook introduced in ember-data 4.7+
+   */
+  createCache(storeWrapper) {
+    return new FragmentCache(storeWrapper);
+  },
 
-/**
- * Override teardownRecord to handle fragments in a disconnected state.
- * In ember-data 4.12+, fragments can end up disconnected during unload,
- * and the default teardownRecord fails when trying to destroy them.
- */
-Store.prototype.teardownRecord = function teardownRecord(record) {
-  // Check if record is a fragment (by checking if it has no id or by model type)
-  // We need to handle the case where the fragment's store is disconnected
-  if (record.isDestroyed || record.isDestroying) {
-    return;
-  }
-  try {
-    record.destroy();
-  } catch (e) {
-    // If the error is about disconnected state, just let it go
-    // The fragment will be cleaned up by ember's garbage collection
-    if (
-      e?.message?.includes?.('disconnected state') ||
-      e?.message?.includes?.('cannot utilize the store')
-    ) {
+  /**
+   * Override teardownRecord to handle fragments in a disconnected state.
+   * In ember-data 4.12+, fragments can end up disconnected during unload,
+   * and the default teardownRecord fails when trying to destroy them.
+   */
+  teardownRecord(record) {
+    if (record.isDestroyed || record.isDestroying) {
       return;
     }
-    throw e;
-  }
-};
+    try {
+      record.destroy();
+    } catch (e) {
+      if (
+        e?.message?.includes?.('disconnected state') ||
+        e?.message?.includes?.('cannot utilize the store')
+      ) {
+        return;
+      }
+      throw e;
+    }
+  },
 
-/**
-  Create a new fragment that does not yet have an owner record.
-  The properties passed to this method are set on the newly created
-  fragment.
+  /**
+    Create a new fragment that does not yet have an owner record.
+    The properties passed to this method are set on the newly created
+    fragment.
 
-  To create a new instance of the `name` fragment:
+    To create a new instance of the `name` fragment:
 
-  ```js
-  store.createFragment('name', {
-    first: 'Alex',
-    last: 'Routé'
-  });
-  ```
+    ```js
+    store.createFragment('name', {
+      first: 'Alex',
+      last: 'Routé'
+    });
+    ```
 
-  @method createFragment
-  @param {String} type
-  @param {Object} properties a hash of properties to set on the
-    newly created fragment.
-  @return {MF.Fragment} fragment
-*/
-Store.prototype.createFragment = function createFragment(modelName, props) {
-  assert(
-    `The '${modelName}' model must be a subclass of MF.Fragment`,
-    this.isFragment(modelName),
-  );
-  // Create a new identifier for the fragment
-  const identifier = this.identifierCache.createIdentifierForNewRecord({
-    type: modelName,
-  });
-  // Signal to cache that this is a new record
-  this.cache.clientDidCreate(identifier, props || {});
-  // Get the record instance
-  return this._instanceCache.getRecord(identifier, props);
-};
+    @method createFragment
+    @param {String} type
+    @param {Object} properties a hash of properties to set on the
+      newly created fragment.
+    @return {MF.Fragment} fragment
+  */
+  createFragment(modelName, props) {
+    assert(
+      `The '${modelName}' model must be a subclass of MF.Fragment`,
+      this.isFragment(modelName),
+    );
+    const identifier = this.identifierCache.createIdentifierForNewRecord({
+      type: modelName,
+    });
+    this.cache.clientDidCreate(identifier, props || {});
+    return this._instanceCache.getRecord(identifier, props);
+  },
 
-/**
-  Returns true if the modelName is a fragment, false if not
+  /**
+    Returns true if the modelName is a fragment, false if not
 
-  @method isFragment
-  @private
-  @param {String} the modelName to check if a fragment
-  @return {boolean}
-*/
-Store.prototype.isFragment = function isFragment(modelName) {
-  if (modelName === 'application' || modelName === '-default') {
-    return false;
-  }
+    @method isFragment
+    @private
+    @param {String} the modelName to check if a fragment
+    @return {boolean}
+  */
+  isFragment(modelName) {
+    if (modelName === 'application' || modelName === '-default') {
+      return false;
+    }
 
-  const type = this.modelFor(modelName);
-  return Fragment.detect(type);
+    const type = this.modelFor(modelName);
+    return Fragment.detect(type);
+  },
+
+  serializerFor(modelName) {
+    assert(
+      "You need to pass a model name to the store's serializerFor method",
+      isPresent(modelName),
+    );
+    assert(
+      `Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`,
+      typeof modelName === 'string',
+    );
+
+    const owner = getOwner(this);
+    const normalizedModelName = dasherize(modelName);
+
+    if (this.isFragment(normalizedModelName)) {
+      return serializerForFragment(owner, normalizedModelName);
+    } else {
+      return this._super
+        ? this._super(...arguments)
+        : _originalSerializerFor.call(this, modelName);
+    }
+  },
 };
 
 const _originalSerializerFor = Store.prototype.serializerFor;
-Store.prototype.serializerFor = function serializerFor(modelName) {
-  assert(
-    "You need to pass a model name to the store's serializerFor method",
-    isPresent(modelName),
-  );
-  assert(
-    `Passing classes to store.serializerFor has been removed. Please pass a dasherized string instead of ${modelName}`,
-    typeof modelName === 'string',
-  );
 
-  const owner = getOwner(this);
-  const normalizedModelName = dasherize(modelName);
-
-  if (this.isFragment(normalizedModelName)) {
-    return serializerForFragment(owner, normalizedModelName);
-  } else {
-    return _originalSerializerFor.call(this, modelName);
+if (typeof Store.reopen === 'function') {
+  Store.reopen(storeMixin);
+} else {
+  for (const [key, value] of Object.entries(storeMixin)) {
+    Store.prototype[key] = value;
   }
-};
+}
 
 /**
   Override `Snapshot._attributes` to snapshot fragment attributes before they are
@@ -185,62 +191,72 @@ Object.defineProperty(Snapshot.prototype, '_attributes', {
 */
 
 const _originalTransformFor = JSONSerializer.prototype.transformFor;
-/**
-  Enables fragment properties to have custom transforms based on the fragment
-  type, so that deserialization does not have to happen on the fly
 
-  @method transformFor
-  @private
-*/
-JSONSerializer.prototype.transformFor = function transformFor(attributeType) {
-  if (attributeType.indexOf('-mf-') !== 0) {
-    return _originalTransformFor.call(this, attributeType);
-  }
+const serializerMixin = {
+  /**
+    Enables fragment properties to have custom transforms based on the fragment
+    type, so that deserialization does not have to happen on the fly
 
-  const owner = getOwner(this);
-  const containerKey = `transform:${attributeType}`;
-
-  if (!owner.hasRegistration(containerKey)) {
-    const match = attributeType.match(
-      /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/,
-    );
-    assert(
-      `Failed parsing ember-data-model-fragments attribute type ${attributeType}`,
-      match != null,
-    );
-    const transformName = match[1];
-    const type = match[2];
-    const polymorphicTypeProp = match[3];
-    let transformClass = owner.factoryFor(`transform:${transformName}`);
-    transformClass = transformClass && transformClass.class;
-    transformClass = transformClass.extend({
-      type,
-      polymorphicTypeProp,
-      store: this.store,
-    });
-    owner.register(containerKey, transformClass);
-  }
-  return owner.lookup(containerKey);
-};
-
-// We need to override this to handle polymorphic with a typeKey function
-JSONSerializer.prototype.applyTransforms = function applyTransforms(
-  typeClass,
-  data,
-) {
-  const attributes = typeClass.attributes;
-
-  typeClass.eachTransformedAttribute((key, typeClass) => {
-    if (data[key] === undefined) {
-      return;
+    @method transformFor
+    @private
+  */
+  transformFor(attributeType) {
+    if (attributeType.indexOf('-mf-') !== 0) {
+      return this._super
+        ? this._super(...arguments)
+        : _originalTransformFor.call(this, attributeType);
     }
 
-    const transform = this.transformFor(typeClass);
-    const transformMeta = attributes.get(key);
-    data[key] = transform.deserialize(data[key], transformMeta.options, data);
-  });
+    const owner = getOwner(this);
+    const containerKey = `transform:${attributeType}`;
 
-  return data;
+    if (!owner.hasRegistration(containerKey)) {
+      const match = attributeType.match(
+        /^-mf-(fragment|fragment-array|array)(?:\$([^$]+))?(?:\$(.+))?$/,
+      );
+      assert(
+        `Failed parsing ember-data-model-fragments attribute type ${attributeType}`,
+        match != null,
+      );
+      const transformName = match[1];
+      const type = match[2];
+      const polymorphicTypeProp = match[3];
+      let transformClass = owner.factoryFor(`transform:${transformName}`);
+      transformClass = transformClass && transformClass.class;
+      transformClass = transformClass.extend({
+        type,
+        polymorphicTypeProp,
+        store: this.store,
+      });
+      owner.register(containerKey, transformClass);
+    }
+    return owner.lookup(containerKey);
+  },
+
+  // We need to override this to handle polymorphic with a typeKey function
+  applyTransforms(typeClass, data) {
+    const attributes = typeClass.attributes;
+
+    typeClass.eachTransformedAttribute((key, typeClass) => {
+      if (data[key] === undefined) {
+        return;
+      }
+
+      const transform = this.transformFor(typeClass);
+      const transformMeta = attributes.get(key);
+      data[key] = transform.deserialize(data[key], transformMeta.options, data);
+    });
+
+    return data;
+  },
 };
+
+if (typeof JSONSerializer.reopen === 'function') {
+  JSONSerializer.reopen(serializerMixin);
+} else {
+  for (const [key, value] of Object.entries(serializerMixin)) {
+    JSONSerializer.prototype[key] = value;
+  }
+}
 
 export { Store, Model, JSONSerializer };
