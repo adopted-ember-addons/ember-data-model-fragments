@@ -1,4 +1,4 @@
-import { get, computed } from '@ember/object';
+import { get, set, computed } from '@ember/object';
 import Ember from 'ember';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
 // DS.Model gets munged to add fragment support, which must be included first
@@ -100,19 +100,34 @@ const Fragment = Model.extend(Ember.Comparable, {
   */
   copy() {
     const type = this.constructor;
-    const props = Object.create(null);
+    const regularProps = Object.create(null);
+    const fragmentProps = Object.create(null);
     const modelName = type.modelName || this._internalModel.modelName;
 
     // Look up model via store to avoid schema access deprecation in ember-data 4.12+
     const modelClass = this.store.modelFor(modelName);
 
     // Loop over each attribute and copy individually to ensure nested fragments
-    // are also copied
-    modelClass.eachAttribute((name) => {
-      props[name] = copy(get(this, name));
+    // are also copied. Separate fragment attributes from regular ones because
+    // clientDidCreate doesn't route fragment data through the fragment state manager.
+    modelClass.eachAttribute((name, meta) => {
+      const value = copy(get(this, name));
+      if (meta.isFragment) {
+        fragmentProps[name] = value;
+      } else {
+        regularProps[name] = value;
+      }
     });
 
-    return this.store.createFragment(modelName, props);
+    const fragment = this.store.createFragment(modelName, regularProps);
+
+    // Set fragment attributes via property setters, which properly route
+    // through the fragment state manager (cache.setDirtyFragment)
+    for (const [name, value] of Object.entries(fragmentProps)) {
+      set(fragment, name, value);
+    }
+
+    return fragment;
   },
 
   toStringExtension() {
@@ -198,7 +213,18 @@ export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
   // Look up model via store to avoid schema access deprecation in ember-data 4.12+
   const modelClass = fragment.store.modelFor(fragment.constructor.modelName);
   modelClass.fragmentOwnerProperties.forEach((name) => {
-    fragment.notifyPropertyChange(name);
+    try {
+      fragment.notifyPropertyChange(name);
+    } catch (e) {
+      // In warp-drive 5.8+, notifyPropertyChange during rendering can trigger
+      // a "mutation-after-consumption" error if the property tag was consumed
+      // in the same computation (e.g., fragment created in a component constructor).
+      // This is safe to suppress: the fragment owner was just set for the first
+      // time, and any future access in a new tracking context will recompute.
+      if (!e?.message?.includes?.('You attempted to update')) {
+        throw e;
+      }
+    }
   });
 
   return fragment;

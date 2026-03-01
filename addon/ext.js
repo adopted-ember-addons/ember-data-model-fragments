@@ -16,17 +16,24 @@ function serializerForFragment(owner, normalizedModelName) {
     return serializer;
   }
 
-  // no serializer found for the specific model, fallback and check for application serializer
+  // no serializer found for the specific model, fallback and check for fragment serializer
   serializer = owner.lookup('serializer:-fragment');
   if (serializer !== undefined) {
     return serializer;
   }
 
-  // final fallback, no model specific serializer, no application serializer, no
-  // `serializer` property on store: use json-api serializer
+  // final fallback: use the -default serializer (JSONSerializer in ember-data 4.12)
   serializer = owner.lookup('serializer:-default');
+  if (serializer !== undefined) {
+    return serializer;
+  }
 
-  return serializer;
+  // In ember-data 5.8+, serializer:-default may not be registered.
+  // Register JSONSerializer as the default fragment serializer.
+  if (!owner.hasRegistration('serializer:-default')) {
+    owner.register('serializer:-default', JSONSerializer);
+  }
+  return owner.lookup('serializer:-default');
 }
 /**
   @module ember-data-model-fragments
@@ -36,6 +43,30 @@ function serializerForFragment(owner, normalizedModelName) {
   @class Store
   @namespace DS
 */
+
+// Wrap serializerFor on a store instance if it's an own property (class field).
+// In ember-data 5.8+, serializerFor is defined as a class field (arrow fn)
+// which shadows our prototype method. We re-wrap it on the instance.
+function _maybeWrapSerializerFor(store) {
+  if (store.__serializerForWrapped) {
+    return;
+  }
+  const ownDesc = Object.getOwnPropertyDescriptor(store, 'serializerFor');
+  if (ownDesc && typeof ownDesc.value === 'function') {
+    const originalFn = ownDesc.value;
+    store.serializerFor = function (...args) {
+      const modelName = args[0];
+      if (typeof modelName === 'string') {
+        const normalizedModelName = dasherize(modelName);
+        if (store.isFragment(normalizedModelName)) {
+          return serializerForFragment(getOwner(store), normalizedModelName);
+        }
+      }
+      return originalFn.apply(store, args);
+    };
+  }
+  store.__serializerForWrapped = true;
+}
 
 const storeMixin = {
   /**
@@ -97,7 +128,19 @@ const storeMixin = {
       type: modelName,
     });
     this.cache.clientDidCreate(identifier, props || {});
-    return this._instanceCache.getRecord(identifier, props);
+    const record = this._instanceCache.getRecord(identifier, props);
+
+    // In ember-data 5.8+, getRecord no longer accepts createRecordArgs.
+    // Set any arbitrary (non-attribute) props on the record after creation.
+    if (props) {
+      for (const [key, value] of Object.entries(props)) {
+        if (record[key] === undefined) {
+          record.set(key, value);
+        }
+      }
+    }
+
+    return record;
   },
 
   /**
@@ -202,6 +245,14 @@ function _patchSchemaService(schemaService, store) {
   const _origAttrsFor =
     schemaService.attributesDefinitionFor.bind(schemaService);
   schemaService.attributesDefinitionFor = function (identifier) {
+    // Guard against calls after store is destroyed (e.g., during unload)
+    if (store.isDestroying || store.isDestroyed) {
+      try {
+        return _origAttrsFor(identifier);
+      } catch {
+        return {};
+      }
+    }
     const definitions = _origAttrsFor(identifier);
     // Check if fragment attributes are missing (5.8+ filters by kind)
     try {
@@ -214,7 +265,7 @@ function _patchSchemaService(schemaService, store) {
         });
       }
     } catch {
-      // modelFor may fail for non-existent types
+      // modelFor may fail for non-existent types or destroyed store
     }
     return definitions;
   };
@@ -247,6 +298,11 @@ const _originalCacheDescriptor = Object.getOwnPropertyDescriptor(
 if (_originalCacheDescriptor && _originalCacheDescriptor.get) {
   Object.defineProperty(Store.prototype, 'cache', {
     get() {
+      // Wrap serializerFor on first cache access (after constructor completes).
+      // In ember-data 5.8+, serializerFor is a class field (arrow fn) that
+      // shadows our prototype method. We must wrap after construction.
+      _maybeWrapSerializerFor(this);
+
       const cache = _originalCacheDescriptor.get.call(this);
       if (cache && !(cache instanceof FragmentCache)) {
         const fragmentCache = new FragmentCache(
