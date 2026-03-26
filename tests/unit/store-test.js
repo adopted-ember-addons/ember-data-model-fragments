@@ -43,6 +43,11 @@ module('unit - `DS.Store`', function (hooks) {
     class ApplicationSerializer extends JSONAPISerializer {}
     owner.register('serializer:application', ApplicationSerializer);
 
+    // Access cache to trigger fragment-aware store initialization.
+    // In ember-data 5.8+, serializerFor is a class field that must be
+    // wrapped after construction; the cache getter handles this.
+    void store.cache;
+
     assert.ok(
       !(store.serializerFor('name') instanceof ApplicationSerializer),
       'fragment serializer fallback is not `JSONAPISerializer`',
@@ -75,6 +80,9 @@ module('unit - `DS.Store`', function (hooks) {
   test('the default fragment serializer is `serializer:-fragment` if registered', function (assert) {
     class FragmentSerializer extends JSONSerializer {}
     owner.register('serializer:-fragment', FragmentSerializer);
+
+    // Access cache to trigger fragment-aware store initialization.
+    void store.cache;
 
     assert.ok(
       store.serializerFor('name') instanceof FragmentSerializer,

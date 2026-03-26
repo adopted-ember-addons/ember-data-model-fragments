@@ -6,5 +6,5 @@ export default class Zoo extends Model {
   @attr('string') city;
   @fragment('animal', { polymorphic: true, typeKey: '$type' }) star;
   @fragmentArray('animal', { polymorphic: true, typeKey: '$type' }) animals;
-  @belongsTo('person') manager;
+  @belongsTo('person', { async: true, inverse: null }) manager;
 }

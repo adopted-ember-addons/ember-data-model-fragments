@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
-import { diffArray } from '@ember-data/model/-private';
+import { diffArray } from '../util/diff-array';
 import { recordIdentifierFor } from '@ember-data/store';
 import { getActualFragmentType, isFragment } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
@@ -675,7 +675,7 @@ export default class FragmentStateManager {
     // Explicitly return boolean to ensure false instead of undefined
     return Boolean(
       (fragments && Object.keys(fragments).length > 0) ||
-        (inFlight && Object.keys(inFlight).length > 0),
+      (inFlight && Object.keys(inFlight).length > 0),
     );
   }
 

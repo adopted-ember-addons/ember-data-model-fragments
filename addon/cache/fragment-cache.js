@@ -12,11 +12,30 @@ import FragmentRecordDataProxy from './fragment-record-data-proxy';
 export default class FragmentCache {
   version = '2';
 
-  constructor(storeWrapper) {
+  constructor(storeWrapper, innerCache) {
     this.__storeWrapper = storeWrapper;
-    this.__innerCache = new JSONAPICache(storeWrapper);
+    this.__innerCache = innerCache || new JSONAPICache(storeWrapper);
     this.__fragmentState = new FragmentStateManager(storeWrapper);
     this.__recordDataProxies = new Map();
+
+    // When wrapping a pre-existing cache (e.g. in ember-data 5.8+), we need to
+    // intercept upsert calls that the inner cache makes on itself during put().
+    // Without this, fragment data goes directly into the inner cache as regular
+    // attributes and our FragmentStateManager never sees it.
+    //
+    // In DEBUG mode, warp-drive wraps the real cache in a CacheManager proxy.
+    // CacheManager.put() delegates to the real cache's put() via this.___cache.put(),
+    // and the real cache's put() calls this.upsert() on itself - bypassing any
+    // monkey-patch on the CacheManager. So we must patch the REAL cache's upsert.
+    if (innerCache) {
+      // Find the actual cache - it may be wrapped in a CacheManager (debug mode)
+      const actualCache = innerCache.___cache || innerCache;
+      const self = this;
+      this.__originalInnerUpsert = actualCache.upsert.bind(actualCache);
+      actualCache.upsert = function (identifier, data, calculateChanges) {
+        return self.upsert(identifier, data, calculateChanges);
+      };
+    }
   }
 
   get store() {
@@ -184,11 +203,12 @@ export default class FragmentCache {
     }
 
     // Let inner cache handle non-fragment attributes
-    const changedKeys = this.__innerCache.upsert(
-      identifier,
-      data,
-      calculateChanges,
-    );
+    // Use __originalInnerUpsert when available to avoid infinite recursion
+    // (since we may have patched innerCache.upsert to route through us)
+    const innerUpsert =
+      this.__originalInnerUpsert ||
+      this.__innerCache.upsert.bind(this.__innerCache);
+    const changedKeys = innerUpsert(identifier, data, calculateChanges);
 
     // Handle fragment attributes
     if (fragmentAttributeKeys.length > 0) {

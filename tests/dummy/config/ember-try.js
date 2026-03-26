@@ -53,6 +53,19 @@ module.exports = async function () {
           devDependencies: {
             'ember-data': '~4.12.0',
             '@ember-data/json-api': '~4.12.0',
+            '@ember-data/legacy-compat': '~4.12.0',
+          },
+        },
+      },
+      {
+        name: 'ember-data-5.8',
+        npm: {
+          devDependencies: {
+            'ember-data': '~5.8.0',
+            '@ember-data/json-api': '~5.8.0',
+            '@ember-data/legacy-compat': '~5.8.0',
+            '@warp-drive/build-config': '~5.8.0',
+            'ember-inflector': '^4.0.0',
           },
         },
       },

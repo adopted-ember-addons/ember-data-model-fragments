@@ -170,6 +170,17 @@ const FragmentArray = StatefulArray.extend({
       fragmentIdentifier,
       props,
     );
+
+    // In ember-data 5.8+, getRecord no longer accepts createRecordArgs.
+    // Set any arbitrary (non-attribute) props on the fragment after creation.
+    if (props) {
+      for (const [key, value] of Object.entries(props)) {
+        if (fragment[key] === undefined) {
+          fragment.set(key, value);
+        }
+      }
+    }
+
     return this.pushObject(fragment);
   },
 });
