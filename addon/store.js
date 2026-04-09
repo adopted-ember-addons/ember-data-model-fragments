@@ -7,6 +7,7 @@ import {
 } from '@embroider/macros';
 import FragmentCache from './cache/fragment-cache';
 import { default as Fragment } from './fragment';
+import { installCacheManagerCompat } from './util/fragment-cache';
 
 // Import side-effects to ensure monkey-patches are applied
 // These must be imported before any store instances are created
@@ -38,6 +39,10 @@ import './ext'; // Applies Snapshot monkey-patch for fragment serialization
   @public
 */
 export default class FragmentStore extends Store {
+  get cache() {
+    return installCacheManagerCompat(this, super.cache);
+  }
+
   /**
    * Override createCache to return our FragmentCache
    * This is the V2 Cache hook introduced in ember-data 4.7+
@@ -71,13 +76,7 @@ export default class FragmentStore extends Store {
    */
   createSchemaService() {
     if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
-      let buildSchema;
-
-      if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
-        ({ buildSchema } = importSync('@warp-drive/legacy/model'));
-      } else {
-        ({ buildSchema } = importSync('@ember-data/model/hooks'));
-      }
+      const { buildSchema } = importSync('@ember-data/model/hooks');
 
       const FragmentSchemaService = importSync('./schema-service').default;
 
@@ -148,6 +147,20 @@ export default class FragmentStore extends Store {
     });
     // Signal to cache that this is a new record
     this.cache.clientDidCreate(identifier, props || {});
+    if (macroCondition(dependencySatisfies('ember-data', '>=5.8.0'))) {
+      const record = this._instanceCache.getRecord(identifier);
+
+      if (props) {
+        for (const [key, value] of Object.entries(props)) {
+          if (record[key] === undefined) {
+            record.set(key, value);
+          }
+        }
+      }
+
+      return record;
+    }
+
     // Get the record instance
     return this._instanceCache.getRecord(identifier, props);
   }

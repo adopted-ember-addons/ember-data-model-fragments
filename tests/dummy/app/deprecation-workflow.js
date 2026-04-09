@@ -20,6 +20,7 @@ setupDeprecationWorkflow({
      */
     /* example: */
     { handler: 'silence', matchId: 'ember-data:deprecate-legacy-imports' },
+    { handler: 'silence', matchId: 'ember-data:deprecate-non-strict-id' },
     { handler: 'silence', matchId: 'ember-data:deprecate-non-strict-types' },
     { handler: 'silence', matchId: 'ember-data:schema-service-updates' },
     {

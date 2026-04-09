@@ -53,6 +53,7 @@ module.exports = async function () {
           devDependencies: {
             'ember-data': '~4.12.0',
             '@ember-data/json-api': '~4.12.0',
+            '@ember-data/legacy-compat': '~4.12.0',
             '@ember-data/model': '~4.12.0',
             '@ember-data/serializer': '~4.12.0',
             '@ember-data/store': '~4.12.0',
@@ -67,6 +68,7 @@ module.exports = async function () {
           devDependencies: {
             'ember-data': '~4.13.0-alpha.9',
             '@ember-data/json-api': '~4.13.0-alpha.9',
+            '@ember-data/legacy-compat': '~4.13.0-alpha.9',
             '@ember-data/model': '~4.13.0-alpha.9',
             '@ember-data/serializer': '~4.13.0-alpha.9',
             '@ember-data/store': '~4.13.0-alpha.9',
@@ -79,10 +81,12 @@ module.exports = async function () {
           devDependencies: {
             'ember-data': '~5.8.0',
             '@ember-data/json-api': '~5.8.0',
+            '@ember-data/legacy-compat': '~5.8.0',
             '@ember-data/model': '~5.8.0',
             '@ember-data/serializer': '~5.8.0',
             '@ember-data/store': '~5.8.0',
-            '@warp-drive/legacy': '~5.8.0',
+            '@warp-drive/build-config': '~5.8.0',
+            'ember-inflector': '^6.0.0',
           },
         },
       },

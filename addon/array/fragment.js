@@ -1,5 +1,6 @@
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
+import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import StatefulArray from './stateful';
 import { isFragment, setFragmentOwner } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
@@ -166,10 +167,25 @@ const FragmentArray = StatefulArray.extend({
       this.key,
       props,
     );
+    if (macroCondition(dependencySatisfies('ember-data', '>=5.8.0'))) {
+      const fragment = this.store._instanceCache.getRecord(fragmentIdentifier);
+
+      if (props) {
+        for (const [key, value] of Object.entries(props)) {
+          if (fragment[key] === undefined) {
+            fragment.set(key, value);
+          }
+        }
+      }
+
+      return this.pushObject(fragment);
+    }
+
     const fragment = this.store._instanceCache.getRecord(
       fragmentIdentifier,
       props,
     );
+
     return this.pushObject(fragment);
   },
 });

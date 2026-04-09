@@ -70,6 +70,7 @@ jobs:
           # - ember-canary
           - ember-data-4.12
           - ember-data-4.13
+          - ember-data-5.8
           - embroider-safe
           - embroider-optimized
 

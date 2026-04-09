@@ -54,10 +54,11 @@
     "@babel/eslint-parser": "^7.27.1",
     "@babel/plugin-proposal-decorators": "^7.27.1",
     "@babel/preset-env": "^7.27.1",
-    "@ember-data/json-api": "~4.13.0-alpha.9",
-    "@ember-data/model": "~4.13.0-alpha.9",
-    "@ember-data/serializer": "~4.13.0-alpha.9",
-    "@ember-data/store": "~4.13.0-alpha.9",
+    "@ember-data/json-api": "~4.12.0",
+    "@ember-data/legacy-compat": "~4.12.0",
+    "@ember-data/model": "~4.12.0",
+    "@ember-data/serializer": "~4.12.0",
+    "@ember-data/store": "~4.12.0",
     "@ember/optional-features": "^2.2.0",
     "@ember/string": "^3.1.1",
     "@ember/test-helpers": "^5.2.1",
@@ -70,6 +71,8 @@
     "@eslint/js": "^9.25.1",
     "@glimmer/component": "^2.0.0",
     "@glimmer/tracking": "^1.1.2",
+    "@warp-drive/build-config": "~5.8.0",
+    "@warp-drive/ember": "~5.8.0",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^9.1.2",
     "ember-auto-import": "^2.10.0",
@@ -80,8 +83,8 @@
     "ember-cli-htmlbars": "^6.3.0",
     "ember-cli-inject-live-reload": "^2.1.0",
     "ember-cli-terser": "^4.0.2",
-    "ember-data": "~4.13.0-alpha.9",
-    "ember-inflector": "^6.0.0",
+    "ember-data": "~4.12.0",
+    "ember-inflector": "^4.0.3",
     "ember-load-initializers": "^3.0.1",
     "ember-page-title": "^9.0.1",
     "ember-qunit": "^9.0.2",
@@ -109,17 +112,17 @@
   },
   "peerDependencies": {
     "@ember-data/json-api": ">= 4.12.0",
+    "@ember-data/legacy-compat": ">= 4.12.0",
     "@ember-data/model": ">= 4.12.0",
     "@ember-data/serializer": ">= 4.12.0",
     "@ember-data/store": ">= 4.12.0",
-    "@warp-drive/legacy": ">= 5.8.0",
     "ember-data": ">= 4.12.0",
     "ember-source": ">= 5.0.0"
   },
-  "peerDependenciesMeta": {
-    "@warp-drive/legacy": {
-      "optional": true
-    }
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js"
+    ]
   },
   "engines": {
     "node": ">= 18"

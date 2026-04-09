@@ -2,7 +2,7 @@
 
 const EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
-module.exports = function (defaults) {
+module.exports = async function (defaults) {
   const app = new EmberAddon(defaults, {
     // Add options here
   });
@@ -13,6 +13,19 @@ module.exports = function (defaults) {
     This build file does *not* influence how the addon or the app using it
     behave. You most likely want to be modifying `./index.js` or app's build file
   */
+
+  try {
+    const { setConfig } = await import('@warp-drive/build-config');
+
+    setConfig(app, __dirname, {
+      deprecations: {
+        DEPRECATE_EARLY_STATIC: true,
+        DEPRECATE_TRACKING_PACKAGE: false,
+      },
+    });
+  } catch {
+    // @warp-drive/build-config is only present in newer ember-data scenarios.
+  }
 
   const { maybeEmbroider } = require('@embroider/test-setup');
   return maybeEmbroider(app, {

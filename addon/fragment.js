@@ -208,6 +208,13 @@ Object.defineProperty(Fragment, 'fragmentOwnerProperties', {
   configurable: true,
 });
 
+Object.defineProperty(Fragment, 'toString', {
+  value() {
+    return `model:${this.modelName || 'fragment'}`;
+  },
+  configurable: true,
+});
+
 /**
  * `getActualFragmentType` returns the actual type of a fragment based on its declared type
  * and whether it is configured to be polymorphic.
