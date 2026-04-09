@@ -71,8 +71,17 @@ export default class FragmentStore extends Store {
    */
   createSchemaService() {
     if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
+      let buildSchema;
+
+      if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
+        ({ buildSchema } = importSync('@warp-drive/legacy/model'));
+      } else {
+        ({ buildSchema } = importSync('@ember-data/model/hooks'));
+      }
+
       const FragmentSchemaService = importSync('./schema-service').default;
-      return new FragmentSchemaService(this);
+
+      return new FragmentSchemaService(this, buildSchema(this));
     }
     // For ember-data 4.12, this method is never called (doesn't exist in Store base class)
     return undefined;

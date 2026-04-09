@@ -3,6 +3,7 @@ import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
 import { recordIdentifierFor } from '@ember-data/store';
 import metaTypeFor from '../util/meta-type-for';
+import fragmentCacheFor from '../util/fragment-cache';
 import StatefulArray from '../array/stateful';
 
 /**
@@ -66,7 +67,7 @@ export default function array(type, options) {
           return null;
         }
         const identifier = recordIdentifierFor(this);
-        const cache = this.store.cache;
+        const cache = fragmentCacheFor(this.store);
         if (cache.getFragment(identifier, key) === null) {
           return null;
         }
@@ -87,7 +88,7 @@ export default function array(type, options) {
           value === null || isArray(value),
         );
         const identifier = recordIdentifierFor(this);
-        const cache = this.store.cache;
+        const cache = fragmentCacheFor(this.store);
         if (value === null) {
           cache.setDirtyFragment(identifier, key, null);
           return null;

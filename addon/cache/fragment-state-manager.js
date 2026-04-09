@@ -692,27 +692,23 @@ export default class FragmentStateManager {
     const fragmentIdentifier =
       this.store.identifierCache.createIdentifierForNewRecord({ type });
     this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, definition.name);
-    // Initialize the fragment in the cache - use clientDidCreate to set up
-    // the record's internal state, then upsert to set canonical data
-    this.store.cache.__innerCache.clientDidCreate(fragmentIdentifier, {});
-    // Push the attributes to the inner cache
+    // Route creation through the fragment cache wrapper so it can initialize
+    // state consistently across Ember Data / WarpDrive versions.
+    this.store.cache.clientDidCreate(fragmentIdentifier, {});
+
     if (attributes) {
-      this.store.cache.__innerCache.upsert(
-        fragmentIdentifier,
-        { attributes },
-        false,
-      );
+      this.store.cache.upsert(fragmentIdentifier, { attributes }, false);
     }
+
     // Process any nested fragment attributes
     this.pushFragmentData(fragmentIdentifier, { attributes }, false);
     return fragmentIdentifier;
   }
 
   hasChangedAttributes(identifier) {
-    // Check both fragment state and inner cache state
     return (
       this.hasChangedFragments(identifier) ||
-      this.store.cache.__innerCache.hasChangedAttrs(identifier)
+      this.store.cache.hasChangedAttrs(identifier)
     );
   }
 
@@ -731,7 +727,7 @@ export default class FragmentStateManager {
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
-    const cache = this.store.cache.__innerCache;
+    const cache = this.store.cache;
 
     // Get changed attrs from inner cache to find original values for dirty attrs
     const changedAttrs = cache.changedAttrs(identifier);
@@ -781,7 +777,7 @@ export default class FragmentStateManager {
         result[key] = behavior.currentState(this.getFragment(identifier, key));
       } else {
         // Regular attributes - get from inner cache
-        const cache = this.store.cache.__innerCache;
+        const cache = this.store.cache;
         result[key] = cache.getAttr(identifier, key);
       }
     }
@@ -1149,8 +1145,7 @@ export default class FragmentStateManager {
   _fragmentPushData(identifier, data) {
     // Push data to the cache for the fragment
     if (data?.attributes) {
-      // Use the inner cache's upsert for the fragment's own attributes
-      const cache = this.store.cache.__innerCache;
+      const cache = this.store.cache;
       cache.upsert(identifier, data, false);
       // Notify that attributes changed so computed properties are invalidated
       for (const key of Object.keys(data.attributes)) {
@@ -1163,7 +1158,7 @@ export default class FragmentStateManager {
 
   _fragmentWillCommit(identifier) {
     // Capture the current attribute values before commit - these are what will be committed
-    const innerCache = this.store.cache.__innerCache;
+    const innerCache = this.store.cache;
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
@@ -1181,7 +1176,7 @@ export default class FragmentStateManager {
 
     // Signal to cache that fragment is being committed
     this.willCommitFragments(identifier);
-    this.store.cache.__innerCache.willCommit(identifier);
+    this.store.cache.willCommit(identifier);
   }
 
   _fragmentDidCommit(identifier, data) {
@@ -1199,7 +1194,7 @@ export default class FragmentStateManager {
     // 4. Rollback to clear in-flight state
     // 5. Upsert the committed values as new canonical
     // 6. Re-apply any new dirty changes that were made during in-flight
-    const innerCache = this.store.cache.__innerCache;
+    const innerCache = this.store.cache;
 
     // Get schema for non-fragment attributes
     const definitions = this.__storeWrapper
@@ -1289,13 +1284,13 @@ export default class FragmentStateManager {
   _fragmentRollbackAttributes(identifier) {
     // Rollback fragment attributes
     this.rollbackFragments(identifier);
-    this.store.cache.__innerCache.rollbackAttrs(identifier);
+    this.store.cache.rollbackAttrs(identifier);
   }
 
   _fragmentCommitWasRejected(identifier) {
     // Signal that commit was rejected
     this.commitWasRejectedFragments(identifier);
-    this.store.cache.__innerCache.commitWasRejected(identifier);
+    this.store.cache.commitWasRejected(identifier);
   }
 
   _fragmentUnloadRecord(identifier) {
@@ -1313,7 +1308,7 @@ export default class FragmentStateManager {
       // Fragment may already be unloaded or destroyed
       // Fall back to just clearing the inner cache
       try {
-        this.store.cache.__innerCache.unloadRecord(identifier);
+        this.store.cache.unloadRecord(identifier);
       } catch {
         // May already be unloaded
       }

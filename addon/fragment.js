@@ -4,6 +4,7 @@ import { Comparable } from '@ember/-internals/runtime';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
 import { copy } from './util/copy';
+import fragmentCacheFor from './util/fragment-cache';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**
@@ -16,7 +17,7 @@ import { recordIdentifierFor } from '@ember-data/store';
  */
 export function fragmentRecordDataFor(fragment) {
   const identifier = recordIdentifierFor(fragment);
-  return fragment.store.cache.createFragmentRecordData(identifier);
+  return fragmentCacheFor(fragment.store).createFragmentRecordData(identifier);
 }
 
 /**
@@ -165,7 +166,7 @@ const Fragment = Model.extend(Comparable, {
       return '';
     }
     const identifier = recordIdentifierFor(this);
-    const owner = this.store.cache.getFragmentOwner(identifier);
+    const owner = fragmentCacheFor(this.store).getFragmentOwner(identifier);
     return owner ? `owner(${owner.ownerIdentifier?.id})` : '';
   },
 
@@ -234,7 +235,7 @@ export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
   const fragmentIdentifier = recordIdentifierFor(fragment);
   const ownerIdentifier =
     ownerRecordDataOrIdentifier.identifier || ownerRecordDataOrIdentifier;
-  fragment.store.cache.setFragmentOwner(
+  fragmentCacheFor(fragment.store).setFragmentOwner(
     fragmentIdentifier,
     ownerIdentifier,
     key,
@@ -273,7 +274,7 @@ export function isFragment(obj) {
 Object.defineProperty(Fragment.prototype, 'hasDirtyAttributes', {
   get() {
     const identifier = recordIdentifierFor(this);
-    return this.store.cache.hasChangedAttrs(identifier);
+    return fragmentCacheFor(this.store).hasChangedAttrs(identifier);
   },
   configurable: true,
 });

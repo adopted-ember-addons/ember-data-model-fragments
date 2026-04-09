@@ -3,6 +3,7 @@ import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
 import { copy } from '../util/copy';
+import fragmentCacheFor from '../util/fragment-cache';
 
 /**
   @module ember-data-model-fragments
@@ -61,7 +62,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @private
   */
   get cache() {
-    return this.store.cache;
+    return fragmentCacheFor(this.store);
   },
 
   init() {

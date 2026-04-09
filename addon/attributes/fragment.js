@@ -7,6 +7,7 @@ import {
   isFragment,
   setFragmentOwner,
 } from '../fragment';
+import fragmentCacheFor from '../util/fragment-cache';
 import metaTypeFor from '../util/meta-type-for';
 import isInstanceOfType from '../util/instance-of-type';
 
@@ -74,7 +75,7 @@ export default function fragment(type, options) {
           return null;
         }
         const identifier = recordIdentifierFor(this);
-        const cache = this.store.cache;
+        const cache = fragmentCacheFor(this.store);
         const fragmentIdentifier = cache.getFragment(identifier, key);
         if (fragmentIdentifier === null) {
           return null;
@@ -88,7 +89,7 @@ export default function fragment(type, options) {
           value === null || isFragment(value) || typeOf(value) === 'object',
         );
         const identifier = recordIdentifierFor(this);
-        const cache = this.store.cache;
+        const cache = fragmentCacheFor(this.store);
         if (value === null) {
           cache.setDirtyFragment(identifier, key, null);
           return null;

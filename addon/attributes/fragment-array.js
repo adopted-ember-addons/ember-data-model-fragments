@@ -4,6 +4,7 @@ import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { recordIdentifierFor } from '@ember-data/store';
 import { isFragment } from '../fragment';
+import fragmentCacheFor from '../util/fragment-cache';
 import metaTypeFor from '../util/meta-type-for';
 import FragmentArray from '../array/fragment';
 
@@ -75,7 +76,7 @@ export default function fragmentArray(type, options) {
           return null;
         }
         const identifier = recordIdentifierFor(this);
-        const cache = this.store.cache;
+        const cache = fragmentCacheFor(this.store);
         if (cache.getFragment(identifier, key) === null) {
           return null;
         }
@@ -99,7 +100,7 @@ export default function fragmentArray(type, options) {
               value.every((v) => isFragment(v) || typeOf(v) === 'object')),
         );
         const identifier = recordIdentifierFor(this);
-        const cache = this.store.cache;
+        const cache = fragmentCacheFor(this.store);
         if (value === null) {
           cache.setDirtyFragment(identifier, key, null);
           return null;

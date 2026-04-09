@@ -3,6 +3,7 @@ import { computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { isFragment } from '../fragment';
 import { recordIdentifierFor } from '@ember-data/store';
+import fragmentCacheFor from '../util/fragment-cache';
 
 /**
  `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`
@@ -42,7 +43,7 @@ export default function fragmentOwner() {
       isFragment(this),
     );
     const identifier = recordIdentifierFor(this);
-    const owner = this.store.cache.getFragmentOwner(identifier);
+    const owner = fragmentCacheFor(this.store).getFragmentOwner(identifier);
     if (!owner) {
       return null;
     }
