@@ -16,6 +16,7 @@ import globals from 'globals';
 import js from '@eslint/js';
 
 import ember from 'eslint-plugin-ember/recommended';
+import WarpDrive from 'eslint-plugin-warp-drive/recommended';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import qunit from 'eslint-plugin-qunit';
 import n from 'eslint-plugin-n';
@@ -38,6 +39,7 @@ export default [
   eslintConfigPrettier,
   ember.configs.base,
   ember.configs.gjs,
+  ...WarpDrive,
   /**
    * Ignores must be in their own object
    * https://eslint.org/docs/latest/use/configure/ignore
@@ -76,6 +78,7 @@ export default [
     },
   },
   {
+    ...qunit.configs.recommended,
     files: ['tests/**/*-test.{js,gjs}'],
     plugins: {
       qunit,
@@ -88,6 +91,7 @@ export default [
    * CJS node files
    */
   {
+    ...n.configs['flat/recommended-script'],
     files: [
       '**/*.cjs',
       'blueprints/**/*.js',
@@ -118,6 +122,7 @@ export default [
    * ESM node files
    */
   {
+    ...n.configs['flat/recommended-module'],
     files: ['**/*.mjs'],
     plugins: {
       n,
