@@ -726,7 +726,7 @@ export default class FragmentStateManager {
     // Explicitly return boolean to ensure false instead of undefined
     return Boolean(
       (fragments && Object.keys(fragments).length > 0) ||
-        (inFlight && Object.keys(inFlight).length > 0),
+      (inFlight && Object.keys(inFlight).length > 0),
     );
   }
 
