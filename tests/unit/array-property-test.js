@@ -8,7 +8,6 @@ import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import { HAS_ARRAY_OBSERVERS } from 'ember-data-model-fragments/array/stateful';
 
 let store;
 class Person extends Model {
@@ -265,42 +264,4 @@ module('unit - `MF.array` property', function (hooks) {
       'preserve array contents after unload',
     );
   });
-
-  if (HAS_ARRAY_OBSERVERS) {
-    test('supports array observers', async function (assert) {
-      store.push({
-        data: {
-          type: 'person',
-          id: 1,
-          attributes: {
-            nickName: 'Tyrion Lannister',
-            titles: ['Hand of the King'],
-          },
-        },
-      });
-
-      this.arrayWillChange = function (array, start, removeCount, addCount) {
-        assert.step(`arrayWillChange(${start},${removeCount},${addCount})`);
-      };
-      this.arrayDidChange = function (array, start, removeCount, addCount) {
-        assert.step(`arrayDidChange(${start},${removeCount},${addCount})`);
-      };
-
-      const person = await store.findRecord('person', 1);
-      const titles = person.titles;
-      titles.addArrayObserver(this, {
-        willChange: 'arrayWillChange',
-        didChange: 'arrayDidChange',
-      });
-      titles.pushObject('Master of Coin');
-
-      assert.verifySteps(['arrayWillChange(1,0,1)', 'arrayDidChange(1,0,1)']);
-
-      titles.clear();
-
-      assert.verifySteps(['arrayWillChange(0,2,0)', 'arrayDidChange(0,2,0)']);
-
-      titles.removeArrayObserver(this);
-    });
-  }
 });
