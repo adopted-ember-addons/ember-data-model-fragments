@@ -58,7 +58,7 @@ export function fragmentRecordDataFor(fragment) {
   ```
 
   ```javascript
-  let person = store.getbyid('person', '1');
+  let person = store.peekRecord('person', '1');
   let name = person.name;
 
   person.hasDirtyAttributes; // false
