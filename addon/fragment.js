@@ -1,6 +1,6 @@
 import { get, computed } from '@ember/object';
-import Ember from 'ember';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
+import { Comparable } from '@ember/-internals/runtime';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext';
 import { copy } from './util/copy';
@@ -74,10 +74,10 @@ export function fragmentRecordDataFor(fragment) {
   @class Fragment
   @namespace MF
   @extends CoreModel
-  @uses Ember.Comparable
+  @uses Comparable
   @uses Copyable
 */
-const Fragment = Model.extend(Ember.Comparable, {
+const Fragment = Model.extend(Comparable, {
   /**
     Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 

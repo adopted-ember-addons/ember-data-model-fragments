@@ -1,5 +1,5 @@
 import { all } from 'rsvp';
-import Ember from 'ember';
+import { Comparable } from '@ember/-internals/runtime';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
@@ -73,10 +73,10 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(copy.last, 'Snow');
   });
 
-  test('fragments are `Ember.Comparable`', function (assert) {
+  test('fragments are `Comparable`', function (assert) {
     const fragment = store.createFragment('name');
 
-    assert.ok(Ember.Comparable.detect(fragment), 'fragments are comparable');
+    assert.ok(Comparable.detect(fragment), 'fragments are comparable');
   });
 
   test('fragments support toString', function (assert) {
