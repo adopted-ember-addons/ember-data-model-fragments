@@ -4,7 +4,6 @@ import { setupApplicationTest } from '../helpers';
 import Name from 'dummy/models/name';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
 import JSONSerializer from '@ember-data/serializer/json';
-import { gte } from 'ember-compatibility-helpers';
 
 let store, owner;
 
@@ -52,25 +51,6 @@ module('unit - `DS.Store`', function (hooks) {
       'fragment serializer fallback is correct',
     );
   });
-
-  if (!gte('ember-data', '4.4.0')) {
-    // default adapter was deprecated in ember-data 3.15 and removed in 4.4
-    // https://deprecations.emberjs.com/ember-data/v3.x/#toc_ember-data-default-adapter
-    // https://github.com/emberjs/data/pull/7861
-
-    test("the default fragment serializer does not use the adapter's `defaultSerializer`", function (assert) {
-      store.set('defaultAdapter.defaultSerializer', '-json-api');
-
-      assert.ok(
-        !(store.serializerFor('name') instanceof JSONAPISerializer),
-        'fragment serializer fallback is not `JSONAPISerializer`',
-      );
-      assert.ok(
-        store.serializerFor('name') instanceof JSONSerializer,
-        'fragment serializer fallback is correct',
-      );
-    });
-  }
 
   test('the default fragment serializer is `serializer:-fragment` if registered', function (assert) {
     class FragmentSerializer extends JSONSerializer {}

@@ -2,23 +2,11 @@ import EmberObject, { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
-import { diffArray } from '@ember-data/model/-private';
 import { copy } from '../util/copy';
-import { gte } from 'ember-compatibility-helpers';
 
 /**
   @module ember-data-model-fragments
 */
-
-/**
- * Whether the current version of ember supports array observers.
- * Array observers were deprecated in ember 3.26 and removed in 4.0.
- * @see https://deprecations.emberjs.com/v3.x#toc_array-observers
- * @see https://github.com/emberjs/ember.js/pull/19833
- * @type {boolean}
- * @private
- */
-export const HAS_ARRAY_OBSERVERS = !gte('4.0.0');
 
 /**
   A state-aware array that is tied to an attribute of a `DS.Model` instance.
@@ -88,14 +76,10 @@ const StatefulArray = EmberObject.extend(MutableArray, {
 
   notify() {
     this._isDirty = true;
-    if (HAS_ARRAY_OBSERVERS && this.hasArrayObservers && !this._hasNotified) {
-      this.retrieveLatest();
-    } else {
-      this._hasNotified = true;
-      this.notifyPropertyChange('[]');
-      this.notifyPropertyChange('firstObject');
-      this.notifyPropertyChange('lastObject');
-    }
+    this._hasNotified = true;
+    this.notifyPropertyChange('[]');
+    this.notifyPropertyChange('firstObject');
+    this.notifyPropertyChange('lastObject');
   },
 
   get length() {
@@ -181,30 +165,9 @@ const StatefulArray = EmberObject.extend(MutableArray, {
 
     this._isDirty = false;
     this._isUpdating = true;
-    if (HAS_ARRAY_OBSERVERS && this.hasArrayObservers && !this._hasNotified) {
-      // diff to find changes
-      const diff = diffArray(this.currentState, currentState);
-      // it's null if no change found
-      if (diff.firstChangeIndex !== null) {
-        // we found a change
-        this.arrayContentWillChange(
-          diff.firstChangeIndex,
-          diff.removedCount,
-          diff.addedCount,
-        );
-        this._length = currentState.length;
-        this.currentState = currentState;
-        this.arrayContentDidChange(
-          diff.firstChangeIndex,
-          diff.removedCount,
-          diff.addedCount,
-        );
-      }
-    } else {
-      this._hasNotified = false;
-      this._length = currentState.length;
-      this.currentState = currentState;
-    }
+    this._hasNotified = false;
+    this._length = currentState.length;
+    this.currentState = currentState;
     this._isUpdating = false;
   },
 

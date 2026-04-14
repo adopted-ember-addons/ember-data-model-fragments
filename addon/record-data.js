@@ -7,7 +7,6 @@ import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { getActualFragmentType, isFragment } from './fragment';
 import isInstanceOfType from './util/instance-of-type';
-import { gte } from 'ember-compatibility-helpers';
 
 class FragmentBehavior {
   constructor(recordData, definition) {
@@ -761,10 +760,11 @@ export default class FragmentRecordData extends RecordData {
     }
 
     const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
-    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+
+    if (changedKeys?.length > 0) {
       internalModelFor(this).notifyAttributes(changedKeys);
     }
-    // on ember-data 2.8 - 4.4, InternalModel.setupData will notify
+
     return changedKeys || [];
   }
 
@@ -838,10 +838,11 @@ export default class FragmentRecordData extends RecordData {
     });
 
     const changedKeys = mergeArrays(changedAttributeKeys, changedFragmentKeys);
-    if (gte('ember-data', '4.5.0') && changedKeys?.length > 0) {
+
+    if (changedKeys?.length > 0) {
       internalModelFor(this).notifyAttributes(changedKeys);
     }
-    // on ember-data 2.8 - 4.4, InternalModel.adapterDidCommit will notify
+
     return changedKeys;
   }
 
@@ -979,7 +980,7 @@ export default class FragmentRecordData extends RecordData {
   }
 
   notifyStateChange(key) {
-    if (key && gte('ember-data', '4.5.0')) {
+    if (key) {
       this.storeWrapper.notifyPropertyChange(
         this.modelName,
         this.id,
@@ -991,7 +992,6 @@ export default class FragmentRecordData extends RecordData {
         this.modelName,
         this.id,
         this.clientId,
-        key,
       );
     }
   }
@@ -1002,13 +1002,10 @@ export default class FragmentRecordData extends RecordData {
    */
 
   _fragmentGetRecord(properties) {
-    if (gte('ember-data', '4.5.0')) {
-      return this.storeWrapper._store._instanceCache.getRecord(
-        this.identifier,
-        properties,
-      );
-    }
-    return internalModelFor(this).getRecord(properties);
+    return this.storeWrapper._store._instanceCache.getRecord(
+      this.identifier,
+      properties,
+    );
   }
   _fragmentPushData(data) {
     internalModelFor(this).setupData(data);
@@ -1094,12 +1091,8 @@ export default class FragmentRecordData extends RecordData {
 
 function internalModelFor(recordData) {
   const store = recordData.storeWrapper._store;
-  if (gte('ember-data', '4.5.0')) {
-    return store._instanceCache._internalModelForResource(
-      recordData.identifier,
-    );
-  }
-  return store._internalModelForResource(recordData.identifier);
+
+  return store._instanceCache._internalModelForResource(recordData.identifier);
 }
 
 function isArrayEqual(a, b) {
