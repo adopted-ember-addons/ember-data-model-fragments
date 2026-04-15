@@ -1,10 +1,40 @@
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
-import { diffArray } from '@ember-data/model/-private';
 import { recordIdentifierFor } from '@ember-data/store';
 import { getActualFragmentType, isFragment } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
+
+/**
+ * Simple array diff implementation.
+ * Returns an object with `firstChangeIndex` indicating where the arrays first differ.
+ * Returns `{ firstChangeIndex: null }` if arrays are identical.
+ *
+ * @param {Array} oldArray
+ * @param {Array} newArray
+ * @returns {Object} Object with firstChangeIndex property
+ */
+function diffArray(oldArray, newArray) {
+  if (oldArray === newArray) {
+    return { firstChangeIndex: null };
+  }
+
+  if (!oldArray || !newArray) {
+    return { firstChangeIndex: 0 };
+  }
+
+  if (oldArray.length !== newArray.length) {
+    return { firstChangeIndex: Math.min(oldArray.length, newArray.length) };
+  }
+
+  for (let i = 0; i < oldArray.length; i++) {
+    if (oldArray[i] !== newArray[i]) {
+      return { firstChangeIndex: i };
+    }
+  }
+
+  return { firstChangeIndex: null };
+}
 
 /**
  * Behavior for single fragment attributes
@@ -441,36 +471,53 @@ export default class FragmentStateManager {
 
   _getBehaviors(identifier) {
     let behaviors = this.__behaviors.get(identifier.lid);
-    if (!behaviors) {
-      behaviors = Object.create(null);
-      const definitions = this.__storeWrapper
-        .getSchemaDefinitionService()
-        .attributesDefinitionFor(identifier);
-      for (const [key, definition] of Object.entries(definitions)) {
-        if (!definition.isFragment) {
-          continue;
-        }
-        switch (definition.kind) {
-          case 'fragment-array':
-            behaviors[key] = new FragmentArrayBehavior(
-              this,
-              identifier,
-              definition,
-            );
-            break;
-          case 'fragment':
-            behaviors[key] = new FragmentBehavior(this, identifier, definition);
-            break;
-          case 'array':
-            behaviors[key] = new ArrayBehavior(this, identifier, definition);
-            break;
-          default:
-            assert(`Unsupported fragment type: ${definition.kind}`);
-            break;
-        }
-      }
-      this.__behaviors.set(identifier.lid, behaviors);
+    if (behaviors) {
+      return behaviors;
     }
+
+    behaviors = Object.create(null);
+
+    const definitions = this.__storeWrapper
+      .getSchemaDefinitionService()
+      .attributesDefinitionFor(identifier);
+
+    for (const [key, definition] of Object.entries(definitions)) {
+      // Support both metadata formats:
+      // - ember-data 4.12: definition.isFragment (direct property on meta)
+      // - ember-data 4.13: definition.options.isFragment (transformed by FragmentSchemaService)
+      const isFragmentAttr =
+        definition.isFragment || definition.options?.isFragment;
+
+      if (!isFragmentAttr) {
+        continue;
+      }
+
+      // Get the fragment kind from the appropriate location:
+      // - ember-data 4.12: definition.kind (original location)
+      // - ember-data 4.13: definition.options.fragmentKind (preserved by FragmentSchemaService)
+      const fragmentKind = definition.options?.fragmentKind || definition.kind;
+
+      switch (fragmentKind) {
+        case 'fragment-array':
+          behaviors[key] = new FragmentArrayBehavior(
+            this,
+            identifier,
+            definition,
+          );
+          break;
+        case 'fragment':
+          behaviors[key] = new FragmentBehavior(this, identifier, definition);
+          break;
+        case 'array':
+          behaviors[key] = new ArrayBehavior(this, identifier, definition);
+          break;
+        default:
+          assert(`Unsupported fragment type: ${fragmentKind}`);
+          break;
+      }
+    }
+
+    this.__behaviors.set(identifier.lid, behaviors);
     return behaviors;
   }
 
@@ -691,7 +738,9 @@ export default class FragmentStateManager {
 
     // Get canonical values for all attributes
     for (const [key, definition] of Object.entries(definitions)) {
-      if (definition.isFragment) {
+      const isFragmentAttr =
+        definition.isFragment || definition.options?.isFragment;
+      if (isFragmentAttr) {
         // Fragment attributes - use behavior's canonicalState
         const behaviors = this._getBehaviors(identifier);
         const behavior = behaviors[key];
@@ -723,7 +772,9 @@ export default class FragmentStateManager {
 
     // Get current values for all attributes
     for (const [key, definition] of Object.entries(definitions)) {
-      if (definition.isFragment) {
+      const isFragmentAttr =
+        definition.isFragment || definition.options?.isFragment;
+      if (isFragmentAttr) {
         // Fragment attributes - use behavior's currentState
         const behaviors = this._getBehaviors(identifier);
         const behavior = behaviors[key];
@@ -823,15 +874,16 @@ export default class FragmentStateManager {
         newCanonicalFragments[key] = behavior.pushData(current, canonical);
       });
 
-      if (calculateChange) {
-        changedFragmentKeys = this._changedFragmentKeys(
-          identifier,
-          newCanonicalFragments,
-        );
-      }
+      // Always calculate which keys changed so we can notify observers
+      changedFragmentKeys = this._changedFragmentKeys(
+        identifier,
+        newCanonicalFragments,
+      );
 
       Object.assign(fragmentData, newCanonicalFragments);
-      changedFragmentKeys?.forEach((key) => {
+
+      // Always notify for changed keys so computed properties are invalidated
+      changedFragmentKeys.forEach((key) => {
         // Notify the storeWrapper that the fragment attribute changed
         this.__storeWrapper.notifyChange(identifier, 'attributes', key);
         const arrayCache = this.__fragmentArrayCache.get(identifier.lid);
@@ -839,7 +891,7 @@ export default class FragmentStateManager {
       });
     }
 
-    return changedFragmentKeys || [];
+    return calculateChange ? changedFragmentKeys || [] : [];
   }
 
   willCommitFragments(identifier) {
@@ -968,6 +1020,16 @@ export default class FragmentStateManager {
   }
 
   unloadFragments(identifier) {
+    // Guard against store being destroyed during teardown
+    if (this.store.isDestroying || this.store.isDestroyed) {
+      // Just clear our internal data structures
+      this.__fragments.delete(identifier.lid);
+      this.__inFlightFragments.delete(identifier.lid);
+      this.__fragmentData.delete(identifier.lid);
+      this.__fragmentArrayCache.delete(identifier.lid);
+      return;
+    }
+
     const behaviors = this._getBehaviors(identifier);
     const fragments = this.__fragments.get(identifier.lid) || {};
     const inFlight = this.__inFlightFragments.get(identifier.lid) || {};
@@ -1059,6 +1121,28 @@ export default class FragmentStateManager {
 
   _notifyStateChange(identifier, key) {
     this.__storeWrapper.notifyChange(identifier, 'attributes', key);
+    // Also notify the record instance directly to invalidate computed property caches
+    if (key) {
+      try {
+        const record = this.store._instanceCache.getRecord(identifier);
+        if (record && typeof record.notifyPropertyChange === 'function') {
+          record.notifyPropertyChange(key);
+          // Also clear any cached value by directly removing from Ember's cache
+          // This is needed because computed setters cache their return value
+          // and notifyPropertyChange alone may not clear it in all Ember versions
+          const meta = record.constructor.metaForProperty?.(key);
+          if (meta) {
+            // Force the computed property to re-evaluate by clearing its cache entry
+            const cache = record['__ember_meta__']?.peekCache?.(key);
+            if (cache !== undefined) {
+              record['__ember_meta__']?.deleteFromCache?.(key);
+            }
+          }
+        }
+      } catch {
+        // Record may not be instantiated yet
+      }
+    }
   }
 
   // Fragment lifecycle methods using cache API directly
@@ -1086,7 +1170,9 @@ export default class FragmentStateManager {
 
     const inFlightValues = {};
     for (const [key, definition] of Object.entries(definitions)) {
-      if (!definition.isFragment) {
+      const isFragmentAttr =
+        definition.isFragment || definition.options?.isFragment;
+      if (!isFragmentAttr) {
         // getAttr returns dirty value if exists, else canonical
         inFlightValues[key] = innerCache.getAttr(identifier, key);
       }
@@ -1127,7 +1213,9 @@ export default class FragmentStateManager {
     // Get current values (may include new dirty changes made during in-flight)
     const currentValues = {};
     for (const [key, definition] of Object.entries(definitions)) {
-      if (!definition.isFragment) {
+      const isFragmentAttr =
+        definition.isFragment || definition.options?.isFragment;
+      if (!isFragmentAttr) {
         currentValues[key] = innerCache.getAttr(identifier, key);
       }
     }
@@ -1140,7 +1228,9 @@ export default class FragmentStateManager {
     const newDirtyAttrs = {};
 
     for (const [key, definition] of Object.entries(definitions)) {
-      if (definition.isFragment) continue;
+      const isFragmentAttr =
+        definition.isFragment || definition.options?.isFragment;
+      if (isFragmentAttr) continue;
 
       // Determine the new canonical value
       const canonicalValue =

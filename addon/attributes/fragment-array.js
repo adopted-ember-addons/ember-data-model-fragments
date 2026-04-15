@@ -61,54 +61,62 @@ export default function fragmentArray(type, options) {
     options,
   };
 
-  // eslint-disable-next-line ember/require-computed-property-dependencies
-  return computed({
-    get(key) {
-      if (this.isDestroying || this.isDestroyed) {
-        return null;
-      }
-      const identifier = recordIdentifierFor(this);
-      const cache = this.store.cache;
-      if (cache.getFragment(identifier, key) === null) {
-        return null;
-      }
-      let fragmentArray = cache.getFragmentArrayCache(identifier, key);
-      if (!fragmentArray) {
-        fragmentArray = FragmentArray.create({
-          modelName: type,
-          store: this.store,
-          identifier,
-          key,
-        });
-        cache.setFragmentArrayCache(identifier, key, fragmentArray);
-      }
-      return fragmentArray;
+  // Use computed with a dependency on hasDirtyAttributes which changes on rollback
+  // This ensures the computed property is re-evaluated when dirty state changes
+  return computed(
+    'currentState',
+    'hasDirtyAttributes',
+    'isDestroyed',
+    'isDestroying',
+    'store.cache',
+    {
+      get(key) {
+        if (this.isDestroying || this.isDestroyed) {
+          return null;
+        }
+        const identifier = recordIdentifierFor(this);
+        const cache = this.store.cache;
+        if (cache.getFragment(identifier, key) === null) {
+          return null;
+        }
+        let fragmentArray = cache.getFragmentArrayCache(identifier, key);
+        if (!fragmentArray) {
+          fragmentArray = FragmentArray.create({
+            modelName: type,
+            store: this.store,
+            identifier,
+            key,
+          });
+          cache.setFragmentArrayCache(identifier, key, fragmentArray);
+        }
+        return fragmentArray;
+      },
+      set(key, value) {
+        assert(
+          'You must pass an array of fragments, or null to set a fragmentArray',
+          value === null ||
+            (isArray(value) &&
+              value.every((v) => isFragment(v) || typeOf(v) === 'object')),
+        );
+        const identifier = recordIdentifierFor(this);
+        const cache = this.store.cache;
+        if (value === null) {
+          cache.setDirtyFragment(identifier, key, null);
+          return null;
+        }
+        let fragmentArray = cache.getFragmentArrayCache(identifier, key);
+        if (!fragmentArray) {
+          fragmentArray = FragmentArray.create({
+            modelName: type,
+            store: this.store,
+            identifier,
+            key,
+          });
+          cache.setFragmentArrayCache(identifier, key, fragmentArray);
+        }
+        fragmentArray._setFragments(value);
+        return fragmentArray;
+      },
     },
-    set(key, value) {
-      assert(
-        'You must pass an array of fragments, or null to set a fragmentArray',
-        value === null ||
-          (isArray(value) &&
-            value.every((v) => isFragment(v) || typeOf(v) === 'object')),
-      );
-      const identifier = recordIdentifierFor(this);
-      const cache = this.store.cache;
-      if (value === null) {
-        cache.setDirtyFragment(identifier, key, null);
-        return null;
-      }
-      let fragmentArray = cache.getFragmentArrayCache(identifier, key);
-      if (!fragmentArray) {
-        fragmentArray = FragmentArray.create({
-          modelName: type,
-          store: this.store,
-          identifier,
-          key,
-        });
-        cache.setFragmentArrayCache(identifier, key, fragmentArray);
-      }
-      fragmentArray._setFragments(value);
-      return fragmentArray;
-    },
-  }).meta(meta);
+  ).meta(meta);
 }
