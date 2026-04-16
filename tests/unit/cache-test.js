@@ -175,6 +175,86 @@ module('unit - FragmentCache', function (hooks) {
 
       assert.strictEqual(nameViaCache, null, 'getAttr returns null');
     });
+
+    test('schema surfaces include fragment fields consistently', async function (assert) {
+      store.push({
+        data: {
+          type: 'person',
+          id: '1',
+          attributes: {
+            name: {
+              first: 'Arya',
+              last: 'Stark',
+            },
+            houses: [{ name: 'Stark', region: 'North' }],
+            children: ['Arya'],
+          },
+        },
+      });
+
+      const person = store.peekRecord('person', '1');
+      const identifier = recordIdentifierFor(person);
+      const schema = store.getSchemaDefinitionService();
+      const definitions = schema.attributesDefinitionFor(identifier);
+
+      assert.true(
+        definitions.name.isFragment,
+        'attributesDefinitionFor preserves fragment metadata for fragments',
+      );
+      assert.true(
+        definitions.houses.isFragment,
+        'attributesDefinitionFor preserves fragment metadata for fragment arrays',
+      );
+      assert.true(
+        definitions.children.isFragment,
+        'attributesDefinitionFor preserves fragment metadata for arrays',
+      );
+
+      // ember-data 4.12 does not expose the newer schema field APIs.
+      if (typeof schema.fields !== 'function') {
+        return;
+      }
+
+      const fields = schema.fields(identifier);
+
+      assert.ok(fields.has('name'), 'fields includes fragment field');
+      assert.ok(fields.has('houses'), 'fields includes fragment array field');
+      assert.ok(fields.has('children'), 'fields includes array field');
+
+      if (typeof schema.cacheFields === 'function') {
+        const cacheFields = schema.cacheFields(identifier);
+
+        assert.ok(
+          cacheFields.has('name'),
+          'cacheFields includes fragment field',
+        );
+        assert.ok(
+          cacheFields.has('houses'),
+          'cacheFields includes fragment array field',
+        );
+        assert.ok(
+          cacheFields.has('children'),
+          'cacheFields includes array field',
+        );
+      }
+
+      if (typeof schema.resource === 'function') {
+        const resource = schema.resource(identifier);
+
+        assert.ok(
+          resource.fields.some((field) => field.name === 'name'),
+          'resource fields include fragment field',
+        );
+        assert.ok(
+          resource.fields.some((field) => field.name === 'houses'),
+          'resource fields include fragment array field',
+        );
+        assert.ok(
+          resource.fields.some((field) => field.name === 'children'),
+          'resource fields include array field',
+        );
+      }
+    });
   });
 
   module('setAttr - dirty state propagation', function () {

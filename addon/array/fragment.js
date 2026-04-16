@@ -169,10 +169,13 @@ const FragmentArray = StatefulArray.extend({
     );
     if (macroCondition(dependencySatisfies('ember-data', '>=5.8.0'))) {
       const fragment = this.store._instanceCache.getRecord(fragmentIdentifier);
+      const definitions = this.store
+        .getSchemaDefinitionService()
+        .fields(fragmentIdentifier);
 
       if (props) {
         for (const [key, value] of Object.entries(props)) {
-          if (fragment[key] === undefined) {
+          if (!definitions.has(key)) {
             fragment.set(key, value);
           }
         }

@@ -32,6 +32,20 @@ function transformFragmentMeta(name, meta) {
   };
 }
 
+function mergedCacheFields(fields) {
+  const cacheFields = new Map();
+
+  fields.forEach((field, key) => {
+    if (field.kind === '@id' || field.kind === '@hash') {
+      return;
+    }
+
+    cacheFields.set(field.sourceKey || field.name || key, field);
+  });
+
+  return cacheFields;
+}
+
 export default class FragmentSchemaService {
   constructor(store, schema) {
     this.store = store;
@@ -84,7 +98,7 @@ export default class FragmentSchemaService {
   }
 
   cacheFields(resource) {
-    return this._schema.cacheFields?.(resource);
+    return mergedCacheFields(this._mergedFields(resource));
   }
 
   transformation(field) {
@@ -101,10 +115,12 @@ export default class FragmentSchemaService {
 
   resource(resource) {
     const schema = this._schema.resource(resource);
+    const fields = this._mergedFields(resource);
 
     return {
       ...schema,
-      fields: Array.from(this._mergedFields(resource).values()),
+      fields: Array.from(fields.values()),
+      cacheFields: mergedCacheFields(fields),
     };
   }
 

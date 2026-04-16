@@ -151,8 +151,11 @@ export default class FragmentStore extends Store {
       const record = this._instanceCache.getRecord(identifier);
 
       if (props) {
+        const definitions =
+          this.getSchemaDefinitionService().fields(identifier);
+
         for (const [key, value] of Object.entries(props)) {
-          if (record[key] === undefined) {
+          if (!definitions.has(key)) {
             record.set(key, value);
           }
         }

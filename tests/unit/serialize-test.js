@@ -117,6 +117,60 @@ module('unit - Serialization', function (hooks) {
     person2.serialize();
   });
 
+  test('fragment properties are snapshotted correctly after fragment wrappers are materialized', async function (assert) {
+    assert.expect(4);
+
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: { first: 'Catelyn', last: 'Stark' },
+          houses: [
+            { name: 'Tully', region: 'Riverlands', exiled: true },
+            { name: 'Stark', region: 'North', exiled: true },
+          ],
+          children: ['Robb', 'Sansa'],
+        },
+      },
+    });
+
+    class PersonSerializer extends JSONSerializer {
+      serialize(snapshot) {
+        const name = snapshot.attr('name');
+        const houses = snapshot.attr('houses');
+        const children = snapshot.attr('children');
+
+        assert.ok(name instanceof DS.Snapshot, 'name remains a snapshot');
+        assert.ok(
+          houses.every((house) => house instanceof DS.Snapshot),
+          'materialized fragment array still snapshots to fragment snapshots',
+        );
+        assert.deepEqual(
+          houses.map((house) => house.attr('name')),
+          ['Tully', 'Stark'],
+          'snapshot preserves fragment array contents',
+        );
+        assert.deepEqual(
+          children,
+          ['Robb', 'Sansa'],
+          'primitive arrays are unchanged',
+        );
+      }
+    }
+
+    owner.register('serializer:person', PersonSerializer);
+
+    const person = await store.findRecord('person', 1);
+
+    // Materialize all wrapper types before serializing.
+    person.name;
+    person.houses;
+    person.children;
+
+    person.serialize();
+  });
+
   test('fragment properties are serialized as normal attributes using their own serializers', async function (assert) {
     store.push({
       data: {
