@@ -1,5 +1,7 @@
 import Model from '@ember-data/model';
+import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { Snapshot } from '@ember-data/legacy-compat/-private';
+import fragmentCacheFor from './util/fragment-cache';
 /**
   @module ember-data-model-fragments
 */
@@ -18,6 +20,22 @@ const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
 // Symbol to store our converted attributes cache
 const FRAGMENT_ATTRS = Symbol('fragmentAttrs');
 
+function convertSnapshotValue(value) {
+  if (value && typeof value._createSnapshot === 'function') {
+    return value._createSnapshot();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => convertSnapshotValue(item));
+  }
+
+  return value;
+}
+
+function isFragmentDefinition(definition) {
+  return definition?.isFragment || definition?.options?.isFragment;
+}
+
 Object.defineProperty(Snapshot.prototype, '_attributes', {
   get() {
     // Return cached converted attrs if available
@@ -32,24 +50,26 @@ Object.defineProperty(Snapshot.prototype, '_attributes', {
     const attrs = Object.create(null);
 
     Object.keys(cachedAttrs).forEach((key) => {
-      const attr = cachedAttrs[key];
-
-      // If the attribute has a `_createSnapshot` method, invoke it before the
-      // snapshot gets passed to the serializer
-      if (attr && typeof attr._createSnapshot === 'function') {
-        attrs[key] = attr._createSnapshot();
-      } else if (Array.isArray(attr)) {
-        // Handle arrays of fragments (fragment arrays)
-        attrs[key] = attr.map((item) => {
-          if (item && typeof item._createSnapshot === 'function') {
-            return item._createSnapshot();
-          }
-          return item;
-        });
-      } else {
-        attrs[key] = attr;
-      }
+      attrs[key] = convertSnapshotValue(cachedAttrs[key]);
     });
+
+    if (macroCondition(dependencySatisfies('ember-data', '>=5.8.0'))) {
+      const schema = this._store.getSchemaDefinitionService?.();
+
+      if (schema) {
+        const definitions = schema.attributesDefinitionFor(this.identifier);
+
+        Object.entries(definitions).forEach(([key, definition]) => {
+          if (key in attrs || !isFragmentDefinition(definition)) {
+            return;
+          }
+
+          attrs[key] = convertSnapshotValue(
+            fragmentCacheFor(this._store).getAttr(this.identifier, key),
+          );
+        });
+      }
+    }
 
     // Cache the converted attrs
     this[FRAGMENT_ATTRS] = attrs;

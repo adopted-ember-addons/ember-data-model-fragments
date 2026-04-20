@@ -3,6 +3,8 @@ import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Name from 'dummy/models/name';
 import JSONSerializer from '@ember-data/serializer/json';
+import Person from 'dummy/models/person';
+import { fragmentArray } from 'ember-data-model-fragments/attributes';
 
 let store, owner;
 
@@ -24,6 +26,44 @@ module('unit - `DS.Store`', function (hooks) {
 
     assert.ok(address instanceof Name, 'fragment is correct type');
     assert.ok(address.hasDirtyAttributes, 'fragment starts in dirty state');
+  });
+
+  test('createFragment applies provided values even when defaults exist', function (assert) {
+    class PersonWithDefaultName extends Person {
+      @fragmentArray('name', {
+        defaultValue: [{ first: 'Default', last: 'Name' }],
+      })
+      names;
+    }
+
+    owner.register('model:person-with-default-name', PersonWithDefaultName);
+
+    const person = store.createRecord('person-with-default-name');
+    const name = store.createFragment('name', {
+      first: 'Arya',
+      last: 'Stark',
+    });
+    const arrayFragment = person.names.createFragment({
+      first: 'Sansa',
+      last: 'Stark',
+    });
+
+    assert.strictEqual(name.first, 'Arya', 'explicit fragment props win');
+    assert.strictEqual(
+      name.last,
+      'Stark',
+      'explicit fragment props are applied',
+    );
+    assert.strictEqual(
+      arrayFragment.first,
+      'Sansa',
+      'fragment array createFragment applies explicit props',
+    );
+    assert.strictEqual(
+      arrayFragment.last,
+      'Stark',
+      'fragment array createFragment applies all explicit props',
+    );
   });
 
   test('attempting to create a fragment type that does not inherit from `MF.Fragment` throws an error', function (assert) {

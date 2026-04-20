@@ -292,6 +292,10 @@ export default class FragmentCache {
     return this.__innerCache.peek(identifier);
   }
 
+  peekRemoteState(identifier) {
+    return this.__innerCache.peekRemoteState?.(identifier);
+  }
+
   /**
    * Peek the Cache for existing request data
    */
@@ -407,6 +411,7 @@ export default class FragmentCache {
         this.__fragmentState.pushFragmentData(
           identifier,
           { attributes: fragmentData },
+          false,
           false,
         );
       }
@@ -663,6 +668,22 @@ export default class FragmentCache {
     return this.__innerCache.getRelationship(identifier, field);
   }
 
+  getRemoteRelationship(identifier, field) {
+    return this.__innerCache.getRemoteRelationship?.(identifier, field);
+  }
+
+  changedRelationships(identifier) {
+    return this.__innerCache.changedRelationships?.(identifier);
+  }
+
+  hasChangedRelationships(identifier) {
+    return this.__innerCache.hasChangedRelationships?.(identifier) || false;
+  }
+
+  rollbackRelationships(identifier) {
+    return this.__innerCache.rollbackRelationships?.(identifier);
+  }
+
   /**
    * Update the cache state for the given resource to be marked as locally deleted
    */
@@ -675,6 +696,10 @@ export default class FragmentCache {
    */
   getErrors(identifier) {
     return this.__innerCache.getErrors(identifier);
+  }
+
+  getRemoteAttr(identifier, attr) {
+    return this.__innerCache.getRemoteAttr?.(identifier, attr);
   }
 
   /**

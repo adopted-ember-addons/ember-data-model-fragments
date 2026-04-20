@@ -91,6 +91,68 @@ export function fragmentApplyTransforms(serializer, typeClass, data) {
   return data;
 }
 
+function isFragmentAttribute(meta) {
+  return (
+    meta &&
+    meta.isFragment &&
+    (meta.kind === 'fragment' ||
+      meta.kind === 'fragment-array' ||
+      meta.kind === 'array')
+  );
+}
+
+function serializedAttributesHash(serializer, snapshot, payload) {
+  if (payload?.data?.attributes) {
+    return payload.data.attributes;
+  }
+
+  const rootKey = serializer.payloadKeyFromModelName?.(snapshot.modelName);
+
+  if (rootKey && payload?.[rootKey] && typeof payload[rootKey] === 'object') {
+    return payload[rootKey];
+  }
+
+  return payload;
+}
+
+/**
+ * Helper function to serialize computed fragment attributes that newer
+ * ember-data versions no longer include via eachAttribute.
+ *
+ * @param {Serializer} serializer
+ * @param {Snapshot} snapshot
+ * @param {Object} payload
+ * @return {Object}
+ * @private
+ */
+export function fragmentSerialize(serializer, snapshot, payload) {
+  const attributes = serializedAttributesHash(serializer, snapshot, payload);
+  const modelClass = serializer.store.modelFor(snapshot.modelName);
+
+  modelClass.eachComputedProperty((key, meta) => {
+    if (!isFragmentAttribute(meta)) {
+      return;
+    }
+
+    const value = snapshot.attr(key);
+
+    if (value === undefined) {
+      return;
+    }
+
+    const attributeKey = serializer.keyForAttribute(key, 'serialize');
+    const transform = serializer.transformFor(meta.type);
+
+    attributes[attributeKey] = transform.serialize(
+      value,
+      meta.options,
+      snapshot,
+    );
+  });
+
+  return payload;
+}
+
 /**
  * Helper function to extract attributes including fragment attributes.
  * The default extractAttributes only iterates modelClass.eachAttribute which
@@ -120,13 +182,7 @@ export function fragmentExtractAttributes(
 
   // Then, add fragment attributes
   modelClass.eachComputedProperty((key, meta) => {
-    if (
-      meta &&
-      meta.isFragment &&
-      (meta.kind === 'fragment' ||
-        meta.kind === 'fragment-array' ||
-        meta.kind === 'array')
-    ) {
+    if (isFragmentAttribute(meta)) {
       const attributeKey = serializer.keyForAttribute(key, 'deserialize');
       if (resourceHash[attributeKey] !== undefined) {
         attributes[key] = resourceHash[attributeKey];
@@ -168,13 +224,7 @@ export function fragmentExtractAttributesJSONAPI(
 
   // Then, add fragment attributes
   modelClass.eachComputedProperty((key, meta) => {
-    if (
-      meta &&
-      meta.isFragment &&
-      (meta.kind === 'fragment' ||
-        meta.kind === 'fragment-array' ||
-        meta.kind === 'array')
-    ) {
+    if (isFragmentAttribute(meta)) {
       const attributeKey = serializer.keyForAttribute(key, 'deserialize');
       if (attrHash[attributeKey] !== undefined) {
         attributes[key] = attrHash[attributeKey];

@@ -1,4 +1,5 @@
 import Namespace from '@ember/application/namespace';
+import { importSync } from '@embroider/macros';
 import VERSION from './version';
 import Fragment from './fragment';
 import FragmentArray from './array/fragment';
@@ -11,7 +12,6 @@ import FragmentSerializer, {
   FragmentRESTSerializer,
   FragmentJSONAPISerializer,
 } from './serializer';
-import FragmentSchemaService from './schema-service';
 
 /**
   Ember Data Model Fragments
@@ -30,11 +30,16 @@ const MF = Namespace.create({
   FragmentSerializer: FragmentSerializer,
   FragmentRESTSerializer: FragmentRESTSerializer,
   FragmentJSONAPISerializer: FragmentJSONAPISerializer,
-  FragmentSchemaService: FragmentSchemaService,
   fragment: fragment,
   fragmentArray: fragmentArray,
   array: array,
   fragmentOwner: fragmentOwner,
+});
+
+Object.defineProperty(MF, 'FragmentSchemaService', {
+  get() {
+    return importSync('./schema-service').default;
+  },
 });
 
 export default MF;

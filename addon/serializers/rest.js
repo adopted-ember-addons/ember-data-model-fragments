@@ -3,6 +3,7 @@ import {
   fragmentTransformFor,
   fragmentApplyTransforms,
   fragmentExtractAttributes,
+  fragmentSerialize,
 } from './utils';
 
 /**
@@ -21,6 +22,14 @@ import {
   @public
 */
 export default class FragmentRESTSerializer extends RESTSerializer {
+  serialize(snapshot, options) {
+    return fragmentSerialize(
+      this,
+      snapshot,
+      super.serialize(snapshot, options),
+    );
+  }
+
   /**
     Enables fragment properties to have custom transforms based on the fragment
     type, so that deserialization does not have to happen on the fly

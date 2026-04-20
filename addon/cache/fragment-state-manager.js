@@ -2,8 +2,10 @@ import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { recordIdentifierFor } from '@ember-data/store';
+import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { getActualFragmentType, isFragment } from '../fragment';
 import isInstanceOfType from '../util/instance-of-type';
+import fragmentCacheFor from '../util/fragment-cache';
 
 /**
  * Simple array diff implementation.
@@ -459,6 +461,14 @@ export default class FragmentStateManager {
     return this.__storeWrapper._store;
   }
 
+  get cache() {
+    return fragmentCacheFor(this.store);
+  }
+
+  get innerCache() {
+    return this.cache.__innerCache;
+  }
+
   _identifierFor(fragmentOrRecord) {
     // Use recordIdentifierFor for records/fragments that already exist
     // This is the correct way to get an identifier from an instantiated record
@@ -692,27 +702,21 @@ export default class FragmentStateManager {
     const fragmentIdentifier =
       this.store.identifierCache.createIdentifierForNewRecord({ type });
     this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, definition.name);
-    // Initialize the fragment in the cache - use clientDidCreate to set up
-    // the record's internal state, then upsert to set canonical data
-    this.store.cache.__innerCache.clientDidCreate(fragmentIdentifier, {});
-    // Push the attributes to the inner cache
+    this.innerCache.clientDidCreate(fragmentIdentifier, {});
+
     if (attributes) {
-      this.store.cache.__innerCache.upsert(
-        fragmentIdentifier,
-        { attributes },
-        false,
-      );
+      this.innerCache.upsert(fragmentIdentifier, { attributes }, false);
     }
+
     // Process any nested fragment attributes
     this.pushFragmentData(fragmentIdentifier, { attributes }, false);
     return fragmentIdentifier;
   }
 
   hasChangedAttributes(identifier) {
-    // Check both fragment state and inner cache state
     return (
       this.hasChangedFragments(identifier) ||
-      this.store.cache.__innerCache.hasChangedAttrs(identifier)
+      this.innerCache.hasChangedAttrs(identifier)
     );
   }
 
@@ -722,7 +726,7 @@ export default class FragmentStateManager {
     // Explicitly return boolean to ensure false instead of undefined
     return Boolean(
       (fragments && Object.keys(fragments).length > 0) ||
-        (inFlight && Object.keys(inFlight).length > 0),
+      (inFlight && Object.keys(inFlight).length > 0),
     );
   }
 
@@ -731,7 +735,7 @@ export default class FragmentStateManager {
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
-    const cache = this.store.cache.__innerCache;
+    const cache = this.innerCache;
 
     // Get changed attrs from inner cache to find original values for dirty attrs
     const changedAttrs = cache.changedAttrs(identifier);
@@ -781,7 +785,7 @@ export default class FragmentStateManager {
         result[key] = behavior.currentState(this.getFragment(identifier, key));
       } else {
         // Regular attributes - get from inner cache
-        const cache = this.store.cache.__innerCache;
+        const cache = this.innerCache;
         result[key] = cache.getAttr(identifier, key);
       }
     }
@@ -847,7 +851,7 @@ export default class FragmentStateManager {
     return changedKeys;
   }
 
-  pushFragmentData(identifier, data, calculateChange) {
+  pushFragmentData(identifier, data, calculateChange, shouldNotify = true) {
     let changedFragmentKeys;
     const behaviors = this._getBehaviors(identifier);
     const subFragmentsToProcess = [];
@@ -882,13 +886,17 @@ export default class FragmentStateManager {
 
       Object.assign(fragmentData, newCanonicalFragments);
 
-      // Always notify for changed keys so computed properties are invalidated
-      changedFragmentKeys.forEach((key) => {
-        // Notify the storeWrapper that the fragment attribute changed
-        this.__storeWrapper.notifyChange(identifier, 'attributes', key);
-        const arrayCache = this.__fragmentArrayCache.get(identifier.lid);
-        arrayCache?.[key]?.notify();
-      });
+      if (shouldNotify) {
+        // Notify the storeWrapper that fragment attributes changed when this is
+        // an update to existing state. For clientDidCreate initialization we
+        // skip notification so initial props don't look like post-consumption
+        // mutations during first render in WarpDrive 5.8.
+        changedFragmentKeys.forEach((key) => {
+          this.__storeWrapper.notifyChange(identifier, 'attributes', key);
+          const arrayCache = this.__fragmentArrayCache.get(identifier.lid);
+          arrayCache?.[key]?.notify();
+        });
+      }
     }
 
     return calculateChange ? changedFragmentKeys || [] : [];
@@ -1121,26 +1129,29 @@ export default class FragmentStateManager {
 
   _notifyStateChange(identifier, key) {
     this.__storeWrapper.notifyChange(identifier, 'attributes', key);
-    // Also notify the record instance directly to invalidate computed property caches
-    if (key) {
-      try {
-        const record = this.store._instanceCache.getRecord(identifier);
-        if (record && typeof record.notifyPropertyChange === 'function') {
-          record.notifyPropertyChange(key);
-          // Also clear any cached value by directly removing from Ember's cache
-          // This is needed because computed setters cache their return value
-          // and notifyPropertyChange alone may not clear it in all Ember versions
-          const meta = record.constructor.metaForProperty?.(key);
-          if (meta) {
-            // Force the computed property to re-evaluate by clearing its cache entry
-            const cache = record['__ember_meta__']?.peekCache?.(key);
-            if (cache !== undefined) {
-              record['__ember_meta__']?.deleteFromCache?.(key);
+    if (macroCondition(dependencySatisfies('ember-data', '<5.8.0'))) {
+      // 5.8+ already wires cache notifications into reactivity, and directly notifying
+      // the record can trip mutation-after-consumption assertions during initial render.
+      if (key) {
+        try {
+          const record = this.store._instanceCache.getRecord(identifier);
+          if (record && typeof record.notifyPropertyChange === 'function') {
+            record.notifyPropertyChange(key);
+            // Also clear any cached value by directly removing from Ember's cache
+            // This is needed because computed setters cache their return value
+            // and notifyPropertyChange alone may not clear it in all Ember versions
+            const meta = record.constructor.metaForProperty?.(key);
+            if (meta) {
+              // Force the computed property to re-evaluate by clearing its cache entry
+              const cache = record['__ember_meta__']?.peekCache?.(key);
+              if (cache !== undefined) {
+                record['__ember_meta__']?.deleteFromCache?.(key);
+              }
             }
           }
+        } catch {
+          // Record may not be instantiated yet
         }
-      } catch {
-        // Record may not be instantiated yet
       }
     }
   }
@@ -1149,8 +1160,7 @@ export default class FragmentStateManager {
   _fragmentPushData(identifier, data) {
     // Push data to the cache for the fragment
     if (data?.attributes) {
-      // Use the inner cache's upsert for the fragment's own attributes
-      const cache = this.store.cache.__innerCache;
+      const cache = this.innerCache;
       cache.upsert(identifier, data, false);
       // Notify that attributes changed so computed properties are invalidated
       for (const key of Object.keys(data.attributes)) {
@@ -1163,7 +1173,7 @@ export default class FragmentStateManager {
 
   _fragmentWillCommit(identifier) {
     // Capture the current attribute values before commit - these are what will be committed
-    const innerCache = this.store.cache.__innerCache;
+    const innerCache = this.innerCache;
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
@@ -1181,7 +1191,7 @@ export default class FragmentStateManager {
 
     // Signal to cache that fragment is being committed
     this.willCommitFragments(identifier);
-    this.store.cache.__innerCache.willCommit(identifier);
+    innerCache.willCommit(identifier);
   }
 
   _fragmentDidCommit(identifier, data) {
@@ -1199,7 +1209,7 @@ export default class FragmentStateManager {
     // 4. Rollback to clear in-flight state
     // 5. Upsert the committed values as new canonical
     // 6. Re-apply any new dirty changes that were made during in-flight
-    const innerCache = this.store.cache.__innerCache;
+    const innerCache = this.innerCache;
 
     // Get schema for non-fragment attributes
     const definitions = this.__storeWrapper
@@ -1289,13 +1299,13 @@ export default class FragmentStateManager {
   _fragmentRollbackAttributes(identifier) {
     // Rollback fragment attributes
     this.rollbackFragments(identifier);
-    this.store.cache.__innerCache.rollbackAttrs(identifier);
+    this.innerCache.rollbackAttrs(identifier);
   }
 
   _fragmentCommitWasRejected(identifier) {
     // Signal that commit was rejected
     this.commitWasRejectedFragments(identifier);
-    this.store.cache.__innerCache.commitWasRejected(identifier);
+    this.innerCache.commitWasRejected(identifier);
   }
 
   _fragmentUnloadRecord(identifier) {
@@ -1313,7 +1323,7 @@ export default class FragmentStateManager {
       // Fragment may already be unloaded or destroyed
       // Fall back to just clearing the inner cache
       try {
-        this.store.cache.__innerCache.unloadRecord(identifier);
+        this.innerCache.unloadRecord(identifier);
       } catch {
         // May already be unloaded
       }
