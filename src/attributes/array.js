@@ -2,9 +2,9 @@ import { computed } from '@ember/object';
 import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
 import { recordIdentifierFor } from '@ember-data/store';
-import metaTypeFor from '../util/meta-type-for';
-import fragmentCacheFor from '../util/fragment-cache';
-import StatefulArray from '../array/stateful';
+import metaTypeFor from '../util/meta-type-for.js';
+import fragmentCacheFor from '../util/fragment-cache.js';
+import StatefulArray from '../array/stateful.js';
 
 /**
  `MF.array` defines an attribute on a `DS.Model` or `MF.Fragment`. It creates a

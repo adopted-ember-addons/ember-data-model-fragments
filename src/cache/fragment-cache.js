@@ -1,7 +1,7 @@
 import { assert } from '@ember/debug';
 import JSONAPICache from '@ember-data/json-api';
-import FragmentStateManager from './fragment-state-manager';
-import FragmentRecordDataProxy from './fragment-record-data-proxy';
+import FragmentStateManager from './fragment-state-manager.js';
+import FragmentRecordDataProxy from './fragment-record-data-proxy.js';
 
 /**
  * FragmentCache wraps the default JSONAPICache and adds fragment-specific

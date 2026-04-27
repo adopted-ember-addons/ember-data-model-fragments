@@ -4,7 +4,7 @@ import {
   fragmentApplyTransforms,
   fragmentExtractAttributesJSONAPI,
   fragmentSerialize,
-} from './utils';
+} from './utils.js';
 
 /**
   FragmentJSONAPISerializer is the base serializer class for ember-data-model-fragments

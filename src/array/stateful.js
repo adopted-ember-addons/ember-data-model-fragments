@@ -2,8 +2,8 @@ import EmberObject, { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
-import { copy } from '../util/copy';
-import fragmentCacheFor from '../util/fragment-cache';
+import { copy } from '../util/copy.js';
+import fragmentCacheFor from '../util/fragment-cache.js';
 
 /**
   @module ember-data-model-fragments

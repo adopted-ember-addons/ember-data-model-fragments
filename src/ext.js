@@ -1,7 +1,7 @@
 import Model from '@ember-data/model';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { Snapshot } from '@ember-data/legacy-compat/-private';
-import fragmentCacheFor from './util/fragment-cache';
+import fragmentCacheFor from './util/fragment-cache.js';
 /**
   @module ember-data-model-fragments
 */

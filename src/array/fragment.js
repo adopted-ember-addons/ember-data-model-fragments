@@ -1,9 +1,9 @@
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
-import StatefulArray from './stateful';
-import { isFragment, setFragmentOwner } from '../fragment';
-import isInstanceOfType from '../util/instance-of-type';
+import StatefulArray from './stateful.js';
+import { isFragment, setFragmentOwner } from '../fragment.js';
+import isInstanceOfType from '../util/instance-of-type.js';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**
