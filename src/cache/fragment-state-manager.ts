@@ -1,11 +1,12 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { recordIdentifierFor } from '@ember-data/store';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
-import { getActualFragmentType, isFragment } from '../fragment.js';
-import isInstanceOfType from '../util/instance-of-type.js';
-import fragmentCacheFor from '../util/fragment-cache.js';
+import { getActualFragmentType, isFragment } from '../fragment.ts';
+import isInstanceOfType from '../util/instance-of-type.ts';
+import fragmentCacheFor from '../util/fragment-cache.ts';
 
 /**
  * Simple array diff implementation.

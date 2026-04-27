@@ -1,29 +1,28 @@
-import JSONSerializer from '@ember-data/serializer/json';
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
+import RESTSerializer from '@ember-data/serializer/rest';
 import {
   fragmentTransformFor,
   fragmentApplyTransforms,
   fragmentExtractAttributes,
   fragmentSerialize,
-} from './utils.js';
+} from './utils.ts';
 
 /**
-  FragmentSerializer is the base serializer class for ember-data-model-fragments.
-  Extends JSONSerializer.
-  
-  To use fragment serialization properly, your serializers should extend FragmentSerializer:
+  FragmentRESTSerializer is the base serializer class for ember-data-model-fragments
+  when using RESTSerializer.
   
   ```js
   // app/serializers/application.js
-  import FragmentSerializer from 'ember-data-model-fragments/serializer';
+  import { FragmentRESTSerializer } from 'ember-data-model-fragments/serializer';
   
-  export default class ApplicationSerializer extends FragmentSerializer {}
+  export default class ApplicationSerializer extends FragmentRESTSerializer {}
   ```
 
-  @class FragmentSerializer
-  @extends JSONSerializer
+  @class FragmentRESTSerializer
+  @extends RESTSerializer
   @public
 */
-export default class FragmentSerializer extends JSONSerializer {
+export default class FragmentRESTSerializer extends RESTSerializer {
   serialize(snapshot, options) {
     return fragmentSerialize(
       this,
@@ -45,7 +44,7 @@ export default class FragmentSerializer extends JSONSerializer {
     return fragmentTransformFor(
       this,
       attributeType,
-      JSONSerializer.prototype.transformFor,
+      RESTSerializer.prototype.transformFor,
     );
   }
 
@@ -79,7 +78,7 @@ export default class FragmentSerializer extends JSONSerializer {
       this,
       modelClass,
       resourceHash,
-      JSONSerializer.prototype.extractAttributes,
+      RESTSerializer.prototype.extractAttributes,
     );
   }
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 function getType(resource) {
   return typeof resource === 'string' ? resource : resource.type;
 }

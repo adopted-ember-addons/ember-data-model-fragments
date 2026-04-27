@@ -1,9 +1,10 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
-import { isFragment } from '../fragment.js';
+import { isFragment } from '../fragment.ts';
 import { recordIdentifierFor } from '@ember-data/store';
-import fragmentCacheFor from '../util/fragment-cache.js';
+import fragmentCacheFor from '../util/fragment-cache.ts';
 
 /**
  `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`

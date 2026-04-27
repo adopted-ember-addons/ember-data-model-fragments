@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 /**
  * FragmentRecordDataProxy provides a backwards-compatible per-resource API
  * for code that expects a RecordData instance per record/fragment.

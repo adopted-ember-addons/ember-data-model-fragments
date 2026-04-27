@@ -1,10 +1,11 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import JSONAPISerializer from '@ember-data/serializer/json-api';
 import {
   fragmentTransformFor,
   fragmentApplyTransforms,
   fragmentExtractAttributesJSONAPI,
   fragmentSerialize,
-} from './utils.js';
+} from './utils.ts';
 
 /**
   FragmentJSONAPISerializer is the base serializer class for ember-data-model-fragments

@@ -1,9 +1,10 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import EmberObject, { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
-import { copy } from '../util/copy.js';
-import fragmentCacheFor from '../util/fragment-cache.js';
+import { copy } from '../util/copy.ts';
+import fragmentCacheFor from '../util/fragment-cache.ts';
 
 /**
   @module ember-data-model-fragments
@@ -65,8 +66,8 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     return fragmentCacheFor(this.store);
   },
 
-  init() {
-    this._super(...arguments);
+  init(...args) {
+    this._super(...args);
     this._length = 0;
     this.currentState = [];
     this._isUpdating = false;

@@ -1,4 +1,5 @@
-import FragmentTransform from './fragment.js';
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
+import FragmentTransform from './fragment.ts';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**

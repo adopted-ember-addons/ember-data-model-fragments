@@ -1,9 +1,10 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
-import StatefulArray from './stateful.js';
-import { isFragment, setFragmentOwner } from '../fragment.js';
-import isInstanceOfType from '../util/instance-of-type.js';
+import StatefulArray from './stateful.ts';
+import { isFragment, setFragmentOwner } from '../fragment.ts';
+import isInstanceOfType from '../util/instance-of-type.ts';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**

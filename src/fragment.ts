@@ -1,10 +1,11 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { get, computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { Comparable } from '@ember/-internals/runtime';
 // DS.Model gets munged to add fragment support, which must be included first
-import { Model } from './ext.js';
-import { copy } from './util/copy.js';
-import fragmentCacheFor from './util/fragment-cache.js';
+import { Model } from './ext.ts';
+import { copy } from './util/copy.ts';
+import fragmentCacheFor from './util/fragment-cache.ts';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**

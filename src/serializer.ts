@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 /**
  * Re-exports for ember-data-model-fragments serializers.
  *
@@ -15,7 +16,7 @@
  * ```
  */
 
-export { default } from './serializers/fragment.js';
-export { default as FragmentSerializer } from './serializers/fragment.js';
-export { default as FragmentRESTSerializer } from './serializers/rest.js';
-export { default as FragmentJSONAPISerializer } from './serializers/json-api.js';
+export { default } from './serializers/fragment.ts';
+export { default as FragmentSerializer } from './serializers/fragment.ts';
+export { default as FragmentRESTSerializer } from './serializers/rest.ts';
+export { default as FragmentJSONAPISerializer } from './serializers/json-api.ts';

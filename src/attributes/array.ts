@@ -1,10 +1,11 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { computed } from '@ember/object';
 import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
 import { recordIdentifierFor } from '@ember-data/store';
-import metaTypeFor from '../util/meta-type-for.js';
-import fragmentCacheFor from '../util/fragment-cache.js';
-import StatefulArray from '../array/stateful.js';
+import metaTypeFor from '../util/meta-type-for.ts';
+import fragmentCacheFor from '../util/fragment-cache.ts';
+import StatefulArray from '../array/stateful.ts';
 
 /**
  `MF.array` defines an attribute on a `DS.Model` or `MF.Fragment`. It creates a
@@ -39,7 +40,9 @@ export default function array(type, options) {
     options = type;
     type = undefined;
   } else {
-    options || (options = {});
+    if (!options) {
+      options = {};
+    }
   }
 
   const metaType = metaTypeFor('array', type);

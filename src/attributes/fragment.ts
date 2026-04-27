@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
@@ -6,10 +7,10 @@ import {
   getActualFragmentType,
   isFragment,
   setFragmentOwner,
-} from '../fragment.js';
-import fragmentCacheFor from '../util/fragment-cache.js';
-import metaTypeFor from '../util/meta-type-for.js';
-import isInstanceOfType from '../util/instance-of-type.js';
+} from '../fragment.ts';
+import fragmentCacheFor from '../util/fragment-cache.ts';
+import metaTypeFor from '../util/meta-type-for.ts';
+import isInstanceOfType from '../util/instance-of-type.ts';
 
 /**
  `MF.fragment` defines an attribute on a `DS.Model` or `MF.Fragment`. Much

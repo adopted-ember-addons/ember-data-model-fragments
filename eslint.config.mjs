@@ -100,6 +100,32 @@ export default defineConfig([
       'import/extensions': ['error', 'always', { ignorePackages: true }],
     },
   },
+  /**
+   * src/ TS files: disable type-checked unsafe-* rules globally for the source
+   * tree because ember-data internals are largely untyped, which makes nearly
+   * every interaction "unsafe" by typescript-eslint's strict standards. These
+   * can be re-enabled per-file as types are tightened.
+   */
+  {
+    files: ['src/**/*.{ts,gts}'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        { 'ts-nocheck': false, 'ts-expect-error': 'allow-with-description' },
+      ],
+    },
+  },
   {
     ...qunit.configs.recommended,
     files: ['tests/**/*-test.{js,gjs,ts,gts}'],

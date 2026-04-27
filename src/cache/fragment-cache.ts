@@ -1,7 +1,8 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import JSONAPICache from '@ember-data/json-api';
-import FragmentStateManager from './fragment-state-manager.js';
-import FragmentRecordDataProxy from './fragment-record-data-proxy.js';
+import FragmentStateManager from './fragment-state-manager.ts';
+import FragmentRecordDataProxy from './fragment-record-data-proxy.ts';
 
 /**
  * FragmentCache wraps the default JSONAPICache and adds fragment-specific
@@ -320,7 +321,7 @@ export default class FragmentCache {
     }
 
     // First, extract fragment attributes from data
-    let fragmentAttributeKeys = [];
+    const fragmentAttributeKeys = [];
     const fragmentData = {};
 
     if (data.attributes) {
@@ -603,7 +604,7 @@ export default class FragmentCache {
       // This is needed for Snapshot._attributes which expects objects with _createSnapshot
       if (fragmentKind === 'fragment-array' || fragmentKind === 'array') {
         // Get the cached wrapper if it exists
-        let arrayWrapper = this.getFragmentArrayCache(identifier, attr);
+        const arrayWrapper = this.getFragmentArrayCache(identifier, attr);
         if (arrayWrapper) {
           return arrayWrapper;
         }

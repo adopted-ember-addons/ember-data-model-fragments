@@ -1,7 +1,8 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model from '@ember-data/model';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { Snapshot } from '@ember-data/legacy-compat/-private';
-import fragmentCacheFor from './util/fragment-cache.js';
+import fragmentCacheFor from './util/fragment-cache.ts';
 /**
   @module ember-data-model-fragments
 */

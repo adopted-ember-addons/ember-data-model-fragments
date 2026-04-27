@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { getOwner } from '@ember/application';
 import Store from 'ember-data/store';
@@ -6,13 +7,13 @@ import {
   dependencySatisfies,
   importSync,
 } from '@embroider/macros';
-import FragmentCache from './cache/fragment-cache.js';
-import { default as Fragment } from './fragment.js';
-import { installCacheManagerCompat } from './util/fragment-cache.js';
+import FragmentCache from './cache/fragment-cache.ts';
+import { default as Fragment } from './fragment.ts';
+import { installCacheManagerCompat } from './util/fragment-cache.ts';
 
 // Import side-effects to ensure monkey-patches are applied
 // These must be imported before any store instances are created
-import './ext.js'; // Applies Snapshot monkey-patch for fragment serialization
+import './ext.ts'; // Applies Snapshot monkey-patch for fragment serialization
 
 /**
   FragmentStore is the base store class for ember-data-model-fragments.
@@ -79,7 +80,7 @@ export default class FragmentStore extends Store {
     if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
       const { buildSchema } = importSync('@ember-data/model/hooks');
 
-      const FragmentSchemaService = importSync('./schema-service.js').default;
+      const FragmentSchemaService = importSync('./schema-service.ts').default;
 
       return new FragmentSchemaService(this, buildSchema(this));
     }

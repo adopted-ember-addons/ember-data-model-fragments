@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 const CACHE_METHODS = [
   'createFragmentRecordData',
   'getFragment',

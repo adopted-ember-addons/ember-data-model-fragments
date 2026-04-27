@@ -1,22 +1,23 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Namespace from '@ember/application/namespace';
 import { importSync } from '@embroider/macros';
-import VERSION from './version.js';
-import Fragment from './fragment.js';
-import FragmentArray from './array/fragment.js';
-import FragmentTransform from './transforms/fragment.js';
-import FragmentArrayTransform from './transforms/fragment-array.js';
-import ArrayTransform from './transforms/array.js';
+import VERSION from './version.ts';
+import Fragment from './fragment.ts';
+import FragmentArray from './array/fragment.ts';
+import FragmentTransform from './transforms/fragment.ts';
+import FragmentArrayTransform from './transforms/fragment-array.ts';
+import ArrayTransform from './transforms/array.ts';
 import {
   fragment,
   fragmentArray,
   array,
   fragmentOwner,
-} from './attributes/index.js';
-import FragmentStore from './store.js';
+} from './attributes/index.ts';
+import FragmentStore from './store.ts';
 import FragmentSerializer, {
   FragmentRESTSerializer,
   FragmentJSONAPISerializer,
-} from './serializer.js';
+} from './serializer.ts';
 
 /**
   Ember Data Model Fragments
@@ -43,7 +44,7 @@ const MF = Namespace.create({
 
 Object.defineProperty(MF, 'FragmentSchemaService', {
   get() {
-    return importSync('./schema-service.js').default;
+    return importSync('./schema-service.ts').default;
   },
 });
 

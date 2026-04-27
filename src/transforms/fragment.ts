@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Transform from '@ember-data/serializer/transform';
 import { service } from '@ember/service';
 import { recordIdentifierFor } from '@ember-data/store';
