@@ -1,10 +1,10 @@
 import { schedule } from '@ember/runloop';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Name from 'dummy/models/name';
+import Name from '../../demo-app/models/name.js';
 import JSONSerializer from '@ember-data/serializer/json';
-import Person from 'dummy/models/person';
-import { fragmentArray } from 'ember-data-model-fragments/attributes';
+import Person from '../../demo-app/models/person.js';
+import { fragmentArray } from '#src/attributes/index.js';
 
 let store, owner;
 

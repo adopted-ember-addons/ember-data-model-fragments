@@ -17,3 +17,4 @@
 # broccoli-debug
 /DEBUG/
 tmp/
+/dist-tests/
