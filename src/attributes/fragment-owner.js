@@ -1,9 +1,9 @@
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
-import { isFragment } from '../fragment';
+import { isFragment } from '../fragment.js';
 import { recordIdentifierFor } from '@ember-data/store';
-import fragmentCacheFor from '../util/fragment-cache';
+import fragmentCacheFor from '../util/fragment-cache.js';
 
 /**
  `MF.fragmentOwner` defines a read-only attribute on a `MF.Fragment`

@@ -6,9 +6,9 @@ import {
   dependencySatisfies,
   importSync,
 } from '@embroider/macros';
-import FragmentCache from './cache/fragment-cache';
-import { default as Fragment } from './fragment';
-import { installCacheManagerCompat } from './util/fragment-cache';
+import FragmentCache from './cache/fragment-cache.js';
+import { default as Fragment } from './fragment.js';
+import { installCacheManagerCompat } from './util/fragment-cache.js';
 
 // Import side-effects to ensure monkey-patches are applied
 // These must be imported before any store instances are created
@@ -16,13 +16,13 @@ import './ext'; // Applies Snapshot monkey-patch for fragment serialization
 
 /**
   FragmentStore is the base store class for ember-data-model-fragments.
-  
+
   To use this addon, you must create an application store service that extends FragmentStore:
-  
+
   ```js
   // app/services/store.js
   import FragmentStore from 'ember-data-model-fragments/store';
-  
+
   export default class extends FragmentStore {}
   ```
 
@@ -31,7 +31,7 @@ import './ext'; // Applies Snapshot monkey-patch for fragment serialization
   ```js
   // app/serializers/application.js
   import FragmentSerializer from 'ember-data-model-fragments/serializer';
-  
+
   export default class extends FragmentSerializer {}
   ```
 
@@ -79,7 +79,7 @@ export default class FragmentStore extends Store {
     if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
       const { buildSchema } = importSync('@ember-data/model/hooks');
 
-      const FragmentSchemaService = importSync('./schema-service').default;
+      const FragmentSchemaService = importSync('./schema-service.js').default;
 
       return new FragmentSchemaService(this, buildSchema(this));
     }

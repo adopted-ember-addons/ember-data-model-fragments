@@ -2,9 +2,9 @@ import { get, computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { Comparable } from '@ember/-internals/runtime';
 // DS.Model gets munged to add fragment support, which must be included first
-import { Model } from './ext';
-import { copy } from './util/copy';
-import fragmentCacheFor from './util/fragment-cache';
+import { Model } from './ext.js';
+import { copy } from './util/copy.js';
+import fragmentCacheFor from './util/fragment-cache.js';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**

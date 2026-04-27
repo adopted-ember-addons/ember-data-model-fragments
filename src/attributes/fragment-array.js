@@ -3,10 +3,10 @@ import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { recordIdentifierFor } from '@ember-data/store';
-import { isFragment } from '../fragment';
-import fragmentCacheFor from '../util/fragment-cache';
-import metaTypeFor from '../util/meta-type-for';
-import FragmentArray from '../array/fragment';
+import { isFragment } from '../fragment.js';
+import fragmentCacheFor from '../util/fragment-cache.js';
+import metaTypeFor from '../util/meta-type-for.js';
+import FragmentArray from '../array/fragment.js';
 
 /**
  `MF.fragmentArray` defines an attribute on a `DS.Model` or `MF.Fragment`.

@@ -6,10 +6,10 @@ import {
   getActualFragmentType,
   isFragment,
   setFragmentOwner,
-} from '../fragment';
-import fragmentCacheFor from '../util/fragment-cache';
-import metaTypeFor from '../util/meta-type-for';
-import isInstanceOfType from '../util/instance-of-type';
+} from '../fragment.js';
+import fragmentCacheFor from '../util/fragment-cache.js';
+import metaTypeFor from '../util/meta-type-for.js';
+import isInstanceOfType from '../util/instance-of-type.js';
 
 /**
  `MF.fragment` defines an attribute on a `DS.Model` or `MF.Fragment`. Much

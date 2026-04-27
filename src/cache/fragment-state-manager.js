@@ -3,9 +3,9 @@ import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
 import { recordIdentifierFor } from '@ember-data/store';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
-import { getActualFragmentType, isFragment } from '../fragment';
-import isInstanceOfType from '../util/instance-of-type';
-import fragmentCacheFor from '../util/fragment-cache';
+import { getActualFragmentType, isFragment } from '../fragment.js';
+import isInstanceOfType from '../util/instance-of-type.js';
+import fragmentCacheFor from '../util/fragment-cache.js';
 
 /**
  * Simple array diff implementation.

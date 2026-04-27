@@ -15,7 +15,7 @@
  * ```
  */
 
-export { default } from './serializers/fragment';
-export { default as FragmentSerializer } from './serializers/fragment';
-export { default as FragmentRESTSerializer } from './serializers/rest';
-export { default as FragmentJSONAPISerializer } from './serializers/json-api';
+export { default } from './serializers/fragment.js';
+export { default as FragmentSerializer } from './serializers/fragment.js';
+export { default as FragmentRESTSerializer } from './serializers/rest.js';
+export { default as FragmentJSONAPISerializer } from './serializers/json-api.js';

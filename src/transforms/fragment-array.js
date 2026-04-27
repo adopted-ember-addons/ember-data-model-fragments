@@ -1,4 +1,4 @@
-import FragmentTransform from './fragment';
+import FragmentTransform from './fragment.js';
 import { recordIdentifierFor } from '@ember-data/store';
 
 /**
