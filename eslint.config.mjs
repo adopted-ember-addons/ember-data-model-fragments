@@ -107,7 +107,7 @@ export default defineConfig([
    * can be re-enabled per-file as types are tightened.
    */
   {
-    files: ['src/**/*.{ts,gts}'],
+    files: ['src/**/*.{ts,gts}', 'tests/**/*.{ts,gts}'],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
@@ -134,6 +134,10 @@ export default defineConfig([
     },
     rules: {
       'ember/no-runloop': 'off',
+      // Tests intentionally evaluate getter expressions to verify side effects.
+      '@typescript-eslint/no-unused-expressions': 'off',
+      // Tests pass async callbacks to expectAssertion etc. that don't await.
+      '@typescript-eslint/require-await': 'off',
     },
   },
   /**

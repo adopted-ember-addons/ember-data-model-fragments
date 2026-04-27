@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import '@warp-drive/ember/install';
 import '../demo-app/deprecation-workflow.js';
 
@@ -10,15 +11,15 @@ import {
   NumberTransform,
   StringTransform,
 } from '@ember-data/serializer/transform';
-import FragmentTransform from '#src/transforms/fragment.js';
-import FragmentArrayTransform from '#src/transforms/fragment-array.js';
-import ArrayTransform from '#src/transforms/array.js';
+import FragmentTransform from '#src/transforms/fragment.ts';
+import FragmentArrayTransform from '#src/transforms/fragment-array.ts';
+import ArrayTransform from '#src/transforms/array.ts';
 import * as QUnit from 'qunit';
 import { setApplication } from '@ember/test-helpers';
 import { setup } from 'qunit-dom';
 import { start as qunitStart, setupEmberOnerrorValidation } from 'ember-qunit';
 
-import { setup as setupCustomAssertions } from './helpers/assertion.js';
+import { setup as setupCustomAssertions } from './helpers/assertion.ts';
 
 class Router extends EmberRouter {
   location = 'none';

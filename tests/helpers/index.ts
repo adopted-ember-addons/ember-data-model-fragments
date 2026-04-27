@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import {
   setupApplicationTest as upstreamSetupApplicationTest,
   setupRenderingTest as upstreamSetupRenderingTest,

@@ -1,11 +1,12 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model, { attr } from '@ember-data/model';
-import { fragmentArray } from '#src/attributes/index.js';
+import { fragmentArray } from '#src/attributes/index.ts';
 import { isEmpty } from '@ember/utils';
 import { schedule } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
-import MF from '#src/index.js';
+import MF from '#src/index.ts';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Address from '../../demo-app/models/address.js';

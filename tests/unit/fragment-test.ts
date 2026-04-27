@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { all } from 'rsvp';
 import { Comparable } from '@ember/-internals/runtime';
 import { module, test } from 'qunit';

@@ -1,7 +1,8 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model from '@ember-data/model';
-import { copy } from '#src/util/copy.js';
+import { copy } from '#src/util/copy.ts';
 import { schedule } from '@ember/runloop';
-import { fragment, fragmentArray } from '#src/attributes/index.js';
+import { fragment, fragmentArray } from '#src/attributes/index.ts';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Order from '../../demo-app/models/order.js';

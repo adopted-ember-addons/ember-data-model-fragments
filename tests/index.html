@@ -20,8 +20,8 @@
     </script>
 
     <script type="module">
-      import { start } from './test-helper.js';
-      import.meta.glob('./**/*-test.{js,gjs}', { eager: true });
+      import { start } from './test-helper.ts';
+      import.meta.glob('./**/*-test.{ts,gts}', { eager: true });
       start();
     </script>
   </body>

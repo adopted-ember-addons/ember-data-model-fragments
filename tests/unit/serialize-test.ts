@@ -1,11 +1,12 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { isEmpty } from '@ember/utils';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Model, { attr } from '@ember-data/model';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentSerializer from '#src/serializer.js';
+import FragmentSerializer from '#src/serializer.ts';
 import Person from '../../demo-app/models/person.js';
-import { fragmentArray, array } from '#src/attributes/index.js';
+import { fragmentArray, array } from '#src/attributes/index.ts';
 import Pretender from 'pretender';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import DS from 'ember-data';

@@ -1,5 +1,6 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
-import { setupRenderingTest } from '../helpers/index.js';
+import { setupRenderingTest } from '../helpers/index.ts';
 import { render, settled } from '@ember/test-helpers';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';

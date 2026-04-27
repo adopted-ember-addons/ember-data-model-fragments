@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { getDebugFunction, setDebugFunction } from '@ember/debug';
 import { DEBUG } from '@glimmer/env';
 
