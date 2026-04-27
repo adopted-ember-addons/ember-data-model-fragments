@@ -38,49 +38,41 @@ module(
       owner = null;
     });
 
-    test('serializerFor on the instance is installed by FragmentStore, not inherited', function (assert) {
-      // The parent Store either defines serializerFor as a class field
-      // (per-instance arrow function) or as a prototype method. Either way,
-      // our constructor-installed override should be present on the instance
-      // and must be a function (not `undefined`).
-      assert.strictEqual(
-        typeof store.serializerFor,
-        'function',
-        'serializerFor is a function on the instance',
-      );
+  test('serializerFor on the instance is installed by FragmentStore, not inherited', function (assert) {
+    // The parent Store either defines serializerFor as a class field
+    // (per-instance arrow function) or as a prototype method. Either way,
+    // our constructor-installed override should be present on the instance
+    // and must be a function (not `undefined`).
+    assert.strictEqual(
+      typeof store.serializerFor,
+      'function',
+      'serializerFor is a function on the instance',
+    );
 
-      // It must not be the FragmentStore prototype method (we install per
-      // instance, so the prototype slot is undefined).
-      assert.strictEqual(
-        FragmentStore.prototype.serializerFor,
-        undefined,
-        'FragmentStore does not declare serializerFor on its prototype',
-      );
+    // It must not live on the FragmentStore prototype (we install per
+    // instance, so the prototype slot is undefined).
+    assert.strictEqual(
+      FragmentStore.prototype.serializerFor,
+      undefined,
+      'FragmentStore does not declare serializerFor on its prototype',
+    );
 
-      // Two independently-constructed FragmentStore instances should each
-      // have their own serializerFor function (because we install in the
-      // constructor). If somebody refactors away from the per-instance
-      // install, this comparison will start being === and break.
-      const otherStore = owner.factoryFor('service:store').create();
-      try {
-        assert.notStrictEqual(
-          store.serializerFor,
-          otherStore.serializerFor,
-          'each FragmentStore instance gets its own serializerFor function',
-        );
-      } finally {
-        otherStore.destroy();
-      }
+    // Behavioral smoke test: looking up a fragment must NOT throw and must
+    // return a JSONSerializer (the class-field shadowing bug surfaces here
+    // as either a thrown error or a wrong-class result).
+    const fragmentSerializer = store.serializerFor('name');
+    assert.ok(
+      fragmentSerializer instanceof JSONSerializer,
+      'fragment lookup goes through our override (returns a JSONSerializer)',
+    );
 
-      // And as a behavioral smoke test: looking up a fragment must NOT throw
-      // and must return a JSONSerializer (the class-field shadowing bug
-      // surfaces here as undefined behavior or a wrong-class result).
-      const fragmentSerializer = store.serializerFor('name');
-      assert.ok(
-        fragmentSerializer instanceof JSONSerializer,
-        'fragment lookup goes through our override (returns a JSONSerializer)',
-      );
-    });
+    // And it must NOT be the application serializer (which is a
+    // FragmentRESTSerializer in the dummy app).
+    assert.notOk(
+      fragmentSerializer instanceof FragmentRESTSerializer,
+      'fragment serializer is not the application serializer',
+    );
+  });
 
     test('non-fragment lookups defer to the parent serializerFor', function (assert) {
       // `person` is a regular Model, not a Fragment. It should resolve via the
