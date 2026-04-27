@@ -25,6 +25,14 @@ const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);
 export default {
   plugins: [
     [
+      '@babel/plugin-transform-typescript',
+      {
+        allExtensions: true,
+        allowDeclareFields: true,
+        onlyRemoveTypeImports: true,
+      },
+    ],
+    [
       'babel-plugin-ember-template-compilation',
       {
         transforms: [
