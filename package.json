@@ -27,6 +27,9 @@
       "default": "./dist/*.js"
     }
   },
+  "imports": {
+    "#src/*": "./src/*"
+  },
   "files": [
     "addon-main.cjs",
     "declarations",
@@ -44,7 +47,9 @@
     "lint:js": "eslint . --cache",
     "lint:js:fix": "eslint . --fix",
     "lint:publish": "pnpm build && publint run --level error",
-    "prepack": "rollup --config"
+    "prepack": "rollup --config",
+    "start": "vite dev",
+    "test": "vite build --mode=development --outDir=dist-tests && testem --file testem.cjs ci --port 0"
   },
   "dependencies": {
     "@embroider/addon-shim": "^1.8.9",
@@ -63,14 +68,27 @@
     "@ember-data/model": "~5.8.1",
     "@ember-data/serializer": "~5.8.1",
     "@ember-data/store": "~5.8.1",
+    "@ember/test-helpers": "^5.4.1",
+    "@ember/test-waiters": "^4.1.1",
     "@embroider/addon-dev": "^8.1.0",
+    "@embroider/compat": "^4.1.0",
+    "@embroider/core": "^4.1.0",
+    "@embroider/vite": "^1.1.5",
     "@eslint/js": "^9.39.4",
+    "@glimmer/component": "^2.1.1",
+    "@glimmer/env": "^0.1.7",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-replace": "^6.0.2",
+    "@warp-drive/build-config": "~5.8.1",
+    "@warp-drive/ember": "~5.8.1",
     "babel-plugin-ember-template-compilation": "^4.0.0",
     "concurrently": "^9.2.1",
+    "ember-cli-deprecation-workflow": "^4.0.1",
     "ember-data": "~5.8.1",
+    "ember-page-title": "^9.0.3",
+    "ember-qunit": "^9.0.4",
     "ember-source": "^6.12.0",
+    "ember-strict-application-resolver": "^0.1.0",
     "ember-template-lint": "^7.9.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.5",
@@ -81,9 +99,14 @@
     "globals": "^16.1.0",
     "prettier": "^3.8.2",
     "prettier-plugin-ember-template-tag": "^2.1.4",
+    "pretender": "^3.4.7",
     "publint": "^0.3.16",
+    "qunit": "^2.25.0",
+    "qunit-dom": "^3.5.0",
     "release-plan": "^0.17.4",
-    "rollup": "^4.22.5"
+    "rollup": "^4.22.5",
+    "testem": "^3.15.1",
+    "vite": "^7.1.9"
   },
   "peerDependencies": {
     "@ember-data/json-api": ">= 4.12.0",

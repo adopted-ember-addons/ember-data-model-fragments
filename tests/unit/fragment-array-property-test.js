@@ -1,14 +1,14 @@
 import Model, { attr } from '@ember-data/model';
-import { fragmentArray } from 'ember-data-model-fragments/attributes';
+import { fragmentArray } from '#src/attributes/index.js';
 import { isEmpty } from '@ember/utils';
 import { schedule } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
-import MF from 'ember-data-model-fragments';
+import MF from '#src/index.js';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Address from 'dummy/models/address';
+import Address from '../../demo-app/models/address.js';
 
 let owner, store, people;
 

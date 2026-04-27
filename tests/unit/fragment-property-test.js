@@ -1,13 +1,13 @@
 import Model, { attr } from '@ember-data/model';
-import { fragment } from 'ember-data-model-fragments/attributes';
+import { fragment } from '#src/attributes/index.js';
 import { schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
 import { all } from 'rsvp';
-import { copy } from 'ember-data-model-fragments/util/copy';
-import MF from 'ember-data-model-fragments';
+import { copy } from '#src/util/copy.js';
+import MF from '#src/index.js';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Name from 'dummy/models/name';
+import Name from '../../demo-app/models/name.js';
 import Pretender from 'pretender';
 
 let store, owner, server;

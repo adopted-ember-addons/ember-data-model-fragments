@@ -2,7 +2,7 @@ import { isEmpty } from '@ember/utils';
 import { A, isArray } from '@ember/array';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import { copy } from 'ember-data-model-fragments/util/copy';
+import { copy } from '#src/util/copy.js';
 
 let store, people;
 

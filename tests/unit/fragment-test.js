@@ -3,8 +3,8 @@ import { Comparable } from '@ember/-internals/runtime';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';
-import Lion from 'dummy/models/lion';
-import Elephant from 'dummy/models/elephant';
+import Lion from '../../demo-app/models/lion.js';
+import Elephant from '../../demo-app/models/elephant.js';
 
 let store;
 
