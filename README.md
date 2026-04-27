@@ -706,19 +706,19 @@ This addon uses [Vite](https://vite.dev/), [Testem](https://github.com/testem/te
 Install dependencies:
 
 ```sh
-$ pnpm install
+ pnpm install
 ```
 
 Run the test suite:
 
 ```sh
-$ pnpm test
+ pnpm test
 ```
 
 Start the demo app dev server:
 
 ```sh
-$ pnpm start
+ pnpm start
 ```
 
 ## Contributing
