@@ -1,6 +1,4 @@
-import { assert } from '@ember/debug';
 import Transform from '@ember-data/serializer/transform';
-import JSONAPISerializer from '@ember-data/serializer/json-api';
 import { service } from '@ember/service';
 import { recordIdentifierFor } from '@ember-data/store';
 
@@ -80,12 +78,10 @@ const FragmentTransform = Transform.extend({
   deserializeSingle(data, options, parentData) {
     const store = this.store;
     const modelName = this.modelNameFor(data, options, parentData);
+    // `FragmentStore#serializerFor` guarantees a JSON-based serializer
+    // (FragmentSerializer / JSONSerializer) for fragment model names, so we
+    // do not need to defend against REST/JSON:API serializers here.
     const serializer = store.serializerFor(modelName);
-
-    assert(
-      'The `JSONAPISerializer` is not suitable for model fragments, please use `JSONSerializer`',
-      !(serializer instanceof JSONAPISerializer),
-    );
 
     const typeClass = store.modelFor(modelName);
     const serialized = serializer.normalize(typeClass, data);

@@ -1,4 +1,5 @@
 import { assert } from '@ember/debug';
+import { getOwner } from '@ember/application';
 import Store from 'ember-data/store';
 import {
   macroCondition,
@@ -166,6 +167,87 @@ export default class FragmentStore extends Store {
 
     // Get the record instance
     return this._instanceCache.getRecord(identifier, props);
+  }
+
+  /**
+    Override `serializerFor` so fragment models never fall back to
+    `serializer:application`.
+
+    Why: a typical app's `serializer:application` is a REST or JSON:API
+    serializer that does not know how to normalize a raw fragment hash. In
+    particular, a JSON:API application serializer would trip the assert in
+    `FragmentTransform.deserializeSingle` and break fragment deserialization
+    on ember-data 4.12 (and any other path that runs the fragment transform
+    pipeline).
+
+    Resolution order for fragment model names:
+      1. `serializer:{modelName}` (if the app registered a per-fragment serializer)
+      2. `serializer:-fragment` (consumer-overridable global fragment serializer)
+      3. `serializer:-mf-fragment` (lazily-registered default `FragmentSerializer`,
+         which extends `JSONSerializer` and is what the fragment pipeline expects)
+
+    Non-fragment lookups defer to `super.serializerFor`, preserving normal app
+    behavior (including `serializer:application` fallback).
+
+    This restores the pre-4.13 behavior that was lost when the previous
+    `Store.reopen({ serializerFor })` from `addon/ext.js` was removed.
+
+    @method serializerFor
+    @param {String} modelName
+    @return {Serializer}
+    @public
+  */
+  serializerFor(modelName) {
+    if (typeof modelName === 'string' && this._isFragmentSafe(modelName)) {
+      const owner = getOwner(this);
+
+      // 1. Per-fragment-type serializer (e.g. app/serializers/name.js)
+      let serializer = owner.lookup(`serializer:${modelName}`);
+      if (serializer !== undefined) {
+        return serializer;
+      }
+
+      // 2. Consumer-provided global fragment serializer
+      serializer = owner.lookup('serializer:-fragment');
+      if (serializer !== undefined) {
+        return serializer;
+      }
+
+      // 3. Lazily register and return our default FragmentSerializer.
+      //    This is JSON-based (not REST/JSON:API), which is what the fragment
+      //    pipeline expects.
+      const FALLBACK_KEY = 'serializer:-mf-fragment';
+      if (!owner.hasRegistration(FALLBACK_KEY)) {
+        const FragmentSerializer = importSync('./serializers/fragment').default;
+        owner.register(FALLBACK_KEY, FragmentSerializer);
+      }
+      return owner.lookup(FALLBACK_KEY);
+    }
+
+    return super.serializerFor(modelName);
+  }
+
+  /**
+    Like `isFragment`, but never throws for unknown model names. `serializerFor`
+    is called with synthetic names (e.g. `-default`, `application`, transform
+    types, etc.) so we can't let `modelFor` blow up.
+
+    @private
+  */
+  _isFragmentSafe(modelName) {
+    if (
+      !modelName ||
+      modelName === 'application' ||
+      modelName === '-default' ||
+      modelName.charAt(0) === '-'
+    ) {
+      return false;
+    }
+    try {
+      return this.isFragment(modelName);
+    } catch {
+      return false;
+    }
   }
 
   /**
