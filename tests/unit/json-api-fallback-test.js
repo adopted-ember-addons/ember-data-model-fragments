@@ -111,5 +111,85 @@ module(
         '@array("string") entry',
       );
     });
+
+    test('a per-fragment-type serializer is honored end-to-end during pushPayload', function (assert) {
+      // Custom serializer for the `name` fragment that maps `given`/`family`
+      // wire keys to `first`/`last` model attrs. If our override resolves
+      // `serializer:name` correctly, the fragment will deserialize using
+      // these attrs; otherwise it would either fall back to the JSON:API
+      // application serializer (broken) or the default FragmentSerializer
+      // (which would not apply the attrs map).
+      this.owner.register(
+        'serializer:name',
+        class CustomNameSerializer extends FragmentSerializer {
+          attrs = {
+            first: 'given',
+            last: 'family',
+          };
+        },
+      );
+
+      const store = this.owner.lookup('service:store');
+
+      store.pushPayload('person', {
+        data: {
+          type: 'people',
+          id: '2',
+          attributes: {
+            name: { given: 'Arya', family: 'Stark' },
+          },
+        },
+      });
+
+      const person = store.peekRecord('person', 2);
+      assert.strictEqual(
+        person.name.first,
+        'Arya',
+        'per-fragment serializer attrs map applied (first <- given)',
+      );
+      assert.strictEqual(
+        person.name.last,
+        'Stark',
+        'per-fragment serializer attrs map applied (last <- family)',
+      );
+    });
+
+    test('a serializer:-fragment registration is honored end-to-end during pushPayload', function (assert) {
+      // Global fragment serializer override. Same idea as the per-type test
+      // but registered as the global fragment fallback.
+      this.owner.register(
+        'serializer:-fragment',
+        class GlobalFragmentSerializer extends FragmentSerializer {
+          attrs = {
+            first: 'given',
+            last: 'family',
+          };
+        },
+      );
+
+      const store = this.owner.lookup('service:store');
+
+      store.pushPayload('person', {
+        data: {
+          type: 'people',
+          id: '3',
+          attributes: {
+            name: { given: 'Sansa', family: 'Stark' },
+          },
+        },
+      });
+
+      const person = store.peekRecord('person', 3);
+      assert.strictEqual(
+        person.name.first,
+        'Sansa',
+        'global fragment serializer attrs applied (first <- given)',
+      );
+      assert.strictEqual(
+        person.name.last,
+        'Stark',
+        'global fragment serializer attrs applied (last <- family)',
+      );
+    });
   },
 );

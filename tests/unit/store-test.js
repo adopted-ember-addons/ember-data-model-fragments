@@ -135,6 +135,32 @@ module('unit - `DS.Store`', function (hooks) {
     );
   });
 
+  test('pushPayload deserializes fragments end-to-end with the default REST application serializer', function (assert) {
+    // Sanity: with the default dummy app setup (FragmentRESTSerializer as
+    // application serializer, no per-fragment overrides), pushing a record
+    // with fragments should round-trip through the fragment transform
+    // pipeline using the bundled FragmentSerializer.
+    store.pushPayload('person', {
+      person: {
+        id: '42',
+        title: 'Lord',
+        name: { first: 'Eddard', last: 'Stark' },
+        addresses: [{ street: '1 Castle Black', city: 'Winterfell' }],
+      },
+    });
+
+    const person = store.peekRecord('person', 42);
+    assert.ok(person, 'person was pushed');
+    assert.ok(person.name instanceof Name, 'fragment is a Name');
+    assert.strictEqual(person.name.first, 'Eddard', 'fragment attr');
+    assert.strictEqual(person.addresses.length, 1, 'fragmentArray length');
+    assert.strictEqual(
+      person.addresses.objectAt(0).city,
+      'Winterfell',
+      'fragmentArray entry',
+    );
+  });
+
   test('unloadAll destroys fragments', function (assert) {
     const person = store.createRecord('person', {
       name: {
