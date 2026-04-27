@@ -1,9 +1,5 @@
 import Model, { attr } from '@ember-data/model';
-import {
-  fragment,
-  fragmentArray,
-  array,
-} from '#src/attributes/index.js';
+import { fragment, fragmentArray, array } from '#src/attributes/index.js';
 
 export default class Person extends Model {
   @attr('string') title;

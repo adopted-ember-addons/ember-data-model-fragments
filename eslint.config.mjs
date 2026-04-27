@@ -12,48 +12,35 @@
  *     npx eslint --inspect-config
  *
  */
-import globals from 'globals';
+import babelParser from '@babel/eslint-parser/experimental-worker';
 import js from '@eslint/js';
-
+import { defineConfig, globalIgnores } from 'eslint/config';
+import prettier from 'eslint-config-prettier';
 import ember from 'eslint-plugin-ember/recommended';
-// import WarpDrive from 'eslint-plugin-warp-drive/recommended';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import qunit from 'eslint-plugin-qunit';
 import n from 'eslint-plugin-n';
-
-import babelParser from '@babel/eslint-parser';
+import qunit from 'eslint-plugin-qunit';
+import globals from 'globals';
 
 const esmParserOptions = {
   ecmaFeatures: { modules: true },
   ecmaVersion: 'latest',
-  requireConfigFile: false,
-  babelOptions: {
-    plugins: [
-      ['@babel/plugin-proposal-decorators', { decoratorsBeforeExport: true }],
-    ],
-  },
 };
 
-export default [
+export default defineConfig([
+  globalIgnores([
+    'dist/',
+    'dist-*/',
+    'declarations/',
+    'node_modules/',
+    'coverage/',
+    'tmp/',
+    '**/*.ts',
+    '!**/.*',
+  ]),
   js.configs.recommended,
-  eslintConfigPrettier,
+  prettier,
   ember.configs.base,
   ember.configs.gjs,
-  // ...WarpDrive,
-  /**
-   * Ignores must be in their own object
-   * https://eslint.org/docs/latest/use/configure/ignore
-   */
-  {
-    ignores: [
-      'dist/',
-      'node_modules/',
-      'coverage/',
-      '**/*.ts',
-      '!**/.*',
-      'blueprints/*/files/**/*.js',
-    ],
-  },
   /**
    * https://eslint.org/docs/latest/use/configure/configuration-files#configuring-linter-options
    */
@@ -91,21 +78,7 @@ export default [
    * CJS node files
    */
   {
-    ...n.configs['flat/recommended-script'],
-    files: [
-      '**/*.cjs',
-      'blueprints/**/*.js',
-      'config/**/*.js',
-      'lib/**/*.js',
-      'tests/dummy/config/**/*.js',
-      'testem.js',
-      'testem*.js',
-      'index.js',
-      '.prettierrc.js',
-      '.stylelintrc.js',
-      '.template-lintrc.js',
-      'ember-cli-build.js',
-    ],
+    files: ['**/*.cjs'],
     plugins: {
       n,
     },
@@ -122,7 +95,6 @@ export default [
    * ESM node files
    */
   {
-    ...n.configs['flat/recommended-module'],
     files: ['**/*.mjs'],
     plugins: {
       n,
@@ -137,4 +109,4 @@ export default [
       },
     },
   },
-];
+]);
