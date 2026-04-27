@@ -118,7 +118,7 @@
     "ember-source": ">= 5.0.0"
   },
   "engines": {
-    "node": ">= 20.19"
+    "node": ">= 22.19"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"

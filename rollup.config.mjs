@@ -6,7 +6,7 @@ import { resolve, dirname } from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const calculateVersion = require('./lib/calculate-version');
+const calculateVersion = require('./lib/calculate-version.cjs');
 
 const addon = new Addon({
   srcDir: 'src',

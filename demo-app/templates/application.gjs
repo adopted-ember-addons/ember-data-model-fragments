@@ -7,4 +7,3 @@ import { pageTitle } from 'ember-page-title';
 
   {{outlet}}
 </template>
-
