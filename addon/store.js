@@ -186,8 +186,16 @@ export default class FragmentStore extends Store {
       3. `serializer:-mf-fragment` (lazily-registered default `FragmentSerializer`,
          which extends `JSONSerializer` and is what the fragment pipeline expects)
 
-    Non-fragment lookups defer to `super.serializerFor`, preserving normal app
-    behavior (including `serializer:application` fallback).
+    Non-fragment lookups defer to the parent `serializerFor`, preserving normal
+    app behavior (including `serializer:application` fallback).
+
+    Implementation note: in ember-data 5.x, `serializerFor` is defined on the
+    parent `Store` as a class-field arrow function, which is assigned per
+    instance during the parent constructor and would shadow any prototype-level
+    override declared on this subclass. To handle both shapes (class field on
+    5.x, prototype method on 4.12) we install the override in the constructor,
+    which runs after the parent constructor and therefore wins in either case.
+    The original `serializerFor` is captured and used for non-fragment lookups.
 
     This restores the pre-4.13 behavior that was lost when the previous
     `Store.reopen({ serializerFor })` from `addon/ext.js` was removed.
@@ -197,43 +205,64 @@ export default class FragmentStore extends Store {
     @return {Serializer}
     @public
   */
-  serializerFor(modelName) {
-    if (typeof modelName === 'string' && this._isFragmentSafe(modelName)) {
-      const owner = getOwner(this);
+  constructor(...args) {
+    super(...args);
 
-      // 1. Per-fragment-type serializer (e.g. app/serializers/name.js).
-      //    We must check `factoryFor`/`hasRegistration` rather than `lookup`,
-      //    because ember-data's resolver auto-falls-back unknown serializer
-      //    lookups to `serializer:application`.
-      const perTypeKey = `serializer:${modelName}`;
-      if (
-        owner.hasRegistration(perTypeKey) ||
-        owner.factoryFor(perTypeKey) !== undefined
-      ) {
-        return owner.lookup(perTypeKey);
-      }
+    const parentSerializerFor =
+      typeof this.serializerFor === 'function'
+        ? this.serializerFor.bind(this)
+        : null;
 
-      // 2. Consumer-provided global fragment serializer.
-      const GLOBAL_KEY = 'serializer:-fragment';
-      if (
-        owner.hasRegistration(GLOBAL_KEY) ||
-        owner.factoryFor(GLOBAL_KEY) !== undefined
-      ) {
-        return owner.lookup(GLOBAL_KEY);
+    this.serializerFor = (modelName) => {
+      if (typeof modelName === 'string' && this._isFragmentSafe(modelName)) {
+        return this._fragmentSerializerFor(modelName);
       }
+      if (parentSerializerFor) {
+        return parentSerializerFor(modelName);
+      }
+      return null;
+    };
+  }
 
-      // 3. Lazily register and return our default FragmentSerializer.
-      //    This is JSON-based (not REST/JSON:API), which is what the fragment
-      //    pipeline expects.
-      const FALLBACK_KEY = 'serializer:-mf-fragment';
-      if (!owner.hasRegistration(FALLBACK_KEY)) {
-        const FragmentSerializer = importSync('./serializers/fragment').default;
-        owner.register(FALLBACK_KEY, FragmentSerializer);
-      }
-      return owner.lookup(FALLBACK_KEY);
+  /**
+    Resolve a serializer for a fragment model name.
+
+    @private
+  */
+  _fragmentSerializerFor(modelName) {
+    const owner = getOwner(this);
+
+    // 1. Per-fragment-type serializer (e.g. app/serializers/name.js).
+    //    We must check `hasRegistration`/`factoryFor` rather than relying on
+    //    `lookup` returning undefined, because in some ember-data versions
+    //    `owner.lookup('serializer:<unknown>')` is routed through a resolver
+    //    that auto-falls-back to `serializer:application`.
+    const perTypeKey = `serializer:${modelName}`;
+    if (
+      owner.hasRegistration(perTypeKey) ||
+      owner.factoryFor(perTypeKey) !== undefined
+    ) {
+      return owner.lookup(perTypeKey);
     }
 
-    return super.serializerFor(modelName);
+    // 2. Consumer-provided global fragment serializer.
+    const GLOBAL_KEY = 'serializer:-fragment';
+    if (
+      owner.hasRegistration(GLOBAL_KEY) ||
+      owner.factoryFor(GLOBAL_KEY) !== undefined
+    ) {
+      return owner.lookup(GLOBAL_KEY);
+    }
+
+    // 3. Lazily register and return our default FragmentSerializer.
+    //    This is JSON-based (not REST/JSON:API), which is what the fragment
+    //    pipeline expects.
+    const FALLBACK_KEY = 'serializer:-mf-fragment';
+    if (!owner.hasRegistration(FALLBACK_KEY)) {
+      const FragmentSerializer = importSync('./serializers/fragment').default;
+      owner.register(FALLBACK_KEY, FragmentSerializer);
+    }
+    return owner.lookup(FALLBACK_KEY);
   }
 
   /**
