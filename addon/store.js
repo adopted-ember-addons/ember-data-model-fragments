@@ -201,16 +201,25 @@ export default class FragmentStore extends Store {
     if (typeof modelName === 'string' && this._isFragmentSafe(modelName)) {
       const owner = getOwner(this);
 
-      // 1. Per-fragment-type serializer (e.g. app/serializers/name.js)
-      let serializer = owner.lookup(`serializer:${modelName}`);
-      if (serializer !== undefined) {
-        return serializer;
+      // 1. Per-fragment-type serializer (e.g. app/serializers/name.js).
+      //    We must check `factoryFor`/`hasRegistration` rather than `lookup`,
+      //    because ember-data's resolver auto-falls-back unknown serializer
+      //    lookups to `serializer:application`.
+      const perTypeKey = `serializer:${modelName}`;
+      if (
+        owner.hasRegistration(perTypeKey) ||
+        owner.factoryFor(perTypeKey) !== undefined
+      ) {
+        return owner.lookup(perTypeKey);
       }
 
-      // 2. Consumer-provided global fragment serializer
-      serializer = owner.lookup('serializer:-fragment');
-      if (serializer !== undefined) {
-        return serializer;
+      // 2. Consumer-provided global fragment serializer.
+      const GLOBAL_KEY = 'serializer:-fragment';
+      if (
+        owner.hasRegistration(GLOBAL_KEY) ||
+        owner.factoryFor(GLOBAL_KEY) !== undefined
+      ) {
+        return owner.lookup(GLOBAL_KEY);
       }
 
       // 3. Lazily register and return our default FragmentSerializer.
