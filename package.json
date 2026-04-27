@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
+    "@embroider/macros": "^1.20.2",
     "broccoli-file-creator": "^2.1.1",
     "broccoli-merge-trees": "^3.0.2",
     "calculate-cache-key-for-tree": "^1.2.3",
@@ -61,7 +62,6 @@
     "@ember/test-waiters": "^4.1.1",
     "@embroider/compat": "^3.9.3",
     "@embroider/core": "^3.5.9",
-    "@embroider/macros": "^1.20.2",
     "@embroider/test-setup": "^4.0.0",
     "@embroider/webpack": "^4.1.2",
     "@eslint/js": "^9.39.4",
@@ -112,7 +112,6 @@
     "@ember-data/model": ">= 4.12.0",
     "@ember-data/serializer": ">= 4.12.0",
     "@ember-data/store": ">= 4.12.0",
-    "@embroider/macros": ">= 1.0.0",
     "ember-data": ">= 4.12.0",
     "ember-source": ">= 5.0.0"
   },
