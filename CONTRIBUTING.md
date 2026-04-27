@@ -13,13 +13,9 @@
 
 ## Running tests
 
-- `pnpm test` – Runs the test suite on the current Ember version
-- `pnpm test:ember --server` – Runs the test suite in "watch mode"
-- `pnpm test:ember-compatibility` – Runs the test suite against multiple Ember versions
+- `pnpm test` – Builds the test bundle with Vite and runs it via Testem (CI mode)
 
-## Running the dummy application
+## Running the demo application
 
 - `pnpm start`
-- Visit the dummy application at [http://localhost:4200](http://localhost:4200).
-
-For more information on using ember-cli, visit [https://cli.emberjs.com/release/](https://cli.emberjs.com/release/).
+- Visit the demo application at [http://localhost:4200](http://localhost:4200).
