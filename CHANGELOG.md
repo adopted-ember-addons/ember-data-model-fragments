@@ -1,5 +1,28 @@
 # Changelog
 
+## Release (2026-04-27)
+
+* ember-data-model-fragments 8.0.0 (major)
+
+#### :boom: Breaking Change
+* `ember-data-model-fragments`
+  * [#507](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/507) Support ember-data 4.13.x and require extending FragmentStore/FragmentSerializer ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### :rocket: Enhancement
+* `ember-data-model-fragments`
+  * [#523](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/523) Add ember-data 5.x support ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#521](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/521) Import Comparable directly in fragments ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### :house: Internal
+* `ember-data-model-fragments`
+  * [#522](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/522) Update release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#520](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/520) Remove unused legacy record-data implementation ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#519](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/519) Remove old ember-data version checks ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+  * [#517](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/517) Various tech debt cleanup ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### Committers: 1
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
 ## Release (2026-02-27)
 
 * ember-data-model-fragments 7.0.3 (patch)

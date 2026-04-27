@@ -1,18 +1,26 @@
 {
   "solution": {
     "ember-data-model-fragments": {
-      "impact": "patch",
-      "oldVersion": "7.0.2",
-      "newVersion": "7.0.3",
+      "impact": "major",
+      "oldVersion": "7.0.3",
+      "newVersion": "8.0.0",
       "tagName": "latest",
       "constraints": [
         {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        },
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
           "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./package.json"
     }
   },
-  "description": "## Release (2026-02-27)\n\n* ember-data-model-fragments 7.0.3 (patch)\n\n#### :bug: Bug Fix\n* `ember-data-model-fragments`\n  * [#514](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/514) Guard fragment access on destroyed/unloaded records ([@deanmarano](https://github.com/deanmarano))\n\n#### Committers: 1\n- Dean Marano ([@deanmarano](https://github.com/deanmarano))\n"
+  "description": "## Release (2026-04-27)\n\n* ember-data-model-fragments 8.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-data-model-fragments`\n  * [#507](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/507) Support ember-data 4.13.x and require extending FragmentStore/FragmentSerializer ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### :rocket: Enhancement\n* `ember-data-model-fragments`\n  * [#523](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/523) Add ember-data 5.x support ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n  * [#521](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/521) Import Comparable directly in fragments ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### :house: Internal\n* `ember-data-model-fragments`\n  * [#522](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/522) Update release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n  * [#520](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/520) Remove unused legacy record-data implementation ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n  * [#519](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/519) Remove old ember-data version checks ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n  * [#517](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/517) Various tech debt cleanup ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### Committers: 1\n- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n"
 }
