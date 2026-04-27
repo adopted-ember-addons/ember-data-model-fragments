@@ -2,9 +2,9 @@
 import { schedule } from '@ember/runloop';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Name from '../../demo-app/models/name.js';
+import Name from '../../demo-app/models/name.ts';
 import JSONSerializer from '@ember-data/serializer/json';
-import Person from '../../demo-app/models/person.js';
+import Person from '../../demo-app/models/person.ts';
 import { fragmentArray } from '#src/attributes/index.ts';
 
 let store, owner;

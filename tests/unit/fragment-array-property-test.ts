@@ -9,7 +9,7 @@ import { all } from 'rsvp';
 import MF from '#src/index.ts';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Address from '../../demo-app/models/address.js';
+import Address from '../../demo-app/models/address.ts';
 
 let owner, store, people;
 

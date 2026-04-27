@@ -8,7 +8,7 @@ import { copy } from '#src/util/copy.ts';
 import MF from '#src/index.ts';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Name from '../../demo-app/models/name.js';
+import Name from '../../demo-app/models/name.ts';
 import Pretender from 'pretender';
 
 let store, owner, server;

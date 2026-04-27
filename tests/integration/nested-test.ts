@@ -5,8 +5,8 @@ import { schedule } from '@ember/runloop';
 import { fragment, fragmentArray } from '#src/attributes/index.ts';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Order from '../../demo-app/models/order.js';
-import Product from '../../demo-app/models/product.js';
+import Order from '../../demo-app/models/order.ts';
+import Product from '../../demo-app/models/product.ts';
 import Pretender from 'pretender';
 
 let store, owner, server;

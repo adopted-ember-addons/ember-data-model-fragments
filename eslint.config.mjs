@@ -107,7 +107,11 @@ export default defineConfig([
    * can be re-enabled per-file as types are tightened.
    */
   {
-    files: ['src/**/*.{ts,gts}', 'tests/**/*.{ts,gts}'],
+    files: [
+      'src/**/*.{ts,gts}',
+      'tests/**/*.{ts,gts}',
+      'demo-app/**/*.{ts,gts}',
+    ],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

@@ -1,4 +1,5 @@
-import { FragmentJSONAPISerializer } from '#src/serializer.js';
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
+import { FragmentJSONAPISerializer } from '#src/serializer.ts';
 
 export default class extends FragmentJSONAPISerializer {
   serialize(snapshot, ...args) {

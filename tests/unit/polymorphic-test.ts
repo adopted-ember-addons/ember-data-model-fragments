@@ -1,10 +1,10 @@
 // @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Animal from '../../demo-app/models/animal.js';
-import Lion from '../../demo-app/models/lion.js';
-import Elephant from '../../demo-app/models/elephant.js';
-import ComponentOptionsText from '../../demo-app/models/component-options-text.js';
+import Animal from '../../demo-app/models/animal.ts';
+import Lion from '../../demo-app/models/lion.ts';
+import Elephant from '../../demo-app/models/elephant.ts';
+import ComponentOptionsText from '../../demo-app/models/component-options-text.ts';
 let store, zoo;
 
 module('unit - Polymorphism', function (hooks) {

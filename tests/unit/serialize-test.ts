@@ -5,7 +5,7 @@ import { setupApplicationTest } from '../helpers';
 import Model, { attr } from '@ember-data/model';
 import JSONSerializer from '@ember-data/serializer/json';
 import FragmentSerializer from '#src/serializer.ts';
-import Person from '../../demo-app/models/person.js';
+import Person from '../../demo-app/models/person.ts';
 import { fragmentArray, array } from '#src/attributes/index.ts';
 import Pretender from 'pretender';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports

@@ -1,3 +1,4 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import ComponentOptions from './component-options';
 import { attr } from '@ember-data/model';
 
