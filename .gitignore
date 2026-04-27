@@ -1,20 +1,18 @@
 # compiled output
-/dist/
-/declarations/
+dist/
+dist-tests/
+declarations/
 
-# dependencies
-/node_modules/
-
-# misc
-/.env*
-/.pnp*
-/.eslintcache
-/coverage/
-/npm-debug.log*
-/testem.log
-/yarn-error.log
-
-# broccoli-debug
-/DEBUG/
+# from scenarios
 tmp/
-/dist-tests/
+
+# npm/pnpm/yarn pack output
+*.tgz
+
+# deps & caches
+node_modules/
+.eslintcache
+.prettiercache
+
+# potentially containing secrets
+*.local
