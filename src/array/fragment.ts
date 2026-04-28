@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
@@ -30,7 +29,7 @@ const FragmentArray = StatefulArray.extend({
   */
   modelName: null,
 
-  _normalizeData(data, index) {
+  _normalizeData(this: any, data: any, index: number) {
     assert(
       `You can only add '${this.modelName}' fragments or object literals to this property`,
       typeOf(data) === 'object' ||
@@ -57,18 +56,18 @@ const FragmentArray = StatefulArray.extend({
     return this.store._instanceCache.getRecord(fragmentIdentifier);
   },
 
-  _getFragmentState() {
+  _getFragmentState(this: any) {
     const fragmentIdentifiers = this._super();
     if (fragmentIdentifiers === null) {
       return null;
     }
-    return fragmentIdentifiers?.map((fragmentIdentifier) =>
+    return fragmentIdentifiers?.map((fragmentIdentifier: any) =>
       this.store._instanceCache.getRecord(fragmentIdentifier),
     );
   },
 
-  _setFragmentState(fragments) {
-    const fragmentIdentifiers = fragments.map((fragment) =>
+  _setFragmentState(this: any, fragments: any[]) {
+    const fragmentIdentifiers = fragments.map((fragment: any) =>
       recordIdentifierFor(fragment),
     );
     this._super(fragmentIdentifiers);
@@ -78,9 +77,9 @@ const FragmentArray = StatefulArray.extend({
     @method _createSnapshot
     @private
   */
-  _createSnapshot() {
+  _createSnapshot(this: any) {
     // Snapshot each fragment
-    return this.map((fragment) => {
+    return this.map((fragment: any) => {
       return fragment._createSnapshot();
     });
   },
@@ -127,7 +126,7 @@ const FragmentArray = StatefulArray.extend({
     @method serialize
     @return {Array}
   */
-  serialize() {
+  serialize(this: any) {
     return this.invoke('serialize');
   },
 
@@ -139,7 +138,7 @@ const FragmentArray = StatefulArray.extend({
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the newly added fragment
   */
-  addFragment(fragment) {
+  addFragment(this: any, fragment: any) {
     return this.addObject(fragment);
   },
 
@@ -150,7 +149,7 @@ const FragmentArray = StatefulArray.extend({
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the removed fragment
   */
-  removeFragment(fragment) {
+  removeFragment(this: any, fragment: any) {
     return this.removeObject(fragment);
   },
 
@@ -162,7 +161,7 @@ const FragmentArray = StatefulArray.extend({
     @param {MF.Fragment} fragment
     @return {MF.Fragment} the newly added fragment
     */
-  createFragment(props) {
+  createFragment(this: any, props: any) {
     const fragmentIdentifier = this.cache.newFragmentIdentifierForKey(
       this.identifier,
       this.key,

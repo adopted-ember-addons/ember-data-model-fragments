@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 /**
  * FragmentRecordDataProxy provides a backwards-compatible per-resource API
  * for code that expects a RecordData instance per record/fragment.
@@ -7,7 +6,10 @@
  * with the appropriate identifier.
  */
 export default class FragmentRecordDataProxy {
-  constructor(cache, identifier) {
+  __cache: any;
+  identifier: any;
+
+  constructor(cache: any, identifier: any) {
     this.__cache = cache;
     this.identifier = identifier;
   }
@@ -29,19 +31,19 @@ export default class FragmentRecordDataProxy {
   }
 
   // Fragment-specific methods
-  getFragment(key) {
+  getFragment(key: string) {
     return this.__cache.getFragment(this.identifier, key);
   }
 
-  hasFragment(key) {
+  hasFragment(key: string) {
     return this.__cache.hasFragment(this.identifier, key);
   }
 
-  setDirtyFragment(key, value) {
+  setDirtyFragment(key: string, value: any) {
     return this.__cache.setDirtyFragment(this.identifier, key, value);
   }
 
-  isFragmentDirty(key) {
+  isFragmentDirty(key: string) {
     return this.__cache.isFragmentDirty(this.identifier, key);
   }
 
@@ -54,12 +56,12 @@ export default class FragmentRecordDataProxy {
     return this.__cache.createFragmentRecordData(owner.ownerIdentifier);
   }
 
-  setFragmentOwner(ownerRecordData, key) {
+  setFragmentOwner(ownerRecordData: any, key: string) {
     const ownerIdentifier = ownerRecordData.identifier || ownerRecordData;
     return this.__cache.setFragmentOwner(this.identifier, ownerIdentifier, key);
   }
 
-  _newFragmentRecordDataForKey(key, attributes) {
+  _newFragmentRecordDataForKey(key: string, attributes: any) {
     const fragmentIdentifier = this.__cache.newFragmentIdentifierForKey(
       this.identifier,
       key,
@@ -68,7 +70,7 @@ export default class FragmentRecordDataProxy {
     return this.__cache.createFragmentRecordData(fragmentIdentifier);
   }
 
-  _newFragmentRecordData(definition, attributes) {
+  _newFragmentRecordData(definition: any, attributes: any) {
     // This is called with a definition object, not a key
     // We need to delegate to the fragment state manager
     const fragmentIdentifier =
@@ -86,7 +88,7 @@ export default class FragmentRecordDataProxy {
     );
   }
 
-  rollbackFragment(key) {
+  rollbackFragment(key: string) {
     return this.__cache.rollbackFragment(this.identifier, key);
   }
 
@@ -119,7 +121,7 @@ export default class FragmentRecordDataProxy {
   getCurrentState() {
     // Get both regular attrs and fragment current state
     const fragmentState = this.__cache.getFragmentCurrentState(this.identifier);
-    const regularState = {};
+    const regularState: Record<string, any> = {};
 
     // Get regular attributes from cache
     const definitions = this.__cache.__storeWrapper
@@ -136,11 +138,11 @@ export default class FragmentRecordDataProxy {
     return Object.assign({}, regularState, fragmentState);
   }
 
-  setDirtyAttribute(key, value) {
+  setDirtyAttribute(key: string, value: any) {
     return this.__cache.setAttr(this.identifier, key, value);
   }
 
-  getAttr(key) {
+  getAttr(key: string) {
     return this.__cache.getAttr(this.identifier, key);
   }
 
@@ -161,11 +163,11 @@ export default class FragmentRecordDataProxy {
   }
 
   // Methods for InternalModel compatibility
-  _fragmentGetRecord(properties) {
+  _fragmentGetRecord(properties: any) {
     return this.__cache.__fragmentState._getRecord(this.identifier, properties);
   }
 
-  _fragmentPushData(data) {
+  _fragmentPushData(data: any) {
     this.__cache.__fragmentState._fragmentPushData(this.identifier, data);
   }
 
@@ -173,7 +175,7 @@ export default class FragmentRecordDataProxy {
     this.__cache.__fragmentState._fragmentWillCommit(this.identifier);
   }
 
-  _fragmentDidCommit(data) {
+  _fragmentDidCommit(data: any) {
     this.__cache.__fragmentState._fragmentDidCommit(this.identifier, data);
   }
 
@@ -189,7 +191,7 @@ export default class FragmentRecordDataProxy {
     this.__cache.__fragmentState._fragmentUnloadRecord(this.identifier);
   }
 
-  notifyStateChange(key) {
+  notifyStateChange(key: string) {
     this.__cache.__storeWrapper.notifyChange(
       this.identifier,
       'attributes',
