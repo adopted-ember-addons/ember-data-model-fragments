@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 /**
  * Re-exports for ember-data-model-fragments serializers.
  *
