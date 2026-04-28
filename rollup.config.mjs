@@ -61,6 +61,27 @@ export default {
     addon.hbs(),
     addon.gjs(),
 
+    // NOTE: We intentionally do NOT use `addon.declarations()` to emit
+    // .d.ts files from src/. The hand-rolled declarations under
+    // `declarations/` expose a curated public API (generics over
+    // FragmentRegistry / TransformRegistry, FragmentArray<T>,
+    // FragmentOptions<K>, Store.createFragment<K>, etc.) that is strictly
+    // better than what tsc would emit today: the source is heavily
+    // annotated with `: any` to satisfy ember-tsc against ember-data 5.8
+    // internals, so generated declarations would (a) drop all generics,
+    // (b) leak `@ember/-internals/*` deep imports, (c) expose internal
+    // helpers, and (d) emit `.ts` import suffixes that break consumers.
+    //
+    // Re-enable this once src/ is properly typed (no `: any`) and the
+    // generated output matches or exceeds the hand-rolled surface:
+    //
+    //   import { resolve } from 'node:path';
+    //   const tsConfig = resolve(rootDirectory, './tsconfig.publish.json');
+    //   addon.declarations(
+    //     'declarations',
+    //     `pnpm ember-tsc --declaration --project ${tsConfig}`,
+    //   ),
+
     addon.keepAssets(['**/*.css']),
 
     addon.clean(),

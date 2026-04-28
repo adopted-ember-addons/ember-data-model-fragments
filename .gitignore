@@ -1,7 +1,7 @@
 # compiled output
 dist/
 dist-tests/
-declarations/
+# declarations/ uncomment wen we start generating declaration files
 
 # from scenarios
 tmp/
