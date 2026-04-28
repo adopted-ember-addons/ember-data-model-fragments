@@ -1,5 +1,5 @@
 import { assert } from '@ember/debug';
-import { getOwner } from '@ember/application';
+import { getOwner } from '@ember/owner';
 import { makeArray } from '@ember/array';
 import { computed } from '@ember/object';
 import Transform from '@ember-data/serializer/transform';

@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { getOwner } from '@ember/application';
 import Store from 'ember-data/store';
@@ -54,7 +53,7 @@ export default class FragmentStore extends Store {
    * @return {FragmentCache}
    * @public
    */
-  createCache(storeWrapper) {
+  createCache(storeWrapper: any) {
     return new FragmentCache(storeWrapper);
   }
 
@@ -78,9 +77,10 @@ export default class FragmentStore extends Store {
    */
   createSchemaService() {
     if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
-      const { buildSchema } = importSync('@ember-data/model/hooks');
+      const { buildSchema } = importSync('@ember-data/model/hooks') as any;
 
-      const FragmentSchemaService = importSync('./schema-service.ts').default;
+      const FragmentSchemaService = (importSync('./schema-service.ts') as any)
+        .default;
 
       return new FragmentSchemaService(this, buildSchema(this));
     }
@@ -97,7 +97,7 @@ export default class FragmentStore extends Store {
    * @param {Model} record
    * @public
    */
-  teardownRecord(record) {
+  teardownRecord(record: any) {
     // Check if record is a fragment (by checking if it has no id or by model type)
     // We need to handle the case where the fragment's store is disconnected
     if (record.isDestroyed || record.isDestroying) {
@@ -105,7 +105,7 @@ export default class FragmentStore extends Store {
     }
     try {
       record.destroy();
-    } catch (e) {
+    } catch (e: any) {
       // If the error is about disconnected state, just let it go
       // The fragment will be cleaned up by ember's garbage collection
       if (
@@ -138,7 +138,7 @@ export default class FragmentStore extends Store {
     @return {Fragment} fragment
     @public
   */
-  createFragment(modelName, props) {
+  createFragment(modelName: string, props?: any) {
     assert(
       `The '${modelName}' model must be a subclass of MF.Fragment`,
       this.isFragment(modelName),
@@ -206,7 +206,7 @@ export default class FragmentStore extends Store {
     @return {Serializer}
     @public
   */
-  constructor(...args) {
+  constructor(...args: any[]) {
     super(...args);
 
     const parentSerializerFor =
@@ -214,7 +214,7 @@ export default class FragmentStore extends Store {
         ? this.serializerFor.bind(this)
         : null;
 
-    this.serializerFor = (modelName) => {
+    this.serializerFor = (modelName: string) => {
       if (typeof modelName === 'string' && this._isFragmentSafe(modelName)) {
         return this._fragmentSerializerFor(modelName);
       }
@@ -230,8 +230,8 @@ export default class FragmentStore extends Store {
 
     @private
   */
-  _fragmentSerializerFor(modelName) {
-    const owner = getOwner(this);
+  _fragmentSerializerFor(modelName: string) {
+    const owner = getOwner(this) as any;
 
     // 1. Per-fragment-type serializer (e.g. app/serializers/name.js).
     //    `owner.lookup('serializer:<name>')` returns `undefined` when no
@@ -254,7 +254,8 @@ export default class FragmentStore extends Store {
     //    pipeline expects.
     const FALLBACK_KEY = 'serializer:-mf-fragment';
     if (!owner.hasRegistration(FALLBACK_KEY)) {
-      const FragmentSerializer = importSync('./serializers/fragment').default;
+      const FragmentSerializer = (importSync('./serializers/fragment') as any)
+        .default;
       owner.register(FALLBACK_KEY, FragmentSerializer);
     }
     return owner.lookup(FALLBACK_KEY);
@@ -267,7 +268,7 @@ export default class FragmentStore extends Store {
 
     @private
   */
-  _isFragmentSafe(modelName) {
+  _isFragmentSafe(modelName: string) {
     if (
       !modelName ||
       modelName === 'application' ||
@@ -291,7 +292,7 @@ export default class FragmentStore extends Store {
     @return {Boolean}
     @public
   */
-  isFragment(modelName) {
+  isFragment(modelName: string) {
     if (modelName === 'application' || modelName === '-default') {
       return false;
     }

@@ -1,7 +1,5 @@
 import { assert } from '@ember/debug';
-import { getOwner } from '@ember/application';
-import JSONAPISerializer from '@ember-data/serializer/json-api';
-import RESTSerializer from '@ember-data/serializer/rest';
+import { getOwner } from '@ember/owner';
 
 /**
  * Helper function to implement fragment transform lookup.
