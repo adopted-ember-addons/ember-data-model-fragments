@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { get, computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
 import { Comparable } from '@ember/-internals/runtime';
@@ -16,7 +15,7 @@ import { recordIdentifierFor } from '@ember-data/store';
  * Helper to get the FragmentRecordDataProxy for a fragment.
  * This provides backwards compatibility with existing code.
  */
-export function fragmentRecordDataFor(fragment) {
+export function fragmentRecordDataFor(fragment: any) {
   const identifier = recordIdentifierFor(fragment);
   return fragmentCacheFor(fragment.store).createFragmentRecordData(identifier);
 }
@@ -93,7 +92,7 @@ const Fragment = Model.extend(Comparable, {
     @return {Integer} The result of the comparison (0 if equal, 1 if not)
     @public
   */
-  compare(f1, f2) {
+  compare(f1: any, f2: any) {
     return f1 === f2 ? 0 : 1;
   },
 
@@ -106,9 +105,9 @@ const Fragment = Model.extend(Comparable, {
     @return {Fragment} The newly created fragment
     @public
   */
-  copy() {
+  copy(this: any) {
     const type = this.constructor;
-    const props = Object.create(null);
+    const props: Record<string, any> = Object.create(null);
     const modelName = type.modelName || this._internalModel.modelName;
     const identifier = recordIdentifierFor(this);
 
@@ -141,7 +140,7 @@ const Fragment = Model.extend(Comparable, {
           // Fragment array or array - serialize each element
           const arr =
             typeof value.toArray === 'function' ? value.toArray() : value;
-          props[name] = arr.map((item) =>
+          props[name] = arr.map((item: any) =>
             typeof item.serialize === 'function' ? item.serialize() : item,
           );
         } else {
@@ -162,7 +161,7 @@ const Fragment = Model.extend(Comparable, {
     @return {String}
     @public
   */
-  toStringExtension() {
+  toStringExtension(this: any) {
     if (isDestroying(this) || isDestroyed(this)) {
       return '';
     }
@@ -179,7 +178,7 @@ const Fragment = Model.extend(Comparable, {
     @return {String}
     @public
   */
-  toString() {
+  toString(this: any) {
     if (isDestroying(this) || isDestroyed(this)) {
       return `<fragment(destroyed)>`;
     }
@@ -194,10 +193,10 @@ const Fragment = Model.extend(Comparable, {
 // This replaces reopenClass which is deprecated
 Object.defineProperty(Fragment, 'fragmentOwnerProperties', {
   get() {
-    return computed(function () {
-      const props = [];
+    return computed(function (this: any) {
+      const props: string[] = [];
 
-      this.eachComputedProperty((name, meta) => {
+      this.eachComputedProperty((name: string, meta: any) => {
         if (meta.isFragmentOwner) {
           props.push(name);
         }
@@ -210,7 +209,7 @@ Object.defineProperty(Fragment, 'fragmentOwnerProperties', {
 });
 
 Object.defineProperty(Fragment, 'toString', {
-  value() {
+  value(this: any) {
     return `model:${this.modelName || 'fragment'}`;
   },
   configurable: true,
@@ -226,7 +225,12 @@ Object.defineProperty(Fragment, 'toString', {
  * @param {Object} data the fragment data
  * @return {String} the actual fragment type
  */
-export function getActualFragmentType(declaredType, options, data, owner) {
+export function getActualFragmentType(
+  declaredType: string,
+  options: any,
+  data: any,
+  owner?: any,
+) {
   if (!options.polymorphic || !data) {
     return declaredType;
   }
@@ -239,7 +243,11 @@ export function getActualFragmentType(declaredType, options, data, owner) {
 }
 
 // Sets the owner/key values on a fragment
-export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
+export function setFragmentOwner(
+  fragment: any,
+  ownerRecordDataOrIdentifier: any,
+  key: string,
+) {
   const fragmentIdentifier = recordIdentifierFor(fragment);
   const ownerIdentifier =
     ownerRecordDataOrIdentifier.identifier || ownerRecordDataOrIdentifier;
@@ -255,8 +263,8 @@ export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
 
   // Get the fragment owner properties array
   // In 4.13+, we need to iterate computed properties directly since static property access may not work
-  const ownerProps = [];
-  modelClass.eachComputedProperty((name, meta) => {
+  const ownerProps: string[] = [];
+  modelClass.eachComputedProperty((name: string, meta: any) => {
     if (meta.isFragmentOwner) {
       ownerProps.push(name);
     }
@@ -271,7 +279,7 @@ export function setFragmentOwner(fragment, ownerRecordDataOrIdentifier, key) {
 
 // Determine whether an object is a fragment instance using a stamp to reduce
 // the number of instanceof checks
-export function isFragment(obj) {
+export function isFragment(obj: any) {
   return obj instanceof Fragment;
 }
 
@@ -280,7 +288,7 @@ export function isFragment(obj) {
 // arrays where ember-data's tracking might not invalidate properly.
 // We use Object.defineProperty to override the inherited getter from Model.
 Object.defineProperty(Fragment.prototype, 'hasDirtyAttributes', {
-  get() {
+  get(this: any) {
     const identifier = recordIdentifierFor(this);
     return fragmentCacheFor(this.store).hasChangedAttrs(identifier);
   },

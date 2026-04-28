@@ -106,7 +106,12 @@ export default function fragment(type?: string, options?: object) {
         }
         // Value is a plain object - update existing fragment or create new one
         const fragmentIdentifier = cache.getFragment(identifier, key);
-        const actualType = getActualFragmentType(type, options, value, this);
+        const actualType = getActualFragmentType(
+          type as string,
+          options,
+          value,
+          this,
+        );
         if (fragmentIdentifier?.type !== actualType) {
           // Create a new fragment
           const fragment = this.store.createFragment(actualType, value);
