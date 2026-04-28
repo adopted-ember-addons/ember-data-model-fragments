@@ -1,9 +1,8 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
-function getType(resource) {
+function getType(resource: any) {
   return typeof resource === 'string' ? resource : resource.type;
 }
 
-function isFragmentAttribute(meta) {
+function isFragmentAttribute(meta: any) {
   return (
     typeof meta === 'object' &&
     meta !== null &&
@@ -15,7 +14,7 @@ function isFragmentAttribute(meta) {
   );
 }
 
-function transformFragmentMeta(name, meta) {
+function transformFragmentMeta(name: string, meta: any) {
   return {
     name,
     key: name,
@@ -33,7 +32,7 @@ function transformFragmentMeta(name, meta) {
   };
 }
 
-function mergedCacheFields(fields) {
+function mergedCacheFields(fields: Map<any, any>) {
   const cacheFields = new Map();
 
   fields.forEach((field, key) => {
@@ -48,17 +47,20 @@ function mergedCacheFields(fields) {
 }
 
 export default class FragmentSchemaService {
-  constructor(store, schema) {
+  store: any;
+  _schema: any;
+
+  constructor(store: any, schema: any) {
     this.store = store;
     this._schema = schema;
   }
 
-  _fragmentDefinitionsFor(resource) {
+  _fragmentDefinitionsFor(resource: any) {
     const type = getType(resource);
     const modelClass = this.store.modelFor(type);
     const definitions = Object.create(null);
 
-    modelClass.eachComputedProperty((name, meta) => {
+    modelClass.eachComputedProperty((name: string, meta: any) => {
       if (isFragmentAttribute(meta)) {
         definitions[name] = transformFragmentMeta(name, meta);
       }
@@ -67,7 +69,7 @@ export default class FragmentSchemaService {
     return definitions;
   }
 
-  _mergedFields(resource) {
+  _mergedFields(resource: any) {
     const fields = new Map(this._schema.fields(resource));
     const fragments = this._fragmentDefinitionsFor(resource);
 
@@ -82,39 +84,39 @@ export default class FragmentSchemaService {
     return this._schema.resourceTypes();
   }
 
-  hasResource(resource) {
+  hasResource(resource: any) {
     return this._schema.hasResource(resource);
   }
 
-  hasTrait(type) {
+  hasTrait(type: any) {
     return this._schema.hasTrait(type);
   }
 
-  resourceHasTrait(resource, trait) {
+  resourceHasTrait(resource: any, trait: any) {
     return this._schema.resourceHasTrait(resource, trait);
   }
 
-  fields(resource) {
+  fields(resource: any) {
     return this._mergedFields(resource);
   }
 
-  cacheFields(resource) {
+  cacheFields(resource: any) {
     return mergedCacheFields(this._mergedFields(resource));
   }
 
-  transformation(field) {
+  transformation(field: any) {
     return this._schema.transformation(field);
   }
 
-  hashFn(field) {
+  hashFn(field: any) {
     return this._schema.hashFn(field);
   }
 
-  derivation(field) {
+  derivation(field: any) {
     return this._schema.derivation(field);
   }
 
-  resource(resource) {
+  resource(resource: any) {
     const schema = this._schema.resource(resource);
     const fields = this._mergedFields(resource);
 
@@ -125,31 +127,31 @@ export default class FragmentSchemaService {
     };
   }
 
-  registerResources(schemas) {
+  registerResources(schemas: any) {
     this._schema.registerResources(schemas);
   }
 
-  registerResource(schema) {
+  registerResource(schema: any) {
     this._schema.registerResource(schema);
   }
 
-  registerTransformation(transform) {
+  registerTransformation(transform: any) {
     this._schema.registerTransformation(transform);
   }
 
-  registerDerivation(derivation) {
+  registerDerivation(derivation: any) {
     this._schema.registerDerivation(derivation);
   }
 
-  registerHashFn(hashFn) {
+  registerHashFn(hashFn: any) {
     this._schema.registerHashFn(hashFn);
   }
 
-  registerTrait(trait) {
+  registerTrait(trait: any) {
     this._schema.registerTrait?.(trait);
   }
 
-  attributesDefinitionFor(resource) {
+  attributesDefinitionFor(resource: any) {
     const attributes = this._schema.attributesDefinitionFor
       ? { ...this._schema.attributesDefinitionFor(resource) }
       : Object.create(null);
@@ -158,34 +160,34 @@ export default class FragmentSchemaService {
     return Object.assign(attributes, fragments);
   }
 
-  relationshipsDefinitionFor(resource) {
+  relationshipsDefinitionFor(resource: any) {
     return this._schema.relationshipsDefinitionFor?.(resource);
   }
 
-  doesTypeExist(type) {
+  doesTypeExist(type: any) {
     return this._schema.doesTypeExist?.(type) ?? this.hasResource({ type });
   }
 
-  CAUTION_MEGA_DANGER_ZONE_registerExtension(extension) {
+  CAUTION_MEGA_DANGER_ZONE_registerExtension(extension: any) {
     this._schema.CAUTION_MEGA_DANGER_ZONE_registerExtension?.(extension);
   }
 
-  CAUTION_MEGA_DANGER_ZONE_resourceExtensions(resource) {
+  CAUTION_MEGA_DANGER_ZONE_resourceExtensions(resource: any) {
     return this._schema.CAUTION_MEGA_DANGER_ZONE_resourceExtensions?.(resource);
   }
 
-  CAUTION_MEGA_DANGER_ZONE_objectExtensions(field, resolvedType) {
+  CAUTION_MEGA_DANGER_ZONE_objectExtensions(field: any, resolvedType: any) {
     return this._schema.CAUTION_MEGA_DANGER_ZONE_objectExtensions?.(
       field,
       resolvedType,
     );
   }
 
-  CAUTION_MEGA_DANGER_ZONE_arrayExtensions(field) {
+  CAUTION_MEGA_DANGER_ZONE_arrayExtensions(field: any) {
     return this._schema.CAUTION_MEGA_DANGER_ZONE_arrayExtensions?.(field);
   }
 
-  CAUTION_MEGA_DANGER_ZONE_hasExtension(extension) {
+  CAUTION_MEGA_DANGER_ZONE_hasExtension(extension: any) {
     return this._schema.CAUTION_MEGA_DANGER_ZONE_hasExtension?.(extension);
   }
 }
