@@ -4,7 +4,6 @@ import JSONSerializer from '@ember-data/serializer/json';
 import FragmentSerializer, {
   FragmentRESTSerializer,
 } from 'ember-data-model-fragments/serializer';
-import FragmentStore from 'ember-data-model-fragments/store';
 
 /*
   Tests for the mechanics of FragmentStore's `serializerFor` override.
@@ -39,22 +38,16 @@ module(
     });
 
     test('serializerFor on the instance is installed by FragmentStore, not inherited', function (assert) {
-      // The parent Store either defines serializerFor as a class field
-      // (per-instance arrow function) or as a prototype method. Either way,
-      // our constructor-installed override should be present on the instance
-      // and must be a function (not `undefined`).
+      // The override must be present on every store instance regardless of
+      // whether the parent Store uses a class-field arrow (5.x) or a prototype
+      // method (4.12). We don't assert anything about the prototype shape:
+      // on 4.12 the parent's method is inherited and visible on the prototype
+      // chain, on 5.x the parent uses a class field and the prototype slot is
+      // undefined. Either way our constructor-installed override wins.
       assert.strictEqual(
         typeof store.serializerFor,
         'function',
         'serializerFor is a function on the instance',
-      );
-
-      // It must not live on the FragmentStore prototype (we install per
-      // instance, so the prototype slot is undefined).
-      assert.strictEqual(
-        FragmentStore.prototype.serializerFor,
-        undefined,
-        'FragmentStore does not declare serializerFor on its prototype',
       );
 
       // Behavioral smoke test: looking up a fragment must NOT throw and must
