@@ -678,6 +678,119 @@ export default class FragmentStateManager {
     });
   }
 
+  /**
+   * Returns true if the given attribute value is, or contains, an instantiated
+   * Fragment. Used by FragmentCache.clientDidCreate to route fragment-instance
+   * initialization (from `store.createRecord(type, { key: fragmentInstance })`)
+   * through the adopt-fragment path instead of pushFragmentData (which only
+   * accepts raw object/null canonical data).
+   */
+  valueContainsFragmentInstance(value) {
+    if (value == null) {
+      return false;
+    }
+    if (isFragment(value)) {
+      return true;
+    }
+    if (isArray(value)) {
+      return value.some((item) => isFragment(item));
+    }
+    return false;
+  }
+
+  /**
+   * Adopt an existing fragment instance (or array of fragment instances) for the
+   * given owner identifier + key. This is used by the client-created path
+   * (`createRecord(...props)`) when consumers pass already-instantiated
+   * fragments rather than raw object data.
+   *
+   * Returns the canonical fragment identifier value to be stored in the
+   * fragment data map (a single identifier for `fragment` kind, an array of
+   * identifiers for `fragment-array` kind).
+   *
+   * Asserts when the provided value does not match the fragment kind/type
+   * declared on the owner's schema.
+   */
+  adoptFragmentForKey(ownerIdentifier, key, value) {
+    const behaviors = this._getBehaviors(ownerIdentifier);
+    const behavior = behaviors[key];
+    assert(
+      `Attribute '${key}' for model '${ownerIdentifier.type}' must be a fragment`,
+      behavior != null,
+    );
+
+    const definition = behavior.definition;
+    const isArrayBehavior = behavior instanceof FragmentArrayBehavior;
+    const isSingleFragmentBehavior = behavior instanceof FragmentBehavior;
+
+    // Only single-fragment and fragment-array behaviors support adopting
+    // fragment instances. Plain array behavior should never receive a
+    // fragment instance.
+    if (!isSingleFragmentBehavior && !isArrayBehavior) {
+      return undefined;
+    }
+
+    if (isSingleFragmentBehavior) {
+      if (value === null) {
+        return null;
+      }
+      if (!isFragment(value)) {
+        return undefined;
+      }
+      assert(
+        `The value provided for fragment attribute '${key}' must be a '${definition.modelName}' fragment`,
+        isInstanceOfType(
+          this.__storeWrapper._store.modelFor(definition.modelName),
+          value,
+        ),
+      );
+      const fragmentIdentifier = this._identifierFor(value);
+      this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, key);
+      return fragmentIdentifier;
+    }
+
+    // fragment-array behavior
+    if (value === null) {
+      return null;
+    }
+    if (!isArray(value)) {
+      return undefined;
+    }
+    // Only treat the value as fragment-instance input if at least one entry is
+    // a fragment instance. Otherwise let the regular pushData path handle it
+    // (raw object array).
+    if (!value.some((item) => isFragment(item))) {
+      return undefined;
+    }
+    return value.map((item) => {
+      if (isFragment(item)) {
+        assert(
+          `The value provided for fragment array attribute '${key}' can only include '${definition.modelName}' fragments`,
+          isInstanceOfType(
+            this.__storeWrapper._store.modelFor(definition.modelName),
+            item,
+          ),
+        );
+        const fragmentIdentifier = this._identifierFor(item);
+        this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, key);
+        return fragmentIdentifier;
+      }
+      // Raw object entry mixed in with fragments - create a new fragment for it.
+      return this._newFragmentIdentifier(ownerIdentifier, definition, item);
+    });
+  }
+
+  /**
+   * Set canonical fragment data for a key on an owner identifier. Used by the
+   * client-created path after adopting fragment instances so subsequent
+   * getFragment/getCurrentState calls find the canonical value without going
+   * through pushData (which only accepts raw object/null canonical data).
+   */
+  setCanonicalFragmentValue(identifier, key, value) {
+    const fragmentData = this._getFragmentDataMap(identifier);
+    fragmentData[key] = value;
+  }
+
   _newFragmentIdentifierForKey(identifier, key, attributes) {
     const behaviors = this._getBehaviors(identifier);
     const behavior = behaviors[key];
