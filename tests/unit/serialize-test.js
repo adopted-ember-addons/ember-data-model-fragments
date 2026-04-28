@@ -411,170 +411,167 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
-  module(
-    'models with only fragment attributes (no @attr fields)',
-    function () {
-      // Models that have only fragment attributes exposed JSON:API serializers
-      // omitting `data.attributes` from the serialized payload. The
-      // fragmentSerialize helper must still place fragment values inside
-      // `data.attributes` rather than at the top level alongside `data`.
+  module('models with only fragment attributes (no @attr fields)', function () {
+    // Models that have only fragment attributes exposed JSON:API serializers
+    // omitting `data.attributes` from the serialized payload. The
+    // fragmentSerialize helper must still place fragment values inside
+    // `data.attributes` rather than at the top level alongside `data`.
 
-      class Timestamps extends Fragment {
-        @attr('string') createdAt;
-        @attr('string') updatedAt;
-      }
+    class Timestamps extends Fragment {
+      @attr('string') createdAt;
+      @attr('string') updatedAt;
+    }
 
-      class FragmentOnly extends Model {
+    class FragmentOnly extends Model {
+      @fragment('timestamps') timestamps;
+    }
+
+    function registerFragmentOnly() {
+      owner.register('model:timestamps', Timestamps);
+      owner.register('model:fragment-only', FragmentOnly);
+    }
+
+    test('FragmentJSONAPISerializer writes fragments inside data.attributes', async function (assert) {
+      registerFragmentOnly();
+      owner.register('serializer:fragment-only', FragmentJSONAPISerializer);
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const record = store.peekRecord('fragment-only', '1');
+      const serialized = record.serialize();
+
+      assert.ok(
+        serialized.data && typeof serialized.data === 'object',
+        'payload has data',
+      );
+      assert.ok(
+        serialized.data.attributes &&
+          typeof serialized.data.attributes === 'object',
+        'data.attributes was created even when no @attr fields exist',
+      );
+      assert.deepEqual(
+        serialized.data.attributes.timestamps,
+        { createdAt: 'a', updatedAt: 'b' },
+        'fragment is written under data.attributes',
+      );
+      assert.notOk(
+        'timestamps' in serialized,
+        'fragment is NOT written at the top level alongside data',
+      );
+    });
+
+    test('FragmentRESTSerializer writes fragments under the model root key', async function (assert) {
+      registerFragmentOnly();
+      owner.register('serializer:fragment-only', FragmentRESTSerializer);
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const record = store.peekRecord('fragment-only', '1');
+      const serialized = record.serialize();
+
+      assert.deepEqual(
+        serialized.timestamps,
+        { createdAt: 'a', updatedAt: 'b' },
+        'fragment is included in the serialized REST payload',
+      );
+    });
+
+    test('FragmentSerializer (JSONSerializer) writes fragments at the root', async function (assert) {
+      registerFragmentOnly();
+      owner.register('serializer:fragment-only', FragmentSerializer);
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const record = store.peekRecord('fragment-only', '1');
+      const serialized = record.serialize();
+
+      assert.deepEqual(
+        serialized.timestamps,
+        { createdAt: 'a', updatedAt: 'b' },
+        'fragment is included in the serialized JSON payload',
+      );
+    });
+
+    test('REST/JSON serializers do not treat a top-level `data` @attr as a JSON:API envelope', async function (assert) {
+      // Regression: the JSON:API attribute-hash logic must not be triggered
+      // by a model that legitimately declares an @attr named `data`.
+      class WithDataAttr extends Model {
+        @attr('string') name;
+        @attr() data;
         @fragment('timestamps') timestamps;
       }
+      owner.register('model:timestamps', Timestamps);
+      owner.register('model:with-data-attr', WithDataAttr);
 
-      function registerFragmentOnly() {
-        owner.register('model:timestamps', Timestamps);
-        owner.register('model:fragment-only', FragmentOnly);
-      }
-
-      test('FragmentJSONAPISerializer writes fragments inside data.attributes', async function (assert) {
-        registerFragmentOnly();
-        owner.register('serializer:fragment-only', FragmentJSONAPISerializer);
-
-        store.push({
-          data: {
-            type: 'fragment-only',
-            id: '1',
-            attributes: {
-              timestamps: { createdAt: 'a', updatedAt: 'b' },
-            },
+      store.push({
+        data: {
+          type: 'with-data-attr',
+          id: '1',
+          attributes: {
+            name: 'thing',
+            data: { user: 'value', nested: { foo: 1 } },
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
           },
-        });
-
-        const record = store.peekRecord('fragment-only', '1');
-        const serialized = record.serialize();
-
-        assert.ok(
-          serialized.data && typeof serialized.data === 'object',
-          'payload has data',
-        );
-        assert.ok(
-          serialized.data.attributes &&
-            typeof serialized.data.attributes === 'object',
-          'data.attributes was created even when no @attr fields exist',
-        );
-        assert.deepEqual(
-          serialized.data.attributes.timestamps,
-          { createdAt: 'a', updatedAt: 'b' },
-          'fragment is written under data.attributes',
-        );
-        assert.notOk(
-          'timestamps' in serialized,
-          'fragment is NOT written at the top level alongside data',
-        );
+        },
       });
 
-      test('FragmentRESTSerializer writes fragments under the model root key', async function (assert) {
-        registerFragmentOnly();
-        owner.register('serializer:fragment-only', FragmentRESTSerializer);
+      const record = store.peekRecord('with-data-attr', '1');
 
-        store.push({
-          data: {
-            type: 'fragment-only',
-            id: '1',
-            attributes: {
-              timestamps: { createdAt: 'a', updatedAt: 'b' },
-            },
-          },
-        });
+      owner.register('serializer:with-data-attr', FragmentSerializer);
+      const jsonSerialized = record.serialize();
+      assert.deepEqual(
+        jsonSerialized.data,
+        { user: 'value', nested: { foo: 1 } },
+        'JSONSerializer leaves user `data` attr untouched',
+      );
+      assert.notOk(
+        jsonSerialized.data.attributes,
+        'no spurious `attributes` key injected into user `data`',
+      );
+      assert.deepEqual(
+        jsonSerialized.timestamps,
+        { createdAt: 'a', updatedAt: 'b' },
+        'fragment still serialized at the root',
+      );
 
-        const record = store.peekRecord('fragment-only', '1');
-        const serialized = record.serialize();
-
-        assert.deepEqual(
-          serialized.timestamps,
-          { createdAt: 'a', updatedAt: 'b' },
-          'fragment is included in the serialized REST payload',
-        );
-      });
-
-      test('FragmentSerializer (JSONSerializer) writes fragments at the root', async function (assert) {
-        registerFragmentOnly();
-        owner.register('serializer:fragment-only', FragmentSerializer);
-
-        store.push({
-          data: {
-            type: 'fragment-only',
-            id: '1',
-            attributes: {
-              timestamps: { createdAt: 'a', updatedAt: 'b' },
-            },
-          },
-        });
-
-        const record = store.peekRecord('fragment-only', '1');
-        const serialized = record.serialize();
-
-        assert.deepEqual(
-          serialized.timestamps,
-          { createdAt: 'a', updatedAt: 'b' },
-          'fragment is included in the serialized JSON payload',
-        );
-      });
-
-      test('REST/JSON serializers do not treat a top-level `data` @attr as a JSON:API envelope', async function (assert) {
-        // Regression: the JSON:API attribute-hash logic must not be triggered
-        // by a model that legitimately declares an @attr named `data`.
-        class WithDataAttr extends Model {
-          @attr('string') name;
-          @attr() data;
-          @fragment('timestamps') timestamps;
-        }
-        owner.register('model:timestamps', Timestamps);
-        owner.register('model:with-data-attr', WithDataAttr);
-
-        store.push({
-          data: {
-            type: 'with-data-attr',
-            id: '1',
-            attributes: {
-              name: 'thing',
-              data: { user: 'value', nested: { foo: 1 } },
-              timestamps: { createdAt: 'a', updatedAt: 'b' },
-            },
-          },
-        });
-
-        const record = store.peekRecord('with-data-attr', '1');
-
-        owner.register('serializer:with-data-attr', FragmentSerializer);
-        const jsonSerialized = record.serialize();
-        assert.deepEqual(
-          jsonSerialized.data,
-          { user: 'value', nested: { foo: 1 } },
-          'JSONSerializer leaves user `data` attr untouched',
-        );
-        assert.notOk(
-          jsonSerialized.data.attributes,
-          'no spurious `attributes` key injected into user `data`',
-        );
-        assert.deepEqual(
-          jsonSerialized.timestamps,
-          { createdAt: 'a', updatedAt: 'b' },
-          'fragment still serialized at the root',
-        );
-
-        owner.unregister('serializer:with-data-attr');
-        owner.register('serializer:with-data-attr', FragmentRESTSerializer);
-        const restSerialized = record.serialize();
-        assert.deepEqual(
-          restSerialized.data,
-          { user: 'value', nested: { foo: 1 } },
-          'RESTSerializer leaves user `data` attr untouched',
-        );
-        assert.notOk(
-          restSerialized.data.attributes,
-          'no spurious `attributes` key injected into user `data` (REST)',
-        );
-      });
-    },
-  );
+      owner.unregister('serializer:with-data-attr');
+      owner.register('serializer:with-data-attr', FragmentRESTSerializer);
+      const restSerialized = record.serialize();
+      assert.deepEqual(
+        restSerialized.data,
+        { user: 'value', nested: { foo: 1 } },
+        'RESTSerializer leaves user `data` attr untouched',
+      );
+      assert.notOk(
+        restSerialized.data.attributes,
+        'no spurious `attributes` key injected into user `data` (REST)',
+      );
+    });
+  });
 
   module('when saving the record', function (saveHooks) {
     let server;
