@@ -1,11 +1,10 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import { recordIdentifierFor } from '@ember-data/store';
 import MF from '#src/index.ts';
 import Pretender from 'pretender';
 
-let store, owner, server;
+let store: any, owner: any, server: Pretender;
 
 module('unit - FragmentCache', function (hooks) {
   setupApplicationTest(hooks);
@@ -49,7 +48,7 @@ module('unit - FragmentCache', function (hooks) {
       );
 
       // Fragment should be accessible via fragment state
-      assert.ok(person.name instanceof MF.Fragment, 'fragment is accessible');
+      assert.ok(person.name instanceof (MF as any).Fragment, 'fragment is accessible');
       assert.strictEqual(
         person.name.first,
         'Eddard',
@@ -117,7 +116,7 @@ module('unit - FragmentCache', function (hooks) {
       const nameViaCache = store.cache.getAttr(identifier, 'name');
 
       assert.ok(
-        nameViaCache instanceof MF.Fragment,
+        nameViaCache instanceof (MF as any).Fragment,
         'getAttr returns Fragment instance',
       );
       assert.strictEqual(
@@ -153,7 +152,7 @@ module('unit - FragmentCache', function (hooks) {
         'array has correct length',
       );
       assert.ok(
-        addressesViaCache[0] instanceof MF.Fragment,
+        addressesViaCache[0] instanceof (MF as any).Fragment,
         'array items are Fragment instances',
       );
     });
@@ -243,15 +242,15 @@ module('unit - FragmentCache', function (hooks) {
         const resource = schema.resource(identifier);
 
         assert.ok(
-          resource.fields.some((field) => field.name === 'name'),
+          resource.fields.some((field: { name: string }) => field.name === 'name'),
           'resource fields include fragment field',
         );
         assert.ok(
-          resource.fields.some((field) => field.name === 'houses'),
+          resource.fields.some((field: { name: string }) => field.name === 'houses'),
           'resource fields include fragment array field',
         );
         assert.ok(
-          resource.fields.some((field) => field.name === 'children'),
+          resource.fields.some((field: { name: string }) => field.name === 'children'),
           'resource fields include array field',
         );
       }
@@ -1011,7 +1010,7 @@ module('unit - Fragment Edge Cases', function (hooks) {
     });
 
     assert.ok(person.hasDirtyAttributes, 'new record is dirty');
-    assert.ok(person.name instanceof MF.Fragment, 'fragment created from hash');
+    assert.ok(person.name instanceof (MF as any).Fragment, 'fragment created from hash');
 
     server.post('/people', () => {
       return [

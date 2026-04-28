@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 /* eslint-disable ember/no-observers */
 import Model, { attr } from '@ember-data/model';
 import { array } from '#src/attributes/index.ts';
@@ -10,7 +9,7 @@ import { module, test, skip } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import Pretender from 'pretender';
 
-let store, owner, server;
+let store: any, owner: any, server: Pretender;
 
 module('integration - Persistence', function (hooks) {
   setupApplicationTest(hooks);
@@ -226,7 +225,7 @@ module('integration - Persistence', function (hooks) {
     });
 
     server.put('/people/1', () => {
-      return [204];
+      return [204, {}, ''];
     });
 
     const person = await store.findRecord('person', 1);
@@ -757,7 +756,7 @@ module('integration - Persistence', function (hooks) {
     });
 
     const person = await store.findRecord('person', 1);
-    PersonObserver.create({ person: person });
+    PersonObserver.create({ person: person } as object);
     return person.save();
   });
 
@@ -765,8 +764,8 @@ module('integration - Persistence', function (hooks) {
     // different ember versions include deprecation checks that cause this count to change
     // assert.expect(1);
     class Army extends Model {
-      @attr('string') name;
-      @array() soldiers;
+      @attr('string') declare name: string;
+      @array() declare soldiers: any;
     }
 
     owner.register('model:army', Army);
@@ -779,13 +778,16 @@ module('integration - Persistence', function (hooks) {
     // eslint-disable-next-line ember/no-classic-classes
     const ArmyObserver = EmberObject.extend({
       army: null,
-      observer: observer('army.soldiers.[]', function () {
-        assert.equal(
-          this.army.soldiers.length,
-          2,
-          'The array change to was observed',
-        );
-      }),
+      observer: observer(
+        'army.soldiers.[]',
+        function (this: { army: { soldiers: { length: number } } }) {
+          assert.equal(
+            this.army.soldiers.length,
+            2,
+            'The array change to was observed',
+          );
+        },
+      ),
     });
 
     store.push({
@@ -811,7 +813,7 @@ module('integration - Persistence', function (hooks) {
     });
 
     const army = await store.findRecord('army', 1);
-    ArmyObserver.create({ army: army });
+    ArmyObserver.create({ army: army } as object);
     return army.reload();
   });
 
@@ -824,8 +826,8 @@ module('integration - Persistence', function (hooks) {
     };
 
     class Army extends Model {
-      @attr('string') name;
-      @array() soldiers;
+      @attr('string') declare name: string;
+      @array() declare soldiers: any;
     }
 
     owner.register('model:army', Army);
@@ -839,7 +841,7 @@ module('integration - Persistence', function (hooks) {
     });
 
     server.get('/armies', () => {
-      return [500, { 'Content-Type': 'application/json' }];
+      return [500, { 'Content-Type': 'application/json' }, ''];
     });
 
     const army = await store.findRecord('army', 1);
@@ -854,7 +856,7 @@ module('integration - Persistence', function (hooks) {
     ]);
 
     server.put('/armies/1', () => {
-      return [400, { 'Content-Type': 'application/json' }];
+      return [400, { 'Content-Type': 'application/json' }, ''];
     });
 
     await assert.rejects(army.save());
@@ -895,7 +897,7 @@ module('integration - Persistence', function (hooks) {
     });
 
     server.put('/armies/1', () => {
-      return [500, { 'Content-Type': 'application/json' }];
+      return [500, { 'Content-Type': 'application/json' }, ''];
     });
 
     const mrStark = await store.findRecord('person', 1);
@@ -908,7 +910,7 @@ module('integration - Persistence', function (hooks) {
     address.set('street', 'BadStreet');
 
     server.put('/people/1', () => {
-      return [400, { 'Content-Type': 'application/json' }];
+      return [400, { 'Content-Type': 'application/json' }, ''];
     });
 
     await assert.rejects(mrStark.save());
@@ -930,7 +932,7 @@ module('integration - Persistence', function (hooks) {
   test('setting an array does not error on save', async function (assert) {
     assert.expect(0);
     class Army extends Model {
-      @array('string') soldiers;
+      @array('string') declare soldiers: any;
     }
 
     const data = {
@@ -1064,8 +1066,8 @@ module('integration - Persistence', function (hooks) {
       options: {},
     });
 
-    server.post('/components', () => [204]);
-    server.put('/components/:id', () => [204]);
+    server.post('/components', () => [204, {}, '']);
+    server.put('/components/:id', () => [204, {}, '']);
 
     await component.save();
 

@@ -1,13 +1,12 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { isEmpty } from '@ember/utils';
 import { A, isArray } from '@ember/array';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import { copy } from '#src/util/copy.ts';
 
-let store, people;
+let store: any, people: any;
 
-function pushPerson(id) {
+function pushPerson(id: number) {
   store.push({
     data: {
       type: 'person',
