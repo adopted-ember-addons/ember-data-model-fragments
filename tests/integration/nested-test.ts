@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model from '@ember-data/model';
 import { copy } from '#src/util/copy.ts';
 import { schedule } from '@ember/runloop';
@@ -9,7 +8,7 @@ import Order from '../../demo-app/models/order.ts';
 import Product from '../../demo-app/models/product.ts';
 import Pretender from 'pretender';
 
-let store, owner, server;
+let store: any, owner: any, server: Pretender;
 
 module('integration - Nested fragments', function (hooks) {
   setupApplicationTest(hooks);
@@ -162,7 +161,7 @@ module('integration - Nested fragments', function (hooks) {
     );
     assert.equal(
       orders.firstObject.amount,
-      data.orders[0].amount,
+      data.orders[0]!.amount,
       'fragment properties are correct',
     );
     assert.equal(
@@ -176,7 +175,7 @@ module('integration - Nested fragments', function (hooks) {
     );
     assert.equal(
       orders.firstObject.products.firstObject.name,
-      data.orders[0].products[0].name,
+      data.orders[0]!.products[0]!.name,
       'nested fragment properties are correct',
     );
   });
@@ -199,8 +198,9 @@ module('integration - Nested fragments', function (hooks) {
     ];
 
     class Assassin extends Model {
-      @fragment('info', { defaultValue: defaultInfo }) info;
-      @fragmentArray('order', { defaultValue: defaultOrders }) orders;
+      @fragment('info', { defaultValue: defaultInfo }) declare info: any;
+      @fragmentArray('order', { defaultValue: defaultOrders })
+      declare orders: any;
     }
 
     owner.register('model:assassin', Assassin);
@@ -219,12 +219,12 @@ module('integration - Nested fragments', function (hooks) {
     );
     assert.equal(
       user.orders.firstObject.amount,
-      defaultOrders[0].amount,
+      defaultOrders[0]!.amount,
       'a nested fragment is created with the default value',
     );
     assert.equal(
       user.orders.firstObject.products.firstObject.name,
-      defaultOrders[0].products[0].name,
+      defaultOrders[0]!.products[0]!.name,
       'a nested fragment is created with the default value',
     );
   });
@@ -273,7 +273,7 @@ module('integration - Nested fragments', function (hooks) {
 
     assert.equal(
       order.recurring,
-      data.orders[0].recurring,
+      data.orders[0]!.recurring,
       'nested fragments are copied',
     );
     assert.ok(
@@ -285,7 +285,7 @@ module('integration - Nested fragments', function (hooks) {
 
     assert.equal(
       product.name,
-      data.orders[0].product.name,
+      data.orders[0]!.product.name,
       'nested fragments are copied',
     );
     assert.ok(
