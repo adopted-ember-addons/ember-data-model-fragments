@@ -8,7 +8,6 @@ import Pretender from 'pretender';
 module('Integration | Rendering', function (hooks) {
   setupRenderingTest(hooks);
 
-
   let store: any;
   let server: Pretender;
 
@@ -24,7 +23,6 @@ module('Integration | Rendering', function (hooks) {
 
   test('construct fragments without autotracking.mutation-after-consumption error', async function (assert) {
     interface PersonComponentSignature {
-
       Blocks: { default: [person: any] };
     }
     class PersonComponent extends Component<PersonComponentSignature> {
@@ -72,7 +70,6 @@ module('Integration | Rendering', function (hooks) {
 
   test('fragment array computed property', async function (assert) {
     interface OrderListSignature {
-
       Args: { order: any };
     }
     class OrderListComponent extends Component<OrderListSignature> {
@@ -236,7 +233,7 @@ module('Integration | Rendering', function (hooks) {
 
     assert.dom('[data-product]').hasText('The Strangler: 299.99');
 
-    server.delete('/orders/1', () => [204, {}, ""]);
+    server.delete('/orders/1', () => [204, {}, '']);
     await order.destroyRecord();
 
     assert.dom('[data-product]').hasText('The Strangler: 299.99');
@@ -281,7 +278,7 @@ module('Integration | Rendering', function (hooks) {
     assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
     assert.dom('[data-product="1"]').hasText('Tears of Lys: 499.99');
 
-    server.delete('/orders/1', () => [204, {}, ""]);
+    server.delete('/orders/1', () => [204, {}, '']);
     await order.destroyRecord();
 
     assert.dom('[data-product]').exists({ count: 2 });
@@ -319,7 +316,7 @@ module('Integration | Rendering', function (hooks) {
     assert.dom('[data-title="0"]').hasText('Hand of the King');
     assert.dom('[data-title="1"]').hasText('Master of Coin');
 
-    server.delete('/people/1', () => [204, {}, ""]);
+    server.delete('/people/1', () => [204, {}, '']);
     await person.destroyRecord();
 
     assert.dom('[data-title]').exists({ count: 2 });

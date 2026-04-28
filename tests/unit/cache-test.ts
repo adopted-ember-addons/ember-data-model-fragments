@@ -48,7 +48,10 @@ module('unit - FragmentCache', function (hooks) {
       );
 
       // Fragment should be accessible via fragment state
-      assert.ok(person.name instanceof (MF as any).Fragment, 'fragment is accessible');
+      assert.ok(
+        person.name instanceof (MF as any).Fragment,
+        'fragment is accessible',
+      );
       assert.strictEqual(
         person.name.first,
         'Eddard',
@@ -242,15 +245,21 @@ module('unit - FragmentCache', function (hooks) {
         const resource = schema.resource(identifier);
 
         assert.ok(
-          resource.fields.some((field: { name: string }) => field.name === 'name'),
+          resource.fields.some(
+            (field: { name: string }) => field.name === 'name',
+          ),
           'resource fields include fragment field',
         );
         assert.ok(
-          resource.fields.some((field: { name: string }) => field.name === 'houses'),
+          resource.fields.some(
+            (field: { name: string }) => field.name === 'houses',
+          ),
           'resource fields include fragment array field',
         );
         assert.ok(
-          resource.fields.some((field: { name: string }) => field.name === 'children'),
+          resource.fields.some(
+            (field: { name: string }) => field.name === 'children',
+          ),
           'resource fields include array field',
         );
       }
@@ -1010,7 +1019,10 @@ module('unit - Fragment Edge Cases', function (hooks) {
     });
 
     assert.ok(person.hasDirtyAttributes, 'new record is dirty');
-    assert.ok(person.name instanceof (MF as any).Fragment, 'fragment created from hash');
+    assert.ok(
+      person.name instanceof (MF as any).Fragment,
+      'fragment created from hash',
+    );
 
     server.post('/people', () => {
       return [
