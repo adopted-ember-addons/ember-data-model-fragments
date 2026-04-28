@@ -29,7 +29,7 @@ import fragmentCacheFor from '../util/fragment-cache.ts';
  @method fragmentOwner
  @return {Attribute}
  */
-export default function fragmentOwner() {
+export default function fragmentOwner(): PropertyDecorator {
   // No dependent keys: the value is invalidated via notifyPropertyChange in
   // setFragmentOwner(). Omitting dependent keys also avoids Ember's
   // "Attempted to access the computed ... on a destroyed object" assertion

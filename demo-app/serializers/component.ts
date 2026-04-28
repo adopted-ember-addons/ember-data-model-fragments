@@ -1,8 +1,7 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { FragmentJSONAPISerializer } from '#src/serializer.ts';
 
 export default class extends FragmentJSONAPISerializer {
-  serialize(snapshot, ...args) {
+  serialize(snapshot: any, ...args: [any]) {
     const data = super.serialize(snapshot, ...args);
     const { record } = snapshot;
 

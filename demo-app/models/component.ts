@@ -1,19 +1,20 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model, { attr } from '@ember-data/model';
 import { fragment, fragmentArray } from '#src/attributes/index.ts';
 
 export default class Component extends Model {
-  @attr('string') name;
-  @attr('string') type;
+  @attr('string') declare name: string;
+  @attr('string') declare type: string;
   @fragment('component-options', {
     polymorphic: true,
-    typeKey: (data, owner) => `component-options-${owner.type}`,
+    typeKey: (data: unknown, owner: Component) =>
+      `component-options-${owner.type}`,
   })
-  options;
+  declare options: unknown;
 
   @fragmentArray('component-options', {
     polymorphic: true,
-    typeKey: (data, owner) => `component-options-${owner.type}`,
+    typeKey: (data: unknown, owner: Component) =>
+      `component-options-${owner.type}`,
   })
-  optionsHistory;
+  declare optionsHistory: unknown;
 }

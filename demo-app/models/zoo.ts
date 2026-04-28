@@ -1,11 +1,12 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model, { attr, belongsTo } from '@ember-data/model';
 import { fragment, fragmentArray } from '#src/attributes/index.ts';
 
 export default class Zoo extends Model {
-  @attr('string') name;
-  @attr('string') city;
-  @fragment('animal', { polymorphic: true, typeKey: '$type' }) star;
-  @fragmentArray('animal', { polymorphic: true, typeKey: '$type' }) animals;
-  @belongsTo('person', { async: true, inverse: null }) manager;
+  @attr('string') declare name: string;
+  @attr('string') declare city: string;
+  @fragment('animal', { polymorphic: true, typeKey: '$type' })
+  declare star: unknown;
+  @fragmentArray('animal', { polymorphic: true, typeKey: '$type' })
+  declare animals: unknown;
+  @belongsTo('person', { async: true, inverse: null }) declare manager: unknown;
 }

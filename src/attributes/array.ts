@@ -35,7 +35,7 @@ import StatefulArray from '../array/stateful.ts';
  @param {Object} options a hash of options
  @return {Attribute}
  */
-export default function array(type, options) {
+export default function array(type?: string | object, options?: object) {
   if (typeof type === 'object') {
     options = type;
     type = undefined;

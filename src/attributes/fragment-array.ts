@@ -49,7 +49,7 @@ import FragmentArray from '../array/fragment.ts';
  @param {Object} options a hash of options
  @return {Attribute}
  */
-export default function fragmentArray(type, options) {
+export default function fragmentArray(type?: string, options?: object) {
   options = options || {};
 
   const metaType = metaTypeFor('fragment-array', type, options);

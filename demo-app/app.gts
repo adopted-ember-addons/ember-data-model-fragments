@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import EmberApp from 'ember-strict-application-resolver';
 import EmberRouter from '@ember/routing/router';
 import PageTitleService from 'ember-page-title/services/page-title';
@@ -20,7 +19,7 @@ class Router extends EmberRouter {
 // Map import.meta.glob keys (e.g. './models/lion.ts') to the strict-resolver
 // expected key shape (e.g. './models/lion'). The resolver matches on
 // `./[type]/[name]` patterns.
-function normalizeGlob(glob) {
+function normalizeGlob(glob: Record<string, unknown>) {
   return Object.fromEntries(
     Object.entries(glob).map(([key, value]) => [
       key.replace(/\.(js|gjs|ts|gts)$/, ''),

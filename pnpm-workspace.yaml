@@ -2,3 +2,5 @@ autoInstallPeers: false
 resolvePeersFromWorkspaceRoot: false
 publicHoistPattern:
   - ember-source
+  - '@warp-drive/legacy'
+  - '@ember-data/adapter'

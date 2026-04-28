@@ -48,7 +48,7 @@ import isInstanceOfType from '../util/instance-of-type.ts';
  @param {Object} options a hash of options
  @return {Attribute}
  */
-export default function fragment(type, options) {
+export default function fragment(type?: string, options?: object) {
   options = options || {};
 
   const metaType = metaTypeFor('fragment', type, options);
