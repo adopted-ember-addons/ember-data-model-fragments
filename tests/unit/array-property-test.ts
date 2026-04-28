@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model, { attr } from '@ember-data/model';
 import { fragment, fragmentArray, array } from '#src/attributes/index.ts';
 import { isArray } from '@ember/array';
@@ -6,20 +5,20 @@ import EmberObject from '@ember/object';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 
-let store;
+let store: any;
 class Person extends Model {
-  @attr('string') title;
-  @attr('string') nickName;
-  @fragment('name') name;
-  @fragmentArray('name') names;
-  @fragmentArray('address') addresses;
-  @array() titles;
-  @fragmentArray('hobby', { defaultValue: null }) hobbies;
-  @fragmentArray('house') houses;
-  @array() children;
-  @array('string') strings;
-  @array('number') numbers;
-  @array('boolean') booleans;
+  @attr('string') declare title: string;
+  @attr('string') declare nickName: string;
+  @fragment('name') declare name: unknown;
+  @fragmentArray('name') declare names: unknown;
+  @fragmentArray('address') declare addresses: unknown;
+  @array() declare titles: unknown;
+  @fragmentArray('hobby', { defaultValue: null }) declare hobbies: unknown;
+  @fragmentArray('house') declare houses: unknown;
+  @array() declare children: unknown;
+  @array('string') declare strings: unknown;
+  @array('number') declare numbers: unknown;
+  @array('boolean') declare booleans: unknown;
 }
 
 module('unit - `MF.array` property', function (hooks) {
@@ -69,7 +68,7 @@ module('unit - `MF.array` property', function (hooks) {
     assert.ok(isArray(titles), 'property is array-like');
 
     assert.ok(
-      titles.every((title, index) => {
+      titles.every((title: string, index: number) => {
         return title === values[index];
       }),
       'each title matches the original value',
@@ -173,7 +172,7 @@ module('unit - `MF.array` property', function (hooks) {
   test('array properties can have default values', function (assert) {
     class PersonWithDefaults extends Person {
       @array({ defaultValue: ['Ser'] })
-      titles;
+      declare titles: unknown;
     }
     this.owner.register('model:person', PersonWithDefaults);
 
@@ -187,7 +186,7 @@ module('unit - `MF.array` property', function (hooks) {
 
   test('default values can be functions', function (assert) {
     class PersonWithDefaults extends Person {
-      @array({ defaultValue: () => ['Viper'] }) titles;
+      @array({ defaultValue: () => ['Viper'] }) declare titles: unknown;
     }
     this.owner.register('model:person', PersonWithDefaults);
 
@@ -207,10 +206,10 @@ module('unit - `MF.array` property', function (hooks) {
     class PersonWithDefaults extends Person {
       @array({
         defaultValue() {
-          return ['Viper', EmberObject.create({ item: 'Longclaw' })];
+          return ['Viper', EmberObject.create({ item: 'Longclaw' } as object)];
         },
       })
-      titles;
+      declare titles: unknown;
     }
     this.owner.register('model:person', PersonWithDefaults);
 

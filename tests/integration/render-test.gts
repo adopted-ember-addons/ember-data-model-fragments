@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
 import { setupRenderingTest } from '../helpers/index.ts';
 import { render, settled } from '@ember/test-helpers';
@@ -9,7 +8,9 @@ import Pretender from 'pretender';
 module('Integration | Rendering', function (hooks) {
   setupRenderingTest(hooks);
 
-  let store, server;
+
+  let store: any;
+  let server: Pretender;
 
   hooks.beforeEach(function () {
     store = this.owner.lookup('service:store');
@@ -22,7 +23,11 @@ module('Integration | Rendering', function (hooks) {
   });
 
   test('construct fragments without autotracking.mutation-after-consumption error', async function (assert) {
-    class PersonComponent extends Component {
+    interface PersonComponentSignature {
+
+      Blocks: { default: [person: any] };
+    }
+    class PersonComponent extends Component<PersonComponentSignature> {
       person = store.createRecord('person', {
         name: {
           first: 'Tyrion',
@@ -34,9 +39,10 @@ module('Integration | Rendering', function (hooks) {
       <template>{{yield this.person}}</template>
     }
 
-    const state = new (class {
+    class State {
       @tracked show = false;
-    })();
+    }
+    const state = new State();
 
     await render(
       <template>
@@ -65,7 +71,11 @@ module('Integration | Rendering', function (hooks) {
   });
 
   test('fragment array computed property', async function (assert) {
-    class OrderListComponent extends Component {
+    interface OrderListSignature {
+
+      Args: { order: any };
+    }
+    class OrderListComponent extends Component<OrderListSignature> {
       get productsByPrice() {
         const { order } = this.args;
         return order.products.sortBy('price');
@@ -226,7 +236,7 @@ module('Integration | Rendering', function (hooks) {
 
     assert.dom('[data-product]').hasText('The Strangler: 299.99');
 
-    server.delete('/orders/1', () => [204]);
+    server.delete('/orders/1', () => [204, {}, ""]);
     await order.destroyRecord();
 
     assert.dom('[data-product]').hasText('The Strangler: 299.99');
@@ -271,7 +281,7 @@ module('Integration | Rendering', function (hooks) {
     assert.dom('[data-product="0"]').hasText('The Strangler: 299.99');
     assert.dom('[data-product="1"]').hasText('Tears of Lys: 499.99');
 
-    server.delete('/orders/1', () => [204]);
+    server.delete('/orders/1', () => [204, {}, ""]);
     await order.destroyRecord();
 
     assert.dom('[data-product]').exists({ count: 2 });
@@ -309,7 +319,7 @@ module('Integration | Rendering', function (hooks) {
     assert.dom('[data-title="0"]').hasText('Hand of the King');
     assert.dom('[data-title="1"]').hasText('Master of Coin');
 
-    server.delete('/people/1', () => [204]);
+    server.delete('/people/1', () => [204, {}, ""]);
     await person.destroyRecord();
 
     assert.dom('[data-title]').exists({ count: 2 });
