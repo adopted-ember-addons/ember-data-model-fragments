@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model from '@ember-data/model';
 import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { Snapshot } from '@ember-data/legacy-compat/-private';
@@ -21,7 +20,7 @@ const oldSnapshotAttributes = Object.getOwnPropertyDescriptor(
 // Symbol to store our converted attributes cache
 const FRAGMENT_ATTRS = Symbol('fragmentAttrs');
 
-function convertSnapshotValue(value) {
+function convertSnapshotValue(value: any): any {
   if (value && typeof value._createSnapshot === 'function') {
     return value._createSnapshot();
   }
@@ -33,22 +32,22 @@ function convertSnapshotValue(value) {
   return value;
 }
 
-function isFragmentDefinition(definition) {
+function isFragmentDefinition(definition: any) {
   return definition?.isFragment || definition?.options?.isFragment;
 }
 
 Object.defineProperty(Snapshot.prototype, '_attributes', {
-  get() {
+  get(this: any) {
     // Return cached converted attrs if available
     if (this[FRAGMENT_ATTRS]) {
       return this[FRAGMENT_ATTRS];
     }
 
-    const cachedAttrs = oldSnapshotAttributes.get.call(this);
+    const cachedAttrs = oldSnapshotAttributes!.get!.call(this);
 
     // Create a new object to avoid modifying the cached __attributes in place
     // This is needed because ember-data caches __attributes and reuses it
-    const attrs = Object.create(null);
+    const attrs: Record<string, any> = Object.create(null);
 
     Object.keys(cachedAttrs).forEach((key) => {
       attrs[key] = convertSnapshotValue(cachedAttrs[key]);

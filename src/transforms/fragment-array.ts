@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import FragmentTransform from './fragment.ts';
 import { recordIdentifierFor } from '@ember-data/store';
 
@@ -15,24 +14,29 @@ import { recordIdentifierFor } from '@ember-data/store';
   @extends DS.Transform
 */
 const FragmentArrayTransform = FragmentTransform.extend({
-  deserialize: function deserializeFragmentArray(data, options, parentData) {
+  deserialize: function deserializeFragmentArray(
+    this: any,
+    data: any,
+    options: any,
+    parentData: any,
+  ) {
     if (data == null) {
       return null;
     }
 
-    return data.map((datum) => {
+    return data.map((datum: any) => {
       return this.deserializeSingle(datum, options, parentData);
     }, this);
   },
 
-  serialize: function serializeFragmentArray(snapshots) {
+  serialize: function serializeFragmentArray(this: any, snapshots: any) {
     if (!snapshots) {
       return null;
     }
 
     const store = this.store;
 
-    return snapshots.map((snapshot) => {
+    return snapshots.map((snapshot: any) => {
       // In ember-data 4.12+, fragment attributes in Snapshot._attributes may be:
       // 1. A Fragment instance (has _createSnapshot method)
       // 2. A Snapshot (has eachAttribute method) - from ext.js patch

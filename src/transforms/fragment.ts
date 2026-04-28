@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Transform from '@ember-data/serializer/transform';
 import { service } from '@ember/service';
 import { recordIdentifierFor } from '@ember-data/store';
@@ -21,7 +20,12 @@ const FragmentTransform = Transform.extend({
   type: null,
   polymorphicTypeProp: null,
 
-  deserialize: function deserializeFragment(data, options, parentData) {
+  deserialize: function deserializeFragment(
+    this: any,
+    data: any,
+    options: any,
+    parentData: any,
+  ) {
     if (data == null) {
       return null;
     }
@@ -29,7 +33,7 @@ const FragmentTransform = Transform.extend({
     return this.deserializeSingle(data, options, parentData);
   },
 
-  serialize: function serializeFragment(snapshot) {
+  serialize: function serializeFragment(this: any, snapshot: any) {
     if (!snapshot) {
       return null;
     }
@@ -63,7 +67,7 @@ const FragmentTransform = Transform.extend({
     return snapshot;
   },
 
-  modelNameFor(data, options, parentData) {
+  modelNameFor(this: any, data: any, options: any, parentData: any) {
     let modelName = this.type;
     const polymorphicTypeProp = this.polymorphicTypeProp;
 
@@ -76,7 +80,7 @@ const FragmentTransform = Transform.extend({
     return modelName;
   },
 
-  deserializeSingle(data, options, parentData) {
+  deserializeSingle(this: any, data: any, options: any, parentData: any) {
     const store = this.store;
     const modelName = this.modelNameFor(data, options, parentData);
     // `FragmentStore#serializerFor` guarantees a JSON-based serializer

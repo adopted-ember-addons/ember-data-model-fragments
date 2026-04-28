@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { getOwner } from '@ember/application';
 import { makeArray } from '@ember/array';
@@ -23,7 +22,7 @@ const ArrayTransform = Transform.extend({
   store: service(),
   type: null,
 
-  deserialize: function deserializeArray(data) {
+  deserialize: function deserializeArray(this: any, data: any) {
     if (data == null) {
       return null;
     }
@@ -39,7 +38,7 @@ const ArrayTransform = Transform.extend({
     return data.map(transform.deserialize, transform);
   },
 
-  serialize: function serializeArray(array) {
+  serialize: function serializeArray(this: any, array: any) {
     if (array == null) {
       return null;
     }
@@ -55,14 +54,14 @@ const ArrayTransform = Transform.extend({
     return array.map(transform.serialize, transform);
   },
 
-  transform: computed('type', function () {
+  transform: computed('type', function (this: any) {
     const attributeType = this.type;
 
     if (!attributeType) {
       return null;
     }
 
-    const transform = getOwner(this).lookup(`transform:${attributeType}`);
+    const transform = getOwner(this)!.lookup(`transform:${attributeType}`);
     assert(`Unable to find transform for '${attributeType}'`, !!transform);
 
     return transform;
