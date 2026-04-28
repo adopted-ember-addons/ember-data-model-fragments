@@ -682,6 +682,142 @@ module('unit - Fragment Owner Tracking', function (hooks) {
       'fragmentOwner returns owner record',
     );
   });
+
+  test('createRecord accepts an existing fragment instance for a single fragment attr', async function (assert) {
+    const name = store.createFragment('name', {
+      first: 'Arya',
+      last: 'Stark',
+    });
+
+    let person;
+    try {
+      person = store.createRecord('person', { name });
+    } catch (e) {
+      assert.notOk(
+        true,
+        `createRecord with fragment instance threw: ${e.message}`,
+      );
+      return;
+    }
+
+    assert.ok(person, 'person was created without error');
+    assert.strictEqual(
+      person.name.first,
+      'Arya',
+      'fragment data is preserved (first)',
+    );
+    assert.strictEqual(
+      person.name.last,
+      'Stark',
+      'fragment data is preserved (last)',
+    );
+
+    // Prefer adoption (no duplication) over re-creating a fragment.
+    assert.strictEqual(
+      person.name,
+      name,
+      'createRecord adopts the provided fragment instance instead of duplicating it',
+    );
+
+    const fragmentIdentifier = recordIdentifierFor(name);
+    const ownerInfo = store.cache.getFragmentOwner(fragmentIdentifier);
+    assert.ok(ownerInfo, 'adopted fragment has an owner');
+    assert.strictEqual(
+      ownerInfo.key,
+      'name',
+      'adopted fragment is owned at the correct key',
+    );
+    assert.strictEqual(
+      ownerInfo.ownerIdentifier,
+      recordIdentifierFor(person),
+      'adopted fragment is owned by the new record',
+    );
+  });
+
+  test('createRecord accepts existing fragment instances for a fragment-array attr', async function (assert) {
+    const name1 = store.createFragment('name', {
+      first: 'Arya',
+      last: 'Stark',
+    });
+    const name2 = store.createFragment('name', {
+      first: 'Sansa',
+      last: 'Stark',
+    });
+
+    let person;
+    try {
+      person = store.createRecord('person', { names: [name1, name2] });
+    } catch (e) {
+      assert.notOk(
+        true,
+        `createRecord with fragment-array instances threw: ${e.message}`,
+      );
+      return;
+    }
+
+    assert.ok(person, 'person was created without error');
+    assert.strictEqual(person.names.length, 2, 'fragment array has 2 entries');
+    assert.strictEqual(
+      person.names.objectAt(0),
+      name1,
+      'first fragment is adopted (not duplicated)',
+    );
+    assert.strictEqual(
+      person.names.objectAt(1),
+      name2,
+      'second fragment is adopted (not duplicated)',
+    );
+    assert.strictEqual(
+      person.names.objectAt(0).first,
+      'Arya',
+      'first fragment data preserved',
+    );
+    assert.strictEqual(
+      person.names.objectAt(1).first,
+      'Sansa',
+      'second fragment data preserved',
+    );
+
+    const personIdentifier = recordIdentifierFor(person);
+    [name1, name2].forEach((fragment) => {
+      const ownerInfo = store.cache.getFragmentOwner(
+        recordIdentifierFor(fragment),
+      );
+      assert.ok(ownerInfo, 'adopted fragment has an owner');
+      assert.strictEqual(
+        ownerInfo.ownerIdentifier,
+        personIdentifier,
+        'adopted fragment owner is the new record',
+      );
+      assert.strictEqual(
+        ownerInfo.key,
+        'names',
+        'adopted fragment owner key is correct',
+      );
+    });
+  });
+
+  test('createRecord still accepts plain object literals for fragment attrs (no regression)', async function (assert) {
+    const person = store.createRecord('person', {
+      name: { first: 'Arya', last: 'Stark' },
+    });
+
+    assert.ok(person, 'person was created');
+    assert.ok(person.name instanceof MF.Fragment, 'fragment was instantiated');
+    assert.strictEqual(person.name.first, 'Arya', 'first preserved');
+    assert.strictEqual(person.name.last, 'Stark', 'last preserved');
+  });
+
+  test('createRecord asserts when given a fragment instance of the wrong type', async function (assert) {
+    // 'address' is a different fragment model than the one declared on `name`.
+    const wrong = store.createFragment('address', {
+      street: '1 Winterfell Way',
+    });
+
+    assert.expectAssertion(() => {
+      store.createRecord('person', { name: wrong });
+    }, "The value provided for fragment attribute 'name' must be a 'name' fragment");
+  });
 });
 
 module('unit - Fragment Edge Cases', function (hooks) {

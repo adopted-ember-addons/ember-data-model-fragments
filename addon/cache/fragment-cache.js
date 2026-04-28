@@ -382,9 +382,18 @@ export default class FragmentCache {
         .getSchemaDefinitionService()
         .attributesDefinitionFor(identifier);
 
+      // Raw fragment data (plain objects / arrays of plain objects) flows
+      // through pushFragmentData -> behavior.pushData which only accepts raw
+      // canonical data. Fragment-instance values must be adopted directly
+      // (mirroring behavior.getDefaultValue's handling of fragment defaults)
+      // so that consumers can pass `store.createFragment(...)` results into
+      // `store.createRecord(type, { fragmentKey: fragment })` without hitting
+      // "Fragment canonical value must be an object or null".
       const fragmentData = {};
+      const fragmentInstanceData = {};
       const regularOptions = {};
       let hasFragmentData = false;
+      let hasFragmentInstanceData = false;
 
       for (const [key, value] of Object.entries(options)) {
         const definition = definitions[key];
@@ -392,8 +401,13 @@ export default class FragmentCache {
           definition?.isFragment || definition?.options?.isFragment;
 
         if (isFragmentAttr && value !== undefined) {
-          fragmentData[key] = value;
-          hasFragmentData = true;
+          if (this.__fragmentState.valueContainsFragmentInstance(value)) {
+            fragmentInstanceData[key] = value;
+            hasFragmentInstanceData = true;
+          } else {
+            fragmentData[key] = value;
+            hasFragmentData = true;
+          }
         } else {
           regularOptions[key] = value;
         }
@@ -406,7 +420,35 @@ export default class FragmentCache {
         regularOptions,
       );
 
-      // Push fragment data to our fragment state manager AFTER the cache entry exists
+      // Adopt fragment-instance values directly into the canonical fragment
+      // data map. This sets up ownership on each adopted fragment and avoids
+      // the raw-object-only pushData assertion path.
+      if (hasFragmentInstanceData) {
+        for (const [key, value] of Object.entries(fragmentInstanceData)) {
+          const adopted = this.__fragmentState.adoptFragmentForKey(
+            identifier,
+            key,
+            value,
+          );
+          if (adopted !== undefined) {
+            this.__fragmentState.setCanonicalFragmentValue(
+              identifier,
+              key,
+              adopted,
+            );
+          } else {
+            // Defensive fallback: shouldn't happen because
+            // _valueContainsFragmentInstance only flagged values that
+            // adoptFragmentForKey can handle, but if it ever does, route
+            // through the raw-object path as a last resort.
+            fragmentData[key] = value;
+            hasFragmentData = true;
+          }
+        }
+      }
+
+      // Push remaining raw fragment data (plain objects) through the normal
+      // canonical-data path.
       if (hasFragmentData) {
         this.__fragmentState.pushFragmentData(
           identifier,
