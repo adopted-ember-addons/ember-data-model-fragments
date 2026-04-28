@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
@@ -71,7 +70,7 @@ export default function fragment(type?: string, options?: object) {
     'isDestroying',
     'store.{_instanceCache,cache}',
     {
-      get(key) {
+      get(this: any, key: string) {
         if (this.isDestroying || this.isDestroyed) {
           return null;
         }
@@ -84,7 +83,7 @@ export default function fragment(type?: string, options?: object) {
         // Get the fragment record from the identifier
         return this.store._instanceCache.getRecord(fragmentIdentifier);
       },
-      set(key, value) {
+      set(this: any, key: string, value: any) {
         assert(
           'You must pass a fragment or null to set a fragment',
           value === null || isFragment(value) || typeOf(value) === 'object',

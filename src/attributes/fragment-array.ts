@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { typeOf } from '@ember/utils';
@@ -72,7 +71,7 @@ export default function fragmentArray(type?: string, options?: object) {
     'isDestroying',
     'store.cache',
     {
-      get(key) {
+      get(this: any, key: string) {
         if (this.isDestroying || this.isDestroyed) {
           return null;
         }
@@ -88,17 +87,19 @@ export default function fragmentArray(type?: string, options?: object) {
             store: this.store,
             identifier,
             key,
-          });
+          } as object);
           cache.setFragmentArrayCache(identifier, key, fragmentArray);
         }
         return fragmentArray;
       },
-      set(key, value) {
+      set(this: any, key: string, value: any) {
         assert(
           'You must pass an array of fragments, or null to set a fragmentArray',
           value === null ||
             (isArray(value) &&
-              value.every((v) => isFragment(v) || typeOf(v) === 'object')),
+              (value as any[]).every(
+                (v: any) => isFragment(v) || typeOf(v) === 'object',
+              )),
         );
         const identifier = recordIdentifierFor(this);
         const cache = fragmentCacheFor(this.store);
@@ -113,7 +114,7 @@ export default function fragmentArray(type?: string, options?: object) {
             store: this.store,
             identifier,
             key,
-          });
+          } as object);
           cache.setFragmentArrayCache(identifier, key, fragmentArray);
         }
         fragmentArray._setFragments(value);

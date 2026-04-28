@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { computed } from '@ember/object';
 import { isArray } from '@ember/array';
 import { assert } from '@ember/debug';
@@ -65,7 +64,7 @@ export default function array(type?: string | object, options?: object) {
     'isDestroying',
     'store.cache',
     {
-      get(key) {
+      get(this: any, key: string) {
         if (this.isDestroying || this.isDestroyed) {
           return null;
         }
@@ -80,12 +79,12 @@ export default function array(type?: string | object, options?: object) {
             store: this.store,
             identifier,
             key,
-          });
+          } as object);
           cache.setFragmentArrayCache(identifier, key, array);
         }
         return array;
       },
-      set(key, value) {
+      set(this: any, key: string, value: any) {
         assert(
           'You must pass an array or null to set an array',
           value === null || isArray(value),
@@ -103,7 +102,7 @@ export default function array(type?: string | object, options?: object) {
             store: this.store,
             identifier,
             key,
-          });
+          } as object);
           cache.setFragmentArrayCache(identifier, key, array);
         }
         array._setFragments(value);
