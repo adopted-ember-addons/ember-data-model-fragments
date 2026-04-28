@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { typeOf } from '@ember/utils';
 import { isArray } from '@ember/array';
@@ -17,7 +16,7 @@ import fragmentCacheFor from '../util/fragment-cache.ts';
  * @param {Array} newArray
  * @returns {Object} Object with firstChangeIndex property
  */
-function diffArray(oldArray, newArray) {
+function diffArray(oldArray: any, newArray: any) {
   if (oldArray === newArray) {
     return { firstChangeIndex: null };
   }
@@ -43,13 +42,17 @@ function diffArray(oldArray, newArray) {
  * Behavior for single fragment attributes
  */
 class FragmentBehavior {
-  constructor(stateManager, identifier, definition) {
+  stateManager: any;
+  identifier: any;
+  definition: any;
+
+  constructor(stateManager: any, identifier: any, definition: any) {
     this.stateManager = stateManager;
     this.identifier = identifier;
     this.definition = definition;
   }
 
-  getDefaultValue(key) {
+  getDefaultValue(key: any) {
     const { options } = this.definition;
     if (options.defaultValue === undefined) {
       return null;
@@ -95,7 +98,7 @@ class FragmentBehavior {
     );
   }
 
-  pushData(fragment, canonical) {
+  pushData(fragment: any, canonical: any) {
     assert(
       'Fragment canonical value must be an object or null',
       canonical === null || typeOf(canonical) === 'object',
@@ -116,11 +119,11 @@ class FragmentBehavior {
     );
   }
 
-  willCommit(fragment) {
+  willCommit(fragment: any) {
     this.stateManager._fragmentWillCommit(fragment);
   }
 
-  didCommit(fragment, canonical) {
+  didCommit(fragment: any, canonical: any) {
     assert(
       'Fragment canonical value must be an object',
       canonical == null || typeOf(canonical) === 'object',
@@ -150,32 +153,32 @@ class FragmentBehavior {
     );
   }
 
-  commitWasRejected(fragment) {
+  commitWasRejected(fragment: any) {
     this.stateManager._fragmentCommitWasRejected(fragment);
   }
 
-  rollback(fragment) {
+  rollback(fragment: any) {
     this.stateManager._fragmentRollbackAttributes(fragment);
   }
 
-  unload(fragment) {
+  unload(fragment: any) {
     this.stateManager._fragmentUnloadRecord(fragment);
   }
 
-  isDirty(value, originalValue) {
+  isDirty(value: any, originalValue: any) {
     return (
       value !== originalValue ||
       (value !== null && this.stateManager.hasChangedAttributes(value))
     );
   }
 
-  currentState(fragment) {
+  currentState(fragment: any) {
     return fragment === null
       ? null
       : this.stateManager.getCurrentState(fragment);
   }
 
-  canonicalState(fragment) {
+  canonicalState(fragment: any) {
     return fragment === null
       ? null
       : this.stateManager.getCanonicalState(fragment);
@@ -186,13 +189,17 @@ class FragmentBehavior {
  * Behavior for fragment array attributes
  */
 class FragmentArrayBehavior {
-  constructor(stateManager, identifier, definition) {
+  stateManager: any;
+  identifier: any;
+  definition: any;
+
+  constructor(stateManager: any, identifier: any, definition: any) {
     this.stateManager = stateManager;
     this.identifier = identifier;
     this.definition = definition;
   }
 
-  getDefaultValue(key) {
+  getDefaultValue(key: any) {
     const { options } = this.definition;
     if (options.defaultValue === undefined) {
       return [];
@@ -208,12 +215,14 @@ class FragmentArrayBehavior {
       "The fragment array's default value must be an array of fragments or null",
       defaultValue === null ||
         (isArray(defaultValue) &&
-          defaultValue.every((v) => typeOf(v) === 'object' || isFragment(v))),
+          (defaultValue as any[]).every(
+            (v: any) => typeOf(v) === 'object' || isFragment(v),
+          )),
     );
     if (defaultValue === null) {
       return null;
     }
-    return defaultValue.map((item) => {
+    return defaultValue.map((item: any) => {
       if (isFragment(item)) {
         assert(
           `The fragment array's default value can only include '${this.definition.modelName}' fragments`,
@@ -240,18 +249,19 @@ class FragmentArrayBehavior {
     });
   }
 
-  pushData(fragmentArray, canonical) {
+  pushData(fragmentArray: any, canonical: any) {
     assert(
       'Fragment array canonical value must be an array of objects',
       canonical === null ||
-        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object')),
+        (isArray(canonical) &&
+          (canonical as any[]).every((v: any) => typeOf(v) === 'object')),
     );
 
     if (canonical === null) {
       return null;
     }
 
-    return canonical.map((attributes, i) => {
+    return canonical.map((attributes: any, i: any) => {
       const fragment = fragmentArray?.[i];
       if (fragment) {
         this.stateManager._fragmentPushData(fragment, { attributes });
@@ -266,21 +276,22 @@ class FragmentArrayBehavior {
     });
   }
 
-  willCommit(fragmentArray) {
-    fragmentArray.forEach((fragment) =>
+  willCommit(fragmentArray: any) {
+    fragmentArray.forEach((fragment: any) =>
       this.stateManager._fragmentWillCommit(fragment),
     );
   }
 
-  didCommit(fragmentArray, canonical) {
+  didCommit(fragmentArray: any, canonical: any) {
     assert(
       'Fragment array canonical value must be an array of objects',
       canonical == null ||
-        (isArray(canonical) && canonical.every((v) => typeOf(v) === 'object')),
+        (isArray(canonical) &&
+          (canonical as any[]).every((v: any) => typeOf(v) === 'object')),
     );
 
     if (canonical == null) {
-      fragmentArray?.forEach((fragment) =>
+      fragmentArray?.forEach((fragment: any) =>
         this.stateManager._fragmentDidCommit(fragment, null),
       );
       if (canonical === null) {
@@ -289,7 +300,7 @@ class FragmentArrayBehavior {
       return fragmentArray;
     }
 
-    const result = canonical.map((attributes, i) => {
+    const result = canonical.map((attributes: any, i: any) => {
       const fragment = fragmentArray?.[i];
       if (fragment) {
         this.stateManager._fragmentDidCommit(fragment, { attributes });
@@ -309,44 +320,44 @@ class FragmentArrayBehavior {
     return result;
   }
 
-  commitWasRejected(fragmentArray) {
-    fragmentArray.forEach((fragment) =>
+  commitWasRejected(fragmentArray: any) {
+    fragmentArray.forEach((fragment: any) =>
       this.stateManager._fragmentCommitWasRejected(fragment),
     );
   }
 
-  rollback(fragmentArray) {
-    fragmentArray.forEach((fragment) =>
+  rollback(fragmentArray: any) {
+    fragmentArray.forEach((fragment: any) =>
       this.stateManager._fragmentRollbackAttributes(fragment),
     );
   }
 
-  unload(fragmentArray) {
-    fragmentArray.forEach((fragment) =>
+  unload(fragmentArray: any) {
+    fragmentArray.forEach((fragment: any) =>
       this.stateManager._fragmentUnloadRecord(fragment),
     );
   }
 
-  isDirty(value, originalValue) {
+  isDirty(value: any, originalValue: any) {
     return (
       !isArrayEqual(value, originalValue) ||
       (value !== null &&
-        value.some((id) => this.stateManager.hasChangedAttributes(id)))
+        value.some((id: any) => this.stateManager.hasChangedAttributes(id)))
     );
   }
 
-  currentState(fragmentArray) {
+  currentState(fragmentArray: any) {
     return fragmentArray === null
       ? null
-      : fragmentArray.map((fragment) =>
+      : fragmentArray.map((fragment: any) =>
           this.stateManager.getCurrentState(fragment),
         );
   }
 
-  canonicalState(fragmentArray) {
+  canonicalState(fragmentArray: any) {
     return fragmentArray === null
       ? null
-      : fragmentArray.map((fragment) =>
+      : fragmentArray.map((fragment: any) =>
           this.stateManager.getCanonicalState(fragment),
         );
   }
@@ -356,13 +367,17 @@ class FragmentArrayBehavior {
  * Behavior for plain array attributes
  */
 class ArrayBehavior {
-  constructor(stateManager, identifier, definition) {
+  stateManager: any;
+  identifier: any;
+  definition: any;
+
+  constructor(stateManager: any, identifier: any, definition: any) {
     this.stateManager = stateManager;
     this.identifier = identifier;
     this.definition = definition;
   }
 
-  getDefaultValue(key) {
+  getDefaultValue(key: any) {
     const { options } = this.definition;
     if (options.defaultValue === undefined) {
       return [];
@@ -384,7 +399,7 @@ class ArrayBehavior {
     return defaultValue.slice();
   }
 
-  pushData(array, canonical) {
+  pushData(array: any, canonical: any) {
     assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
@@ -400,7 +415,7 @@ class ArrayBehavior {
     // nothing to do
   }
 
-  didCommit(array, canonical) {
+  didCommit(array: any, canonical: any) {
     assert('Array value must be an array', array === null || isArray(array));
     assert(
       'Array canonical value must be an array',
@@ -427,15 +442,15 @@ class ArrayBehavior {
     // nothing to do
   }
 
-  isDirty(value, originalValue) {
+  isDirty(value: any, originalValue: any) {
     return !isArrayEqual(value, originalValue);
   }
 
-  currentState(array) {
+  currentState(array: any) {
     return array === null ? null : array.slice();
   }
 
-  canonicalState(array) {
+  canonicalState(array: any) {
     return array === null ? null : array.slice();
   }
 }
@@ -445,7 +460,17 @@ class ArrayBehavior {
  * It replaces the per-resource FragmentRecordData with a centralized state store.
  */
 export default class FragmentStateManager {
-  constructor(storeWrapper) {
+  __storeWrapper: any;
+  __fragmentData: Map<string, any>;
+  __fragments: Map<string, any>;
+  __inFlightFragments: Map<string, any>;
+  __fragmentOwners: Map<string, any>;
+  __fragmentArrayCache: Map<string, any>;
+  __behaviors: Map<string, any>;
+  __committedFragments: Set<string>;
+  __inFlightAttrValues: Map<string, any>;
+
+  constructor(storeWrapper: any) {
     this.__storeWrapper = storeWrapper;
     // Keyed by identifier.lid
     this.__fragmentData = new Map(); // canonical server state
@@ -470,17 +495,17 @@ export default class FragmentStateManager {
     return this.cache.__innerCache;
   }
 
-  _identifierFor(fragmentOrRecord) {
+  _identifierFor(fragmentOrRecord: any) {
     // Use recordIdentifierFor for records/fragments that already exist
     // This is the correct way to get an identifier from an instantiated record
     return recordIdentifierFor(fragmentOrRecord);
   }
 
-  _getRecord(identifier, properties) {
+  _getRecord(identifier: any, properties?: any) {
     return this.store._instanceCache.getRecord(identifier, properties);
   }
 
-  _getBehaviors(identifier) {
+  _getBehaviors(identifier: any) {
     let behaviors = this.__behaviors.get(identifier.lid);
     if (behaviors) {
       return behaviors;
@@ -492,7 +517,8 @@ export default class FragmentStateManager {
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
 
-    for (const [key, definition] of Object.entries(definitions)) {
+    for (const [key, _entry_definition] of Object.entries(definitions)) {
+      const definition: any = _entry_definition;
       // Support both metadata formats:
       // - ember-data 4.12: definition.isFragment (direct property on meta)
       // - ember-data 4.13: definition.options.isFragment (transformed by FragmentSchemaService)
@@ -532,7 +558,7 @@ export default class FragmentStateManager {
     return behaviors;
   }
 
-  _getFragmentDataMap(identifier) {
+  _getFragmentDataMap(identifier: any) {
     let data = this.__fragmentData.get(identifier.lid);
     if (!data) {
       data = Object.create(null);
@@ -541,7 +567,7 @@ export default class FragmentStateManager {
     return data;
   }
 
-  _getFragmentsMap(identifier) {
+  _getFragmentsMap(identifier: any) {
     let data = this.__fragments.get(identifier.lid);
     if (!data) {
       data = Object.create(null);
@@ -550,7 +576,7 @@ export default class FragmentStateManager {
     return data;
   }
 
-  _getInFlightFragmentsMap(identifier) {
+  _getInFlightFragmentsMap(identifier: any) {
     let data = this.__inFlightFragments.get(identifier.lid);
     if (!data) {
       data = Object.create(null);
@@ -559,7 +585,7 @@ export default class FragmentStateManager {
     return data;
   }
 
-  _getFragmentArrayCacheMap(identifier) {
+  _getFragmentArrayCacheMap(identifier: any) {
     let cache = this.__fragmentArrayCache.get(identifier.lid);
     if (!cache) {
       cache = Object.create(null);
@@ -568,7 +594,7 @@ export default class FragmentStateManager {
     return cache;
   }
 
-  _getFragmentDefault(identifier, key) {
+  _getFragmentDefault(identifier: any, key: any) {
     const fragmentData = this._getFragmentDataMap(identifier);
 
     // Guard against re-entrant calls during fragment creation.
@@ -596,7 +622,7 @@ export default class FragmentStateManager {
     return defaultValue;
   }
 
-  getFragment(identifier, key) {
+  getFragment(identifier: any, key: any) {
     const fragments = this.__fragments.get(identifier.lid);
     if (fragments && key in fragments) {
       return fragments[key];
@@ -612,7 +638,7 @@ export default class FragmentStateManager {
     return this._getFragmentDefault(identifier, key);
   }
 
-  hasFragment(identifier, key) {
+  hasFragment(identifier: any, key: any) {
     const fragments = this.__fragments.get(identifier.lid);
     if (fragments && key in fragments) {
       return true;
@@ -625,7 +651,7 @@ export default class FragmentStateManager {
     return fragmentData && key in fragmentData;
   }
 
-  setDirtyFragment(identifier, key, value) {
+  setDirtyFragment(identifier: any, key: any, value: any) {
     const behaviors = this._getBehaviors(identifier);
     const behavior = behaviors[key];
     assert(
@@ -657,16 +683,16 @@ export default class FragmentStateManager {
     }
   }
 
-  isFragmentDirty(identifier, key) {
+  isFragmentDirty(identifier: any, key: any) {
     const fragments = this.__fragments.get(identifier.lid);
     return fragments?.[key] !== undefined;
   }
 
-  getFragmentOwner(identifier) {
+  getFragmentOwner(identifier: any) {
     return this.__fragmentOwners.get(identifier.lid);
   }
 
-  setFragmentOwner(fragmentIdentifier, ownerIdentifier, key) {
+  setFragmentOwner(fragmentIdentifier: any, ownerIdentifier: any, key: any) {
     assert(
       'Fragments can only belong to one owner, try copying instead',
       !this.__fragmentOwners.has(fragmentIdentifier.lid) ||
@@ -679,120 +705,7 @@ export default class FragmentStateManager {
     });
   }
 
-  /**
-   * Returns true if the given attribute value is, or contains, an instantiated
-   * Fragment. Used by FragmentCache.clientDidCreate to route fragment-instance
-   * initialization (from `store.createRecord(type, { key: fragmentInstance })`)
-   * through the adopt-fragment path instead of pushFragmentData (which only
-   * accepts raw object/null canonical data).
-   */
-  valueContainsFragmentInstance(value) {
-    if (value == null) {
-      return false;
-    }
-    if (isFragment(value)) {
-      return true;
-    }
-    if (isArray(value)) {
-      return value.some((item) => isFragment(item));
-    }
-    return false;
-  }
-
-  /**
-   * Adopt an existing fragment instance (or array of fragment instances) for the
-   * given owner identifier + key. This is used by the client-created path
-   * (`createRecord(...props)`) when consumers pass already-instantiated
-   * fragments rather than raw object data.
-   *
-   * Returns the canonical fragment identifier value to be stored in the
-   * fragment data map (a single identifier for `fragment` kind, an array of
-   * identifiers for `fragment-array` kind).
-   *
-   * Asserts when the provided value does not match the fragment kind/type
-   * declared on the owner's schema.
-   */
-  adoptFragmentForKey(ownerIdentifier, key, value) {
-    const behaviors = this._getBehaviors(ownerIdentifier);
-    const behavior = behaviors[key];
-    assert(
-      `Attribute '${key}' for model '${ownerIdentifier.type}' must be a fragment`,
-      behavior != null,
-    );
-
-    const definition = behavior.definition;
-    const isArrayBehavior = behavior instanceof FragmentArrayBehavior;
-    const isSingleFragmentBehavior = behavior instanceof FragmentBehavior;
-
-    // Only single-fragment and fragment-array behaviors support adopting
-    // fragment instances. Plain array behavior should never receive a
-    // fragment instance.
-    if (!isSingleFragmentBehavior && !isArrayBehavior) {
-      return undefined;
-    }
-
-    if (isSingleFragmentBehavior) {
-      if (value === null) {
-        return null;
-      }
-      if (!isFragment(value)) {
-        return undefined;
-      }
-      assert(
-        `The value provided for fragment attribute '${key}' must be a '${definition.modelName}' fragment`,
-        isInstanceOfType(
-          this.__storeWrapper._store.modelFor(definition.modelName),
-          value,
-        ),
-      );
-      const fragmentIdentifier = this._identifierFor(value);
-      this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, key);
-      return fragmentIdentifier;
-    }
-
-    // fragment-array behavior
-    if (value === null) {
-      return null;
-    }
-    if (!isArray(value)) {
-      return undefined;
-    }
-    // Only treat the value as fragment-instance input if at least one entry is
-    // a fragment instance. Otherwise let the regular pushData path handle it
-    // (raw object array).
-    if (!value.some((item) => isFragment(item))) {
-      return undefined;
-    }
-    return value.map((item) => {
-      if (isFragment(item)) {
-        assert(
-          `The value provided for fragment array attribute '${key}' can only include '${definition.modelName}' fragments`,
-          isInstanceOfType(
-            this.__storeWrapper._store.modelFor(definition.modelName),
-            item,
-          ),
-        );
-        const fragmentIdentifier = this._identifierFor(item);
-        this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, key);
-        return fragmentIdentifier;
-      }
-      // Raw object entry mixed in with fragments - create a new fragment for it.
-      return this._newFragmentIdentifier(ownerIdentifier, definition, item);
-    });
-  }
-
-  /**
-   * Set canonical fragment data for a key on an owner identifier. Used by the
-   * client-created path after adopting fragment instances so subsequent
-   * getFragment/getCurrentState calls find the canonical value without going
-   * through pushData (which only accepts raw object/null canonical data).
-   */
-  setCanonicalFragmentValue(identifier, key, value) {
-    const fragmentData = this._getFragmentDataMap(identifier);
-    fragmentData[key] = value;
-  }
-
-  _newFragmentIdentifierForKey(identifier, key, attributes) {
+  _newFragmentIdentifierForKey(identifier: any, key: any, attributes: any) {
     const behaviors = this._getBehaviors(identifier);
     const behavior = behaviors[key];
     assert(
@@ -806,7 +719,11 @@ export default class FragmentStateManager {
     );
   }
 
-  _newFragmentIdentifier(ownerIdentifier, definition, attributes) {
+  _newFragmentIdentifier(
+    ownerIdentifier: any,
+    definition: any,
+    attributes: any,
+  ) {
     const type = getActualFragmentType(
       definition.modelName,
       definition.options,
@@ -827,14 +744,14 @@ export default class FragmentStateManager {
     return fragmentIdentifier;
   }
 
-  hasChangedAttributes(identifier) {
+  hasChangedAttributes(identifier: any) {
     return (
       this.hasChangedFragments(identifier) ||
       this.innerCache.hasChangedAttrs(identifier)
     );
   }
 
-  hasChangedFragments(identifier) {
+  hasChangedFragments(identifier: any) {
     const fragments = this.__fragments.get(identifier.lid);
     const inFlight = this.__inFlightFragments.get(identifier.lid);
     // Explicitly return boolean to ensure false instead of undefined
@@ -844,8 +761,8 @@ export default class FragmentStateManager {
     );
   }
 
-  getCanonicalState(identifier) {
-    const result = {};
+  getCanonicalState(identifier: any) {
+    const result: Record<string, any> = {};
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
@@ -855,7 +772,8 @@ export default class FragmentStateManager {
     const changedAttrs = cache.changedAttrs(identifier);
 
     // Get canonical values for all attributes
-    for (const [key, definition] of Object.entries(definitions)) {
+    for (const [key, _entry_definition] of Object.entries(definitions)) {
+      const definition: any = _entry_definition;
       const isFragmentAttr =
         definition.isFragment || definition.options?.isFragment;
       if (isFragmentAttr) {
@@ -882,14 +800,15 @@ export default class FragmentStateManager {
     return result;
   }
 
-  getCurrentState(identifier) {
-    const result = {};
+  getCurrentState(identifier: any) {
+    const result: Record<string, any> = {};
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
 
     // Get current values for all attributes
-    for (const [key, definition] of Object.entries(definitions)) {
+    for (const [key, _entry_definition] of Object.entries(definitions)) {
+      const definition: any = _entry_definition;
       const isFragmentAttr =
         definition.isFragment || definition.options?.isFragment;
       if (isFragmentAttr) {
@@ -906,7 +825,7 @@ export default class FragmentStateManager {
     return result;
   }
 
-  changedFragments(identifier) {
+  changedFragments(identifier: any) {
     const diffData = Object.create(null);
     const behaviors = this._getBehaviors(identifier);
     const fragments = this.__fragments.get(identifier.lid) || {};
@@ -916,7 +835,10 @@ export default class FragmentStateManager {
     const fragmentData = this._getFragmentDataMap(identifier);
 
     // Check keys that are in the dirty fragments map
-    for (const [key, newFragment] of Object.entries(fragmentsOrInFlight)) {
+    for (const [key, _entry_newFragment] of Object.entries(
+      fragmentsOrInFlight,
+    )) {
+      const newFragment: any = _entry_newFragment;
       const behavior = behaviors[key];
       const oldFragment = fragmentData[key];
       diffData[key] = [
@@ -927,7 +849,8 @@ export default class FragmentStateManager {
 
     // Also check canonical fragments that may have internal dirty state
     // (e.g., when fragment.someAttr = newValue changes the fragment's internal state)
-    for (const [key, behavior] of Object.entries(behaviors)) {
+    for (const [key, _entry_behavior] of Object.entries(behaviors)) {
+      const behavior: any = _entry_behavior;
       if (key in diffData) {
         continue; // Already handled above
       }
@@ -944,7 +867,7 @@ export default class FragmentStateManager {
     return diffData;
   }
 
-  _changedFragmentKeys(identifier, updates) {
+  _changedFragmentKeys(identifier: any, updates: any) {
     const changedKeys = [];
     const fragmentData = this._getFragmentDataMap(identifier);
     const inFlight = this.__inFlightFragments.get(identifier.lid) || {};
@@ -965,13 +888,19 @@ export default class FragmentStateManager {
     return changedKeys;
   }
 
-  pushFragmentData(identifier, data, calculateChange, shouldNotify = true) {
+  pushFragmentData(
+    identifier: any,
+    data: any,
+    calculateChange: any,
+    shouldNotify: any = true,
+  ) {
     let changedFragmentKeys;
     const behaviors = this._getBehaviors(identifier);
     const subFragmentsToProcess = [];
 
     if (data.attributes) {
-      for (const [key, behavior] of Object.entries(behaviors)) {
+      for (const [key, _entry_behavior] of Object.entries(behaviors)) {
+        const behavior: any = _entry_behavior;
         const canonical = data.attributes[key];
         if (canonical === undefined) {
           continue;
@@ -981,10 +910,10 @@ export default class FragmentStateManager {
     }
 
     if (subFragmentsToProcess.length > 0) {
-      const newCanonicalFragments = {};
+      const newCanonicalFragments: Record<string, any> = {};
       const fragmentData = this._getFragmentDataMap(identifier);
 
-      subFragmentsToProcess.forEach(({ key, behavior, canonical }) => {
+      subFragmentsToProcess.forEach(({ key, behavior, canonical }: any) => {
         const current =
           key in fragmentData
             ? fragmentData[key]
@@ -1005,7 +934,7 @@ export default class FragmentStateManager {
         // an update to existing state. For clientDidCreate initialization we
         // skip notification so initial props don't look like post-consumption
         // mutations during first render in WarpDrive 5.8.
-        changedFragmentKeys.forEach((key) => {
+        changedFragmentKeys.forEach((key: any) => {
           this.__storeWrapper.notifyChange(identifier, 'attributes', key);
           const arrayCache = this.__fragmentArrayCache.get(identifier.lid);
           arrayCache?.[key]?.notify();
@@ -1016,9 +945,10 @@ export default class FragmentStateManager {
     return calculateChange ? changedFragmentKeys || [] : [];
   }
 
-  willCommitFragments(identifier) {
+  willCommitFragments(identifier: any) {
     const behaviors = this._getBehaviors(identifier);
-    for (const [key, behavior] of Object.entries(behaviors)) {
+    for (const [key, _entry_behavior] of Object.entries(behaviors)) {
+      const behavior: any = _entry_behavior;
       const data = this.getFragment(identifier, key);
       if (data) {
         behavior.willCommit(data);
@@ -1032,7 +962,7 @@ export default class FragmentStateManager {
     this.__fragments.set(identifier.lid, null);
   }
 
-  _updateChangedFragments(identifier) {
+  _updateChangedFragments(identifier: any) {
     const fragments = this.__fragments.get(identifier.lid);
     if (!fragments) return;
     const fragmentData = this._getFragmentDataMap(identifier);
@@ -1048,13 +978,14 @@ export default class FragmentStateManager {
     }
   }
 
-  didCommitFragments(identifier, data) {
+  didCommitFragments(identifier: any, data: any) {
     const behaviors = this._getBehaviors(identifier);
-    const newCanonicalFragments = {};
+    const newCanonicalFragments: Record<string, any> = {};
     const inFlight = this.__inFlightFragments.get(identifier.lid) || {};
     const fragmentData = this._getFragmentDataMap(identifier);
 
-    for (const [key, behavior] of Object.entries(behaviors)) {
+    for (const [key, _entry_behavior] of Object.entries(behaviors)) {
+      const behavior: any = _entry_behavior;
       let canonical;
       if (data?.attributes) {
         canonical = data.attributes[key];
@@ -1072,7 +1003,7 @@ export default class FragmentStateManager {
 
     this._updateChangedFragments(identifier);
 
-    changedFragmentKeys.forEach((key) => {
+    changedFragmentKeys.forEach((key: any) => {
       const arrayCache = this.__fragmentArrayCache.get(identifier.lid);
       arrayCache?.[key]?.notify();
     });
@@ -1080,12 +1011,13 @@ export default class FragmentStateManager {
     return changedFragmentKeys;
   }
 
-  commitWasRejectedFragments(identifier) {
+  commitWasRejectedFragments(identifier: any) {
     const behaviors = this._getBehaviors(identifier);
     const inFlight = this.__inFlightFragments.get(identifier.lid) || {};
     const fragmentData = this._getFragmentDataMap(identifier);
 
-    for (const [key, behavior] of Object.entries(behaviors)) {
+    for (const [key, _entry_behavior] of Object.entries(behaviors)) {
+      const behavior: any = _entry_behavior;
       const fragment = key in inFlight ? inFlight[key] : fragmentData[key];
       if (fragment == null) {
         continue;
@@ -1097,12 +1029,12 @@ export default class FragmentStateManager {
     this.__inFlightFragments.set(identifier.lid, null);
   }
 
-  rollbackFragments(identifier) {
+  rollbackFragments(identifier: any) {
     let dirtyFragmentKeys;
     const fragments = this.__fragments.get(identifier.lid);
     if (fragments && Object.keys(fragments).length > 0) {
       dirtyFragmentKeys = Object.keys(fragments);
-      dirtyFragmentKeys.forEach((key) => {
+      dirtyFragmentKeys.forEach((key: any) => {
         this.rollbackFragment(identifier, key);
       });
       this.__fragments.set(identifier.lid, null);
@@ -1112,7 +1044,7 @@ export default class FragmentStateManager {
     return dirtyFragmentKeys || [];
   }
 
-  rollbackFragment(identifier, key) {
+  rollbackFragment(identifier: any, key: any) {
     const behaviors = this._getBehaviors(identifier);
     const behavior = behaviors[key];
     assert(
@@ -1141,7 +1073,7 @@ export default class FragmentStateManager {
     }
   }
 
-  unloadFragments(identifier) {
+  unloadFragments(identifier: any) {
     // Guard against store being destroyed during teardown
     if (this.store.isDestroying || this.store.isDestroyed) {
       // Just clear our internal data structures
@@ -1157,7 +1089,8 @@ export default class FragmentStateManager {
     const inFlight = this.__inFlightFragments.get(identifier.lid) || {};
     const fragmentData = this._getFragmentDataMap(identifier);
 
-    for (const [key, behavior] of Object.entries(behaviors)) {
+    for (const [key, _entry_behavior] of Object.entries(behaviors)) {
+      const behavior: any = _entry_behavior;
       // Unload the dirty value if it's a fragment (not null)
       const fragment = fragments[key];
       if (fragment != null) {
@@ -1190,7 +1123,7 @@ export default class FragmentStateManager {
     this.__fragmentOwners.delete(identifier.lid);
   }
 
-  _fragmentDidDirty(identifier) {
+  _fragmentDidDirty(identifier: any) {
     assert('Fragment is not dirty', this.hasChangedAttributes(identifier));
     const owner = this.__fragmentOwners.get(identifier.lid);
     if (!owner) {
@@ -1212,7 +1145,7 @@ export default class FragmentStateManager {
     this._fragmentDidDirty(ownerIdentifier);
   }
 
-  _fragmentDidReset(identifier) {
+  _fragmentDidReset(identifier: any) {
     const owner = this.__fragmentOwners.get(identifier.lid);
     if (!owner) {
       return;
@@ -1241,7 +1174,7 @@ export default class FragmentStateManager {
     this._fragmentDidReset(ownerIdentifier);
   }
 
-  _notifyStateChange(identifier, key) {
+  _notifyStateChange(identifier: any, key?: any) {
     this.__storeWrapper.notifyChange(identifier, 'attributes', key);
     if (macroCondition(dependencySatisfies('ember-data', '<5.8.0'))) {
       // 5.8+ already wires cache notifications into reactivity, and directly notifying
@@ -1271,7 +1204,7 @@ export default class FragmentStateManager {
   }
 
   // Fragment lifecycle methods using cache API directly
-  _fragmentPushData(identifier, data) {
+  _fragmentPushData(identifier: any, data: any) {
     // Push data to the cache for the fragment
     if (data?.attributes) {
       const cache = this.innerCache;
@@ -1285,15 +1218,16 @@ export default class FragmentStateManager {
     this.pushFragmentData(identifier, data, false);
   }
 
-  _fragmentWillCommit(identifier) {
+  _fragmentWillCommit(identifier: any) {
     // Capture the current attribute values before commit - these are what will be committed
     const innerCache = this.innerCache;
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
 
-    const inFlightValues = {};
-    for (const [key, definition] of Object.entries(definitions)) {
+    const inFlightValues: Record<string, any> = {};
+    for (const [key, _entry_definition] of Object.entries(definitions)) {
+      const definition: any = _entry_definition;
       const isFragmentAttr =
         definition.isFragment || definition.options?.isFragment;
       if (!isFragmentAttr) {
@@ -1308,7 +1242,7 @@ export default class FragmentStateManager {
     innerCache.willCommit(identifier);
   }
 
-  _fragmentDidCommit(identifier, data) {
+  _fragmentDidCommit(identifier: any, data: any) {
     // Signal to cache that fragment was committed
     // Mark this fragment as committed (no longer new)
     this.__committedFragments.add(identifier.lid);
@@ -1335,8 +1269,9 @@ export default class FragmentStateManager {
     this.__inFlightAttrValues.delete(identifier.lid);
 
     // Get current values (may include new dirty changes made during in-flight)
-    const currentValues = {};
-    for (const [key, definition] of Object.entries(definitions)) {
+    const currentValues: Record<string, any> = {};
+    for (const [key, _entry_definition] of Object.entries(definitions)) {
+      const definition: any = _entry_definition;
       const isFragmentAttr =
         definition.isFragment || definition.options?.isFragment;
       if (!isFragmentAttr) {
@@ -1348,10 +1283,11 @@ export default class FragmentStateManager {
     const serverAttrs = data?.attributes || {};
 
     // Calculate canonical values: server response > in-flight values
-    const commitAttrs = {};
-    const newDirtyAttrs = {};
+    const commitAttrs: Record<string, any> = {};
+    const newDirtyAttrs: Record<string, any> = {};
 
-    for (const [key, definition] of Object.entries(definitions)) {
+    for (const [key, _entry_definition] of Object.entries(definitions)) {
+      const definition: any = _entry_definition;
       const isFragmentAttr =
         definition.isFragment || definition.options?.isFragment;
       if (isFragmentAttr) continue;
@@ -1386,7 +1322,8 @@ export default class FragmentStateManager {
     innerCache.rollbackAttrs(identifier);
 
     // Re-apply any new dirty changes made during in-flight
-    for (const [key, value] of Object.entries(newDirtyAttrs)) {
+    for (const [key, _entry_value] of Object.entries(newDirtyAttrs)) {
+      const value: any = _entry_value;
       innerCache.setAttr(identifier, key, value);
     }
 
@@ -1406,23 +1343,23 @@ export default class FragmentStateManager {
   /**
    * Check if a fragment has been committed (is no longer new)
    */
-  isFragmentCommitted(identifier) {
+  isFragmentCommitted(identifier: any) {
     return this.__committedFragments.has(identifier.lid);
   }
 
-  _fragmentRollbackAttributes(identifier) {
+  _fragmentRollbackAttributes(identifier: any) {
     // Rollback fragment attributes
     this.rollbackFragments(identifier);
     this.innerCache.rollbackAttrs(identifier);
   }
 
-  _fragmentCommitWasRejected(identifier) {
+  _fragmentCommitWasRejected(identifier: any) {
     // Signal that commit was rejected
     this.commitWasRejectedFragments(identifier);
     this.innerCache.commitWasRejected(identifier);
   }
 
-  _fragmentUnloadRecord(identifier) {
+  _fragmentUnloadRecord(identifier: any) {
     // Unload fragment-specific state first
     this.unloadFragments(identifier);
 
@@ -1445,7 +1382,7 @@ export default class FragmentStateManager {
   }
 }
 
-function isArrayEqual(a, b) {
+function isArrayEqual(a: any, b: any) {
   if (a === b) {
     return true;
   }
