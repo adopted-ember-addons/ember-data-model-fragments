@@ -1,5 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
-import { all } from 'rsvp';
 import { Comparable } from '@ember/-internals/runtime';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
@@ -7,7 +5,7 @@ import Pretender from 'pretender';
 import Lion from '../../demo-app/models/lion.ts';
 import Elephant from '../../demo-app/models/elephant.ts';
 
-let store;
+let store: any;
 
 module('unit - `MF.Fragment`', function (hooks) {
   setupApplicationTest(hooks);
@@ -42,7 +40,7 @@ module('unit - `MF.Fragment`', function (hooks) {
       },
     });
 
-    const people = await all([
+    const people = await Promise.all([
       store.findRecord('person', 1),
       store.findRecord('person', 2),
     ]);
@@ -275,7 +273,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   test('fragments unloaded/reload w/ relationship', async function (assert) {
     // Related to: https://github.com/lytics/ember-data-model-fragments/issues/261
 
-    function isUnloaded(recordOrFragment) {
+    function isUnloaded(recordOrFragment: { isDestroyed: boolean }) {
       // Ember-2.13 and newer uses `recordOrFragment.isDestroyed`
       return recordOrFragment.isDestroyed;
     }
@@ -413,7 +411,7 @@ module('unit - `MF.Fragment`', function (hooks) {
   });
 
   module('fragment bug when initially set to `null`', function (hooks) {
-    let server;
+    let server: Pretender;
     hooks.beforeEach(function () {
       server = new Pretender();
       server.post('/people', () => {

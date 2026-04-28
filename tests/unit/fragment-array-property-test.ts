@@ -1,17 +1,15 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model, { attr } from '@ember-data/model';
 import { fragmentArray } from '#src/attributes/index.ts';
 import { isEmpty } from '@ember/utils';
 import { schedule } from '@ember/runloop';
 import { A, isArray } from '@ember/array';
 import EmberObject from '@ember/object';
-import { all } from 'rsvp';
 import MF from '#src/index.ts';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import Address from '../../demo-app/models/address.ts';
 
-let owner, store, people;
+let owner: any, store: any, people: any;
 
 module('unit - `MF.fragmentArray` property', function (hooks) {
   setupApplicationTest(hooks);
@@ -66,7 +64,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     people = null;
   });
 
-  function pushPerson(id) {
+  function pushPerson(id: number) {
     store.push({
       data: {
         type: 'person',
@@ -84,7 +82,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     assert.ok(isArray(addresses), 'property is array-like');
     assert.ok(
-      addresses instanceof MF.FragmentArray,
+      addresses instanceof (MF as any).FragmentArray,
       'property is an instance of `MF.FragmentArray`',
     );
   });
@@ -96,7 +94,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     const addresses = person.addresses;
 
     assert.ok(
-      addresses.every((address) => {
+      addresses.every((address: unknown) => {
         return address instanceof Address;
       }),
       'each fragment is a `MF.Fragment` instance',
@@ -207,7 +205,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     pushPerson(1);
     pushPerson(2);
 
-    const people = await all([
+    const people = await Promise.all([
       store.findRecord('person', 1),
       store.findRecord('person', 2),
     ]);
@@ -327,7 +325,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     });
 
     assert.ok(
-      person.addresses.firstObject instanceof MF.Fragment,
+      person.addresses.firstObject instanceof (MF as any).Fragment,
       'a `MF.Fragment` instance is created',
     );
     assert.equal(
@@ -363,7 +361,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     person.set('addresses', [address]);
 
     assert.ok(
-      person.addresses.firstObject instanceof MF.Fragment,
+      person.addresses.firstObject instanceof (MF as any).Fragment,
       'a `MF.Fragment` instance is created',
     );
     assert.equal(
@@ -439,8 +437,9 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     ];
 
     class Throne extends Model {
-      @attr('string') name;
-      @fragmentArray('address', { defaultValue: defaultValue }) addresses;
+      @attr('string') declare name: string;
+      @fragmentArray('address', { defaultValue: defaultValue })
+      declare addresses: any;
     }
 
     owner.register('model:throne', Throne);
@@ -449,7 +448,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     assert.equal(
       throne.addresses.firstObject.street,
-      defaultValue[0].street,
+      defaultValue[0]!.street,
       'the default value is used when the value has not been specified',
     );
 
@@ -479,13 +478,13 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
     ];
 
     class Sword extends Model {
-      @attr('string') name;
+      @attr('string') declare name: string;
       @fragmentArray('address', {
         defaultValue() {
           return defaultValue;
         },
       })
-      addresses;
+      declare addresses: any;
     }
 
     owner.register('model:sword', Sword);
@@ -494,7 +493,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     assert.equal(
       sword.addresses.firstObject.street,
-      defaultValue[0].street,
+      defaultValue[0]!.street,
       'the default value is correct',
     );
   });
@@ -506,18 +505,18 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
         city: 'Winterfell',
         region: 'North',
         country: 'Westeros',
-        uncopyableObject: EmberObject.create({ item: 'Iron Throne' }), // Will throw an error if copied
+        uncopyableObject: EmberObject.create({ item: 'Iron Throne' } as object), // Will throw an error if copied
       },
     ];
 
     class Sword extends Model {
-      @attr('string') name;
+      @attr('string') declare name: string;
       @fragmentArray('address', {
         defaultValue() {
           return defaultValue;
         },
       })
-      addresses;
+      declare addresses: any;
     }
 
     owner.register('model:sword', Sword);
@@ -526,7 +525,7 @@ module('unit - `MF.fragmentArray` property', function (hooks) {
 
     assert.equal(
       sword.addresses.firstObject.street,
-      defaultValue[0].street,
+      defaultValue[0]!.street,
       'the default value is correct',
     );
   });

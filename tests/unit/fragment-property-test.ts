@@ -1,9 +1,7 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model, { attr } from '@ember-data/model';
 import { fragment } from '#src/attributes/index.ts';
 import { schedule } from '@ember/runloop';
 import EmberObject from '@ember/object';
-import { all } from 'rsvp';
 import { copy } from '#src/util/copy.ts';
 import MF from '#src/index.ts';
 import { module, test } from 'qunit';
@@ -11,7 +9,7 @@ import { setupApplicationTest } from '../helpers/index.ts';
 import Name from '../../demo-app/models/name.ts';
 import Pretender from 'pretender';
 
-let store, owner, server;
+let store: any, owner: any, server: Pretender;
 
 module('unit - `MF.fragment` property', function (hooks) {
   setupApplicationTest(hooks);
@@ -139,7 +137,7 @@ module('unit - `MF.fragment` property', function (hooks) {
       },
     });
 
-    const people = await all([
+    const people = await Promise.all([
       store.findRecord('person', 1),
       store.findRecord('person', 2),
     ]);
@@ -193,7 +191,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     });
 
     assert.ok(
-      person.name instanceof MF.Fragment,
+      person.name instanceof (MF as any).Fragment,
       'a `MF.Fragment` instance is created',
     );
     assert.equal(person.name.first, name.first, 'fragment has correct values');
@@ -219,7 +217,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     person.set('name', name);
 
     assert.ok(
-      person.name instanceof MF.Fragment,
+      person.name instanceof (MF as any).Fragment,
       'a `MF.Fragment` instance is created',
     );
     assert.equal(person.name.first, name.first, 'fragment has correct values');
@@ -264,7 +262,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     };
 
     class Ship extends Model {
-      @fragment('name', { defaultValue: defaultValue }) name;
+      @fragment('name', { defaultValue: defaultValue }) declare name: any;
     }
 
     owner.register('model:ship', Ship);
@@ -306,7 +304,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     };
 
     class Ship extends Model {
-      @fragment('name', { defaultValue: defaultValue }) name;
+      @fragment('name', { defaultValue: defaultValue }) declare name: any;
     }
 
     owner.register('model:ship', Ship);
@@ -346,7 +344,7 @@ module('unit - `MF.fragment` property', function (hooks) {
           return defaultValue;
         },
       })
-      name;
+      declare name: any;
     }
 
     owner.register('model:sword', Sword);
@@ -364,7 +362,7 @@ module('unit - `MF.fragment` property', function (hooks) {
     const defaultValue = {
       first: 'Oath',
       last: 'Keeper',
-      uncopyableObject: EmberObject.create({ item: 'Longclaw' }), // Will throw an error if copied
+      uncopyableObject: EmberObject.create({ item: 'Longclaw' } as object), // Will throw an error if copied
     };
 
     class Sword extends Model {
@@ -373,7 +371,7 @@ module('unit - `MF.fragment` property', function (hooks) {
           return defaultValue;
         },
       })
-      name;
+      declare name: any;
     }
 
     owner.register('model:sword', Sword);
@@ -400,11 +398,11 @@ module('unit - `MF.fragment` property', function (hooks) {
 
     class Sword extends Model {
       @fragment('name', {
-        defaultValue(record) {
+        defaultValue(record: any) {
           return record.store.createFragment('name', defaultValue);
         },
       })
-      name;
+      declare name: any;
     }
 
     owner.register('model:sword', Sword);
@@ -430,8 +428,8 @@ module('unit - `MF.fragment` property', function (hooks) {
     };
 
     class Ship extends Model {
-      @attr('string', { defaultValue: 'USA' }) country;
-      @fragment('name', { defaultValue: defaultValue }) name;
+      @attr('string', { defaultValue: 'USA' }) declare country: any;
+      @fragment('name', { defaultValue: defaultValue }) declare name: any;
     }
 
     owner.register('model:ship', Ship);
