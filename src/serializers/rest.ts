@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import RESTSerializer from '@ember-data/serializer/rest';
 import {
   fragmentTransformFor,
@@ -10,11 +9,11 @@ import {
 /**
   FragmentRESTSerializer is the base serializer class for ember-data-model-fragments
   when using RESTSerializer.
-  
+
   ```js
   // app/serializers/application.js
   import { FragmentRESTSerializer } from 'ember-data-model-fragments/serializer';
-  
+
   export default class ApplicationSerializer extends FragmentRESTSerializer {}
   ```
 
@@ -23,7 +22,7 @@ import {
   @public
 */
 export default class FragmentRESTSerializer extends RESTSerializer {
-  serialize(snapshot, options) {
+  serialize(snapshot: any, options: any) {
     return fragmentSerialize(
       this,
       snapshot,
@@ -40,7 +39,7 @@ export default class FragmentRESTSerializer extends RESTSerializer {
     @return {Transform}
     @public
   */
-  transformFor(attributeType) {
+  transformFor(attributeType: string) {
     return fragmentTransformFor(
       this,
       attributeType,
@@ -50,14 +49,14 @@ export default class FragmentRESTSerializer extends RESTSerializer {
 
   /**
     Override applyTransforms to handle polymorphic fragments with a typeKey function
-    
+
     @method applyTransforms
     @param {Class} typeClass - The model class
     @param {Object} data - The data to apply transforms to
     @return {Object} The transformed data
     @public
   */
-  applyTransforms(typeClass, data) {
+  applyTransforms(typeClass: any, data: any) {
     return fragmentApplyTransforms(this, typeClass, data);
   }
 
@@ -73,7 +72,7 @@ export default class FragmentRESTSerializer extends RESTSerializer {
     @return {Object} The extracted attributes
     @public
   */
-  extractAttributes(modelClass, resourceHash) {
+  extractAttributes(modelClass: any, resourceHash: any) {
     return fragmentExtractAttributes(
       this,
       modelClass,

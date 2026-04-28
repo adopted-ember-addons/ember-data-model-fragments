@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { getOwner } from '@ember/application';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
@@ -15,15 +14,15 @@ import RESTSerializer from '@ember-data/serializer/rest';
  * @private
  */
 export function fragmentTransformFor(
-  serializer,
-  attributeType,
-  superTransformFor,
+  serializer: any,
+  attributeType: string,
+  superTransformFor: (this: any, attributeType: string) => any,
 ) {
   if (attributeType.indexOf('-mf-') !== 0) {
     return superTransformFor.call(serializer, attributeType);
   }
 
-  const owner = getOwner(serializer);
+  const owner: any = getOwner(serializer);
   const containerKey = `transform:${attributeType}`;
 
   if (!owner.hasRegistration(containerKey)) {
@@ -59,11 +58,15 @@ export function fragmentTransformFor(
  * @return {Object} The transformed data
  * @private
  */
-export function fragmentApplyTransforms(serializer, typeClass, data) {
+export function fragmentApplyTransforms(
+  serializer: any,
+  typeClass: any,
+  data: any,
+) {
   const attributes = typeClass.attributes;
 
   // Handle regular @attr transforms
-  typeClass.eachTransformedAttribute((key, attrType) => {
+  typeClass.eachTransformedAttribute((key: string, attrType: string) => {
     if (data[key] === undefined) {
       return;
     }
@@ -76,7 +79,7 @@ export function fragmentApplyTransforms(serializer, typeClass, data) {
   // Also handle @array computed properties with transforms
   // These are not in eachTransformedAttribute because they're computed properties,
   // not regular @attr attributes
-  typeClass.eachComputedProperty((key, meta) => {
+  typeClass.eachComputedProperty((key: string, meta: any) => {
     if (data[key] === undefined) {
       return;
     }
@@ -94,7 +97,7 @@ export function fragmentApplyTransforms(serializer, typeClass, data) {
   return data;
 }
 
-function isFragmentAttribute(meta) {
+function isFragmentAttribute(meta: any) {
   return (
     meta &&
     meta.isFragment &&
@@ -104,19 +107,13 @@ function isFragmentAttribute(meta) {
   );
 }
 
-function serializedAttributesHash(serializer, snapshot, payload) {
-  // JSON:API: fragment attributes belong inside payload.data.attributes.
-  // If the model has no regular @attr fields, JSONAPISerializer#serialize
-  // omits `attributes` entirely, so we create it here. We dispatch by
-  // serializer type rather than payload shape, because a model could
-  // legitimately declare an @attr named `data` under RESTSerializer /
-  // JSONSerializer and we must not clobber it.
-  if (serializer instanceof JSONAPISerializer) {
-    if (payload?.data && typeof payload.data === 'object') {
-      payload.data.attributes ??= {};
-      return payload.data.attributes;
-    }
-    return payload;
+function serializedAttributesHash(
+  serializer: any,
+  snapshot: any,
+  payload: any,
+) {
+  if (payload?.data?.attributes) {
+    return payload.data.attributes;
   }
 
   // RESTSerializer: payload is keyed by the model's payload key, e.g.
@@ -143,11 +140,15 @@ function serializedAttributesHash(serializer, snapshot, payload) {
  * @return {Object}
  * @private
  */
-export function fragmentSerialize(serializer, snapshot, payload) {
+export function fragmentSerialize(
+  serializer: any,
+  snapshot: any,
+  payload: any,
+) {
   const attributes = serializedAttributesHash(serializer, snapshot, payload);
   const modelClass = serializer.store.modelFor(snapshot.modelName);
 
-  modelClass.eachComputedProperty((key, meta) => {
+  modelClass.eachComputedProperty((key: string, meta: any) => {
     if (!isFragmentAttribute(meta)) {
       return;
     }
@@ -186,10 +187,14 @@ export function fragmentSerialize(serializer, snapshot, payload) {
  * @private
  */
 export function fragmentExtractAttributes(
-  serializer,
-  modelClass,
-  resourceHash,
-  superExtractAttributes,
+  serializer: any,
+  modelClass: any,
+  resourceHash: any,
+  superExtractAttributes: (
+    this: any,
+    modelClass: any,
+    resourceHash: any,
+  ) => any,
 ) {
   // First, call parent to get regular attributes
   const attributes = superExtractAttributes.call(
@@ -199,7 +204,7 @@ export function fragmentExtractAttributes(
   );
 
   // Then, add fragment attributes
-  modelClass.eachComputedProperty((key, meta) => {
+  modelClass.eachComputedProperty((key: string, meta: any) => {
     if (isFragmentAttribute(meta)) {
       const attributeKey = serializer.keyForAttribute(key, 'deserialize');
       if (resourceHash[attributeKey] !== undefined) {
@@ -225,10 +230,14 @@ export function fragmentExtractAttributes(
  * @private
  */
 export function fragmentExtractAttributesJSONAPI(
-  serializer,
-  modelClass,
-  resourceHash,
-  superExtractAttributes,
+  serializer: any,
+  modelClass: any,
+  resourceHash: any,
+  superExtractAttributes: (
+    this: any,
+    modelClass: any,
+    resourceHash: any,
+  ) => any,
 ) {
   // First, call parent to get regular attributes
   const attributes = superExtractAttributes.call(
@@ -241,7 +250,7 @@ export function fragmentExtractAttributesJSONAPI(
   const attrHash = resourceHash.attributes || resourceHash;
 
   // Then, add fragment attributes
-  modelClass.eachComputedProperty((key, meta) => {
+  modelClass.eachComputedProperty((key: string, meta: any) => {
     if (isFragmentAttribute(meta)) {
       const attributeKey = serializer.keyForAttribute(key, 'deserialize');
       if (attrHash[attributeKey] !== undefined) {

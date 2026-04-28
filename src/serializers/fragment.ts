@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import JSONSerializer from '@ember-data/serializer/json';
 import {
   fragmentTransformFor,
@@ -10,13 +9,13 @@ import {
 /**
   FragmentSerializer is the base serializer class for ember-data-model-fragments.
   Extends JSONSerializer.
-  
+
   To use fragment serialization properly, your serializers should extend FragmentSerializer:
-  
+
   ```js
   // app/serializers/application.js
   import FragmentSerializer from 'ember-data-model-fragments/serializer';
-  
+
   export default class ApplicationSerializer extends FragmentSerializer {}
   ```
 
@@ -25,7 +24,7 @@ import {
   @public
 */
 export default class FragmentSerializer extends JSONSerializer {
-  serialize(snapshot, options) {
+  serialize(snapshot: any, options: any) {
     return fragmentSerialize(
       this,
       snapshot,
@@ -42,7 +41,7 @@ export default class FragmentSerializer extends JSONSerializer {
     @return {Transform}
     @public
   */
-  transformFor(attributeType) {
+  transformFor(attributeType: string) {
     return fragmentTransformFor(
       this,
       attributeType,
@@ -52,14 +51,14 @@ export default class FragmentSerializer extends JSONSerializer {
 
   /**
     Override applyTransforms to handle polymorphic fragments with a typeKey function
-    
+
     @method applyTransforms
     @param {Class} typeClass - The model class
     @param {Object} data - The data to apply transforms to
     @return {Object} The transformed data
     @public
   */
-  applyTransforms(typeClass, data) {
+  applyTransforms(typeClass: any, data: any) {
     return fragmentApplyTransforms(this, typeClass, data);
   }
 
@@ -75,7 +74,7 @@ export default class FragmentSerializer extends JSONSerializer {
     @return {Object} The extracted attributes
     @public
   */
-  extractAttributes(modelClass, resourceHash) {
+  extractAttributes(modelClass: any, resourceHash: any) {
     return fragmentExtractAttributes(
       this,
       modelClass,
