@@ -181,5 +181,46 @@ module(
         'pushPayload still deserializes the fragment',
       );
     });
+
+    test('record.serialize() outbound with a JSON:API application serializer', function (assert) {
+      // Outbound path: serializing a record whose application serializer is
+      // FragmentJSONAPISerializer must still produce fragment data without
+      // routing fragments through the JSON:API serializer (which would either
+      // assert in the fragment pipeline or emit the wrong shape).
+      const store = this.owner.lookup('service:store');
+
+      store.pushPayload('person', {
+        data: {
+          type: 'people',
+          id: '4',
+          attributes: {
+            title: 'Lady',
+            name: { first: 'Catelyn', last: 'Stark' },
+            addresses: [{ street: '1 Castle Black', city: 'Winterfell' }],
+            strings: ['a', 'b'],
+          },
+        },
+      });
+
+      const person = store.peekRecord('person', 4);
+      const serialized = person.serialize();
+
+      // FragmentJSONAPISerializer wraps things in a JSON:API document.
+      // We don't pin the exact wire shape across ed versions \u2014 we just
+      // verify that the fragment data round-trips through to the output.
+      const flat = JSON.stringify(serialized);
+      assert.ok(
+        flat.includes('Catelyn') && flat.includes('Stark'),
+        'fragment attrs survive outbound serialization',
+      );
+      assert.ok(
+        flat.includes('Winterfell'),
+        'fragmentArray entries survive outbound serialization',
+      );
+      assert.ok(
+        flat.includes('"a"') && flat.includes('"b"'),
+        '@array entries survive outbound serialization',
+      );
+    });
   },
 );
