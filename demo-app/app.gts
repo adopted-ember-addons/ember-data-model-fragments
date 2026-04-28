@@ -10,6 +10,7 @@ import {
 import FragmentTransform from '#src/transforms/fragment.ts';
 import FragmentArrayTransform from '#src/transforms/fragment-array.ts';
 import ArrayTransform from '#src/transforms/array.ts';
+import '@warp-drive/ember/install';
 
 class Router extends EmberRouter {
   location = 'history';
@@ -43,6 +44,7 @@ export class App extends EmberApp {
     ...normalizeGlob(import.meta.glob('./serializers/**/*', { eager: true })),
     ...normalizeGlob(import.meta.glob('./services/**/*', { eager: true })),
     ...normalizeGlob(import.meta.glob('./models/**/*', { eager: true })),
+    ...normalizeGlob(import.meta.glob('./routes/**/*', { eager: true })),
     ...normalizeGlob(import.meta.glob('./templates/**/*', { eager: true })),
   };
 }

@@ -1,1 +1,183 @@
 /* Ember supports plain CSS out of the box. More info: https://cli.emberjs.com/release/advanced-use/stylesheets/ */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  background: #f7f7f8;
+  color: #222;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.intro {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editor__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.editor__header h3 {
+  margin: 0;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e6f7e6;
+  color: #1a7a1a;
+  text-transform: uppercase;
+}
+
+.badge--dirty {
+  background: #fff1cc;
+  color: #8a6500;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem 1rem 1rem;
+}
+
+legend {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 2px;
+  flex: 1;
+  min-width: 140px;
+}
+
+input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+input:focus {
+  outline: 2px solid #5b8def;
+  outline-offset: -1px;
+}
+
+.address-row input {
+  flex: 1;
+  min-width: 110px;
+}
+
+button {
+  padding: 4px 10px;
+  border: 1px solid #ccc;
+  background: #f3f3f5;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+button:hover {
+  background: #e8e8eb;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.status {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.table th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.table th:last-child,
+.table td:last-child {
+  text-align: right;
+}
+
+.table td:last-child .row {
+  justify-content: flex-end;
+}
+
+.table .empty {
+  text-align: center;
+  color: #888;
+  padding: 1rem;
+}
+
+.btn--danger {
+  background: #fde8e8;
+  border-color: #f5b5b5;
+  color: #a02020;
+}
+
+.btn--danger:hover {
+  background: #f9d4d4;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.form h3 {
+  margin: 0;
+}

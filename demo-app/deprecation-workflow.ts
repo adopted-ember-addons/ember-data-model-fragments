@@ -27,5 +27,9 @@ setupDeprecationWorkflow({
       handler: 'silence',
       matchId: 'warp-drive:deprecate-legacy-request-methods',
     },
+    {
+      handler: 'silence',
+      matchId: 'warp-drive.deprecate-tracking-package',
+    },
   ],
 });
