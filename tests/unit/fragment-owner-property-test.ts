@@ -1,11 +1,11 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Model from '@ember-data/model';
 import { fragmentOwner } from '#src/attributes/index.ts';
-import { all } from 'rsvp';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 
-let store, owner;
+let store: any;
+
+let owner: any;
 
 module('unit - `MF.fragmentOwner` property', function (hooks) {
   setupApplicationTest(hooks);
@@ -46,7 +46,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
 
   test('using a fragment owner property on a non-fragment throws an error', function (assert) {
     class InvalidModel extends Model {
-      @fragmentOwner() owner;
+      @fragmentOwner() declare owner: unknown;
     }
 
     owner.register('model:invalidModel', InvalidModel);
@@ -85,7 +85,7 @@ module('unit - `MF.fragmentOwner` property', function (hooks) {
       },
     });
 
-    const people = await all([
+    const people = await Promise.all([
       store.findRecord('person', 1),
       store.findRecord('person', 2),
     ]);
