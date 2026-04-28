@@ -7,7 +7,7 @@ import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
 import { copy } from '#src/util/copy.ts';
 import { module, test, skip } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import Pretender from 'pretender';
 
 let store, owner, server;

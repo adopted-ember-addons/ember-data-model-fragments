@@ -8,7 +8,7 @@ import EmberObject from '@ember/object';
 import { all } from 'rsvp';
 import MF from '#src/index.ts';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import Address from '../../demo-app/models/address.ts';
 
 let owner, store, people;

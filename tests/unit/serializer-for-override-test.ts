@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import JSONSerializer from '@ember-data/serializer/json';
@@ -24,7 +23,9 @@ module(
   function (hooks) {
     setupApplicationTest(hooks);
 
-    let store, owner;
+    let store: any;
+
+    let owner: any;
 
     hooks.beforeEach(function () {
       owner = this.owner;

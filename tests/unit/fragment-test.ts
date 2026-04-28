@@ -2,7 +2,7 @@
 import { all } from 'rsvp';
 import { Comparable } from '@ember/-internals/runtime';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import Pretender from 'pretender';
 import Lion from '../../demo-app/models/lion.ts';
 import Elephant from '../../demo-app/models/elephant.ts';

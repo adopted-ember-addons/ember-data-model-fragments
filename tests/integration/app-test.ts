@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import { getDeprecations } from '@ember/test-helpers';
 
 module('Integration | Application', function (hooks) {

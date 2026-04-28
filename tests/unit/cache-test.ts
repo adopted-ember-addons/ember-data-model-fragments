@@ -1,6 +1,6 @@
 // @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import { recordIdentifierFor } from '@ember-data/store';
 import MF from '#src/index.ts';
 import Pretender from 'pretender';

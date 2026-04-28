@@ -4,7 +4,7 @@ import { fragment, fragmentArray, array } from '#src/attributes/index.ts';
 import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 
 let store;
 class Person extends Model {

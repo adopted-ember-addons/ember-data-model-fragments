@@ -4,7 +4,7 @@ import { copy } from '#src/util/copy.ts';
 import { schedule } from '@ember/runloop';
 import { fragment, fragmentArray } from '#src/attributes/index.ts';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import Order from '../../demo-app/models/order.ts';
 import Product from '../../demo-app/models/product.ts';
 import Pretender from 'pretender';

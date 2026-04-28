@@ -1,6 +1,6 @@
 // @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 let store;
 
 module('unit - `MF.fragmentArray`', function (hooks) {

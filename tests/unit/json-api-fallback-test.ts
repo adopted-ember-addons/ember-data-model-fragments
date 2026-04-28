@@ -1,6 +1,5 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import {
   default as FragmentSerializer,
   FragmentJSONAPISerializer,
@@ -31,6 +30,7 @@ module(
     hooks.beforeEach(function () {
       // IMPORTANT: override BEFORE any serializer lookup happens so the
       // serializer cache cannot hold a reference to the previous (REST) one.
+      // @ts-expect-error: upstream type issue
       this.owner.unregister('serializer:application');
       this.owner.register(
         'serializer:application',
@@ -39,7 +39,7 @@ module(
     });
 
     test('fragment models do not resolve to a JSON:API application serializer', function (assert) {
-      const store = this.owner.lookup('service:store');
+      const store = this.owner.lookup('service:store') as any;
 
       const appSerializer = store.serializerFor('application');
       assert.ok(
@@ -64,7 +64,7 @@ module(
     });
 
     test('fragments deserialize via pushPayload when application serializer is FragmentJSONAPISerializer', function (assert) {
-      const store = this.owner.lookup('service:store');
+      const store = this.owner.lookup('service:store') as any;
 
       store.pushPayload('person', {
         data: {
@@ -125,9 +125,10 @@ module(
       // schema service to strip fragment attrs before transforms run), so
       // this test asserts the resolution wiring rather than the attrs map.
       class CustomNameSerializer extends FragmentSerializer {}
-      this.owner.register('serializer:name', CustomNameSerializer);
 
-      const store = this.owner.lookup('service:store');
+      (this.owner as any).register('serializer:name', CustomNameSerializer);
+
+      const store = this.owner.lookup('service:store') as any;
 
       assert.ok(
         store.serializerFor('name') instanceof CustomNameSerializer,
@@ -157,9 +158,13 @@ module(
 
     test('a serializer:-fragment registration is honored end-to-end during pushPayload', function (assert) {
       class GlobalFragmentSerializer extends FragmentSerializer {}
-      this.owner.register('serializer:-fragment', GlobalFragmentSerializer);
 
-      const store = this.owner.lookup('service:store');
+      (this.owner as any).register(
+        'serializer:-fragment',
+        GlobalFragmentSerializer,
+      );
+
+      const store = this.owner.lookup('service:store') as any;
 
       assert.ok(
         store.serializerFor('name') instanceof GlobalFragmentSerializer,
@@ -190,7 +195,8 @@ module(
       // FragmentJSONAPISerializer must still produce fragment data without
       // routing fragments through the JSON:API serializer (which would either
       // assert in the fragment pipeline or emit the wrong shape).
-      const store = this.owner.lookup('service:store');
+
+      const store = this.owner.lookup('service:store') as any;
 
       store.pushPayload('person', {
         data: {

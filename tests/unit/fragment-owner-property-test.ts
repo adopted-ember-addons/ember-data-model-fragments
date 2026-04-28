@@ -1,7 +1,7 @@
 import Model from '@ember-data/model';
 import { fragmentOwner } from '#src/attributes/index.ts';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 
 let store: any;
 

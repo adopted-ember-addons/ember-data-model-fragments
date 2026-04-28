@@ -2,7 +2,7 @@
 import { isEmpty } from '@ember/utils';
 import { A, isArray } from '@ember/array';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import { copy } from '#src/util/copy.ts';
 
 let store, people;

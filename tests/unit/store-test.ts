@@ -1,13 +1,14 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { schedule } from '@ember/runloop';
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import Name from '../../demo-app/models/name.ts';
 import JSONSerializer from '@ember-data/serializer/json';
 import Person from '../../demo-app/models/person.ts';
 import { fragmentArray } from '#src/attributes/index.ts';
 
-let store, owner;
+let store: any;
+
+let owner: any;
 
 module('unit - `DS.Store`', function (hooks) {
   setupApplicationTest(hooks);
@@ -34,7 +35,7 @@ module('unit - `DS.Store`', function (hooks) {
       @fragmentArray('name', {
         defaultValue: [{ first: 'Default', last: 'Name' }],
       })
-      names;
+      declare names: unknown;
     }
 
     owner.register('model:person-with-default-name', PersonWithDefaultName);
