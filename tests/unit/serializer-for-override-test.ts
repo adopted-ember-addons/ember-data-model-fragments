@@ -1,9 +1,8 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.ts';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentSerializer, {
-  FragmentRESTSerializer,
-} from 'ember-data-model-fragments/serializer';
+import FragmentSerializer, { FragmentRESTSerializer } from '#src/serializer.ts';
 
 /*
   Tests for the mechanics of FragmentStore's `serializerFor` override.

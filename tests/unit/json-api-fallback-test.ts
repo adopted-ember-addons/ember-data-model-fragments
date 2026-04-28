@@ -1,9 +1,12 @@
+// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import { FragmentJSONAPISerializer } from 'ember-data-model-fragments/serializer';
-import FragmentSerializer from 'ember-data-model-fragments/serializer';
+import {
+  default as FragmentSerializer,
+  FragmentJSONAPISerializer,
+} from '#src/serializer.ts';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
-import Name from 'dummy/models/name';
+import Name from '../../demo-app/models/name.ts';
 
 /*
   Regression test for: "JSON:API application-serializer fallback for fragments".
