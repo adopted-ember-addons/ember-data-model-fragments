@@ -1,7 +1,7 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
-let store;
+
+let store: any;
 
 module('unit - `MF.fragmentArray`', function (hooks) {
   setupApplicationTest(hooks);
@@ -38,7 +38,7 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     assert.equal(copy.length, person.names.length, "copy's size is correct");
     assert.equal(
       copy[0].first,
-      data.names[0].first,
+      data.names[0]!.first,
       'child fragments are copied',
     );
     assert.ok(
@@ -389,7 +389,9 @@ module('unit - `MF.fragmentArray`', function (hooks) {
     });
 
     assert.deepEqual(
-      person.names.toArray().map((f) => f.serialize()),
+      person.names
+        .toArray()
+        .map((f: { serialize(): unknown }) => f.serialize()),
       [
         {
           first: 'Catelyn',

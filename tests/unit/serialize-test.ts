@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { isEmpty } from '@ember/utils';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
@@ -9,7 +8,8 @@ import { fragmentArray, array } from '#src/attributes/index.ts';
 import Pretender from 'pretender';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import DS from 'ember-data';
-let store, owner;
+
+let store: any, owner: any;
 
 module('unit - Serialization', function (hooks) {
   setupApplicationTest(hooks);
@@ -75,7 +75,7 @@ module('unit - Serialization', function (hooks) {
     });
 
     class PersonSerializer extends JSONSerializer {
-      serialize(snapshot) {
+      serialize(snapshot: any) {
         const name = snapshot.attr('name');
         assert.ok(
           name instanceof DS.Snapshot,
@@ -99,7 +99,7 @@ module('unit - Serialization', function (hooks) {
         );
         assert.equal(
           houses[0].attr('name'),
-          expectedHouses[0].name,
+          expectedHouses[0]!.name,
           'fragment array attributes are snapshotted correctly',
         );
 
@@ -137,18 +137,20 @@ module('unit - Serialization', function (hooks) {
     });
 
     class PersonSerializer extends JSONSerializer {
-      serialize(snapshot) {
+      serialize(snapshot: any) {
         const name = snapshot.attr('name');
         const houses = snapshot.attr('houses');
         const children = snapshot.attr('children');
 
         assert.ok(name instanceof DS.Snapshot, 'name remains a snapshot');
         assert.ok(
-          houses.every((house) => house instanceof DS.Snapshot),
+          houses.every((house: unknown) => house instanceof DS.Snapshot),
           'materialized fragment array still snapshots to fragment snapshots',
         );
         assert.deepEqual(
-          houses.map((house) => house.attr('name')),
+          houses.map((house: { attr(key: string): unknown }) =>
+            house.attr('name'),
+          ),
           ['Tully', 'Stark'],
           'snapshot preserves fragment array contents',
         );
@@ -247,8 +249,8 @@ module('unit - Serialization', function (hooks) {
 
   test('normalizing data can handle `null` fragment values', function (assert) {
     class NullDefaultPerson extends Person {
-      @fragmentArray('house', { defaultValue: null }) houses;
-      @array({ defaultValue: null }) children;
+      @fragmentArray('house', { defaultValue: null }) declare houses: any;
+      @array({ defaultValue: null }) declare children: any;
     }
 
     owner.register('model:nullDefaultPerson', NullDefaultPerson);
@@ -280,8 +282,8 @@ module('unit - Serialization', function (hooks) {
 
   test('normalizing data can handle `null` fragment values', async function (assert) {
     class NullDefaultPerson extends Person {
-      @fragmentArray('house', { defaultValue: null }) houses;
-      @array({ defaultValue: null }) children;
+      @fragmentArray('house', { defaultValue: null }) declare houses: any;
+      @array({ defaultValue: null }) declare children: any;
     }
 
     owner.register('model:nullDefaultPerson', NullDefaultPerson);
@@ -566,7 +568,7 @@ module('unit - Serialization', function (hooks) {
   });
 
   module('when saving the record', function (saveHooks) {
-    let server;
+    let server: Pretender;
 
     saveHooks.beforeEach(function () {
       server = new Pretender();
@@ -610,7 +612,7 @@ module('unit - Serialization', function (hooks) {
         ],
       });
 
-      server.put('/components/1', (request) => {
+      server.put('/components/1', (request: { requestBody: string }) => {
         assert.deepEqual(JSON.parse(request.requestBody), {
           data: {
             type: 'components',
