@@ -1,5 +1,5 @@
 import { assert } from '@ember/debug';
-import { getOwner } from '@ember/application';
+import { getOwner } from '@ember/owner';
 import Store from 'ember-data/store';
 import {
   macroCondition,

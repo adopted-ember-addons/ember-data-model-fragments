@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import JSONAPICache from '@ember-data/json-api';
 import FragmentStateManager from './fragment-state-manager.ts';
@@ -14,7 +13,13 @@ import FragmentRecordDataProxy from './fragment-record-data-proxy.ts';
 export default class FragmentCache {
   version = '2';
 
-  constructor(storeWrapper) {
+  __storeWrapper: any;
+  __innerCache: any;
+  __fragmentState: any;
+  __recordDataProxies: Map<string, any>;
+  __storeValidated: boolean;
+
+  constructor(storeWrapper: any) {
     this.__storeWrapper = storeWrapper;
     this.__innerCache = new JSONAPICache(storeWrapper);
     this.__fragmentState = new FragmentStateManager(storeWrapper);
@@ -57,7 +62,7 @@ export default class FragmentCache {
    * Get or create a FragmentRecordDataProxy for the given identifier.
    * This provides backwards compatibility with code expecting per-resource RecordData API.
    */
-  createFragmentRecordData(identifier) {
+  createFragmentRecordData(identifier: any) {
     let proxy = this.__recordDataProxies.get(identifier.lid);
     if (!proxy) {
       proxy = new FragmentRecordDataProxy(this, identifier);
@@ -70,28 +75,28 @@ export default class FragmentCache {
   // Fragment-specific public API
   // ==================
 
-  getFragment(identifier, key) {
+  getFragment(identifier: any, key: string) {
     this._validateStore();
     return this.__fragmentState.getFragment(identifier, key);
   }
 
-  hasFragment(identifier, key) {
+  hasFragment(identifier: any, key: string) {
     return this.__fragmentState.hasFragment(identifier, key);
   }
 
-  setDirtyFragment(identifier, key, value) {
+  setDirtyFragment(identifier: any, key: string, value: any) {
     return this.__fragmentState.setDirtyFragment(identifier, key, value);
   }
 
-  isFragmentDirty(identifier, key) {
+  isFragmentDirty(identifier: any, key: string) {
     return this.__fragmentState.isFragmentDirty(identifier, key);
   }
 
-  getFragmentOwner(identifier) {
+  getFragmentOwner(identifier: any) {
     return this.__fragmentState.getFragmentOwner(identifier);
   }
 
-  setFragmentOwner(fragmentIdentifier, ownerIdentifier, key) {
+  setFragmentOwner(fragmentIdentifier: any, ownerIdentifier: any, key: string) {
     return this.__fragmentState.setFragmentOwner(
       fragmentIdentifier,
       ownerIdentifier,
@@ -99,7 +104,7 @@ export default class FragmentCache {
     );
   }
 
-  newFragmentIdentifierForKey(identifier, key, attributes) {
+  newFragmentIdentifierForKey(identifier: any, key: string, attributes: any) {
     return this.__fragmentState._newFragmentIdentifierForKey(
       identifier,
       key,
@@ -107,31 +112,31 @@ export default class FragmentCache {
     );
   }
 
-  getFragmentArrayCache(identifier, key) {
+  getFragmentArrayCache(identifier: any, key: string) {
     return this.__fragmentState._getFragmentArrayCacheMap(identifier)[key];
   }
 
-  setFragmentArrayCache(identifier, key, value) {
+  setFragmentArrayCache(identifier: any, key: string, value: any) {
     this.__fragmentState._getFragmentArrayCacheMap(identifier)[key] = value;
   }
 
-  rollbackFragment(identifier, key) {
+  rollbackFragment(identifier: any, key: string) {
     return this.__fragmentState.rollbackFragment(identifier, key);
   }
 
-  hasChangedFragments(identifier) {
+  hasChangedFragments(identifier: any) {
     return this.__fragmentState.hasChangedFragments(identifier);
   }
 
-  changedFragments(identifier) {
+  changedFragments(identifier: any) {
     return this.__fragmentState.changedFragments(identifier);
   }
 
-  getFragmentCanonicalState(identifier) {
+  getFragmentCanonicalState(identifier: any) {
     return this.__fragmentState.getCanonicalState(identifier);
   }
 
-  getFragmentCurrentState(identifier) {
+  getFragmentCurrentState(identifier: any) {
     return this.__fragmentState.getCurrentState(identifier);
   }
 
@@ -156,11 +161,11 @@ export default class FragmentCache {
    *   }
    * }
    */
-  put(doc) {
+  put(doc: any) {
     // Normalize id to string to ensure consistent comparison
     if (doc?.content?.data) {
       if (Array.isArray(doc.content.data)) {
-        doc.content.data.forEach((resource) => {
+        doc.content.data.forEach((resource: any) => {
           if (resource.id != null && typeof resource.id !== 'string') {
             resource.id = String(resource.id);
           }
@@ -178,7 +183,7 @@ export default class FragmentCache {
     // which requires the owner record to exist in the cache first.
 
     // Step 1: Extract fragment data from resources WITHOUT creating fragment identifiers
-    const fragmentDataByIdentifier = new Map();
+    const fragmentDataByIdentifier = new Map<any, any>();
     if (doc && doc.content && doc.content.data) {
       this._collectFragmentsFromDocument(doc.content, fragmentDataByIdentifier);
     }
@@ -201,7 +206,10 @@ export default class FragmentCache {
    *
    * @private
    */
-  _collectFragmentsFromDocument(jsonApiDoc, fragmentDataByIdentifier) {
+  _collectFragmentsFromDocument(
+    jsonApiDoc: any,
+    fragmentDataByIdentifier: Map<any, any>,
+  ) {
     const { data, included } = jsonApiDoc;
 
     // Handle single resource
@@ -229,7 +237,10 @@ export default class FragmentCache {
    *
    * @private
    */
-  _collectFragmentsFromResource(resource, fragmentDataByIdentifier) {
+  _collectFragmentsFromResource(
+    resource: any,
+    fragmentDataByIdentifier: Map<any, any>,
+  ) {
     if (!resource || !resource.attributes || !resource.type) {
       return;
     }
@@ -245,10 +256,11 @@ export default class FragmentCache {
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
 
-    const fragmentData = {};
-    const fragmentKeys = [];
+    const fragmentData: Record<string, any> = {};
+    const fragmentKeys: string[] = [];
 
-    for (const [key, definition] of Object.entries(definitions)) {
+    for (const [key, def] of Object.entries(definitions)) {
+      const definition: any = def;
       const isFragment =
         definition.isFragment || definition.options?.isFragment;
 
@@ -275,32 +287,32 @@ export default class FragmentCache {
   /**
    * Update the "remote" or "canonical" state via a merge operation
    */
-  patch(op) {
+  patch(op: any) {
     return this.__innerCache.patch(op);
   }
 
   /**
    * Update the "local" or "current" (unpersisted) state
    */
-  mutate(mutation) {
+  mutate(mutation: any) {
     return this.__innerCache.mutate(mutation);
   }
 
   /**
    * Peek resource data from the Cache
    */
-  peek(identifier) {
+  peek(identifier: any) {
     return this.__innerCache.peek(identifier);
   }
 
-  peekRemoteState(identifier) {
+  peekRemoteState(identifier: any) {
     return this.__innerCache.peekRemoteState?.(identifier);
   }
 
   /**
    * Peek the Cache for existing request data
    */
-  peekRequest(identifier) {
+  peekRequest(identifier: any) {
     return this.__innerCache.peekRequest(identifier);
   }
 
@@ -313,7 +325,7 @@ export default class FragmentCache {
    * In ember-data 4.12, the signature was:
    *   upsert(identifier, data, calculateChanges) where data = { attributes: {...} }
    */
-  upsert(identifier, data, hasRecordOrCalculateChanges) {
+  upsert(identifier: any, data: any, hasRecordOrCalculateChanges: any) {
     // Normalize the id to string to match identifier.id (which is always coerced to string)
     // This ensures cached.id matches identifier.id type when didCommit compares them
     if (data.id != null && typeof data.id !== 'string') {
@@ -321,15 +333,16 @@ export default class FragmentCache {
     }
 
     // First, extract fragment attributes from data
-    const fragmentAttributeKeys = [];
-    const fragmentData = {};
+    const fragmentAttributeKeys: string[] = [];
+    const fragmentData: Record<string, any> = {};
 
     if (data.attributes) {
       const definitions = this.__storeWrapper
         .getSchemaDefinitionService()
         .attributesDefinitionFor(identifier);
 
-      for (const [key, definition] of Object.entries(definitions)) {
+      for (const [key, def] of Object.entries(definitions)) {
+        const definition: any = def;
         const isFragment =
           definition.isFragment || definition.options?.isFragment;
         if (isFragment && data.attributes[key] !== undefined) {
@@ -376,23 +389,15 @@ export default class FragmentCache {
   /**
    * Signal to the cache that a new record has been instantiated on the client
    */
-  clientDidCreate(identifier, options) {
+  clientDidCreate(identifier: any, options?: any) {
     // Extract fragment attributes from options before passing to inner cache
     if (options) {
       const definitions = this.__storeWrapper
         .getSchemaDefinitionService()
         .attributesDefinitionFor(identifier);
 
-      // Raw fragment data (plain objects / arrays of plain objects) flows
-      // through pushFragmentData -> behavior.pushData which only accepts raw
-      // canonical data. Fragment-instance values must be adopted directly
-      // (mirroring behavior.getDefaultValue's handling of fragment defaults)
-      // so that consumers can pass `store.createFragment(...)` results into
-      // `store.createRecord(type, { fragmentKey: fragment })` without hitting
-      // "Fragment canonical value must be an object or null".
-      const fragmentData = {};
-      const fragmentInstanceData = {};
-      const regularOptions = {};
+      const fragmentData: Record<string, any> = {};
+      const regularOptions: Record<string, any> = {};
       let hasFragmentData = false;
       let hasFragmentInstanceData = false;
 
@@ -468,7 +473,7 @@ export default class FragmentCache {
   /**
    * Signals to the cache that a resource will be part of a save transaction
    */
-  willCommit(identifier) {
+  willCommit(identifier: any) {
     // Handle fragments first
     this.__fragmentState.willCommitFragments(identifier);
     return this.__innerCache.willCommit(identifier);
@@ -477,7 +482,7 @@ export default class FragmentCache {
   /**
    * Signals to the cache that a resource was successfully updated
    */
-  didCommit(identifier, data) {
+  didCommit(identifier: any, data: any) {
     // In ember-data 4.12+, didCommit receives { request, content } where
     // content is a ResourceDocument with { data: { id, type, attributes, relationships } }
     // We need to extract fragment attributes from data.content.data.attributes
@@ -508,14 +513,15 @@ export default class FragmentCache {
     const attributes = responseData?.attributes;
 
     // Extract fragment data from attributes
-    let fragmentData = null;
+    let fragmentData: any = null;
     if (attributes) {
       const definitions = this.__storeWrapper
         .getSchemaDefinitionService()
         .attributesDefinitionFor(identifier);
       fragmentData = { attributes: {} };
 
-      for (const [key, definition] of Object.entries(definitions)) {
+      for (const [key, def] of Object.entries(definitions)) {
+        const definition: any = def;
         const isFragment =
           definition.isFragment || definition.options?.isFragment;
         if (isFragment && attributes[key] !== undefined) {
@@ -536,7 +542,7 @@ export default class FragmentCache {
 
     // Notify changed fragments
     if (changedFragmentKeys?.length > 0) {
-      changedFragmentKeys.forEach((key) => {
+      changedFragmentKeys.forEach((key: string) => {
         this.__storeWrapper.notifyChange(identifier, 'attributes', key);
       });
     }
@@ -546,7 +552,7 @@ export default class FragmentCache {
   /**
    * Signals to the cache that a resource save transaction failed
    */
-  commitWasRejected(identifier, errors) {
+  commitWasRejected(identifier: any, errors: any) {
     this.__fragmentState.commitWasRejectedFragments(identifier);
     return this.__innerCache.commitWasRejected(identifier, errors);
   }
@@ -554,7 +560,7 @@ export default class FragmentCache {
   /**
    * Signals to the cache that all data for a resource should be cleared
    */
-  unloadRecord(identifier) {
+  unloadRecord(identifier: any) {
     this.__fragmentState.unloadFragments(identifier);
     this.__recordDataProxies.delete(identifier.lid);
     return this.__innerCache.unloadRecord(identifier);
@@ -563,7 +569,7 @@ export default class FragmentCache {
   /**
    * Retrieve the data for an attribute from the cache
    */
-  getAttr(identifier, attr) {
+  getAttr(identifier: any, attr: string) {
     // Check if this is a fragment attribute
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
@@ -611,7 +617,7 @@ export default class FragmentCache {
         // If no wrapper exists yet, convert identifiers to Fragment instances
         // so ext.js patch can call _createSnapshot on each fragment
         if (fragmentKind === 'fragment-array' && Array.isArray(fragmentValue)) {
-          const fragments = fragmentValue.map((item) => {
+          const fragments = fragmentValue.map((item: any) => {
             if (item?.lid) {
               return this.store._instanceCache.getRecord(item);
             }
@@ -633,7 +639,7 @@ export default class FragmentCache {
   /**
    * Mutate the data for an attribute in the cache
    */
-  setAttr(identifier, attr, value) {
+  setAttr(identifier: any, attr: string, value: any) {
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(identifier);
@@ -675,7 +681,7 @@ export default class FragmentCache {
   /**
    * Query the cache for the changed attributes of a resource
    */
-  changedAttrs(identifier) {
+  changedAttrs(identifier: any) {
     const changedAttrs = this.__innerCache.changedAttrs(identifier);
     const changedFragments = this.__fragmentState.changedFragments(identifier);
     return Object.assign({}, changedAttrs, changedFragments);
@@ -684,7 +690,7 @@ export default class FragmentCache {
   /**
    * Query the cache for whether any mutated attributes exist
    */
-  hasChangedAttrs(identifier) {
+  hasChangedAttrs(identifier: any) {
     // New records are considered to have dirty attributes since they haven't been saved
     // This is important for fragments created via createFragment
     return (
@@ -697,7 +703,7 @@ export default class FragmentCache {
   /**
    * Tell the cache to discard any uncommitted mutations to attributes
    */
-  rollbackAttrs(identifier) {
+  rollbackAttrs(identifier: any) {
     const dirtyAttrKeys = this.__innerCache.rollbackAttrs(identifier);
     const dirtyFragmentKeys =
       this.__fragmentState.rollbackFragments(identifier);
@@ -707,55 +713,55 @@ export default class FragmentCache {
   /**
    * Query the cache for the current state of a relationship
    */
-  getRelationship(identifier, field) {
+  getRelationship(identifier: any, field: any) {
     return this.__innerCache.getRelationship(identifier, field);
   }
 
-  getRemoteRelationship(identifier, field) {
+  getRemoteRelationship(identifier: any, field: any) {
     return this.__innerCache.getRemoteRelationship?.(identifier, field);
   }
 
-  changedRelationships(identifier) {
+  changedRelationships(identifier: any) {
     return this.__innerCache.changedRelationships?.(identifier);
   }
 
-  hasChangedRelationships(identifier) {
+  hasChangedRelationships(identifier: any) {
     return this.__innerCache.hasChangedRelationships?.(identifier) || false;
   }
 
-  rollbackRelationships(identifier) {
+  rollbackRelationships(identifier: any) {
     return this.__innerCache.rollbackRelationships?.(identifier);
   }
 
   /**
    * Update the cache state for the given resource to be marked as locally deleted
    */
-  setIsDeleted(identifier, isDeleted) {
+  setIsDeleted(identifier: any, isDeleted: boolean) {
     return this.__innerCache.setIsDeleted(identifier, isDeleted);
   }
 
   /**
    * Query the cache for any validation errors applicable to the given resource
    */
-  getErrors(identifier) {
+  getErrors(identifier: any) {
     return this.__innerCache.getErrors(identifier);
   }
 
-  getRemoteAttr(identifier, attr) {
+  getRemoteAttr(identifier: any, attr: string) {
     return this.__innerCache.getRemoteAttr?.(identifier, attr);
   }
 
   /**
    * Query the cache for whether a given resource has any available data
    */
-  isEmpty(identifier) {
+  isEmpty(identifier: any) {
     return this.__innerCache.isEmpty(identifier);
   }
 
   /**
    * Query the cache for whether a given resource was created locally
    */
-  isNew(identifier) {
+  isNew(identifier: any) {
     // For fragments that have been committed, they are no longer new
     if (this.__fragmentState.isFragmentCommitted(identifier)) {
       return false;
@@ -766,14 +772,14 @@ export default class FragmentCache {
   /**
    * Query the cache for whether a given resource is marked as deleted
    */
-  isDeleted(identifier) {
+  isDeleted(identifier: any) {
     return this.__innerCache.isDeleted(identifier);
   }
 
   /**
    * Query the cache for whether a given resource has been deleted and persisted
    */
-  isDeletionCommitted(identifier) {
+  isDeletionCommitted(identifier: any) {
     return this.__innerCache.isDeletionCommitted(identifier);
   }
 
@@ -785,7 +791,7 @@ export default class FragmentCache {
     return this.__innerCache.fork();
   }
 
-  merge(cache) {
+  merge(cache: any) {
     return this.__innerCache.merge(cache);
   }
 
@@ -801,7 +807,7 @@ export default class FragmentCache {
     return this.__innerCache.dump();
   }
 
-  hydrate(stream) {
+  hydrate(stream: any) {
     return this.__innerCache.hydrate(stream);
   }
 }
