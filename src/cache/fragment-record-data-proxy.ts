@@ -127,7 +127,8 @@ export default class FragmentRecordDataProxy {
     const definitions = this.__cache.__storeWrapper
       .getSchemaDefinitionService()
       .attributesDefinitionFor(this.identifier);
-    for (const [key, definition] of Object.entries(definitions)) {
+    for (const [key, def] of Object.entries(definitions)) {
+      const definition: any = def;
       const isFragmentAttr =
         definition.isFragment || definition.options?.isFragment;
       if (!isFragmentAttr) {

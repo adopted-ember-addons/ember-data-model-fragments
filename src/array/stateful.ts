@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import EmberObject, { get } from '@ember/object';
 import { isArray } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
@@ -26,7 +25,9 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @type {DS.Model}
   */
   get owner() {
-    return this.store._instanceCache.getRecord(this.identifier);
+    return (this as any).store._instanceCache.getRecord(
+      (this as any).identifier,
+    );
   },
 
   /**
@@ -63,10 +64,10 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @private
   */
   get cache() {
-    return fragmentCacheFor(this.store);
+    return fragmentCacheFor((this as any).store);
   },
 
-  init(...args) {
+  init(this: any, ...args: any[]) {
     this._super(...args);
     this._length = 0;
     this.currentState = [];
@@ -76,7 +77,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     this.retrieveLatest();
   },
 
-  notify() {
+  notify(this: any) {
     this._isDirty = true;
     this._hasNotified = true;
     this.notifyPropertyChange('[]');
@@ -85,14 +86,15 @@ const StatefulArray = EmberObject.extend(MutableArray, {
   },
 
   get length() {
-    if (this._isDirty) {
-      this.retrieveLatest();
+    const self = this as any;
+    if (self._isDirty) {
+      self.retrieveLatest();
     }
     // By using `get()`, the tracking system knows to pay attention to changes that occur.
     // eslint-disable-next-line ember/no-get
     get(this, '[]');
 
-    return this._length;
+    return self._length;
   },
 
   /**
@@ -102,33 +104,33 @@ const StatefulArray = EmberObject.extend(MutableArray, {
    * @param objects the new array contents
    * @private
    */
-  _setFragments(objects) {
+  _setFragments(this: any, objects: any[]) {
     if (this._isDirty) {
       this.retrieveLatest();
     }
     this.replace(0, this._length, objects);
   },
 
-  objectAt(index) {
+  objectAt(this: any, index: number) {
     if (this._isDirty) {
       this.retrieveLatest();
     }
     return this.currentState[index];
   },
 
-  _normalizeData(data) {
+  _normalizeData(data: any) {
     return data;
   },
 
-  _getFragmentState() {
+  _getFragmentState(this: any) {
     return this.cache.getFragment(this.identifier, this.key);
   },
 
-  _setFragmentState(array) {
+  _setFragmentState(this: any, array: any) {
     this.cache.setDirtyFragment(this.identifier, this.key, array);
   },
 
-  replace(start, deleteCount, items) {
+  replace(this: any, start: number, deleteCount: number, items: any[]) {
     assert(
       'The third argument to replace needs to be an array.',
       isArray(items),
@@ -148,13 +150,15 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     data.splice(
       start,
       deleteCount,
-      ...items.map((item, i) => this._normalizeData(item, start + i)),
+      ...items.map((item: any, i: number) =>
+        this._normalizeData(item, start + i),
+      ),
     );
     this._setFragmentState(data);
     this.notify();
   },
 
-  retrieveLatest() {
+  retrieveLatest(this: any) {
     // It's possible the parent side of the relationship may have been destroyed by this point
     if (this.isDestroyed || this.isDestroying || this._isUpdating) {
       return;
@@ -179,7 +183,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @method copy
     @return {array} a new array
   */
-  copy() {
+  copy(this: any) {
     return this.map(copy);
   },
 
@@ -187,7 +191,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @method _createSnapshot
     @private
   */
-  _createSnapshot() {
+  _createSnapshot(this: any) {
     // Since elements are not models, a snapshot is simply a mapping of raw values
     return this.toArray();
   },
@@ -211,7 +215,8 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @readOnly
   */
   get hasDirtyAttributes() {
-    return this.cache.isFragmentDirty(this.identifier, this.key);
+    const self = this as any;
+    return self.cache.isFragmentDirty(self.identifier, self.key);
   },
 
   /**
@@ -230,7 +235,7 @@ const StatefulArray = EmberObject.extend(MutableArray, {
 
     @method rollbackAttributes
   */
-  rollbackAttributes() {
+  rollbackAttributes(this: any) {
     this.cache.rollbackFragment(this.identifier, this.key);
   },
 
@@ -240,11 +245,11 @@ const StatefulArray = EmberObject.extend(MutableArray, {
     @method serialize
     @return {Array}
   */
-  serialize() {
+  serialize(this: any) {
     return this.toArray();
   },
 
-  toStringExtension() {
+  toStringExtension(this: any) {
     return `owner(${this.owner?.id})`;
   },
 });
