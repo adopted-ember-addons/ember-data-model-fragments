@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import '@warp-drive/ember/install';
 import '../demo-app/deprecation-workflow.ts';
 
@@ -28,7 +27,10 @@ class Router extends EmberRouter {
 
 // Map import.meta.glob keys (e.g. '../demo-app/models/lion.ts') to the
 // strict-resolver expected key shape (e.g. './models/lion').
-function normalizeGlob(glob, prefix) {
+function normalizeGlob(
+  glob: Record<string, unknown>,
+  prefix: string,
+): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(glob).map(([key, value]) => [
       key.replace(prefix, './').replace(/\.(js|gjs|ts|gts)$/, ''),
