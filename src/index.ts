@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import Namespace from '@ember/application/namespace';
 import { importSync } from '@embroider/macros';
 import VERSION from './version.ts';
@@ -40,11 +39,11 @@ const MF = Namespace.create({
   fragmentArray: fragmentArray,
   array: array,
   fragmentOwner: fragmentOwner,
-});
+} as object);
 
 Object.defineProperty(MF, 'FragmentSchemaService', {
   get() {
-    return importSync('./schema-service.ts').default;
+    return (importSync('./schema-service.ts') as { default: unknown }).default;
   },
 });
 

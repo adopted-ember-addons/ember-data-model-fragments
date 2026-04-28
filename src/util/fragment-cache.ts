@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 const CACHE_METHODS = [
   'createFragmentRecordData',
   'getFragment',
@@ -17,7 +16,7 @@ const CACHE_METHODS = [
   'getFragmentCurrentState',
 ];
 
-function installCacheManagerCompat(store, rawCache = store.cache) {
+function installCacheManagerCompat(store: any, rawCache: any = store.cache) {
   const cacheManager = rawCache;
   const cache = cacheManager?.___cache;
 
@@ -43,7 +42,7 @@ function installCacheManagerCompat(store, rawCache = store.cache) {
     }
 
     Object.defineProperty(cacheManager, methodName, {
-      value(...args) {
+      value(...args: unknown[]) {
         return cache[methodName](...args);
       },
       configurable: true,
@@ -55,6 +54,6 @@ function installCacheManagerCompat(store, rawCache = store.cache) {
 
 export { installCacheManagerCompat };
 
-export default function fragmentCacheFor(store) {
+export default function fragmentCacheFor(store: any) {
   return installCacheManagerCompat(store);
 }

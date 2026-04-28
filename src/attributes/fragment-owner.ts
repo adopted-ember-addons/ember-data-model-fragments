@@ -1,4 +1,3 @@
-// @ts-nocheck -- incremental TS conversion; types will be tightened in follow-up PRs.
 import { assert } from '@ember/debug';
 import { computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
@@ -35,7 +34,7 @@ export default function fragmentOwner(): PropertyDecorator {
   // "Attempted to access the computed ... on a destroyed object" assertion
   // when a fragment is torn down.
   // eslint-disable-next-line ember/require-computed-property-dependencies
-  return computed(function () {
+  return computed(function (this: any) {
     if (isDestroying(this) || isDestroyed(this)) {
       return null;
     }
@@ -54,5 +53,5 @@ export default function fragmentOwner(): PropertyDecorator {
     .meta({
       isFragmentOwner: true,
     })
-    .readOnly();
+    .readOnly() as unknown as PropertyDecorator;
 }
