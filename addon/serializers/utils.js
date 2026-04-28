@@ -1,5 +1,7 @@
 import { assert } from '@ember/debug';
 import { getOwner } from '@ember/application';
+import JSONAPISerializer from '@ember-data/serializer/json-api';
+import RESTSerializer from '@ember-data/serializer/rest';
 
 /**
  * Helper function to implement fragment transform lookup.
@@ -102,16 +104,31 @@ function isFragmentAttribute(meta) {
 }
 
 function serializedAttributesHash(serializer, snapshot, payload) {
-  if (payload?.data?.attributes) {
-    return payload.data.attributes;
+  // JSON:API: fragment attributes belong inside payload.data.attributes.
+  // If the model has no regular @attr fields, JSONAPISerializer#serialize
+  // omits `attributes` entirely, so we create it here. We dispatch by
+  // serializer type rather than payload shape, because a model could
+  // legitimately declare an @attr named `data` under RESTSerializer /
+  // JSONSerializer and we must not clobber it.
+  if (serializer instanceof JSONAPISerializer) {
+    if (payload?.data && typeof payload.data === 'object') {
+      payload.data.attributes ??= {};
+      return payload.data.attributes;
+    }
+    return payload;
   }
 
-  const rootKey = serializer.payloadKeyFromModelName?.(snapshot.modelName);
-
-  if (rootKey && payload?.[rootKey] && typeof payload[rootKey] === 'object') {
-    return payload[rootKey];
+  // RESTSerializer: payload is keyed by the model's payload key, e.g.
+  // `{ person: { ...attrs } }`.
+  if (serializer instanceof RESTSerializer) {
+    const rootKey = serializer.payloadKeyFromModelName?.(snapshot.modelName);
+    if (rootKey && payload?.[rootKey] && typeof payload[rootKey] === 'object') {
+      return payload[rootKey];
+    }
+    return payload;
   }
 
+  // JSONSerializer (default): flat hash keyed by attribute names.
   return payload;
 }
 
