@@ -314,7 +314,7 @@ export default class NameSerializer extends JSONSerializer {
 }
 ```
 
-Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. And since the attribute value is not a full-fledged [JSON API](http://jsonapi.org/) response, `JSONAPISerializer` cannot be used directly with fragments.
+Since fragment deserialization uses the value of a single attribute in the parent model, the `normalizeResponse` method of the serializer is never used. The fragment value is not a full-fledged [JSON:API](http://jsonapi.org/) resource, so a `JSONAPISerializer` cannot be used to normalize a fragment directly. The addon takes care of this for you (see [Fragment serializer resolution](#fragment-serializer-resolution) below) — your application serializer can still be `FragmentJSONAPISerializer` or `FragmentRESTSerializer`.
 
 Your application serializer should extend one of the fragment-aware serializers provided by this addon:
 
@@ -345,6 +345,48 @@ import { FragmentJSONAPISerializer } from "ember-data-model-fragments/serializer
 
 export default class ApplicationSerializer extends FragmentJSONAPISerializer {}
 ```
+
+### Fragment serializer resolution
+
+When this addon needs to (de)serialize a fragment, it looks up a serializer for that fragment's model name in this order:
+
+1. **A serializer registered for the specific fragment type** — e.g. `app/serializers/name.js` for an `MF.fragment("name")` attribute. Use this to customize how a single fragment type is (de)serialized (see the `NameSerializer` example above).
+2. **An app-wide fragment serializer registered as `serializer:-fragment`** — use this if you want every fragment in your app to share custom behavior without registering a separate serializer for each fragment type.
+3. **The bundled `FragmentSerializer`** (a `JSONSerializer`-based serializer) — registered automatically the first time it is needed. This is what powers the "just works" behavior for apps that don't customize fragment serialization.
+
+Fragment lookups never fall back to `serializer:application`. This is intentional: a typical application serializer is a `RESTSerializer` or `JSONAPISerializer`, neither of which can normalize a raw fragment hash. Your application serializer therefore remains free to be `FragmentRESTSerializer` or `FragmentJSONAPISerializer`, while fragments themselves are always handled by a JSON serializer.
+
+#### Customizing serialization for one fragment type
+
+```javascript
+// app/serializers/name.js
+
+import FragmentSerializer from "ember-data-model-fragments/serializer";
+
+export default class NameSerializer extends FragmentSerializer {
+  attrs = {
+    given: "first",
+    family: "last",
+  };
+}
+```
+
+#### Customizing serialization for every fragment
+
+```javascript
+// app/serializers/-fragment.js
+
+import FragmentSerializer from "ember-data-model-fragments/serializer";
+
+export default class AppFragmentSerializer extends FragmentSerializer {
+  keyForAttribute(key) {
+    // e.g. snake_case fragment attribute keys app-wide
+    return key.replace(/([A-Z])/g, "_$1").toLowerCase();
+  }
+}
+```
+
+Per-fragment-type serializers (`app/serializers/<fragment-name>.js`) take precedence over `serializer:-fragment`.
 
 If custom serialization of the owner record is needed, fragment [snapshots](http://emberjs.com/api/data/classes/DS.Snapshot.html) can be accessed using the [`Snapshot#attr`](http://emberjs.com/api/data/classes/DS.Snapshot.html#method_attr) method. Note that this differs from how relationships are accessed on snapshots (using `belongsTo`/`hasMany` methods):
 

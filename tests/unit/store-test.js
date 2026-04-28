@@ -77,16 +77,47 @@ module('unit - `DS.Store`', function (hooks) {
     assert.notOk(store.isFragment('person', 'a model should return false'));
   });
 
-  test('fragments use the application serializer as fallback', function (assert) {
-    // The dummy app's application serializer is FragmentRESTSerializer
-    // Fragments without specific serializers should use the application serializer
+  test('fragments do NOT fall back to the application serializer', function (assert) {
+    // Regression: previously the addon overrode `serializerFor` so fragment
+    // models never resolved to `serializer:application`. That override was
+    // dropped in the 4.13/5.x compatibility work, which made fragment
+    // deserialization on ember-data 4.12 break when the app's application
+    // serializer was JSON:API (the FragmentTransform pipeline asserts that
+    // the resolved fragment serializer is not a `JSONAPISerializer`).
+    //
+    // Fragment serializers should always resolve to a `JSONSerializer`-based
+    // serializer (FragmentSerializer by default), not `serializer:application`.
     const fragmentSerializer = store.serializerFor('name');
     const applicationSerializer = store.serializerFor('application');
 
-    assert.strictEqual(
+    assert.notStrictEqual(
       fragmentSerializer,
       applicationSerializer,
-      'fragment serializer falls back to application serializer',
+      'fragment serializer is not the application serializer',
+    );
+    assert.ok(
+      fragmentSerializer instanceof JSONSerializer,
+      'fragment serializer is a JSONSerializer (not REST or JSON:API)',
+    );
+  });
+
+  test('a per-fragment serializer registration wins over the default fallback', function (assert) {
+    class CustomNameSerializer extends JSONSerializer {}
+    owner.register('serializer:name', CustomNameSerializer);
+
+    assert.ok(
+      store.serializerFor('name') instanceof CustomNameSerializer,
+      'app-provided serializer:name is used',
+    );
+  });
+
+  test('a serializer:-fragment registration overrides the default fragment fallback for all fragments', function (assert) {
+    class GlobalFragmentSerializer extends JSONSerializer {}
+    owner.register('serializer:-fragment', GlobalFragmentSerializer);
+
+    assert.ok(
+      store.serializerFor('name') instanceof GlobalFragmentSerializer,
+      'serializer:-fragment is used as the global fragment fallback',
     );
   });
 
@@ -101,6 +132,32 @@ module('unit - `DS.Store`', function (hooks) {
     assert.ok(
       store.serializerFor('-default') instanceof JSONSerializer,
       'default serializer can still be looked up',
+    );
+  });
+
+  test('pushPayload deserializes fragments end-to-end with the default REST application serializer', function (assert) {
+    // Sanity: with the default dummy app setup (FragmentRESTSerializer as
+    // application serializer, no per-fragment overrides), pushing a record
+    // with fragments should round-trip through the fragment transform
+    // pipeline using the bundled FragmentSerializer.
+    store.pushPayload('person', {
+      person: {
+        id: '42',
+        title: 'Lord',
+        name: { first: 'Eddard', last: 'Stark' },
+        addresses: [{ street: '1 Castle Black', city: 'Winterfell' }],
+      },
+    });
+
+    const person = store.peekRecord('person', 42);
+    assert.ok(person, 'person was pushed');
+    assert.ok(person.name instanceof Name, 'fragment is a Name');
+    assert.strictEqual(person.name.first, 'Eddard', 'fragment attr');
+    assert.strictEqual(person.addresses.length, 1, 'fragmentArray length');
+    assert.strictEqual(
+      person.addresses.objectAt(0).city,
+      'Winterfell',
+      'fragmentArray entry',
     );
   });
 

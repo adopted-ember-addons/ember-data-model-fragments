@@ -1,4 +1,5 @@
 import { assert } from '@ember/debug';
+import { getOwner } from '@ember/application';
 import Store from 'ember-data/store';
 import {
   macroCondition,
@@ -166,6 +167,119 @@ export default class FragmentStore extends Store {
 
     // Get the record instance
     return this._instanceCache.getRecord(identifier, props);
+  }
+
+  /**
+    Override `serializerFor` so fragment models never fall back to
+    `serializer:application`.
+
+    Why: a typical app's `serializer:application` is a REST or JSON:API
+    serializer that does not know how to normalize a raw fragment hash. In
+    particular, a JSON:API application serializer would trip the assert in
+    `FragmentTransform.deserializeSingle` and break fragment deserialization
+    on ember-data 4.12 (and any other path that runs the fragment transform
+    pipeline).
+
+    Resolution order for fragment model names:
+      1. `serializer:{modelName}` (if the app registered a per-fragment serializer)
+      2. `serializer:-fragment` (consumer-overridable global fragment serializer)
+      3. `serializer:-mf-fragment` (lazily-registered default `FragmentSerializer`,
+         which extends `JSONSerializer` and is what the fragment pipeline expects)
+
+    Non-fragment lookups defer to the parent `serializerFor`, preserving normal
+    app behavior (including `serializer:application` fallback).
+
+    Implementation note: in ember-data 5.x, `serializerFor` is defined on the
+    parent `Store` as a class-field arrow function, which is assigned per
+    instance during the parent constructor and would shadow any prototype-level
+    override declared on this subclass. To handle both shapes (class field on
+    5.x, prototype method on 4.12) we install the override in the constructor,
+    which runs after the parent constructor and therefore wins in either case.
+    The original `serializerFor` is captured and used for non-fragment lookups.
+
+    This restores the pre-4.13 behavior that was lost when the previous
+    `Store.reopen({ serializerFor })` from `addon/ext.js` was removed.
+
+    @method serializerFor
+    @param {String} modelName
+    @return {Serializer}
+    @public
+  */
+  constructor(...args) {
+    super(...args);
+
+    const parentSerializerFor =
+      typeof this.serializerFor === 'function'
+        ? this.serializerFor.bind(this)
+        : null;
+
+    this.serializerFor = (modelName) => {
+      if (typeof modelName === 'string' && this._isFragmentSafe(modelName)) {
+        return this._fragmentSerializerFor(modelName);
+      }
+      if (parentSerializerFor) {
+        return parentSerializerFor(modelName);
+      }
+      return null;
+    };
+  }
+
+  /**
+    Resolve a serializer for a fragment model name.
+
+    @private
+  */
+  _fragmentSerializerFor(modelName) {
+    const owner = getOwner(this);
+
+    // 1. Per-fragment-type serializer (e.g. app/serializers/name.js).
+    //    `owner.lookup('serializer:<name>')` returns `undefined` when no
+    //    registration / app file exists, so a non-undefined result means a
+    //    consumer actually provided one.
+    const perTypeKey = `serializer:${modelName}`;
+    let serializer = owner.lookup(perTypeKey);
+    if (serializer !== undefined) {
+      return serializer;
+    }
+
+    // 2. Consumer-provided global fragment serializer.
+    serializer = owner.lookup('serializer:-fragment');
+    if (serializer !== undefined) {
+      return serializer;
+    }
+
+    // 3. Lazily register and return our default FragmentSerializer.
+    //    This is JSON-based (not REST/JSON:API), which is what the fragment
+    //    pipeline expects.
+    const FALLBACK_KEY = 'serializer:-mf-fragment';
+    if (!owner.hasRegistration(FALLBACK_KEY)) {
+      const FragmentSerializer = importSync('./serializers/fragment').default;
+      owner.register(FALLBACK_KEY, FragmentSerializer);
+    }
+    return owner.lookup(FALLBACK_KEY);
+  }
+
+  /**
+    Like `isFragment`, but never throws for unknown model names. `serializerFor`
+    is called with synthetic names (e.g. `-default`, `application`, transform
+    types, etc.) so we can't let `modelFor` blow up.
+
+    @private
+  */
+  _isFragmentSafe(modelName) {
+    if (
+      !modelName ||
+      modelName === 'application' ||
+      modelName === '-default' ||
+      modelName.charAt(0) === '-'
+    ) {
+      return false;
+    }
+    try {
+      return this.isFragment(modelName);
+    } catch {
+      return false;
+    }
   }
 
   /**
