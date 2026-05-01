@@ -2,7 +2,7 @@
 
 ## Release (2026-04-30)
 
-* ember-data-model-fragments 8.0.0 (major)
+* ember-data-model-fragments 8.0.1 (major)
 
 #### :boom: Breaking Change
 * `ember-data-model-fragments`
