@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-05-04)
+
+* ember-data-model-fragments 8.0.2 (patch)
+
+#### :bug: Bug Fix
+* `ember-data-model-fragments`
+  * [#530](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/530) pnpm update ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### Committers: 1
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
 ## Release (2026-04-30)
 
 * ember-data-model-fragments 8.0.1 (major)
