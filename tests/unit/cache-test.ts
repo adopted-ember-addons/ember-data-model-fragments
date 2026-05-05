@@ -701,7 +701,7 @@ module('unit - Fragment Owner Tracking', function (hooks) {
     let person;
     try {
       person = store.createRecord('person', { name });
-    } catch (e) {
+    } catch (e: any) {
       assert.notOk(
         true,
         `createRecord with fragment instance threw: ${e.message}`,
@@ -756,7 +756,7 @@ module('unit - Fragment Owner Tracking', function (hooks) {
     let person;
     try {
       person = store.createRecord('person', { names: [name1, name2] });
-    } catch (e) {
+    } catch (e: any) {
       assert.notOk(
         true,
         `createRecord with fragment-array instances threw: ${e.message}`,
@@ -812,7 +812,10 @@ module('unit - Fragment Owner Tracking', function (hooks) {
     });
 
     assert.ok(person, 'person was created');
-    assert.ok(person.name instanceof MF.Fragment, 'fragment was instantiated');
+    assert.ok(
+      person.name instanceof (MF as any).Fragment,
+      'fragment was instantiated',
+    );
     assert.strictEqual(person.name.first, 'Arya', 'first preserved');
     assert.strictEqual(person.name.last, 'Stark', 'last preserved');
   });

@@ -2,9 +2,14 @@ import { isEmpty } from '@ember/utils';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentSerializer from '#src/serializer.ts';
+import Model, { attr } from '@ember-data/model';
+import FragmentSerializer, {
+  FragmentJSONAPISerializer,
+  FragmentRESTSerializer,
+} from '#src/serializer.ts';
+import Fragment from '#src/fragment.ts';
 import Person from '../../demo-app/models/person.ts';
-import { fragmentArray, array } from '#src/attributes/index.ts';
+import { fragment, fragmentArray, array } from '#src/attributes/index.ts';
 import Pretender from 'pretender';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import DS from 'ember-data';
@@ -412,12 +417,12 @@ module('unit - Serialization', function (hooks) {
     // `data.attributes` rather than at the top level alongside `data`.
 
     class Timestamps extends Fragment {
-      @attr('string') createdAt;
-      @attr('string') updatedAt;
+      @attr('string') declare createdAt: string;
+      @attr('string') declare updatedAt: string;
     }
 
     class FragmentOnly extends Model {
-      @fragment('timestamps') timestamps;
+      @fragment('timestamps') declare timestamps: any;
     }
 
     function registerFragmentOnly() {
@@ -514,9 +519,9 @@ module('unit - Serialization', function (hooks) {
       // Regression: the JSON:API attribute-hash logic must not be triggered
       // by a model that legitimately declares an @attr named `data`.
       class WithDataAttr extends Model {
-        @attr('string') name;
-        @attr() data;
-        @fragment('timestamps') timestamps;
+        @attr('string') declare name: string;
+        @attr() declare data: any;
+        @fragment('timestamps') declare timestamps: any;
       }
       owner.register('model:timestamps', Timestamps);
       owner.register('model:with-data-attr', WithDataAttr);

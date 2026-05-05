@@ -397,6 +397,7 @@ export default class FragmentCache {
         .attributesDefinitionFor(identifier);
 
       const fragmentData: Record<string, any> = {};
+      const fragmentInstanceData: Record<string, any> = {};
       const regularOptions: Record<string, any> = {};
       let hasFragmentData = false;
       let hasFragmentInstanceData = false;
