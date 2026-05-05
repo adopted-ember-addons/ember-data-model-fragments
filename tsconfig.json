@@ -1,0 +1,32 @@
+/**
+ * This tsconfig is not used for publishing.
+ * It's only for the local editing experience
+ * (and linting)
+ */
+{
+  "extends": "@ember/app-tsconfig",
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "unpublished-development-types/**/*",
+    "demo-app/**/*"
+  ],
+  "compilerOptions": {
+    "rootDir": ".",
+    "allowJs": true,
+    "checkJs": false,
+    "types": [
+      "ember-source/types",
+      "vite/client",
+      "@embroider/core/virtual",
+      "@glint/ember-tsc/types",
+      "@ember-data/store/unstable-preview-types",
+      "@ember-data/model/unstable-preview-types",
+      "@ember-data/serializer/unstable-preview-types",
+      "@ember-data/adapter/unstable-preview-types",
+      "@ember-data/json-api/unstable-preview-types",
+      "@ember-data/legacy-compat/unstable-preview-types",
+      "ember-data/unstable-preview-types"
+    ]
+  }
+}

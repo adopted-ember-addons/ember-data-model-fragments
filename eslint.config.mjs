@@ -12,48 +12,42 @@
  *     npx eslint --inspect-config
  *
  */
-import globals from 'globals';
+import babelParser from '@babel/eslint-parser/experimental-worker';
 import js from '@eslint/js';
-
+import { defineConfig, globalIgnores } from 'eslint/config';
+import prettier from 'eslint-config-prettier';
 import ember from 'eslint-plugin-ember/recommended';
-// import WarpDrive from 'eslint-plugin-warp-drive/recommended';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import qunit from 'eslint-plugin-qunit';
+import importPlugin from 'eslint-plugin-import';
 import n from 'eslint-plugin-n';
-
-import babelParser from '@babel/eslint-parser';
+import qunit from 'eslint-plugin-qunit';
+import globals from 'globals';
+import ts from 'typescript-eslint';
 
 const esmParserOptions = {
   ecmaFeatures: { modules: true },
   ecmaVersion: 'latest',
-  requireConfigFile: false,
-  babelOptions: {
-    plugins: [
-      ['@babel/plugin-proposal-decorators', { decoratorsBeforeExport: true }],
-    ],
-  },
 };
 
-export default [
+const tsParserOptions = {
+  projectService: true,
+  tsconfigRootDir: import.meta.dirname,
+};
+
+export default defineConfig([
+  globalIgnores([
+    'dist/',
+    'dist-*/',
+    'declarations/',
+    'node_modules/',
+    'coverage/',
+    'tmp/',
+    '!**/.*',
+  ]),
   js.configs.recommended,
-  eslintConfigPrettier,
+  prettier,
   ember.configs.base,
   ember.configs.gjs,
-  // ...WarpDrive,
-  /**
-   * Ignores must be in their own object
-   * https://eslint.org/docs/latest/use/configure/ignore
-   */
-  {
-    ignores: [
-      'dist/',
-      'node_modules/',
-      'coverage/',
-      '**/*.ts',
-      '!**/.*',
-      'blueprints/*/files/**/*.js',
-    ],
-  },
+  ember.configs.gts,
   /**
    * https://eslint.org/docs/latest/use/configure/configuration-files#configuring-linter-options
    */
@@ -78,34 +72,70 @@ export default [
     },
   },
   {
+    files: ['**/*.{ts,gts}'],
+    languageOptions: {
+      parser: ember.parser,
+      parserOptions: tsParserOptions,
+      globals: {
+        ...globals.browser,
+      },
+    },
+    extends: [
+      ...ts.configs.recommendedTypeChecked,
+      // https://github.com/ember-cli/ember-addon-blueprint/issues/119
+      {
+        ...ts.configs.eslintRecommended,
+        files: undefined,
+      },
+      ember.configs.gts,
+    ],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        { 'ts-nocheck': false, 'ts-expect-error': 'allow-with-description' },
+      ],
+    },
+  },
+  {
+    files: ['src/**/*'],
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      // require relative imports use full extensions
+      'import/extensions': ['error', 'always', { ignorePackages: true }],
+    },
+  },
+  {
     ...qunit.configs.recommended,
-    files: ['tests/**/*-test.{js,gjs}'],
+    files: ['tests/**/*-test.{js,gjs,ts,gts}'],
     plugins: {
       qunit,
     },
     rules: {
       'ember/no-runloop': 'off',
+      // Tests intentionally evaluate getter expressions to verify side effects.
+      '@typescript-eslint/no-unused-expressions': 'off',
+      // Tests pass async callbacks to expectAssertion etc. that don't await.
+      '@typescript-eslint/require-await': 'off',
     },
   },
   /**
    * CJS node files
    */
   {
-    ...n.configs['flat/recommended-script'],
-    files: [
-      '**/*.cjs',
-      'blueprints/**/*.js',
-      'config/**/*.js',
-      'lib/**/*.js',
-      'tests/dummy/config/**/*.js',
-      'testem.js',
-      'testem*.js',
-      'index.js',
-      '.prettierrc.js',
-      '.stylelintrc.js',
-      '.template-lintrc.js',
-      'ember-cli-build.js',
-    ],
+    files: ['**/*.cjs'],
     plugins: {
       n,
     },
@@ -122,7 +152,6 @@ export default [
    * ESM node files
    */
   {
-    ...n.configs['flat/recommended-module'],
     files: ['**/*.mjs'],
     plugins: {
       n,
@@ -137,4 +166,4 @@ export default [
       },
     },
   },
-];
+]);

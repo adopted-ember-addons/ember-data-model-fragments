@@ -1,0 +1,17 @@
+# Docs: https://pnpm.io/settings
+# https://github.com/emberjs/rfcs/pull/907
+
+packages:
+  - .
+
+# we don't want addons to be bad citizens of the ecosystem
+autoInstallPeers: false
+
+# we want true isolation,
+# if a dependency is not declared, we want an error
+resolvePeersFromWorkspaceRoot: false
+
+publicHoistPattern:
+  - ember-source
+  - '@warp-drive/legacy'
+  - '@ember-data/adapter'
