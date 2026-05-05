@@ -89,29 +89,6 @@ export default defineConfig([
       },
       ember.configs.gts,
     ],
-  },
-  {
-    files: ['src/**/*'],
-    plugins: {
-      import: importPlugin,
-    },
-    rules: {
-      // require relative imports use full extensions
-      'import/extensions': ['error', 'always', { ignorePackages: true }],
-    },
-  },
-  /**
-   * src/ TS files: disable type-checked unsafe-* rules globally for the source
-   * tree because ember-data internals are largely untyped, which makes nearly
-   * every interaction "unsafe" by typescript-eslint's strict standards. These
-   * can be re-enabled per-file as types are tightened.
-   */
-  {
-    files: [
-      'src/**/*.{ts,gts}',
-      'tests/**/*.{ts,gts}',
-      'demo-app/**/*.{ts,gts}',
-    ],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
@@ -128,6 +105,16 @@ export default defineConfig([
         'error',
         { 'ts-nocheck': false, 'ts-expect-error': 'allow-with-description' },
       ],
+    },
+  },
+  {
+    files: ['src/**/*'],
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      // require relative imports use full extensions
+      'import/extensions': ['error', 'always', { ignorePackages: true }],
     },
   },
   {
