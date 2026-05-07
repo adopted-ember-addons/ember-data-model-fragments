@@ -1,9 +1,7 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
+import { setupApplicationTest } from '../helpers/index.js';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentSerializer, {
-  FragmentRESTSerializer,
-} from 'ember-data-model-fragments/serializer';
+import FragmentSerializer, { FragmentRESTSerializer } from '#src/serializer.js';
 
 /*
   Tests for the mechanics of FragmentStore's `serializerFor` override.

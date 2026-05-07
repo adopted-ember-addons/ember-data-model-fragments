@@ -1,9 +1,10 @@
 import { module, test } from 'qunit';
-import { setupApplicationTest } from '../helpers';
-import { FragmentJSONAPISerializer } from 'ember-data-model-fragments/serializer';
-import FragmentSerializer from 'ember-data-model-fragments/serializer';
+import { setupApplicationTest } from '../helpers/index.js';
+import FragmentSerializer, {
+  FragmentJSONAPISerializer,
+} from '#src/serializer.js';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
-import Name from 'dummy/models/name';
+import Name from '../../demo-app/models/name.js';
 
 /*
   Regression test for: "JSON:API application-serializer fallback for fragments".

@@ -3,9 +3,13 @@ import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Model, { attr } from '@ember-data/model';
 import JSONSerializer from '@ember-data/serializer/json';
-import FragmentSerializer from '#src/serializer.js';
+import FragmentSerializer, {
+  FragmentJSONAPISerializer,
+  FragmentRESTSerializer,
+} from '#src/serializer.js';
+import Fragment from '#src/fragment.js';
 import Person from '../../demo-app/models/person.js';
-import { fragmentArray, array } from '#src/attributes/index.js';
+import { fragment, fragmentArray, array } from '#src/attributes/index.js';
 import Pretender from 'pretender';
 // eslint-disable-next-line ember/use-ember-data-rfc-395-imports
 import DS from 'ember-data';
