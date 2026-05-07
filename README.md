@@ -30,14 +30,6 @@ To install as an Ember CLI addon:
 $ ember install ember-data-model-fragments
 ```
 
-You may then start creating fragments with:
-
-```sh
-$ ember generate fragment foo someAttr:string anotherAttr:boolean
-```
-
-Which will create the module `app/models/foo.js` which exports a `Fragment` class with the given attributes.
-
 ## Setup
 
 This addon requires you to extend the provided `FragmentStore` and a fragment-aware serializer in your application.
