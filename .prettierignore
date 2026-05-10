@@ -3,6 +3,9 @@
 /dist-*/
 /declarations/
 
+# blueprint template files contain ERB-style placeholders (<%= ... %>)
+/blueprints/*/files/
+
 # misc
 /coverage/
 pnpm-lock.yaml

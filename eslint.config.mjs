@@ -109,4 +109,19 @@ export default defineConfig([
       },
     },
   },
+  /**
+   * Blueprint files: index.js is CJS (consumed by ember-cli at runtime in
+   * the host app), template files under blueprints/<name>/files/ are ESM
+   * fragments processed by the blueprint engine.
+   */
+  {
+    files: ['blueprints/*/index.js'],
+    languageOptions: {
+      sourceType: 'script',
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  globalIgnores(['blueprints/*/files/']),
 ]);
