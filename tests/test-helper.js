@@ -15,12 +15,29 @@ import '../demo-app/deprecation-workflow.js';
 import EmberApp from 'ember-strict-application-resolver';
 import EmberRouter from '@ember/routing/router';
 import PageTitleService from 'ember-page-title/services/page-title';
-import {
-  BooleanTransform,
-  DateTransform,
-  NumberTransform,
-  StringTransform,
-} from '@ember-data/serializer/transform';
+// ember-data 5.x exposes the built-in transforms as named exports from
+// `@ember-data/serializer/transform`. On 4.12 those named exports don't
+// exist; the legacy layout ships one default export per transform module.
+// Switch the import shape at build time so both branches stay tree-shakeable.
+let BooleanTransform, DateTransform, NumberTransform, StringTransform;
+if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
+  const transforms = importSync('@ember-data/serializer/transform');
+  BooleanTransform = transforms.BooleanTransform;
+  DateTransform = transforms.DateTransform;
+  NumberTransform = transforms.NumberTransform;
+  StringTransform = transforms.StringTransform;
+} else {
+  BooleanTransform = importSync(
+    '@ember-data/serializer/transforms/boolean',
+  ).default;
+  DateTransform = importSync('@ember-data/serializer/transforms/date').default;
+  NumberTransform = importSync(
+    '@ember-data/serializer/transforms/number',
+  ).default;
+  StringTransform = importSync(
+    '@ember-data/serializer/transforms/string',
+  ).default;
+}
 import FragmentTransform from '#src/transforms/fragment.js';
 import FragmentArrayTransform from '#src/transforms/fragment-array.js';
 import ArrayTransform from '#src/transforms/array.js';
