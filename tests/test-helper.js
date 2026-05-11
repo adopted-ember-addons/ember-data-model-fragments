@@ -16,27 +16,20 @@ import EmberApp from 'ember-strict-application-resolver';
 import EmberRouter from '@ember/routing/router';
 import PageTitleService from 'ember-page-title/services/page-title';
 // ember-data 5.x exposes the built-in transforms as named exports from
-// `@ember-data/serializer/transform`. On 4.12 those named exports don't
-// exist; the legacy layout ships one default export per transform module.
-// Switch the import shape at build time so both branches stay tree-shakeable.
-let BooleanTransform, DateTransform, NumberTransform, StringTransform;
+// `@ember-data/serializer/transform` and the strict resolver needs us to
+// register them explicitly. On 4.x they aren't shipped as importable
+// modules — `ember-data`'s initializer registers them onto the container
+// at boot, so we don't need to touch them here.
+let builtinTransformModules = {};
 if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
-  const transforms = importSync('@ember-data/serializer/transform');
-  BooleanTransform = transforms.BooleanTransform;
-  DateTransform = transforms.DateTransform;
-  NumberTransform = transforms.NumberTransform;
-  StringTransform = transforms.StringTransform;
-} else {
-  BooleanTransform = importSync(
-    '@ember-data/serializer/transforms/boolean',
-  ).default;
-  DateTransform = importSync('@ember-data/serializer/transforms/date').default;
-  NumberTransform = importSync(
-    '@ember-data/serializer/transforms/number',
-  ).default;
-  StringTransform = importSync(
-    '@ember-data/serializer/transforms/string',
-  ).default;
+  const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
+    importSync('@ember-data/serializer/transform');
+  builtinTransformModules = {
+    './transforms/boolean': BooleanTransform,
+    './transforms/date': DateTransform,
+    './transforms/number': NumberTransform,
+    './transforms/string': StringTransform,
+  };
 }
 import FragmentTransform from '#src/transforms/fragment.js';
 import FragmentArrayTransform from '#src/transforms/fragment-array.js';
@@ -68,10 +61,7 @@ class TestApp extends EmberApp {
   modules = {
     './router': Router,
     './services/page-title': PageTitleService,
-    './transforms/string': StringTransform,
-    './transforms/number': NumberTransform,
-    './transforms/boolean': BooleanTransform,
-    './transforms/date': DateTransform,
+    ...builtinTransformModules,
     './transforms/fragment': FragmentTransform,
     './transforms/fragment-array': FragmentArrayTransform,
     './transforms/array': ArrayTransform,
