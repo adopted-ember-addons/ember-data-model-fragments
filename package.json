@@ -54,10 +54,7 @@
   },
   "dependencies": {
     "@embroider/addon-shim": "^1.10.2",
-    "@embroider/macros": "^1.20.2",
-    "decorator-transforms": "^2.3.2",
-    "git-repo-info": "^2.1.1",
-    "npm-git-info": "^1.0.3"
+    "decorator-transforms": "^2.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
@@ -74,12 +71,12 @@
     "@embroider/addon-dev": "^8.3.0",
     "@embroider/compat": "^4.1.17",
     "@embroider/core": "^4.4.7",
+    "@embroider/macros": "^1.20.2",
     "@embroider/vite": "^1.7.2",
     "@eslint/js": "^9.39.4",
     "@glimmer/component": "^2.1.1",
     "@glimmer/env": "^0.1.7",
     "@rollup/plugin-babel": "^7.0.0",
-    "@rollup/plugin-replace": "^6.0.3",
     "@warp-drive/build-config": "~5.8.2",
     "@warp-drive/ember": "~5.8.2",
     "babel-plugin-ember-template-compilation": "^4.0.0",
@@ -108,7 +105,7 @@
     "rollup": "^4.60.3",
     "testem": "^3.20.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.11"
+    "vite": "^8.0.12"
   },
   "peerDependencies": {
     "@ember-data/json-api": ">= 4.12.0",

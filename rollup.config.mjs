@@ -1,12 +1,7 @@
 import { babel } from '@rollup/plugin-babel';
-import replace from '@rollup/plugin-replace';
 import { Addon } from '@embroider/addon-dev/rollup';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
-const calculateVersion = require('./lib/calculate-version.cjs');
 
 const addon = new Addon({
   srcDir: 'src',
@@ -42,15 +37,6 @@ export default {
     addon.appReexports(['transforms/**/*.js']),
 
     addon.dependencies(),
-
-    // Replace the version placeholder in src/version.js with the actual
-    // computed version (package.json version + optional git sha).
-    replace({
-      preventAssignment: true,
-      values: {
-        __EMBER_DATA_MODEL_FRAGMENTS_VERSION__: calculateVersion(),
-      },
-    }),
 
     babel({
       extensions: ['.js', '.gjs', '.ts', '.gts'],
