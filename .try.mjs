@@ -33,7 +33,9 @@ const compatDeps = {
   '@ember/optional-features': '^2.2.0',
 };
 
-// ember-data 4.12 needs the legacy peer on ember-inflector 4.x.
+// ember-data 4.12 needs the legacy peer on ember-inflector 4.x and the
+// separately-published `@ember/string` package (ember-source 5.x+ no
+// longer bundles it).
 const emberData412Deps = {
   'ember-data': '~4.12.0',
   '@ember-data/json-api': '~4.12.0',
@@ -41,6 +43,7 @@ const emberData412Deps = {
   '@ember-data/model': '~4.12.0',
   '@ember-data/serializer': '~4.12.0',
   '@ember-data/store': '~4.12.0',
+  '@ember/string': '^3.0.1',
   '@ember/test-waiters': '^3.1.0',
   'ember-inflector': '^4.0.3',
 };
@@ -52,6 +55,7 @@ const emberData413Deps = {
   '@ember-data/model': '~4.13.0-alpha.9',
   '@ember-data/serializer': '~4.13.0-alpha.9',
   '@ember-data/store': '~4.13.0-alpha.9',
+  '@ember/string': '^3.0.1',
   '@ember/test-waiters': '^3.1.0',
 };
 
