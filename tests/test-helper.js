@@ -15,22 +15,6 @@ import '../demo-app/deprecation-workflow.js';
 import EmberApp from 'ember-strict-application-resolver';
 import EmberRouter from '@ember/routing/router';
 import PageTitleService from 'ember-page-title/services/page-title';
-// ember-data 5.x exposes the built-in transforms as named exports from
-// `@ember-data/serializer/transform` and the strict resolver needs us to
-// register them explicitly. On 4.x they aren't shipped as importable
-// modules — `ember-data`'s initializer registers them onto the container
-// at boot, so we don't need to touch them here.
-let builtinTransformModules = {};
-if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
-  const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
-    importSync('@ember-data/serializer/transform');
-  builtinTransformModules = {
-    './transforms/boolean': BooleanTransform,
-    './transforms/date': DateTransform,
-    './transforms/number': NumberTransform,
-    './transforms/string': StringTransform,
-  };
-}
 import FragmentTransform from '#src/transforms/fragment.js';
 import FragmentArrayTransform from '#src/transforms/fragment-array.js';
 import ArrayTransform from '#src/transforms/array.js';
@@ -44,6 +28,32 @@ import { setup as setupCustomAssertions } from './helpers/assertion.js';
 class Router extends EmberRouter {
   location = 'none';
   rootURL = '/';
+}
+
+// ember-data 5.x exposes the built-in transforms as named exports from
+// `@ember-data/serializer/transform`. On 4.x they aren't shipped at that
+// public path; the addon re-exports them from `@ember-data/serializer/-private`
+// via `app/transforms/*` files, so we read them from there. Either way the
+// strict resolver needs them registered explicitly.
+let builtinTransformModules = {};
+if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
+  const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
+    importSync('@ember-data/serializer/transform');
+  builtinTransformModules = {
+    './transforms/boolean': BooleanTransform,
+    './transforms/date': DateTransform,
+    './transforms/number': NumberTransform,
+    './transforms/string': StringTransform,
+  };
+} else {
+  const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
+    importSync('@ember-data/serializer/-private');
+  builtinTransformModules = {
+    './transforms/boolean': BooleanTransform,
+    './transforms/date': DateTransform,
+    './transforms/number': NumberTransform,
+    './transforms/string': StringTransform,
+  };
 }
 
 // Map import.meta.glob keys (e.g. '../demo-app/models/lion.js') to the
