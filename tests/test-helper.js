@@ -1,15 +1,10 @@
 import {
-  macroCondition,
-  dependencySatisfies,
-  importSync,
-} from '@embroider/macros';
+  installWarpDriveEmber,
+  getBuiltinTransformModules,
+} from './helpers/ember-data-compat.js';
 
-// `@warp-drive/ember/install` reads `getOwnConfig().deprecations` from
-// `@warp-drive/build-config`, which only ships a macro-resolvable config on
-// ember-data >= 4.13. Guard the import so we still support ember-data 4.12.
-if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
-  importSync('@warp-drive/ember/install');
-}
+installWarpDriveEmber();
+
 import '../demo-app/deprecation-workflow.js';
 
 import EmberApp from 'ember-strict-application-resolver';
@@ -30,32 +25,7 @@ class Router extends EmberRouter {
   rootURL = '/';
 }
 
-// ember-data >= 4.13 (v2 addon shape) exposes the built-in transforms as
-// named exports from `@ember-data/serializer/transform`. ember-data 4.12 is
-// a v1 addon that doesn't ship them at any public ESM path — the addon
-// re-exports them from `@ember-data/serializer/-private` via
-// `app/transforms/*` files, so we read them from there. Either way the
-// strict resolver needs them registered explicitly.
-let builtinTransformModules = {};
-if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
-  const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
-    importSync('@ember-data/serializer/transform');
-  builtinTransformModules = {
-    './transforms/boolean': BooleanTransform,
-    './transforms/date': DateTransform,
-    './transforms/number': NumberTransform,
-    './transforms/string': StringTransform,
-  };
-} else {
-  const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
-    importSync('@ember-data/serializer/-private');
-  builtinTransformModules = {
-    './transforms/boolean': BooleanTransform,
-    './transforms/date': DateTransform,
-    './transforms/number': NumberTransform,
-    './transforms/string': StringTransform,
-  };
-}
+Router.map(function () {});
 
 // Map import.meta.glob keys (e.g. '../demo-app/models/lion.js') to the
 // strict-resolver expected key shape (e.g. './models/lion').
@@ -72,7 +42,7 @@ class TestApp extends EmberApp {
   modules = {
     './router': Router,
     './services/page-title': PageTitleService,
-    ...builtinTransformModules,
+    ...getBuiltinTransformModules(),
     './transforms/fragment': FragmentTransform,
     './transforms/fragment-array': FragmentArrayTransform,
     './transforms/array': ArrayTransform,
@@ -98,8 +68,6 @@ class TestApp extends EmberApp {
     ),
   };
 }
-
-Router.map(function () {});
 
 export function start() {
   setApplication(
