@@ -30,13 +30,14 @@ class Router extends EmberRouter {
   rootURL = '/';
 }
 
-// ember-data 5.x exposes the built-in transforms as named exports from
-// `@ember-data/serializer/transform`. On 4.x they aren't shipped at that
-// public path; the addon re-exports them from `@ember-data/serializer/-private`
-// via `app/transforms/*` files, so we read them from there. Either way the
+// ember-data >= 4.13 (v2 addon shape) exposes the built-in transforms as
+// named exports from `@ember-data/serializer/transform`. ember-data 4.12 is
+// a v1 addon that doesn't ship them at any public ESM path — the addon
+// re-exports them from `@ember-data/serializer/-private` via
+// `app/transforms/*` files, so we read them from there. Either way the
 // strict resolver needs them registered explicitly.
 let builtinTransformModules = {};
-if (macroCondition(dependencySatisfies('ember-data', '>=5.0.0'))) {
+if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
   const { BooleanTransform, DateTransform, NumberTransform, StringTransform } =
     importSync('@ember-data/serializer/transform');
   builtinTransformModules = {
