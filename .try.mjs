@@ -5,11 +5,7 @@
 // the v2 addon blueprint shape. We test against:
 //   - ember-source LTS 5.8 / 5.12 (require @embroider/compat shim)
 //   - ember-source LTS 6.4, latest, beta, alpha
-//   - ember-data 4.13 / 5.3 / 5.8 (declared peer range is >= 4.12)
-//
-// ember-data 4.12 is omitted because `tests/test-helper.js` imports
-// `@warp-drive/ember/install`, which depends on configuration only
-// emitted by `@warp-drive/build-config` shipped with ember-data >= 4.13.
+//   - ember-data 4.12 / 4.13 / 5.3 / 5.8 (declared peer range is >= 4.12)
 
 // When building this addon for older Ember versions we need to ship the
 // classic ember-cli build entry alongside @embroider/compat.
@@ -37,8 +33,18 @@ const compatDeps = {
   '@ember/optional-features': '^2.2.0',
 };
 
-// ember-data 4.13 (alpha) is the minimum ED that ships @warp-drive/build-config
-// with the macro-resolvable deprecations config our test-helper needs.
+// ember-data 4.12 needs the legacy peer on ember-inflector 4.x.
+const emberData412Deps = {
+  'ember-data': '~4.12.0',
+  '@ember-data/json-api': '~4.12.0',
+  '@ember-data/legacy-compat': '~4.12.0',
+  '@ember-data/model': '~4.12.0',
+  '@ember-data/serializer': '~4.12.0',
+  '@ember-data/store': '~4.12.0',
+  '@ember/test-waiters': '^3.1.0',
+  'ember-inflector': '^4.0.3',
+};
+
 const emberData413Deps = {
   'ember-data': '~4.13.0-alpha.9',
   '@ember-data/json-api': '~4.13.0-alpha.9',
@@ -77,7 +83,7 @@ export default {
       npm: {
         devDependencies: {
           'ember-source': '~5.8.0',
-          ...emberData413Deps,
+          ...emberData412Deps,
           ...compatDeps,
         },
       },
@@ -91,7 +97,7 @@ export default {
       npm: {
         devDependencies: {
           'ember-source': '~5.12.0',
-          ...emberData413Deps,
+          ...emberData412Deps,
           ...compatDeps,
         },
       },
@@ -131,6 +137,19 @@ export default {
           'ember-source': 'npm:ember-source@alpha',
         },
       },
+    },
+    {
+      name: 'ember-data-4.12',
+      npm: {
+        devDependencies: {
+          ...emberData412Deps,
+          ...compatDeps,
+        },
+      },
+      env: {
+        ENABLE_COMPAT_BUILD: true,
+      },
+      files: compatFiles,
     },
     {
       name: 'ember-data-4.13',

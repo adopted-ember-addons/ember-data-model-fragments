@@ -1,4 +1,15 @@
-import '@warp-drive/ember/install';
+import {
+  macroCondition,
+  dependencySatisfies,
+  importSync,
+} from '@embroider/macros';
+
+// `@warp-drive/ember/install` reads `getOwnConfig().deprecations` from
+// `@warp-drive/build-config`, which only ships a macro-resolvable config on
+// ember-data >= 4.13. Guard the import so we still support ember-data 4.12.
+if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
+  importSync('@warp-drive/ember/install');
+}
 import '../demo-app/deprecation-workflow.js';
 
 import EmberApp from 'ember-strict-application-resolver';
