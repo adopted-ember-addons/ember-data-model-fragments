@@ -6,6 +6,7 @@ packages:
 
 allowBuilds:
   esbuild: false
+  core-js: false
 
 # we don't want addons to be bad citizens of the ecosystem
 autoInstallPeers: false
