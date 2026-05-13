@@ -1,9 +1,5 @@
 import Model, { attr } from '@ember-data/model';
-import {
-  fragment,
-  fragmentArray,
-  array,
-} from 'ember-data-model-fragments/attributes';
+import { fragment, fragmentArray, array } from '#src/attributes/index.js';
 import { isArray } from '@ember/array';
 import EmberObject from '@ember/object';
 import { module, test } from 'qunit';

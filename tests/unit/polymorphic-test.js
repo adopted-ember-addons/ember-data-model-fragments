@@ -1,9 +1,9 @@
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Animal from 'dummy/models/animal';
-import Lion from 'dummy/models/lion';
-import Elephant from 'dummy/models/elephant';
-import ComponentOptionsText from 'dummy/models/component-options-text';
+import Animal from '../../demo-app/models/animal.js';
+import Lion from '../../demo-app/models/lion.js';
+import Elephant from '../../demo-app/models/elephant.js';
+import ComponentOptionsText from '../../demo-app/models/component-options-text.js';
 let store, zoo;
 
 module('unit - Polymorphism', function (hooks) {

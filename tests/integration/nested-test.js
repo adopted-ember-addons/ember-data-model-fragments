@@ -1,11 +1,11 @@
 import Model from '@ember-data/model';
-import { copy } from 'ember-data-model-fragments/util/copy';
+import { copy } from '#src/util/copy.js';
 import { schedule } from '@ember/runloop';
-import { fragment, fragmentArray } from 'ember-data-model-fragments/attributes';
+import { fragment, fragmentArray } from '#src/attributes/index.js';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
-import Order from 'dummy/models/order';
-import Product from 'dummy/models/product';
+import Order from '../../demo-app/models/order.js';
+import Product from '../../demo-app/models/product.js';
 import Pretender from 'pretender';
 
 let store, owner, server;
