@@ -11,6 +11,8 @@ allowBuilds:
 # we don't want addons to be bad citizens of the ecosystem
 autoInstallPeers: false
 
+minimumReleaseAge: 0
+
 # we want true isolation,
 # if a dependency is not declared, we want an error
 resolvePeersFromWorkspaceRoot: false

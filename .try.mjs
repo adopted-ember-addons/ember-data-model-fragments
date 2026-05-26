@@ -37,6 +37,7 @@ const compatDeps = {
 // separately-published `@ember/string` package (ember-source 5.x+ no
 // longer bundles it).
 const emberData412Deps = {
+  'ember-source': '~6.12.0',
   'ember-data': '~4.12.0',
   '@ember-data/json-api': '~4.12.0',
   '@ember-data/legacy-compat': '~4.12.0',
@@ -49,6 +50,7 @@ const emberData412Deps = {
 };
 
 const emberData413Deps = {
+  'ember-source': '~6.12.0',
   'ember-data': '~4.13.0-alpha.9',
   '@ember-data/json-api': '~4.13.0-alpha.9',
   '@ember-data/legacy-compat': '~4.13.0-alpha.9',
@@ -60,6 +62,7 @@ const emberData413Deps = {
 };
 
 const emberData53Deps = {
+  'ember-source': '~6.12.0',
   'ember-data': '~5.3.0',
   '@ember-data/json-api': '~5.3.0',
   '@ember-data/legacy-compat': '~5.3.0',

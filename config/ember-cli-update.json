@@ -3,11 +3,11 @@
   "projectName": "ember-data-model-fragments",
   "packages": [
     {
-      "name": "@embroider/addon-blueprint",
-      "version": "4.1.2",
+      "name": "@ember/addon-blueprint",
+      "version": "0.17.1",
       "blueprints": [
         {
-          "name": "@embroider/addon-blueprint",
+          "name": "@ember/addon-blueprint",
           "isBaseBlueprint": true,
           "options": ["--pnpm, --typescript"]
         }

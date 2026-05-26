@@ -1,5 +1,6 @@
 import Namespace from '@ember/application/namespace';
 import { importSync } from '@embroider/macros';
+import { version as VERSION } from '../package.json';
 import Fragment from './fragment.js';
 import FragmentArray from './array/fragment.js';
 import FragmentTransform from './transforms/fragment.js';
@@ -24,6 +25,7 @@ import FragmentSerializer, {
   @main ember-data-model-fragments
 */
 const MF = Namespace.create({
+  VERSION: VERSION,
   Fragment: Fragment,
   FragmentArray: FragmentArray,
   FragmentTransform: FragmentTransform,

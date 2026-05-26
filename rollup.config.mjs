@@ -1,4 +1,5 @@
 import { babel } from '@rollup/plugin-babel';
+import json from '@rollup/plugin-json';
 import { Addon } from '@embroider/addon-dev/rollup';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
@@ -37,6 +38,8 @@ export default {
     addon.appReexports(['transforms/**/*.js']),
 
     addon.dependencies(),
+
+    json(),
 
     babel({
       extensions: ['.js', '.gjs', '.ts', '.gts'],

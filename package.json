@@ -57,10 +57,10 @@
     "decorator-transforms": "^2.3.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/eslint-parser": "^7.28.6",
-    "@babel/plugin-proposal-decorators": "^7.29.0",
-    "@babel/runtime": "^7.29.2",
+    "@babel/core": "^7.29.7",
+    "@babel/eslint-parser": "^7.29.7",
+    "@babel/plugin-proposal-decorators": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
     "@ember-data/json-api": "~5.8.2",
     "@ember-data/legacy-compat": "~5.8.2",
     "@ember-data/model": "~5.8.2",
@@ -69,14 +69,15 @@
     "@ember/test-helpers": "^5.4.2",
     "@ember/test-waiters": "^4.1.1",
     "@embroider/addon-dev": "^8.3.0",
-    "@embroider/compat": "^4.1.17",
-    "@embroider/core": "^4.4.7",
-    "@embroider/macros": "^1.20.2",
-    "@embroider/vite": "^1.7.2",
+    "@embroider/compat": "^4.1.19",
+    "@embroider/core": "^4.5.0",
+    "@embroider/macros": "^1.20.3",
+    "@embroider/vite": "^1.7.4",
     "@eslint/js": "^9.39.4",
     "@glimmer/component": "^2.1.1",
     "@glimmer/env": "^0.1.7",
     "@rollup/plugin-babel": "^7.0.0",
+    "@rollup/plugin-json": "^6.1.0",
     "@warp-drive/build-config": "~5.8.2",
     "@warp-drive/ember": "~5.8.2",
     "babel-plugin-ember-template-compilation": "^4.0.0",
@@ -85,12 +86,12 @@
     "ember-data": "~5.8.2",
     "ember-page-title": "^9.0.3",
     "ember-qunit": "^9.0.4",
-    "ember-source": "^6.12.0",
+    "ember-source": "^7.0.0",
     "ember-strict-application-resolver": "^0.1.1",
     "ember-template-lint": "^7.9.3",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-ember": "^12.7.5",
+    "eslint-plugin-ember": "^13.3.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^18.0.1",
     "eslint-plugin-qunit": "^8.2.6",
@@ -98,14 +99,14 @@
     "pretender": "^3.4.7",
     "prettier": "^3.8.3",
     "prettier-plugin-ember-template-tag": "^2.1.6",
-    "publint": "^0.3.20",
+    "publint": "^0.3.21",
     "qunit": "^2.25.0",
     "qunit-dom": "^3.5.1",
     "release-plan": "^0.18.0",
-    "rollup": "^4.60.3",
+    "rollup": "^4.60.4",
     "testem": "^3.20.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.12"
+    "vite": "^8.0.14"
   },
   "peerDependencies": {
     "@ember-data/json-api": ">= 4.12.0",
@@ -116,17 +117,12 @@
     "ember-data": ">= 4.12.0",
     "ember-source": ">= 5.0.0"
   },
-  "packageManager": "pnpm@11.1.0+sha512.0c44e842e5686b2c061a81adda8b2258bd8818e9704b2cf2c63d56b931a7b2e910092e085027003b96ca3911ab56a07f6df5abaed2be9925034cdd686a535b14",
+  "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215",
   "engines": {
     "node": ">= 22.19"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "core-js"
-    ]
   },
   "ember": {
     "edition": "octane"
