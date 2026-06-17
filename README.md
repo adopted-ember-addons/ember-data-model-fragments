@@ -33,7 +33,7 @@ $ pnpm add ember-data-model-fragments
 You may then start creating fragments with:
 
 ```sh
-$ ember generate fragment foo someAttr:string anotherAttr:boolean
+ember generate fragment foo someAttr:string anotherAttr:boolean
 ```
 
 Which will create the module `app/models/foo.js` which exports a `Fragment` class with the given attributes.
@@ -728,6 +728,16 @@ Start the demo app dev server:
 ```sh
  pnpm start
 ```
+
+> TODO: Document the package's public API.
+>
+> For each public api (including components, helpers, modifiers, and other apis) include:
+>
+> - The import path for a consumer (e.g. `import MyAddonsComponent from 'my-addon/components/my-addons-component'`)
+> - What it does
+> - Parameters/options
+> - Return value
+> - Example usage
 
 ## Contributing
 

@@ -12,7 +12,7 @@
  *     npx eslint --inspect-config
  *
  */
-import babelParser from '@babel/eslint-parser/experimental-worker';
+import babelParser from '@babel/eslint-parser';
 import js from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettier from 'eslint-config-prettier';
@@ -33,8 +33,6 @@ export default defineConfig([
     'declarations/',
     'node_modules/',
     'coverage/',
-    'tmp/',
-    '**/*.ts',
     '!**/.*',
   ]),
   js.configs.recommended,

@@ -4,12 +4,14 @@
   "packages": [
     {
       "name": "@ember/addon-blueprint",
-      "version": "0.17.1",
+      "version": "0.18.0",
       "blueprints": [
         {
           "name": "@ember/addon-blueprint",
           "isBaseBlueprint": true,
-          "options": ["--pnpm, --typescript"]
+          "options": [
+            "--pnpm, --typescript"
+          ]
         }
       ]
     }
