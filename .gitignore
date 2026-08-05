@@ -6,6 +6,8 @@ declarations/
 
 # from scenarios
 tmp/
+config/optional-features.json
+ember-cli-build.cjs
 
 # npm/pnpm/yarn pack output
 *.tgz

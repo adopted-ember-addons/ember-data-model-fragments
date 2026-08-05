@@ -1,9 +1,8 @@
-'use strict';
-
-// Babel config used by rollup when building the addon for publishing.
-// Keep this minimal: do not transform ES modules (rollup needs them) and
-// do not apply presets that would compile away modern syntax that
-// consumers' build tools can handle.
+/**
+ * This babel.config is only used for publishing.
+ *
+ * For local dev experience, see the babel.config
+ */
 module.exports = {
   plugins: [
     [
@@ -16,7 +15,9 @@ module.exports = {
     [
       'module:decorator-transforms',
       {
-        runtime: { import: 'decorator-transforms/runtime-esm' },
+        runtime: {
+          import: 'decorator-transforms/runtime-esm',
+        },
       },
     ],
   ],

@@ -12,7 +12,7 @@ import { installCacheManagerCompat } from './util/fragment-cache.js';
 
 // Import side-effects to ensure monkey-patches are applied
 // These must be imported before any store instances are created
-import './ext'; // Applies Snapshot monkey-patch for fragment serialization
+import './ext.js'; // Applies Snapshot monkey-patch for fragment serialization
 
 /**
   FragmentStore is the base store class for ember-data-model-fragments.
