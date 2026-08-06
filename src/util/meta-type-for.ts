@@ -1,11 +1,11 @@
-import type { FragmentOptions } from '../-private/types.ts';
+import type { MetaTypeOptions } from '../-private/types.ts';
 
 // Create a unique type string for the combination of fragment property type,
 // transform type (or fragment model), and polymorphic type key
 export default function metaTypeFor(
   name: 'fragment' | 'fragment-array' | 'array',
   type?: string,
-  options?: FragmentOptions,
+  options?: MetaTypeOptions,
 ): string {
   let metaType = `-mf-${name}`;
 

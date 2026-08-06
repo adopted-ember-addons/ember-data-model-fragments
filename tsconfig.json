@@ -28,6 +28,12 @@
     "paths": {
       "ember-data": ["./node_modules/ember-data/unstable-preview-types"],
       "ember-data/*": ["./node_modules/ember-data/unstable-preview-types/*"],
+      "@ember-data/adapter": [
+        "./node_modules/@ember-data/adapter/unstable-preview-types"
+      ],
+      "@ember-data/adapter/*": [
+        "./node_modules/@ember-data/adapter/unstable-preview-types/*"
+      ],
       "@ember-data/model": [
         "./node_modules/@ember-data/model/unstable-preview-types"
       ],

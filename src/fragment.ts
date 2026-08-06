@@ -39,13 +39,21 @@ declare class FragmentClass extends Model {
   /**
     Compare two fragments by identity to allow `FragmentArray` to diff arrays.
 
+    The parameters are brand-typed rather than `Fragment`: ember-data types
+    `Model#eachAttribute`'s callback key against `keyof this`, so a `Fragment`
+    subclass that declares any attribute is not assignable to `Fragment`, and
+    `compare(myName, myOtherName)` would not type-check.
+
     @method compare
     @param {Fragment} f1 - The first fragment to compare
     @param {Fragment} f2 - The second fragment to compare
     @return {Integer} The result of the comparison (0 if equal, 1 if not)
     @public
   */
-  compare(f1: Fragment, f2: Fragment): number;
+  compare(
+    f1: Pick<Fragment, '_isFragment'>,
+    f2: Pick<Fragment, '_isFragment'>,
+  ): number;
 
   /**
     Create a new fragment that is a copy of the current fragment. Copied

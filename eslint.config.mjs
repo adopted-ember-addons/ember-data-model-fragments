@@ -33,6 +33,24 @@ const tsParserOptions = {
   tsconfigRootDir: import.meta.dirname,
 };
 
+/**
+ * The unsafe-`any` lint family, switched off.
+ *
+ * Both the addon internals and the test suite sit on ember-data API surfaces
+ * that ship no usable types, so `any` is load-bearing at those boundaries.
+ * See the individual blocks below for what each one is up against. Tighten
+ * incrementally as ember-data's types stabilize.
+ */
+const unsafeAnyRulesOff = {
+  '@typescript-eslint/no-explicit-any': 'off',
+  '@typescript-eslint/no-unsafe-argument': 'off',
+  '@typescript-eslint/no-unsafe-assignment': 'off',
+  '@typescript-eslint/no-unsafe-call': 'off',
+  '@typescript-eslint/no-unsafe-member-access': 'off',
+  '@typescript-eslint/no-unsafe-return': 'off',
+  '@typescript-eslint/unbound-method': 'off',
+};
+
 export default defineConfig([
   globalIgnores([
     'dist/',
@@ -103,29 +121,31 @@ export default defineConfig([
     /**
      * The addon integrates with ember-data by reaching into private API
      * (`store._instanceCache`, the cache manager, snapshot internals, ...)
-     * that has no published types, so the internals lean on `any` at those
-     * boundaries. Relax the unsafe-`any` lint family here; tighten
-     * incrementally as ember-data's types stabilize.
+     * that has no published types.
      */
     files: ['src/**/*.ts'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
+      ...unsafeAnyRulesOff,
+      // Several public classes are built with `EmberObject.extend()`, whose
+      // type surface is declared as an interface beside the runtime value.
       '@typescript-eslint/no-unsafe-declaration-merging': 'off',
-      '@typescript-eslint/unbound-method': 'off',
     },
   },
   {
     ...qunit.configs.recommended,
-    files: ['tests/**/*-test.{js,gjs}'],
+    files: ['tests/**/*-test.{js,gjs,ts,gts}'],
     plugins: {
       qunit,
     },
     rules: {
+      /**
+       * The suite drives ember-data through its legacy string-keyed API
+       * (`store.push`, `peekRecord`, `pushPayload`, ...), which resolves to
+       * `unknown` without a per-call-site model type argument, and asserts
+       * against private cache internals. The shared `store` / `owner` /
+       * record handles are therefore untyped.
+       */
+      ...unsafeAnyRulesOff,
       'ember/no-runloop': 'off',
     },
   },

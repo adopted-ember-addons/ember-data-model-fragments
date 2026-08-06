@@ -39,6 +39,7 @@ const compatDeps = {
 const emberData412Deps = {
   'ember-source': '~6.12.0',
   'ember-data': '~4.12.0',
+  '@ember-data/adapter': '~4.12.0',
   '@ember-data/json-api': '~4.12.0',
   '@ember-data/legacy-compat': '~4.12.0',
   '@ember-data/model': '~4.12.0',
@@ -52,6 +53,7 @@ const emberData412Deps = {
 const emberData413Deps = {
   'ember-source': '~6.12.0',
   'ember-data': '~4.13.0-alpha.9',
+  '@ember-data/adapter': '~4.13.0-alpha.9',
   '@ember-data/json-api': '~4.13.0-alpha.9',
   '@ember-data/legacy-compat': '~4.13.0-alpha.9',
   '@ember-data/model': '~4.13.0-alpha.9',
@@ -64,6 +66,7 @@ const emberData413Deps = {
 const emberData53Deps = {
   'ember-source': '~6.12.0',
   'ember-data': '~5.3.0',
+  '@ember-data/adapter': '~5.3.0',
   '@ember-data/json-api': '~5.3.0',
   '@ember-data/legacy-compat': '~5.3.0',
   '@ember-data/model': '~5.3.0',
@@ -74,6 +77,7 @@ const emberData53Deps = {
 
 const emberData58Deps = {
   'ember-data': '~5.8.0',
+  '@ember-data/adapter': '~5.8.0',
   '@ember-data/json-api': '~5.8.0',
   '@ember-data/legacy-compat': '~5.8.0',
   '@ember-data/model': '~5.8.0',

@@ -4,8 +4,15 @@
  * For local dev experience, see the babel.config
  */
 module.exports = {
-  presets: ['@babel/preset-typescript'],
   plugins: [
+    [
+      '@babel/plugin-transform-typescript',
+      {
+        allExtensions: true,
+        allowDeclareFields: true,
+        onlyRemoveTypeImports: true,
+      },
+    ],
     [
       'babel-plugin-ember-template-compilation',
       {

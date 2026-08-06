@@ -119,6 +119,10 @@ export interface StatefulArray<T = unknown>
 export interface StatefulArrayClass<Instance = StatefulArray> {
   create(props?: Record<string, unknown>): Instance;
   extend(...definitions: object[]): StatefulArrayClass<Instance>;
+  // `EmberObject.extend()` yields a constructor function, so `instanceof`
+  // works at runtime — declare it so consumers can narrow with it.
+  new (...args: any[]): Instance;
+  readonly prototype: Instance;
 }
 
 /**
