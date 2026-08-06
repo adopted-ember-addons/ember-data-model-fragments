@@ -1,5 +1,5 @@
-import Fragment from '#src/fragment.js';
-import { fragment } from '#src/attributes/index.js';
+import Fragment from '#src/fragment.ts';
+import { fragment } from '#src/attributes/index.ts';
 
 export default class Passenger extends Fragment {
   @fragment('name') name;

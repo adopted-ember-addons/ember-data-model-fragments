@@ -4,7 +4,7 @@ import { setupApplicationTest } from '../helpers';
 import Name from '../../demo-app/models/name.js';
 import JSONSerializer from '@ember-data/serializer/json';
 import Person from '../../demo-app/models/person.js';
-import { fragmentArray } from '#src/attributes/index.js';
+import { fragmentArray } from '#src/attributes/index.ts';
 
 let store, owner;
 

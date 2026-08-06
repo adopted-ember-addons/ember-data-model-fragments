@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import { recordIdentifierFor } from '@ember-data/store';
-import MF from '#src/index.js';
+import MF from '#src/index.ts';
 import Pretender from 'pretender';
 
 let store, owner, server;

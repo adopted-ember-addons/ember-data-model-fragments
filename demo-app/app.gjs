@@ -7,9 +7,9 @@ import {
   NumberTransform,
   StringTransform,
 } from '@ember-data/serializer/transform';
-import FragmentTransform from '#src/transforms/fragment.js';
-import FragmentArrayTransform from '#src/transforms/fragment-array.js';
-import ArrayTransform from '#src/transforms/array.js';
+import FragmentTransform from '#src/transforms/fragment.ts';
+import FragmentArrayTransform from '#src/transforms/fragment-array.ts';
+import ArrayTransform from '#src/transforms/array.ts';
 
 class Router extends EmberRouter {
   location = 'history';

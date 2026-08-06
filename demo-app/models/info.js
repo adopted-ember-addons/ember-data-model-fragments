@@ -1,6 +1,6 @@
-import Fragment from '#src/fragment.js';
+import Fragment from '#src/fragment.ts';
 import { attr } from '@ember-data/model';
-import { array } from '#src/attributes/index.js';
+import { array } from '#src/attributes/index.ts';
 
 export default class Info extends Fragment {
   @attr('string') name;

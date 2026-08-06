@@ -2,7 +2,6 @@
 dist/
 dist-tests/
 declarations/
-!declarations/**/*.d.ts
 
 # from scenarios
 tmp/

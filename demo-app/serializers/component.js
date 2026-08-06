@@ -1,4 +1,4 @@
-import { FragmentJSONAPISerializer } from '#src/serializer.js';
+import { FragmentJSONAPISerializer } from '#src/serializer.ts';
 
 export default class extends FragmentJSONAPISerializer {
   serialize(snapshot, ...args) {

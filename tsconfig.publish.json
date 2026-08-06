@@ -7,7 +7,6 @@
   "extends": "@ember/library-tsconfig",
   "include": ["./src/**/*", "./unpublished-development-types/**/*"],
   "compilerOptions": {
-    "allowJs": true,
     "declarationDir": "declarations",
 
     /**
@@ -22,6 +21,46 @@
     */
     "rootDir": "./src",
 
-    "types": ["ember-source/types", "@glint/ember-tsc/types"]
+    "types": ["ember-source/types", "@glint/ember-tsc/types"],
+
+    /**
+      ember-data 5.x publishes its types as "unstable preview types" that are
+      not wired up in package.json#exports, so they must be mapped manually.
+      Keep in sync with tsconfig.json.
+    */
+    "paths": {
+      "ember-data": ["./node_modules/ember-data/unstable-preview-types"],
+      "ember-data/*": ["./node_modules/ember-data/unstable-preview-types/*"],
+      "@ember-data/model": [
+        "./node_modules/@ember-data/model/unstable-preview-types"
+      ],
+      "@ember-data/model/*": [
+        "./node_modules/@ember-data/model/unstable-preview-types/*"
+      ],
+      "@ember-data/store": [
+        "./node_modules/@ember-data/store/unstable-preview-types"
+      ],
+      "@ember-data/store/*": [
+        "./node_modules/@ember-data/store/unstable-preview-types/*"
+      ],
+      "@ember-data/serializer": [
+        "./node_modules/@ember-data/serializer/unstable-preview-types"
+      ],
+      "@ember-data/serializer/*": [
+        "./node_modules/@ember-data/serializer/unstable-preview-types/*"
+      ],
+      "@ember-data/legacy-compat": [
+        "./node_modules/@ember-data/legacy-compat/unstable-preview-types"
+      ],
+      "@ember-data/legacy-compat/*": [
+        "./node_modules/@ember-data/legacy-compat/unstable-preview-types/*"
+      ],
+      "@ember-data/json-api": [
+        "./node_modules/@ember-data/json-api/unstable-preview-types"
+      ],
+      "@ember-data/json-api/*": [
+        "./node_modules/@ember-data/json-api/unstable-preview-types/*"
+      ]
+    }
   }
 }

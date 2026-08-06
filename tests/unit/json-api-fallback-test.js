@@ -2,7 +2,7 @@ import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.js';
 import FragmentSerializer, {
   FragmentJSONAPISerializer,
-} from '#src/serializer.js';
+} from '#src/serializer.ts';
 import JSONAPISerializer from '@ember-data/serializer/json-api';
 import Name from '../../demo-app/models/name.js';
 

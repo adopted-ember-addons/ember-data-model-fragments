@@ -1,10 +1,10 @@
 /* eslint-disable ember/no-observers */
 import Model, { attr } from '@ember-data/model';
-import { array } from '#src/attributes/index.js';
+import { array } from '#src/attributes/index.ts';
 import EmberObject, { observer } from '@ember/object';
 import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
-import { copy } from '#src/util/copy.js';
+import { copy } from '#src/util/copy.ts';
 import { module, test, skip } from 'qunit';
 import { setupApplicationTest } from '../helpers';
 import Pretender from 'pretender';

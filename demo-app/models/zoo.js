@@ -1,5 +1,5 @@
 import Model, { attr, belongsTo } from '@ember-data/model';
-import { fragment, fragmentArray } from '#src/attributes/index.js';
+import { fragment, fragmentArray } from '#src/attributes/index.ts';
 
 export default class Zoo extends Model {
   @attr('string') name;

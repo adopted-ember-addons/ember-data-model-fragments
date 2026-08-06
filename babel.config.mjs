@@ -23,6 +23,7 @@ const macros = buildMacros({
 const isCompat = Boolean(process.env.ENABLE_COMPAT_BUILD);
 
 export default {
+  presets: ['@babel/preset-typescript'],
   plugins: [
     [
       'babel-plugin-ember-template-compilation',

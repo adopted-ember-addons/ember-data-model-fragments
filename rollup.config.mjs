@@ -11,7 +11,7 @@ const addon = new Addon({
 
 const rootDirectory = dirname(fileURLToPath(import.meta.url));
 const babelConfig = resolve(rootDirectory, './babel.publish.config.cjs');
-// const tsConfig = resolve(rootDirectory, './tsconfig.publish.json');
+const tsConfig = resolve(rootDirectory, './tsconfig.publish.json');
 
 export default {
   // This provides defaults that work well alongside `publicEntrypoints` below.
@@ -72,10 +72,10 @@ export default {
     addon.gjs(),
 
     // Emit .d.ts declaration files
-    // addon.declarations(
-    //   'declarations',
-    //   `pnpm ember-tsc --declaration --project ${tsConfig}`,
-    // ),
+    addon.declarations(
+      'declarations',
+      `pnpm ember-tsc --declaration --project ${tsConfig}`,
+    ),
 
     // addons are allowed to contain imports of .css files, which we want rollup
     // to leave alone and keep in the published output.

@@ -1,5 +1,5 @@
 import Model from '@ember-data/model';
-import { fragmentOwner } from '#src/attributes/index.js';
+import { fragmentOwner } from '#src/attributes/index.ts';
 import { all } from 'rsvp';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers';
