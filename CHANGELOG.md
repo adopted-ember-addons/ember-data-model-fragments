@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2026-08-15)
+
+* ember-data-model-fragments 9.0.0 (major)
+
+#### :boom: Breaking Change
+* `ember-data-model-fragments`
+  * [#534](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/534) Convert to a v2 addon ([@aklkv](https://github.com/aklkv))
+
+#### :house: Internal
+* `ember-data-model-fragments`
+  * [#537](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/537) fix: push-dist CI ([@aklkv](https://github.com/aklkv))
+
+#### Committers: 1
+- Alexey Kulakov ([@aklkv](https://github.com/aklkv))
+
 ## Release (2026-05-04)
 
 * ember-data-model-fragments 8.0.2 (patch)

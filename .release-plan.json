@@ -1,18 +1,22 @@
 {
   "solution": {
     "ember-data-model-fragments": {
-      "impact": "patch",
-      "oldVersion": "8.0.1",
-      "newVersion": "8.0.2",
+      "impact": "major",
+      "oldVersion": "8.0.2",
+      "newVersion": "9.0.0",
       "tagName": "latest",
       "constraints": [
         {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        },
+        {
           "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./package.json"
     }
   },
-  "description": "## Release (2026-05-04)\n\n* ember-data-model-fragments 8.0.2 (patch)\n\n#### :bug: Bug Fix\n* `ember-data-model-fragments`\n  * [#530](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/530) pnpm update ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### Committers: 1\n- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n"
+  "description": "## Release (2026-08-15)\n\n* ember-data-model-fragments 9.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-data-model-fragments`\n  * [#534](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/534) Convert to a v2 addon ([@aklkv](https://github.com/aklkv))\n\n#### :house: Internal\n* `ember-data-model-fragments`\n  * [#537](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/537) fix: push-dist CI ([@aklkv](https://github.com/aklkv))\n\n#### Committers: 1\n- Alexey Kulakov ([@aklkv](https://github.com/aklkv))\n"
 }
