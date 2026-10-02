@@ -309,6 +309,32 @@ module('integration - Persistence', function (hooks) {
     assert.ok(!person.hasDirtyAttributes, 'owner record is clean');
   });
 
+  test('saved fragments have no changed attributes', async function (this: TestContext, assert: Assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Eddard',
+            last: 'Stark',
+          },
+        },
+      },
+    });
+
+    server.put('/people/1', () => {
+      return [200, { 'Content-Type': 'application/json' }, '{}'];
+    });
+
+    const person = await store.findRecord('person', 1);
+
+    person.name.set('first', 'Arya');
+    await person.save();
+
+    assert.deepEqual(person.name.changedAttributes(), {});
+  });
+
   test('persisting a new owner record moves the owner record, fragment array, and all fragments into clean state', async function (this: TestContext, assert: Assert) {
     const data = {
       name: {
