@@ -158,8 +158,21 @@ export function fragmentSerialize(
   const attributes = serializedAttributesHash(serializer, snapshot, payload);
   const modelClass = serializer.store.modelFor(snapshot.modelName);
 
+  // On ember-data 4.12 `eachAttribute` includes fragments, so the base
+  // serializer has already serialized them
+  const serializedByBase = new Set<string>();
+  snapshot.eachAttribute((key: string) => serializedByBase.add(key));
+
   modelClass.eachComputedProperty((key: string, meta: any) => {
-    if (!isFragmentAttribute(meta)) {
+    if (!isFragmentAttribute(meta) || serializedByBase.has(key)) {
+      return;
+    }
+
+    // Honor `attrs`, as serializeAttribute does
+    if (
+      typeof serializer._canSerialize === 'function' &&
+      !serializer._canSerialize(key)
+    ) {
       return;
     }
 
@@ -169,7 +182,10 @@ export function fragmentSerialize(
       return;
     }
 
-    const attributeKey = serializer.keyForAttribute(key, 'serialize');
+    let attributeKey = serializer._getMappedKey?.(key, modelClass) ?? key;
+    if (attributeKey === key) {
+      attributeKey = serializer.keyForAttribute(key, 'serialize');
+    }
     const transform = serializer.transformFor(meta.type);
 
     attributes[attributeKey] = transform.serialize(

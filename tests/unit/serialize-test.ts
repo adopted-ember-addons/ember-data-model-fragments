@@ -546,6 +546,86 @@ module('unit - Serialization', function (hooks) {
       );
     });
 
+    test('fragment serializers skip fragments with `serialize: false` in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: { serialize: false } };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const serialized = store.peekRecord('fragment-only', '1').serialize();
+
+      assert.notOk('timestamps' in serialized);
+    });
+
+    test('fragment serializers use keys mapped in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: 'times' };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const serialized = store.peekRecord('fragment-only', '1').serialize();
+
+      assert.deepEqual(serialized.times, { createdAt: 'a', updatedAt: 'b' });
+      assert.notOk('timestamps' in serialized);
+    });
+
+    test('fragment serializers serialize each fragment once', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register('serializer:fragment-only', FragmentRESTSerializer);
+
+      let count = 0;
+
+      owner.register(
+        'serializer:timestamps',
+        class extends JSONSerializer {
+          serialize(snapshot: any, options: any) {
+            count++;
+            return super.serialize(snapshot, options);
+          }
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      store.peekRecord('fragment-only', '1').serialize();
+
+      assert.strictEqual(count, 1);
+    });
+
     test('REST/JSON serializers do not treat a top-level `data` @attr as a JSON:API envelope', function (this: TestContext, assert: Assert) {
       // Regression: the JSON:API attribute-hash logic must not be triggered
       // by a model that legitimately declares an @attr named `data`.
