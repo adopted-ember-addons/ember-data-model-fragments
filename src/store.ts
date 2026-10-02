@@ -80,7 +80,7 @@ export default class FragmentStore extends Store {
     if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
       const { buildSchema } = importSync('@ember-data/model/hooks') as any;
 
-      const FragmentSchemaService = (importSync('./schema-service.ts') as any)
+      const FragmentSchemaService = (importSync('./schema-service.js') as any)
         .default;
 
       return new FragmentSchemaService(this, buildSchema(this));
@@ -259,7 +259,7 @@ export default class FragmentStore extends Store {
     const FALLBACK_KEY = 'serializer:-mf-fragment';
     if (!owner.hasRegistration(FALLBACK_KEY)) {
       const FragmentSerializer = (
-        importSync('./serializers/fragment.ts') as any
+        importSync('./serializers/fragment.js') as any
       ).default;
       owner.register(FALLBACK_KEY, FragmentSerializer);
     }
