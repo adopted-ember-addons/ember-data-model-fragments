@@ -356,6 +356,35 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
+  test('fragment properties are normalized using their own serializers', function (this: TestContext, assert: Assert) {
+    class Dimensions extends Fragment {
+      @attr('number') declare widthInCm: number;
+    }
+
+    class Shipment extends Model {
+      @fragment('dimensions') declare dimensions: Dimensions;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    owner.register('model:dimensions', Dimensions);
+    owner.register('model:shipment', Shipment);
+    owner.register('serializer:-fragment', UnderscoredSerializer);
+
+    store.pushPayload('shipment', {
+      shipment: { id: 1, dimensions: { width_in_cm: 10 } },
+    });
+
+    assert.strictEqual(
+      store.peekRecord('shipment', 1).dimensions.widthInCm,
+      10,
+    );
+  });
+
   test('array properties use the specified transform to normalize data', function (this: TestContext, assert: Assert) {
     const values = [1, 0, true, false, 'true', ''];
 

@@ -64,9 +64,12 @@ export function fragmentApplyTransforms(
   data: any,
 ): any {
   const attributes = typeClass.attributes;
+  const transformed = new Set<string>();
 
   // Handle regular @attr transforms
   typeClass.eachTransformedAttribute((key: string, attrType: string) => {
+    transformed.add(key);
+
     if (data[key] === undefined) {
       return;
     }
@@ -76,12 +79,20 @@ export function fragmentApplyTransforms(
     data[key] = transform.deserialize(data[key], transformMeta.options, data);
   });
 
-  // Also handle @array computed properties with transforms
-  // These are not in eachTransformedAttribute because they're computed properties,
-  // not regular @attr attributes
+  // Also handle fragment and @array computed properties with transforms.
+  // ember-data 4.13+ leaves them out of eachTransformedAttribute; on 4.12
+  // they're already transformed above
   typeClass.eachComputedProperty((key: string, meta: any) => {
-    if (data[key] === undefined) {
+    if (data[key] === undefined || transformed.has(key)) {
       return;
+    }
+
+    if (
+      meta?.isFragment &&
+      (meta.kind === 'fragment' || meta.kind === 'fragment-array')
+    ) {
+      const transform = serializer.transformFor(meta.type);
+      data[key] = transform.deserialize(data[key], meta.options, data);
     }
 
     // Only handle @array attributes that have a transform type (arrayTransform)
