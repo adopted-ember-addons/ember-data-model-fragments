@@ -1480,7 +1480,12 @@ export default class FragmentStateManager {
     // them deleted, but here we want to transition them to saved state.)
     innerCache.upsert(identifier, { attributes: commitAttrs }, false);
 
-    // Rollback the inner cache to clear dirty/in-flight tracking
+    // Rollback the inner cache to clear dirty/in-flight tracking. It only
+    // resets `changes` when there are local attrs, so reset them here.
+    const cached = innerCache.__peek?.(identifier, false);
+    if (cached) {
+      cached.changes = null;
+    }
     innerCache.rollbackAttrs(identifier);
 
     // Re-apply any new dirty changes made during in-flight
