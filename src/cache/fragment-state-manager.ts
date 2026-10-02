@@ -526,6 +526,14 @@ export default class FragmentStateManager {
     return this.store._instanceCache.getRecord(identifier, properties);
   }
 
+  _peekRecord(identifier: FragmentIdentifier): any {
+    if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
+      return this.store._instanceCache.peek(identifier);
+    }
+
+    return this.store._instanceCache.peek({ identifier, bucket: 'record' });
+  }
+
   _getBehaviors(identifier: FragmentIdentifier): Record<string, Behavior> {
     let behaviors = this.__behaviors.get(identifier.lid);
     if (behaviors) {
@@ -1336,7 +1344,9 @@ export default class FragmentStateManager {
       // the record can trip mutation-after-consumption assertions during initial render.
       if (key) {
         try {
-          const record = this.store._instanceCache.getRecord(identifier);
+          // Only notify an existing record; getRecord would build a duplicate
+          // while the fragment is still being created
+          const record = this._peekRecord(identifier);
           if (record && typeof record.notifyPropertyChange === 'function') {
             record.notifyPropertyChange(key);
             // Also clear any cached value by directly removing from Ember's cache
@@ -1470,7 +1480,12 @@ export default class FragmentStateManager {
     // them deleted, but here we want to transition them to saved state.)
     innerCache.upsert(identifier, { attributes: commitAttrs }, false);
 
-    // Rollback the inner cache to clear dirty/in-flight tracking
+    // Rollback the inner cache to clear dirty/in-flight tracking. It only
+    // resets `changes` when there are local attrs, so reset them here.
+    const cached = innerCache.__peek?.(identifier, false);
+    if (cached) {
+      cached.changes = null;
+    }
     innerCache.rollbackAttrs(identifier);
 
     // Re-apply any new dirty changes made during in-flight

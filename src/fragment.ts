@@ -154,39 +154,9 @@ const Fragment = Model.extend(Comparable, {
       .attributesDefinitionFor(identifier);
 
     // Loop over each attribute and copy individually to ensure nested fragments
-    // are also copied. For fragment attributes, we need to serialize to raw data
-    // since createFragment expects raw data, not fragment instances.
+    // are also copied, as instances that createFragment adopts.
     for (const name of Object.keys(schemaService)) {
-      const value = get(this, name);
-      const definition = schemaService[name];
-      const isFragmentAttr =
-        definition?.isFragment || definition?.options?.isFragment;
-
-      if (isFragmentAttr) {
-        // For fragment attributes, serialize to get raw data that can be used to create new fragments
-        if (value === null || value === undefined) {
-          props[name] = value;
-        } else if (typeof value.serialize === 'function') {
-          // Single fragment - serialize it
-          props[name] = value.serialize();
-        } else if (
-          Array.isArray(value) ||
-          typeof value.toArray === 'function'
-        ) {
-          // Fragment array or array - serialize each element
-          const arr =
-            typeof value.toArray === 'function' ? value.toArray() : value;
-          props[name] = arr.map((item: any) =>
-            typeof item.serialize === 'function' ? item.serialize() : item,
-          );
-        } else {
-          // Fallback - use as-is
-          props[name] = value;
-        }
-      } else {
-        // Regular attribute - just copy the value
-        props[name] = copy(value);
-      }
+      props[name] = copy(get(this, name));
     }
 
     return this.store.createFragment(modelName, props);

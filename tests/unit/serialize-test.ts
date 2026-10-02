@@ -214,6 +214,33 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
+  test('copying a fragment keeps nested attributes when the serializer maps keys', function (this: TestContext, assert: Assert) {
+    class Dimensions extends Fragment {
+      @attr('number') declare widthInCm: number;
+    }
+
+    class Parcel extends Fragment {
+      @fragment('dimensions') declare dimensions: Dimensions;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    owner.register('model:dimensions', Dimensions);
+    owner.register('model:parcel', Parcel);
+    owner.register('serializer:-fragment', UnderscoredSerializer);
+
+    const parcel = store.createFragment('parcel', {
+      dimensions: { widthInCm: 10 },
+    });
+    const copy = parcel.copy() as Parcel;
+
+    assert.strictEqual(copy.dimensions.widthInCm, 10);
+  });
+
   test('serializing a fragment array creates a new array with contents the result of serializing each fragment', async function (this: TestContext, assert: Assert) {
     const names = [
       {
@@ -326,6 +353,35 @@ module('unit - Serialization', function (hooks) {
       serialized.children,
       null,
       '`array property values can be null',
+    );
+  });
+
+  test('fragment properties are normalized using their own serializers', function (this: TestContext, assert: Assert) {
+    class Dimensions extends Fragment {
+      @attr('number') declare widthInCm: number;
+    }
+
+    class Shipment extends Model {
+      @fragment('dimensions') declare dimensions: Dimensions;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    owner.register('model:dimensions', Dimensions);
+    owner.register('model:shipment', Shipment);
+    owner.register('serializer:-fragment', UnderscoredSerializer);
+
+    store.pushPayload('shipment', {
+      shipment: { id: 1, dimensions: { width_in_cm: 10 } },
+    });
+
+    assert.strictEqual(
+      store.peekRecord('shipment', 1).dimensions.widthInCm,
+      10,
     );
   });
 
@@ -517,6 +573,86 @@ module('unit - Serialization', function (hooks) {
         { createdAt: 'a', updatedAt: 'b' },
         'fragment is included in the serialized JSON payload',
       );
+    });
+
+    test('fragment serializers skip fragments with `serialize: false` in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: { serialize: false } };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const serialized = store.peekRecord('fragment-only', '1').serialize();
+
+      assert.notOk('timestamps' in serialized);
+    });
+
+    test('fragment serializers use keys mapped in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: 'times' };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const serialized = store.peekRecord('fragment-only', '1').serialize();
+
+      assert.deepEqual(serialized.times, { createdAt: 'a', updatedAt: 'b' });
+      assert.notOk('timestamps' in serialized);
+    });
+
+    test('fragment serializers serialize each fragment once', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register('serializer:fragment-only', FragmentRESTSerializer);
+
+      let count = 0;
+
+      owner.register(
+        'serializer:timestamps',
+        class extends JSONSerializer {
+          serialize(snapshot: any, options: any) {
+            count++;
+            return super.serialize(snapshot, options);
+          }
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      store.peekRecord('fragment-only', '1').serialize();
+
+      assert.strictEqual(count, 1);
     });
 
     test('REST/JSON serializers do not treat a top-level `data` @attr as a JSON:API envelope', function (this: TestContext, assert: Assert) {

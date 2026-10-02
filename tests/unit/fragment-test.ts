@@ -1,5 +1,7 @@
 import { Comparable } from '@ember/-internals/runtime';
+import { attr } from '@ember-data/model';
 import { module, test } from 'qunit';
+import Fragment from '#src/fragment.ts';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
 import Pretender from 'pretender';
@@ -69,6 +71,20 @@ module('unit - `MF.Fragment`', function (hooks) {
 
     assert.ok(copy.first, 'Jon');
     assert.ok(copy.last, 'Snow');
+  });
+
+  test('copying a fragment copies its Date properties', function (this: TestContext, assert: Assert) {
+    class Event extends Fragment {
+      @attr('date') declare startsAt: Date;
+    }
+
+    this.owner.register('model:event', Event);
+
+    const startsAt = new Date('2024-01-02T03:04:05Z');
+    const copy = store.createFragment('event', { startsAt }).copy() as Event;
+
+    assert.deepEqual(copy.startsAt, startsAt, 'the copy has the same date');
+    assert.notStrictEqual(copy.startsAt, startsAt, 'in a new Date');
   });
 
   test('fragments are `Comparable`', function (this: TestContext, assert: Assert) {
