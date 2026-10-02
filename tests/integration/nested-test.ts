@@ -296,6 +296,27 @@ module('integration - Nested fragments', function (hooks) {
     );
   });
 
+  test('Fragments created from fragment instances are built once', function (this: TestContext, assert: Assert) {
+    const prefixes = [
+      store.createFragment('prefix', { name: 'Lord' }),
+      store.createFragment('prefix', { name: 'Ser' }),
+    ];
+
+    const instantiateRecord = store.instantiateRecord.bind(store);
+    let count = 0;
+
+    store.instantiateRecord = (
+      ...args: Parameters<typeof instantiateRecord>
+    ) => {
+      count++;
+      return instantiateRecord(...args);
+    };
+
+    store.createFragment('name', { first: 'Jon', prefixes });
+
+    assert.strictEqual(count, 1, 'only the name is built');
+  });
+
   test('Nested fragments are destroyed when the owner record is destroyed', async function (this: TestContext, assert: Assert) {
     store.push({
       data: {
