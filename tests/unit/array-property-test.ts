@@ -74,6 +74,35 @@ module('unit - `MF.array` property', function (hooks) {
     );
   });
 
+  test('copying an array copies every item the same way', function (this: TestContext, assert: Assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          children: [
+            { name: 'Joffrey', houses: ['Baratheon', 'Lannister'] },
+            { name: 'Myrcella', houses: ['Baratheon', 'Lannister'] },
+          ],
+        },
+      },
+    });
+
+    const children = store.peekRecord('person', 1).children;
+    const copy = children.copy();
+
+    copy.forEach((child: any, index: number) => {
+      const original = children.objectAt(index);
+
+      assert.notStrictEqual(child, original, `item ${index} is a new object`);
+      assert.strictEqual(
+        child.houses,
+        original.houses,
+        `item ${index} is a shallow copy`,
+      );
+    });
+  });
+
   test('null values are allowed', async function (this: TestContext, assert: Assert) {
     store.push({
       data: {
