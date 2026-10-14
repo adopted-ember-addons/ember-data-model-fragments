@@ -1,4 +1,5 @@
-import { Comparable } from '@ember/-internals/runtime';
+import { compare } from '@ember/utils';
+import { getDeprecations } from '@ember/test-helpers';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
@@ -71,10 +72,32 @@ module('unit - `MF.Fragment`', function (hooks) {
     assert.ok(copy.last, 'Snow');
   });
 
-  test('fragments are `Comparable`', function (this: TestContext, assert: Assert) {
-    const fragment = store.createFragment('name');
+  test('fragments are compared by reference with `compare` from `@ember/utils`', function (this: TestContext, assert: Assert) {
+    const fragment1 = store.createFragment('name', {
+      first: 'Jon',
+      last: 'Arryn',
+    });
+    const fragment2 = store.createFragment('name', {
+      first: 'Jon',
+      last: 'Arryn',
+    });
 
-    assert.ok(Comparable.detect(fragment), 'fragments are comparable');
+    assert.notStrictEqual(
+      compare(fragment1, fragment2),
+      0,
+      'deeply equal objects are not the same',
+    );
+    assert.strictEqual(
+      compare(fragment1, fragment1),
+      0,
+      'identical objects are the same',
+    );
+  });
+
+  test('creating a fragment causes no deprecations', function (this: TestContext, assert: Assert) {
+    store.createFragment('name');
+
+    assert.deepEqual(getDeprecations(), [], 'expected no deprecations');
   });
 
   test('fragments support toString', function (this: TestContext, assert: Assert) {

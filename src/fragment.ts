@@ -3,7 +3,12 @@
 // eslint-disable-next-line ember/no-computed-properties-in-native-classes
 import { get, computed } from '@ember/object';
 import { isDestroying, isDestroyed } from '@ember/destroyable';
-import { Comparable } from '@ember/-internals/runtime';
+import type Mixin from '@ember/object/mixin';
+import {
+  dependencySatisfies,
+  importSync,
+  macroCondition,
+} from '@embroider/macros';
 // DS.Model gets munged to add fragment support, which must be included first
 import { Model } from './ext.ts';
 import { copy } from './util/copy.ts';
@@ -131,12 +136,22 @@ declare class FragmentClass extends Model {
   @class Fragment
   @namespace MF
   @extends Model
-  @uses Comparable
   @public
 */
-// Note: We use Model.extend() with Comparable mixin for now
-// as mixins are being phased out but still work in ember-data 4.12+
-const Fragment = Model.extend(Comparable, {
+// Before ember-source 7.3, `compare` from `@ember/utils` only calls the
+// `compare` method of objects that use the `Comparable` mixin. From 7.3 it
+// calls any `compare` method and the mixin is deprecated, and from 7.5
+// applying the mixin throws. So apply it only where `compare` still needs it.
+const comparableMixins: Mixin[] = macroCondition(
+  dependencySatisfies('ember-source', '<7.3.0'),
+)
+  ? [
+      (importSync('@ember/-internals/runtime') as { Comparable: Mixin })
+        .Comparable,
+    ]
+  : [];
+
+const Fragment = Model.extend(...comparableMixins, {
   compare(f1: Fragment, f2: Fragment) {
     return f1 === f2 ? 0 : 1;
   },
