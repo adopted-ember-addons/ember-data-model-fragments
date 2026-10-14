@@ -25,6 +25,10 @@
     },
     "./addon-main.js": "./addon-main.cjs",
     "./*.css": "./dist/*.css",
+    "./attributes": {
+      "types": "./declarations/attributes/index.d.ts",
+      "default": "./dist/attributes/index.js"
+    },
     "./*": {
       "types": "./declarations/*.d.ts",
       "default": "./dist/*.js"

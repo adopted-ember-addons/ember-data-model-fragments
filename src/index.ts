@@ -60,7 +60,7 @@ const MF = Namespace.create({
 
 Object.defineProperty(MF, 'FragmentSchemaService', {
   get() {
-    return (importSync('./schema-service.ts') as any).default;
+    return (importSync('./schema-service.js') as any).default;
   },
 });
 
