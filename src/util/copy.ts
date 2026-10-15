@@ -8,6 +8,10 @@ export function copy<T>(value: T, deep = false): T {
     return copyable.copy(deep);
   }
 
+  if (value instanceof Date) {
+    return new Date(value.getTime()) as T;
+  }
+
   if (deep) {
     return structuredClone(value);
   }
