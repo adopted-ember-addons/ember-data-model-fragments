@@ -93,9 +93,10 @@ export default {
       name: 'ember-lts-5.8',
       npm: {
         devDependencies: {
-          'ember-source': '~5.8.0',
           ...emberData412Deps,
           ...compatDeps,
+          // After the spreads, so it overrides emberData412Deps' ember-source.
+          'ember-source': '~5.8.0',
         },
       },
       env: {
@@ -107,9 +108,10 @@ export default {
       name: 'ember-lts-5.12',
       npm: {
         devDependencies: {
-          'ember-source': '~5.12.0',
           ...emberData412Deps,
           ...compatDeps,
+          // After the spreads, so it overrides emberData412Deps' ember-source.
+          'ember-source': '~5.12.0',
         },
       },
       env: {
