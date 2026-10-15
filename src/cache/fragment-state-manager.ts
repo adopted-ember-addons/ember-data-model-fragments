@@ -6,6 +6,10 @@ import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { getActualFragmentType, isFragment } from '../fragment.ts';
 import isInstanceOfType from '../util/instance-of-type.ts';
 import fragmentCacheFor from '../util/fragment-cache.ts';
+import {
+  isUnnormalized,
+  normalizeFragmentData,
+} from '../util/fragment-data.ts';
 import type {
   FragmentIdentifier,
   FragmentOwnerInfo,
@@ -897,6 +901,12 @@ export default class FragmentStateManager {
       attributes,
       this._getRecord(ownerIdentifier),
     );
+
+    // Payload data the serializer left for us, now that the type is known
+    if (isUnnormalized(attributes)) {
+      attributes = normalizeFragmentData(this.store, type, attributes);
+    }
+
     const fragmentIdentifier =
       this.store.identifierCache.createIdentifierForNewRecord({ type });
     this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, definition.name);
@@ -1368,8 +1378,27 @@ export default class FragmentStateManager {
     }
   }
 
+  // Normalizes payload data that the serializer left for us (see
+  // `_newFragmentIdentifier`) with the existing fragment's type
+  _normalizedFragmentData(identifier: FragmentIdentifier, data: any): any {
+    if (isUnnormalized(data?.attributes)) {
+      return {
+        ...data,
+        attributes: normalizeFragmentData(
+          this.store,
+          identifier.type,
+          data.attributes,
+        ),
+      };
+    }
+
+    return data;
+  }
+
   // Fragment lifecycle methods using cache API directly
   _fragmentPushData(identifier: FragmentIdentifier, data: any): void {
+    data = this._normalizedFragmentData(identifier, data);
+
     // Push data to the cache for the fragment
     if (data?.attributes) {
       const cache = this.innerCache;
@@ -1407,6 +1436,8 @@ export default class FragmentStateManager {
   }
 
   _fragmentDidCommit(identifier: FragmentIdentifier, data: any): void {
+    data = this._normalizedFragmentData(identifier, data);
+
     // Signal to cache that fragment was committed
     // Mark this fragment as committed (no longer new)
     this.__committedFragments.add(identifier.lid);

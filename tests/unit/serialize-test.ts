@@ -1,4 +1,5 @@
 import { isEmpty } from '@ember/utils';
+import { registerWarnHandler } from '@ember/debug';
 import { module, test } from 'qunit';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
@@ -356,6 +357,35 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
+  test('fragment properties are normalized using their own serializers', function (this: TestContext, assert: Assert) {
+    class Dimensions extends Fragment {
+      @attr('number') declare widthInCm: number;
+    }
+
+    class Shipment extends Model {
+      @fragment('dimensions') declare dimensions: Dimensions;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    owner.register('model:dimensions', Dimensions);
+    owner.register('model:shipment', Shipment);
+    owner.register('serializer:-fragment', UnderscoredSerializer);
+
+    store.pushPayload('shipment', {
+      shipment: { id: 1, dimensions: { width_in_cm: 10 } },
+    });
+
+    assert.strictEqual(
+      store.peekRecord('shipment', 1).dimensions.widthInCm,
+      10,
+    );
+  });
+
   test('array properties use the specified transform to normalize data', function (this: TestContext, assert: Assert) {
     const values = [1, 0, true, false, 'true', ''];
 
@@ -544,6 +574,159 @@ module('unit - Serialization', function (hooks) {
         { createdAt: 'a', updatedAt: 'b' },
         'fragment is included in the serialized JSON payload',
       );
+    });
+
+    test('fragment serializers skip fragments with `serialize: false` in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: { serialize: false } };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const serialized = store.peekRecord('fragment-only', '1').serialize();
+
+      assert.notOk('timestamps' in serialized);
+    });
+
+    test('fragment serializers use keys mapped in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: 'times' };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const serialized = store.peekRecord('fragment-only', '1').serialize();
+
+      assert.deepEqual(serialized.times, { createdAt: 'a', updatedAt: 'b' });
+      assert.notOk('timestamps' in serialized);
+    });
+
+    // The warnings `callback` triggers. Handlers can't be unregistered, so
+    // this one stops collecting once the callback returns.
+    function warningsFrom(callback: () => void): string[] {
+      const warnings: string[] = [];
+      let collecting = true;
+
+      registerWarnHandler((message, options, next) => {
+        if (collecting) {
+          warnings.push(message);
+        }
+        next(message, options);
+      });
+
+      try {
+        callback();
+      } finally {
+        collecting = false;
+      }
+
+      return warnings;
+    }
+
+    test('fragment serializers read keys mapped in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: 'times' };
+        },
+      );
+
+      const warnings = warningsFrom(() => {
+        store.push(
+          store.normalize('fragment-only', {
+            id: '1',
+            times: { createdAt: 'a', updatedAt: 'b' },
+          }),
+        );
+      });
+
+      assert.strictEqual(
+        store.peekRecord('fragment-only', '1').timestamps.createdAt,
+        'a',
+      );
+      assert.deepEqual(warnings, [], 'without warnings');
+    });
+
+    test('fragment serializers serialize fragments without warnings', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentRESTSerializer {
+          attrs = { timestamps: 'times' };
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      const warnings = warningsFrom(() => {
+        store.peekRecord('fragment-only', '1').serialize();
+      });
+
+      assert.deepEqual(warnings, []);
+    });
+
+    test('fragment serializers serialize each fragment once', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register('serializer:fragment-only', FragmentRESTSerializer);
+
+      let count = 0;
+
+      owner.register(
+        'serializer:timestamps',
+        class extends JSONSerializer {
+          serialize(snapshot: any, options: any) {
+            count++;
+            return super.serialize(snapshot, options);
+          }
+        },
+      );
+
+      store.push({
+        data: {
+          type: 'fragment-only',
+          id: '1',
+          attributes: {
+            timestamps: { createdAt: 'a', updatedAt: 'b' },
+          },
+        },
+      });
+
+      store.peekRecord('fragment-only', '1').serialize();
+
+      assert.strictEqual(count, 1);
     });
 
     test('REST/JSON serializers do not treat a top-level `data` @attr as a JSON:API envelope', function (this: TestContext, assert: Assert) {

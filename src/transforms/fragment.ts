@@ -2,6 +2,10 @@ import Transform from '@ember-data/serializer/transform';
 import { service } from '@ember/service';
 import { recordIdentifierFor } from '@ember-data/store';
 import type Store from '@ember-data/store';
+import {
+  leaveUnnormalized,
+  normalizeFragmentData,
+} from '../util/fragment-data.ts';
 
 /**
   @module ember-data-model-fragments
@@ -84,33 +88,35 @@ const FragmentTransform = Transform.extend({
     return snapshot;
   },
 
-  modelNameFor(this: any, data: any, options: any, parentData: any) {
-    let modelName = this.type;
+  // A function `typeKey` isn't called here: it gets the owner record, so the
+  // cache resolves it (see `deserializeSingle`)
+  modelNameFor(this: any, data: any) {
     const polymorphicTypeProp = this.polymorphicTypeProp;
 
     if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
-      modelName = data[polymorphicTypeProp];
-    } else if (options && typeof options.typeKey === 'function') {
-      modelName = options.typeKey(data, parentData);
+      return data[polymorphicTypeProp];
     }
 
-    return modelName;
+    return this.type;
   },
 
   deserializeSingle(this: any, data: any, options: any, parentData: any) {
-    const store = this.store;
+    // A function `typeKey` is called with the owner record, which may not
+    // exist yet, so the cache normalizes this once it does
+    if (options?.polymorphic && typeof options.typeKey === 'function') {
+      return leaveUnnormalized(data);
+    }
+
     const modelName = this.modelNameFor(data, options, parentData);
-    // `FragmentStore#serializerFor` guarantees a JSON-based serializer
-    // (FragmentSerializer / JSONSerializer) for fragment model names, so we
-    // do not need to defend against REST/JSON:API serializers here.
-    const serializer = store.serializerFor(modelName);
+    const attributes = normalizeFragmentData(this.store, modelName, data);
+    const typeKey = this.polymorphicTypeProp;
 
-    const typeClass = store.modelFor(modelName);
-    const serialized = serializer.normalize(typeClass, data);
+    // Keep the type, which the fragment class doesn't have to declare
+    if (attributes && typeKey && data[typeKey] !== undefined) {
+      attributes[typeKey] ??= data[typeKey];
+    }
 
-    // `JSONSerializer#normalize` returns a full JSON API document, but we only
-    // need the attributes hash
-    return serialized?.data?.attributes;
+    return attributes;
   },
 }) as unknown as typeof FragmentTransformClass;
 
