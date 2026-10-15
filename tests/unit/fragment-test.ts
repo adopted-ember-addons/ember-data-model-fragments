@@ -3,6 +3,7 @@ import { getDeprecations } from '@ember/test-helpers';
 import { attr } from '@ember-data/model';
 import { module, test } from 'qunit';
 import Fragment from '#src/fragment.ts';
+import { fragment } from '#src/attributes/index.ts';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
 import Pretender from 'pretender';
@@ -86,6 +87,62 @@ module('unit - `MF.Fragment`', function (hooks) {
 
     assert.deepEqual(copy.startsAt, startsAt, 'the copy has the same date');
     assert.notStrictEqual(copy.startsAt, startsAt, 'in a new Date');
+  });
+
+  test('copying a fragment copies the Date properties of its nested fragments', function (this: TestContext, assert: Assert) {
+    class Stamp extends Fragment {
+      @attr('date') declare at: Date;
+    }
+
+    class Log extends Fragment {
+      @fragment('stamp') declare stamp: Stamp;
+    }
+
+    this.owner.register('model:stamp', Stamp);
+    this.owner.register('model:log', Log);
+
+    const at = new Date('2024-01-02T03:04:05Z');
+    const copy: any = store.createFragment('log', { stamp: { at } }).copy();
+
+    assert.ok(copy.stamp.at instanceof Date, 'the copy has a Date');
+    assert.strictEqual(
+      copy.stamp.at.getTime(),
+      at.getTime(),
+      'with the same time',
+    );
+  });
+
+  test('copying a fragment copies its nested fragments, which start clean', function (this: TestContext, assert: Assert) {
+    store.push({
+      data: {
+        type: 'person',
+        id: 1,
+        attributes: {
+          name: {
+            first: 'Jon',
+            last: 'Snow',
+            prefixes: [{ name: 'Lord' }, { name: 'Commander' }],
+          },
+        },
+      },
+    });
+
+    const name = store.peekRecord('person', 1).name;
+    const copy = name.copy();
+    const prefix = copy.prefixes.objectAt(0);
+
+    assert.deepEqual(
+      copy.prefixes.map((prefix: any) => prefix.name),
+      ['Lord', 'Commander'],
+      'the nested fragments are copied',
+    );
+    assert.notStrictEqual(
+      prefix,
+      name.prefixes.objectAt(0),
+      'into new fragments',
+    );
+    assert.false(prefix.isNew, 'that are not new');
+    assert.false(prefix.hasDirtyAttributes, 'and not dirty');
   });
 
   test('fragments are compared by reference with `compare` from `@ember/utils`', function (this: TestContext, assert: Assert) {

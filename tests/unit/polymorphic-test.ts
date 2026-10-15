@@ -1,4 +1,7 @@
+import { attr } from '@ember-data/model';
 import { module, test } from 'qunit';
+import Fragment from '#src/fragment.ts';
+import { fragment, fragmentArray } from '#src/attributes/index.ts';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
 import Animal from '../../demo-app/models/animal.ts';
@@ -83,6 +86,80 @@ module('unit - Polymorphism', function (hooks) {
     assert.equal(second.name, 'Snuitje', "second animal's name is correct");
     assert.ok(second instanceof Elephant);
     assert.equal(second.trunkLength, 4, "elephant's trunk length is correct");
+  });
+
+  test('copying a fragment keeps the types of its polymorphic fragments', function (this: TestContext, assert: Assert) {
+    // Like the demo `Animal`, these classes don't declare the `$type` attribute
+    class Exhibit extends Fragment {
+      @fragment('animal', { polymorphic: true, typeKey: '$type' })
+      declare star: any;
+      @fragmentArray('animal', { polymorphic: true, typeKey: '$type' })
+      declare animals: any;
+    }
+
+    this.owner.register('model:exhibit', Exhibit);
+
+    const exhibit = store.createFragment('exhibit', {
+      star: { $type: 'lion', name: 'Mittens', hasManes: true },
+      animals: [{ $type: 'elephant', name: 'Snuitje', trunkLength: 4 }],
+    });
+    const copy: any = exhibit.copy();
+    const elephant = copy.animals.objectAt(0);
+
+    assert.ok(copy.star instanceof Lion, 'the star is a lion');
+    assert.true(copy.star.hasManes, 'with a mane');
+    assert.ok(elephant instanceof Elephant, 'the animal is an elephant');
+    assert.strictEqual(elephant.trunkLength, 4, 'with a trunk');
+  });
+
+  test('copying a fragment keeps the types of its polymorphic fragments with a function typeKey', function (this: TestContext, assert: Assert) {
+    class Panel extends Fragment {
+      @fragment('component-options', {
+        polymorphic: true,
+        typeKey: (data: any) =>
+          // eslint-disable-next-line no-prototype-builtins -- typeKey functions can expect a plain object
+          data.hasOwnProperty('fontSize')
+            ? 'component-options-text'
+            : 'component-options',
+      })
+      declare options: any;
+    }
+
+    this.owner.register('model:panel', Panel);
+
+    const panel = store.createFragment('panel', {
+      options: { fontFamily: 'Verdana', fontSize: 12 },
+    });
+    const copy: any = panel.copy();
+
+    assert.ok(
+      copy.options instanceof ComponentOptionsText,
+      'the options are text options',
+    );
+    assert.strictEqual(copy.options.fontSize, 12, 'with a font size');
+  });
+
+  test("copying a fragment doesn't set the typeKey of its base-type fragments", function (this: TestContext, assert: Assert) {
+    class Beast extends Fragment {
+      @attr('string') declare $type: string;
+      @attr('string') declare name: string;
+    }
+
+    class Exhibit extends Fragment {
+      @fragment('beast', { polymorphic: true, typeKey: '$type' })
+      declare beast: any;
+    }
+
+    this.owner.register('model:beast', Beast);
+    this.owner.register('model:exhibit', Exhibit);
+
+    const exhibit: any = store.createFragment('exhibit', {
+      beast: { name: 'Nameless' },
+    });
+    const copy: any = exhibit.copy();
+
+    assert.ok(copy.beast instanceof Beast, 'the copy is a beast');
+    assert.strictEqual(copy.beast.$type, exhibit.beast.$type, 'with no type');
   });
 
   test("fragment array's createFragment supports polymorphism with string typeKey", async function (this: TestContext, assert: Assert) {

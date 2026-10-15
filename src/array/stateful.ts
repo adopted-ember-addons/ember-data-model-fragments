@@ -266,7 +266,8 @@ const definition: object & ThisType<any> = {
     @return {array} a new array
   */
   copy() {
-    return this.map(copy);
+    // Not `this.map(copy)`: map passes the index, which `copy` takes as `deep`
+    return this.map((item: unknown) => copy(item));
   },
 
   /**

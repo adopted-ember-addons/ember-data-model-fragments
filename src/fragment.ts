@@ -30,6 +30,71 @@ export function fragmentRecordDataFor(fragment: any): any {
 }
 
 /**
+  Captures a fragment's values for `Fragment#copy`, in the form
+  `createFragment` takes: keyed by attribute name, with nested fragments
+  captured as data too, so they are created along with the copy and start
+  clean. `serialize()` doesn't fit, because it uses the serializer's keys and
+  transformed values.
+*/
+function fragmentData(fragment: any): Record<string, unknown> {
+  // eachAttribute leaves out fragment attributes, so use the schema service
+  const definitions = fragment.store
+    .getSchemaDefinitionService()
+    .attributesDefinitionFor(recordIdentifierFor(fragment));
+  // A plain object, since a function `typeKey` receives it as `data`
+  const data: Record<string, unknown> = {};
+
+  for (const name of Object.keys(definitions)) {
+    const definition = definitions[name];
+    const value = get(fragment, name);
+
+    if (definition?.isFragment || definition?.options?.isFragment) {
+      data[name] = fragmentAttributeData(value, definition);
+    } else {
+      data[name] = copy(value);
+    }
+  }
+
+  return data;
+}
+
+function fragmentAttributeData(value: any, definition: any): unknown {
+  if (isFragment(value)) {
+    return nestedFragmentData(value, definition);
+  }
+
+  // A fragment array, or an `@array`
+  if (Array.isArray(value) || typeof value?.toArray === 'function') {
+    const items: unknown[] =
+      typeof value.toArray === 'function' ? value.toArray() : value;
+
+    return items.map((item) =>
+      isFragment(item) ? nestedFragmentData(item, definition) : copy(item),
+    );
+  }
+
+  return copy(value);
+}
+
+// A polymorphic fragment of a subtype must carry its type under a string
+// `typeKey`, and the fragment class doesn't have to declare that attribute.
+function nestedFragmentData(fragment: any, definition: any) {
+  const data = fragmentData(fragment);
+  const { polymorphic, typeKey } = definition.options ?? {};
+  const type = recordIdentifierFor(fragment).type;
+
+  if (
+    polymorphic &&
+    typeof typeKey !== 'function' &&
+    type !== definition.modelName
+  ) {
+    data[typeKey || 'type'] = type;
+  }
+
+  return data;
+}
+
+/**
   The public shape of the `Fragment` class. The runtime class is built with
   `Model.extend()` (see below), so the type surface is declared here for
   consumers.
@@ -157,54 +222,10 @@ const Fragment = Model.extend(...comparableMixins, {
   },
 
   copy(this: any) {
-    const type = this.constructor;
-    const props: Record<string, unknown> = Object.create(null);
-    const modelName = type.modelName || this._internalModel.modelName;
-    const identifier = recordIdentifierFor(this);
-
-    // Use schema service to get all attributes including fragment attributes
-    // eachAttribute only iterates standard @attr() properties, not fragment properties
-    const schemaService = this.store
-      .getSchemaDefinitionService()
-      .attributesDefinitionFor(identifier);
-
-    // Loop over each attribute and copy individually to ensure nested fragments
-    // are also copied. For fragment attributes, we need to serialize to raw data
-    // since createFragment expects raw data, not fragment instances.
-    for (const name of Object.keys(schemaService)) {
-      const value = get(this, name);
-      const definition = schemaService[name];
-      const isFragmentAttr =
-        definition?.isFragment || definition?.options?.isFragment;
-
-      if (isFragmentAttr) {
-        // For fragment attributes, serialize to get raw data that can be used to create new fragments
-        if (value === null || value === undefined) {
-          props[name] = value;
-        } else if (typeof value.serialize === 'function') {
-          // Single fragment - serialize it
-          props[name] = value.serialize();
-        } else if (
-          Array.isArray(value) ||
-          typeof value.toArray === 'function'
-        ) {
-          // Fragment array or array - serialize each element
-          const arr =
-            typeof value.toArray === 'function' ? value.toArray() : value;
-          props[name] = arr.map((item: any) =>
-            typeof item.serialize === 'function' ? item.serialize() : item,
-          );
-        } else {
-          // Fallback - use as-is
-          props[name] = value;
-        }
-      } else {
-        // Regular attribute - just copy the value
-        props[name] = copy(value);
-      }
-    }
-
-    return this.store.createFragment(modelName, props);
+    return this.store.createFragment(
+      recordIdentifierFor(this).type,
+      fragmentData(this),
+    );
   },
 
   toStringExtension(this: any) {

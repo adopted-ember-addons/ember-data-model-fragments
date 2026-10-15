@@ -526,6 +526,14 @@ export default class FragmentStateManager {
     return this.store._instanceCache.getRecord(identifier, properties);
   }
 
+  _peekRecord(identifier: FragmentIdentifier): any {
+    if (macroCondition(dependencySatisfies('ember-data', '>=4.13.0-alpha.0'))) {
+      return this.store._instanceCache.peek(identifier);
+    }
+
+    return this.store._instanceCache.peek({ identifier, bucket: 'record' });
+  }
+
   _getBehaviors(identifier: FragmentIdentifier): Record<string, Behavior> {
     let behaviors = this.__behaviors.get(identifier.lid);
     if (behaviors) {
@@ -1336,7 +1344,9 @@ export default class FragmentStateManager {
       // the record can trip mutation-after-consumption assertions during initial render.
       if (key) {
         try {
-          const record = this.store._instanceCache.getRecord(identifier);
+          // Only notify an existing record; getRecord would build a duplicate
+          // while the fragment is still being created
+          const record = this._peekRecord(identifier);
           if (record && typeof record.notifyPropertyChange === 'function') {
             record.notifyPropertyChange(key);
             // Also clear any cached value by directly removing from Ember's cache

@@ -214,6 +214,33 @@ module('unit - Serialization', function (hooks) {
     );
   });
 
+  test('copying a fragment keeps nested attributes when the serializer maps keys', function (this: TestContext, assert: Assert) {
+    class Dimensions extends Fragment {
+      @attr('number') declare widthInCm: number;
+    }
+
+    class Parcel extends Fragment {
+      @fragment('dimensions') declare dimensions: Dimensions;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    owner.register('model:dimensions', Dimensions);
+    owner.register('model:parcel', Parcel);
+    owner.register('serializer:-fragment', UnderscoredSerializer);
+
+    const parcel = store.createFragment('parcel', {
+      dimensions: { widthInCm: 10 },
+    });
+    const copy = parcel.copy() as Parcel;
+
+    assert.strictEqual(copy.dimensions.widthInCm, 10);
+  });
+
   test('serializing a fragment array creates a new array with contents the result of serializing each fragment', async function (this: TestContext, assert: Assert) {
     const names = [
       {
