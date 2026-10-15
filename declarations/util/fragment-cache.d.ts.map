@@ -1,0 +1,1 @@
+{"version":3,"file":"fragment-cache.d.ts","sourceRoot":"","sources":["../../src/util/fragment-cache.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,aAAa,MAAM,4BAA4B,CAAC;AAoB5D,iBAAS,yBAAyB,CAChC,KAAK,EAAE,GAAG,EACV,QAAQ,GAAE,GAAiB,GAC1B,aAAa,CAkCf;AAED,OAAO,EAAE,yBAAyB,EAAE,CAAC;AAErC,MAAM,CAAC,OAAO,UAAU,gBAAgB,CAAC,KAAK,EAAE,GAAG,GAAG,aAAa,CAElE"}
