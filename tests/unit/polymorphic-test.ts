@@ -1,12 +1,14 @@
-import { attr } from '@ember-data/model';
+import Model, { attr } from '@ember-data/model';
 import { module, test } from 'qunit';
 import Fragment from '#src/fragment.ts';
 import { fragment, fragmentArray } from '#src/attributes/index.ts';
+import FragmentSerializer from '#src/serializer.ts';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
 import Animal from '../../demo-app/models/animal.ts';
 import Lion from '../../demo-app/models/lion.ts';
 import Elephant from '../../demo-app/models/elephant.ts';
+import ComponentOptions from '../../demo-app/models/component-options.ts';
 import ComponentOptionsText from '../../demo-app/models/component-options-text.ts';
 let store: TestStore;
 let zoo: any;
@@ -160,6 +162,115 @@ module('unit - Polymorphism', function (hooks) {
 
     assert.ok(copy.beast instanceof Beast, 'the copy is a beast');
     assert.strictEqual(copy.beast.$type, exhibit.beast.$type, 'with no type');
+  });
+
+  test('fragments loaded through a serializer keep their polymorphic types', function (this: TestContext, assert: Assert) {
+    // The demo `Animal` doesn't declare the `$type` attribute
+    store.pushPayload('zoo', { zoo: { id: 1, ...zoo } });
+
+    const record = store.peekRecord('zoo', 1);
+
+    assert.ok(record.star instanceof Lion, 'the star is a lion');
+    assert.true(record.star.hasManes, 'with a mane');
+    assert.ok(
+      record.animals.objectAt(0) instanceof Lion,
+      'the first animal is a lion',
+    );
+    assert.ok(
+      record.animals.objectAt(1) instanceof Elephant,
+      'the second animal is an elephant',
+    );
+  });
+
+  module('with a function typeKey', function (hooks) {
+    let owners: unknown[];
+
+    const typeKey = (data: unknown, owner: unknown) => {
+      owners.push(owner);
+      return `component-options-${(owner as Panel).kind}`;
+    };
+
+    class Panel extends Model {
+      @attr('string') declare kind: string;
+      @fragment('component-options', { polymorphic: true, typeKey })
+      declare options: any;
+      @fragmentArray('component-options', { polymorphic: true, typeKey })
+      declare history: any;
+    }
+
+    class Dimensions extends Fragment {
+      @attr('number') declare widthInCm: number;
+    }
+
+    class ComponentOptionsRich extends ComponentOptions {
+      @fragment('dimensions') declare size: any;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    hooks.beforeEach(function (this: TestContext) {
+      owners = [];
+      this.owner.register('model:panel', Panel);
+      this.owner.register('model:dimensions', Dimensions);
+      this.owner.register('model:component-options-rich', ComponentOptionsRich);
+      this.owner.register('serializer:-fragment', UnderscoredSerializer);
+    });
+
+    test('loading a payload calls it with the owner record', function (this: TestContext, assert: Assert) {
+      store.pushPayload('panel', {
+        panel: {
+          id: 1,
+          kind: 'text',
+          options: { font_family: 'Verdana', font_size: 12 },
+          history: [{ font_family: 'Arial', font_size: 10 }],
+        },
+      });
+
+      const panel = store.peekRecord('panel', 1);
+      const previous = panel.history.objectAt(0);
+
+      assert.ok(
+        panel.options instanceof ComponentOptionsText,
+        'the options are text options',
+      );
+      assert.strictEqual(
+        panel.options.fontSize,
+        12,
+        'normalized by their own serializer',
+      );
+      assert.ok(
+        previous instanceof ComponentOptionsText,
+        'so are the ones in the fragment array',
+      );
+      assert.strictEqual(previous.fontSize, 10, 'normalized the same way');
+      assert.strictEqual(owners.length, 2, 'typeKey was called for each');
+      assert.true(
+        owners.every((owner) => owner === panel),
+        'with the owner record',
+      );
+    });
+
+    test('loading a payload normalizes the fragments nested in its fragments', function (this: TestContext, assert: Assert) {
+      store.pushPayload('panel', {
+        panel: {
+          id: 1,
+          kind: 'rich',
+          options: { size: { width_in_cm: 10 } },
+        },
+      });
+
+      const panel = store.peekRecord('panel', 1);
+
+      assert.ok(
+        panel.options instanceof ComponentOptionsRich,
+        'the options are rich options',
+      );
+      assert.strictEqual(panel.options.size.widthInCm, 10);
+    });
   });
 
   test("fragment array's createFragment supports polymorphism with string typeKey", async function (this: TestContext, assert: Assert) {
