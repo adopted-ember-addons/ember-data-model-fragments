@@ -64,9 +64,12 @@ export function fragmentApplyTransforms(
   data: any,
 ): any {
   const attributes = typeClass.attributes;
+  const transformed = new Set<string>();
 
   // Handle regular @attr transforms
   typeClass.eachTransformedAttribute((key: string, attrType: string) => {
+    transformed.add(key);
+
     if (data[key] === undefined) {
       return;
     }
@@ -76,25 +79,46 @@ export function fragmentApplyTransforms(
     data[key] = transform.deserialize(data[key], transformMeta.options, data);
   });
 
-  // Also handle @array computed properties with transforms
-  // These are not in eachTransformedAttribute because they're computed properties,
-  // not regular @attr attributes
+  // Also handle fragment and @array computed properties. Below ember-data
+  // 4.13 fragment attributes are in eachTransformedAttribute, so they're
+  // already transformed; from 4.13 they aren't
   typeClass.eachComputedProperty((key: string, meta: any) => {
-    if (data[key] === undefined) {
+    if (
+      data[key] === undefined ||
+      transformed.has(key) ||
+      !isFragmentAttribute(meta)
+    ) {
       return;
     }
 
-    // Only handle @array attributes that have a transform type (arrayTransform)
-    // meta.arrayTransform is the child transform type (e.g., 'string')
-    // meta.type is the full transform type string (e.g., '-mf-array$string')
-    if (meta?.isFragment && meta.kind === 'array' && meta.arrayTransform) {
-      // Use the full transform type string from meta.type
-      const transform = serializer.transformFor(meta.type);
-      data[key] = transform.deserialize(data[key], meta.options, data);
+    // An `@array` without a transform type (arrayTransform, e.g. 'string')
+    // has nothing to transform. meta.type is the full transform type string
+    // (e.g. '-mf-array$string')
+    if (meta.kind === 'array' && !meta.arrayTransform) {
+      return;
     }
+
+    const transform = serializer.transformFor(meta.type);
+    data[key] = transform.deserialize(data[key], meta.options, data);
   });
 
   return data;
+}
+
+// The payload key that `attrs` maps an attribute to, if any
+function mappedKey(serializer: any, key: string): string | undefined {
+  const mapping = serializer.attrs?.[key];
+  return typeof mapping === 'string' ? mapping : mapping?.key;
+}
+
+// From ember-data 4.13, `normalizeUsingDeclaredMapping` doesn't apply `attrs`
+// to fragment attributes, as they aren't in `modelClass.attributes`
+export function payloadKeyFor(serializer: any, key: string, hash: any): string {
+  const mapped = mappedKey(serializer, key);
+
+  return mapped !== undefined && hash[mapped] !== undefined
+    ? mapped
+    : serializer.keyForAttribute(key, 'deserialize');
 }
 
 function isFragmentAttribute(meta: any): boolean {
@@ -107,21 +131,14 @@ function isFragmentAttribute(meta: any): boolean {
   );
 }
 
-function serializedAttributesHash(
-  serializer: any,
-  snapshot: any,
-  payload: any,
-): any {
-  // JSON:API: fragment attributes belong inside payload.data.attributes.
-  // If the model has no regular @attr fields, JSONAPISerializer#serialize
-  // omits `attributes` entirely, so we create it here. We dispatch by
-  // serializer type rather than payload shape, because a model could
-  // legitimately declare an @attr named `data` under RESTSerializer /
-  // JSONSerializer and we must not clobber it.
+function serializedResource(serializer: any, snapshot: any, payload: any): any {
+  // JSON:API: the resource is payload.data, and serializeAttribute writes
+  // into its `attributes`. We dispatch by serializer type rather than payload
+  // shape, because a model could legitimately declare an @attr named `data`
+  // under RESTSerializer / JSONSerializer and we must not clobber it.
   if (serializer instanceof JSONAPISerializer) {
     if (payload?.data && typeof payload.data === 'object') {
-      payload.data.attributes ??= {};
-      return payload.data.attributes;
+      return payload.data;
     }
     return payload;
   }
@@ -155,31 +172,75 @@ export function fragmentSerialize(
   snapshot: any,
   payload: any,
 ): any {
-  const attributes = serializedAttributesHash(serializer, snapshot, payload);
+  const resource = serializedResource(serializer, snapshot, payload);
   const modelClass = serializer.store.modelFor(snapshot.modelName);
 
+  // Below ember-data 5.8 `eachAttribute` includes fragment attributes, so the
+  // base serializer has already serialized them
+  const serializedByBase = new Set<string>();
+  snapshot.eachAttribute((key: string) => serializedByBase.add(key));
+
   modelClass.eachComputedProperty((key: string, meta: any) => {
-    if (!isFragmentAttribute(meta)) {
+    if (!isFragmentAttribute(meta) || serializedByBase.has(key)) {
       return;
     }
 
-    const value = snapshot.attr(key);
-
-    if (value === undefined) {
+    if (snapshot.attr(key) === undefined) {
       return;
     }
 
-    const attributeKey = serializer.keyForAttribute(key, 'serialize');
-    const transform = serializer.transformFor(meta.type);
-
-    attributes[attributeKey] = transform.serialize(
-      value,
-      meta.options,
-      snapshot,
-    );
+    // Through serializeAttribute, as the base serializer does below 5.8, so
+    // overrides of it apply on every version
+    serializer.serializeAttribute(snapshot, resource, key, meta);
   });
 
   return payload;
+}
+
+const fragmentKeysByModel = new WeakMap<object, Set<string>>();
+
+function fragmentKeysFor(modelClass: any): Set<string> {
+  let keys = fragmentKeysByModel.get(modelClass);
+
+  if (!keys) {
+    keys = new Set();
+    modelClass.eachComputedProperty((key: string, meta: any) => {
+      if (isFragmentAttribute(meta)) {
+        keys!.add(key);
+      }
+    });
+    fragmentKeysByModel.set(modelClass, keys);
+  }
+
+  return keys;
+}
+
+/**
+ * Helper function to implement `_getMappedKey` without its warning for
+ * fragment attributes. From ember-data 4.13 they aren't in
+ * `modelClass.attributes`, so `_getMappedKey` warns that each one doesn't
+ * exist, both when serializing and when normalizing with `attrs`.
+ *
+ * Used by FragmentSerializer, FragmentRESTSerializer, and FragmentJSONAPISerializer.
+ *
+ * @param {Serializer} serializer
+ * @param {String} key
+ * @param {Class} modelClass
+ * @param {Function} superGetMappedKey - The parent's _getMappedKey method
+ * @return {String}
+ * @private
+ */
+export function fragmentGetMappedKey(
+  serializer: any,
+  key: string,
+  modelClass: any,
+  superGetMappedKey: (...args: any[]) => any,
+): string {
+  if (fragmentKeysFor(modelClass).has(key)) {
+    return mappedKey(serializer, key) ?? key;
+  }
+
+  return superGetMappedKey.call(serializer, key, modelClass);
 }
 
 /**
@@ -212,7 +273,7 @@ export function fragmentExtractAttributes(
   // Then, add fragment attributes
   modelClass.eachComputedProperty((key: string, meta: any) => {
     if (isFragmentAttribute(meta)) {
-      const attributeKey = serializer.keyForAttribute(key, 'deserialize');
+      const attributeKey = payloadKeyFor(serializer, key, resourceHash);
       if (resourceHash[attributeKey] !== undefined) {
         attributes[key] = resourceHash[attributeKey];
       }
@@ -254,7 +315,7 @@ export function fragmentExtractAttributesJSONAPI(
   // Then, add fragment attributes
   modelClass.eachComputedProperty((key: string, meta: any) => {
     if (isFragmentAttribute(meta)) {
-      const attributeKey = serializer.keyForAttribute(key, 'deserialize');
+      const attributeKey = payloadKeyFor(serializer, key, attrHash);
       if (attrHash[attributeKey] !== undefined) {
         attributes[key] = attrHash[attributeKey];
       }

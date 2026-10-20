@@ -2,6 +2,11 @@ import Transform from '@ember-data/serializer/transform';
 import { service } from '@ember/service';
 import { recordIdentifierFor } from '@ember-data/store';
 import type Store from '@ember-data/store';
+import {
+  leaveUnnormalized,
+  normalizeFragmentData,
+} from '../util/fragment-data.ts';
+import { payloadKeyFor } from '../serializers/utils.ts';
 
 /**
   @module ember-data-model-fragments
@@ -19,8 +24,30 @@ declare class FragmentTransformClass extends Transform {
   polymorphicTypeProp: string | null;
   deserialize(data: any, options?: any, parentData?: any): any;
   serialize(snapshot: any): any;
+  /**
+    The model name for a fragment's payload data, from a string `typeKey`.
+    A function `typeKey` isn't resolved here: it's called with the owner
+    record, so the cache resolves it.
+  */
   modelNameFor(data: any, options?: any, parentData?: any): string | null;
   deserializeSingle(data: any, options?: any, parentData?: any): any;
+}
+
+// The type under a string `typeKey` in a fragment's payload data, which may
+// use the declared type's serializer key for it
+function payloadType(transform: any, data: any): string | undefined {
+  const typeKey = transform.polymorphicTypeProp;
+
+  if (!data || !typeKey) {
+    return undefined;
+  }
+
+  if (data[typeKey] !== undefined) {
+    return data[typeKey];
+  }
+
+  const serializer = transform.store.serializerFor(transform.type);
+  return data[payloadKeyFor(serializer, typeKey, data)];
 }
 
 /**
@@ -84,33 +111,28 @@ const FragmentTransform = Transform.extend({
     return snapshot;
   },
 
-  modelNameFor(this: any, data: any, options: any, parentData: any) {
-    let modelName = this.type;
-    const polymorphicTypeProp = this.polymorphicTypeProp;
-
-    if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
-      modelName = data[polymorphicTypeProp];
-    } else if (options && typeof options.typeKey === 'function') {
-      modelName = options.typeKey(data, parentData);
-    }
-
-    return modelName;
+  modelNameFor(this: any, data: any) {
+    return payloadType(this, data) || this.type;
   },
 
   deserializeSingle(this: any, data: any, options: any, parentData: any) {
-    const store = this.store;
+    // A function `typeKey` is called with the owner record, which may not
+    // exist yet, so the cache normalizes this once it does
+    if (options?.polymorphic && typeof options.typeKey === 'function') {
+      return leaveUnnormalized(data);
+    }
+
     const modelName = this.modelNameFor(data, options, parentData);
-    // `FragmentStore#serializerFor` guarantees a JSON-based serializer
-    // (FragmentSerializer / JSONSerializer) for fragment model names, so we
-    // do not need to defend against REST/JSON:API serializers here.
-    const serializer = store.serializerFor(modelName);
+    const attributes = normalizeFragmentData(this.store, modelName, data);
+    const type = payloadType(this, data);
 
-    const typeClass = store.modelFor(modelName);
-    const serialized = serializer.normalize(typeClass, data);
+    // The cache reads the type from here (`getActualFragmentType`) when it
+    // creates the fragment, and the fragment class doesn't have to declare it
+    if (attributes && type !== undefined) {
+      attributes[this.polymorphicTypeProp] ??= type;
+    }
 
-    // `JSONSerializer#normalize` returns a full JSON API document, but we only
-    // need the attributes hash
-    return serialized?.data?.attributes;
+    return attributes;
   },
 }) as unknown as typeof FragmentTransformClass;
 

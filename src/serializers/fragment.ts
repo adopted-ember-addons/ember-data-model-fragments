@@ -4,6 +4,7 @@ import {
   fragmentApplyTransforms,
   fragmentExtractAttributes,
   fragmentSerialize,
+  fragmentGetMappedKey,
 } from './utils.ts';
 
 /**
@@ -29,6 +30,25 @@ export default class FragmentSerializer extends JSONSerializer {
       this,
       snapshot,
       super.serialize(snapshot, options),
+    );
+  }
+
+  /**
+    Override _getMappedKey so `attrs` lookups don't warn about fragment
+    attributes, which aren't in `modelClass.attributes` from ember-data 4.13
+
+    @method _getMappedKey
+    @param {String} key
+    @param {Class} modelClass
+    @return {String}
+    @private
+  */
+  _getMappedKey(key: string, modelClass: any): string {
+    return fragmentGetMappedKey(
+      this,
+      key,
+      modelClass,
+      JSONSerializer.prototype._getMappedKey,
     );
   }
 

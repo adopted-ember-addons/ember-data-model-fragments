@@ -6,6 +6,10 @@ import { dependencySatisfies, macroCondition } from '@embroider/macros';
 import { getActualFragmentType, isFragment } from '../fragment.ts';
 import isInstanceOfType from '../util/instance-of-type.ts';
 import fragmentCacheFor from '../util/fragment-cache.ts';
+import {
+  normalizeFragmentData,
+  unnormalizedData,
+} from '../util/fragment-data.ts';
 import type {
   FragmentIdentifier,
   FragmentOwnerInfo,
@@ -891,12 +895,20 @@ export default class FragmentStateManager {
     definition: any,
     attributes: any,
   ): FragmentIdentifier {
+    // Payload data the serializer left for us: resolve the type from it,
+    // then normalize it with that type's serializer
+    const payloadData = unnormalizedData(attributes);
     const type = getActualFragmentType(
       definition.modelName,
       definition.options,
-      attributes,
+      payloadData ?? attributes,
       this._getRecord(ownerIdentifier),
     );
+
+    if (payloadData) {
+      attributes = normalizeFragmentData(this.store, type, payloadData);
+    }
+
     const fragmentIdentifier =
       this.store.identifierCache.createIdentifierForNewRecord({ type });
     this.setFragmentOwner(fragmentIdentifier, ownerIdentifier, definition.name);
@@ -1368,8 +1380,29 @@ export default class FragmentStateManager {
     }
   }
 
+  // Normalizes payload data that the serializer left for us (see
+  // `_newFragmentIdentifier`) with the existing fragment's type
+  _normalizedFragmentData(identifier: FragmentIdentifier, data: any): any {
+    const payloadData = unnormalizedData(data?.attributes);
+
+    if (payloadData) {
+      return {
+        ...data,
+        attributes: normalizeFragmentData(
+          this.store,
+          identifier.type,
+          payloadData,
+        ),
+      };
+    }
+
+    return data;
+  }
+
   // Fragment lifecycle methods using cache API directly
   _fragmentPushData(identifier: FragmentIdentifier, data: any): void {
+    data = this._normalizedFragmentData(identifier, data);
+
     // Push data to the cache for the fragment
     if (data?.attributes) {
       const cache = this.innerCache;
@@ -1407,6 +1440,8 @@ export default class FragmentStateManager {
   }
 
   _fragmentDidCommit(identifier: FragmentIdentifier, data: any): void {
+    data = this._normalizedFragmentData(identifier, data);
+
     // Signal to cache that fragment was committed
     // Mark this fragment as committed (no longer new)
     this.__committedFragments.add(identifier.lid);

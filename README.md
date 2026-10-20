@@ -525,7 +525,7 @@ However, note that fragments do not currently support `belongsTo` or `hasMany` p
 Ember Data: Model Fragments has support for _reading_ polymorphic fragments. To use this feature, pass an options object to `fragment` or `fragmentArray`
 with `polymorphic` set to true. In addition the `typeKey` can be set, which defaults to `'type'`.
 
-The `typeKey` option might be a `String` or a `Function` returning a `String`. If you use a function, the `data` and the `owner` will be passed as parameter.
+The `typeKey` option might be a `String` or a `Function` returning a `String`. A function is called with the fragment's `data` and its `owner`, the record or fragment it belongs to. The data comes in two shapes, so a function that reads it has to handle both: from a payload, it is as the server sent it, before your serializer normalizes it; from `store.push`, `createRecord` or `createFragment`, it is keyed by attribute name.
 
 The `typeKey`'s value must be the lowercase name of a class that is assignment-compatible to the declared type of the fragment attribute. That is, it must be the declared type itself or a subclass. Additionally, the `typeKey`'s value must be a field on the parent class.
 
