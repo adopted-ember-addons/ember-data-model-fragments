@@ -3,6 +3,7 @@ import { module, test } from 'qunit';
 import Fragment from '#src/fragment.ts';
 import { fragment, fragmentArray } from '#src/attributes/index.ts';
 import FragmentSerializer from '#src/serializer.ts';
+import Pretender from 'pretender';
 import { setupApplicationTest } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
 import Animal from '../../demo-app/models/animal.ts';
@@ -182,12 +183,52 @@ module('unit - Polymorphism', function (hooks) {
     );
   });
 
+  test('fragments loaded through a serializer that maps the typeKey keep their polymorphic types', function (this: TestContext, assert: Assert) {
+    class Pet extends Fragment {
+      @attr('string') declare name: string;
+    }
+
+    class Dog extends Pet {
+      @attr('boolean') declare goodBoy: boolean;
+    }
+
+    class Kennel extends Model {
+      @fragment('pet', { polymorphic: true, typeKey: 'typeName' })
+      declare resident: any;
+    }
+
+    class UnderscoredSerializer extends FragmentSerializer {
+      keyForAttribute(key: string) {
+        return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      }
+    }
+
+    this.owner.register('model:pet', Pet);
+    this.owner.register('model:dog', Dog);
+    this.owner.register('model:kennel', Kennel);
+    this.owner.register('serializer:-fragment', UnderscoredSerializer);
+
+    store.pushPayload('kennel', {
+      kennel: {
+        id: 1,
+        resident: { type_name: 'dog', name: 'Rex', good_boy: true },
+      },
+    });
+
+    const resident = store.peekRecord('kennel', 1).resident;
+
+    assert.ok(resident instanceof Dog, 'the resident is a dog');
+    assert.true(resident.goodBoy, 'normalized');
+  });
+
   module('with a function typeKey', function (hooks) {
     let owners: unknown[];
 
+    let server: any;
+
     const typeKey = (data: unknown, owner: unknown) => {
       owners.push(owner);
-      return `component-options-${(owner as Panel).kind}`;
+      return `component-options-${(owner as { kind: string }).kind}`;
     };
 
     class Panel extends Model {
@@ -196,6 +237,13 @@ module('unit - Polymorphism', function (hooks) {
       declare options: any;
       @fragmentArray('component-options', { polymorphic: true, typeKey })
       declare history: any;
+      @fragment('layout') declare layout: any;
+    }
+
+    class Layout extends Fragment {
+      @attr('string') declare kind: string;
+      @fragment('component-options', { polymorphic: true, typeKey })
+      declare options: any;
     }
 
     class Dimensions extends Fragment {
@@ -214,10 +262,16 @@ module('unit - Polymorphism', function (hooks) {
 
     hooks.beforeEach(function (this: TestContext) {
       owners = [];
+      server = new Pretender();
       this.owner.register('model:panel', Panel);
+      this.owner.register('model:layout', Layout);
       this.owner.register('model:dimensions', Dimensions);
       this.owner.register('model:component-options-rich', ComponentOptionsRich);
       this.owner.register('serializer:-fragment', UnderscoredSerializer);
+    });
+
+    hooks.afterEach(function () {
+      server.shutdown();
     });
 
     test('loading a payload calls it with the owner record', function (this: TestContext, assert: Assert) {
@@ -270,6 +324,86 @@ module('unit - Polymorphism', function (hooks) {
         'the options are rich options',
       );
       assert.strictEqual(panel.options.size.widthInCm, 10);
+    });
+
+    test('loading a payload calls it with the owner fragment', function (this: TestContext, assert: Assert) {
+      store.pushPayload('panel', {
+        panel: {
+          id: 1,
+          layout: { kind: 'text', options: { font_size: 12 } },
+        },
+      });
+
+      const layout = store.peekRecord('panel', 1).layout;
+
+      assert.ok(
+        layout.options instanceof ComponentOptionsText,
+        'the options are text options',
+      );
+      assert.strictEqual(layout.options.fontSize, 12, 'normalized');
+      assert.strictEqual(owners.length, 1, 'typeKey was called once');
+      assert.strictEqual(owners[0], layout, 'with the owner fragment');
+    });
+
+    test('loading a copy of a normalized payload', function (this: TestContext, assert: Assert) {
+      const document = store.normalize('panel', {
+        id: 1,
+        kind: 'text',
+        options: { font_family: 'Verdana', font_size: 12 },
+      });
+
+      store.push(structuredClone(document));
+
+      const panel = store.peekRecord('panel', 1);
+
+      assert.ok(
+        panel.options instanceof ComponentOptionsText,
+        'the options are text options',
+      );
+      assert.strictEqual(panel.options.fontSize, 12, 'normalized');
+    });
+
+    test('a later payload updates the fragments', function (this: TestContext, assert: Assert) {
+      const payload = (fontSize: number) => ({
+        panel: {
+          id: 1,
+          kind: 'text',
+          options: { font_size: fontSize },
+          history: [{ font_size: fontSize }],
+        },
+      });
+
+      store.pushPayload('panel', payload(12));
+      store.pushPayload('panel', payload(14));
+
+      const panel = store.peekRecord('panel', 1);
+
+      assert.strictEqual(panel.options.fontSize, 14, 'the fragment');
+      assert.strictEqual(
+        panel.history.objectAt(0).fontSize,
+        14,
+        'the fragment array',
+      );
+    });
+
+    test('a save response updates the fragments', async function (this: TestContext, assert: Assert) {
+      store.pushPayload('panel', {
+        panel: { id: 1, kind: 'text', options: { font_size: 12 } },
+      });
+
+      server.put('/panels/1', () => [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({
+          panel: { id: 1, kind: 'text', options: { font_size: 14 } },
+        }),
+      ]);
+
+      const panel = store.peekRecord('panel', 1);
+      await panel.save();
+
+      assert.strictEqual(panel.options.fontSize, 14, 'normalized');
+      assert.false(panel.hasDirtyAttributes, 'and clean');
     });
   });
 

@@ -6,6 +6,7 @@ import {
   leaveUnnormalized,
   normalizeFragmentData,
 } from '../util/fragment-data.ts';
+import { payloadKeyFor } from '../serializers/utils.ts';
 
 /**
   @module ember-data-model-fragments
@@ -23,8 +24,30 @@ declare class FragmentTransformClass extends Transform {
   polymorphicTypeProp: string | null;
   deserialize(data: any, options?: any, parentData?: any): any;
   serialize(snapshot: any): any;
+  /**
+    The model name for a fragment's payload data, from a string `typeKey`.
+    A function `typeKey` isn't resolved here: it's called with the owner
+    record, so the cache resolves it.
+  */
   modelNameFor(data: any, options?: any, parentData?: any): string | null;
   deserializeSingle(data: any, options?: any, parentData?: any): any;
+}
+
+// The type under a string `typeKey` in a fragment's payload data, which may
+// use the declared type's serializer key for it
+function payloadType(transform: any, data: any): string | undefined {
+  const typeKey = transform.polymorphicTypeProp;
+
+  if (!data || !typeKey) {
+    return undefined;
+  }
+
+  if (data[typeKey] !== undefined) {
+    return data[typeKey];
+  }
+
+  const serializer = transform.store.serializerFor(transform.type);
+  return data[payloadKeyFor(serializer, typeKey, data)];
 }
 
 /**
@@ -88,16 +111,8 @@ const FragmentTransform = Transform.extend({
     return snapshot;
   },
 
-  // A function `typeKey` isn't called here: it gets the owner record, so the
-  // cache resolves it (see `deserializeSingle`)
   modelNameFor(this: any, data: any) {
-    const polymorphicTypeProp = this.polymorphicTypeProp;
-
-    if (data && polymorphicTypeProp && data[polymorphicTypeProp]) {
-      return data[polymorphicTypeProp];
-    }
-
-    return this.type;
+    return payloadType(this, data) || this.type;
   },
 
   deserializeSingle(this: any, data: any, options: any, parentData: any) {
@@ -109,11 +124,12 @@ const FragmentTransform = Transform.extend({
 
     const modelName = this.modelNameFor(data, options, parentData);
     const attributes = normalizeFragmentData(this.store, modelName, data);
-    const typeKey = this.polymorphicTypeProp;
+    const type = payloadType(this, data);
 
-    // Keep the type, which the fragment class doesn't have to declare
-    if (attributes && typeKey && data[typeKey] !== undefined) {
-      attributes[typeKey] ??= data[typeKey];
+    // The cache reads the type from here (`getActualFragmentType`) when it
+    // creates the fragment, and the fragment class doesn't have to declare it
+    if (attributes && type !== undefined) {
+      attributes[this.polymorphicTypeProp] ??= type;
     }
 
     return attributes;

@@ -125,7 +125,18 @@ export type DefaultValueFn<Options, Value> = (
 /** Options accepted by `MF.fragment` and `MF.fragmentArray`. */
 export interface FragmentOptions<K extends FragmentType = FragmentType> {
   polymorphic?: boolean;
-  typeKey?: string | ((data: FragmentData<K>, owner: Model) => string);
+  /**
+   * The attribute holding the fragment's model name, or a function returning
+   * it. A function gets the fragment's data and the record or fragment that
+   * owns it. The data is keyed by attribute name, or, from a payload, is as
+   * the server sent it.
+   */
+  typeKey?:
+    | string
+    | ((
+        data: FragmentData<K> | Record<string, unknown>,
+        owner: Model,
+      ) => string);
   defaultValue?:
     | FragmentData<K>
     | FragmentData<K>[]

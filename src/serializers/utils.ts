@@ -83,26 +83,23 @@ export function fragmentApplyTransforms(
   // 4.13 fragment attributes are in eachTransformedAttribute, so they're
   // already transformed; from 4.13 they aren't
   typeClass.eachComputedProperty((key: string, meta: any) => {
-    if (data[key] === undefined || transformed.has(key)) {
+    if (
+      data[key] === undefined ||
+      transformed.has(key) ||
+      !isFragmentAttribute(meta)
+    ) {
       return;
     }
 
-    if (
-      meta?.isFragment &&
-      (meta.kind === 'fragment' || meta.kind === 'fragment-array')
-    ) {
-      const transform = serializer.transformFor(meta.type);
-      data[key] = transform.deserialize(data[key], meta.options, data);
+    // An `@array` without a transform type (arrayTransform, e.g. 'string')
+    // has nothing to transform. meta.type is the full transform type string
+    // (e.g. '-mf-array$string')
+    if (meta.kind === 'array' && !meta.arrayTransform) {
+      return;
     }
 
-    // Only handle @array attributes that have a transform type (arrayTransform)
-    // meta.arrayTransform is the child transform type (e.g., 'string')
-    // meta.type is the full transform type string (e.g., '-mf-array$string')
-    if (meta?.isFragment && meta.kind === 'array' && meta.arrayTransform) {
-      // Use the full transform type string from meta.type
-      const transform = serializer.transformFor(meta.type);
-      data[key] = transform.deserialize(data[key], meta.options, data);
-    }
+    const transform = serializer.transformFor(meta.type);
+    data[key] = transform.deserialize(data[key], meta.options, data);
   });
 
   return data;
@@ -116,7 +113,7 @@ function mappedKey(serializer: any, key: string): string | undefined {
 
 // From ember-data 4.13, `normalizeUsingDeclaredMapping` doesn't apply `attrs`
 // to fragment attributes, as they aren't in `modelClass.attributes`
-function payloadKeyFor(serializer: any, key: string, hash: any): string {
+export function payloadKeyFor(serializer: any, key: string, hash: any): string {
   const mapped = mappedKey(serializer, key);
 
   return mapped !== undefined && hash[mapped] !== undefined

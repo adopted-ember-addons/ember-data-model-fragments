@@ -7,8 +7,8 @@ import { getActualFragmentType, isFragment } from '../fragment.ts';
 import isInstanceOfType from '../util/instance-of-type.ts';
 import fragmentCacheFor from '../util/fragment-cache.ts';
 import {
-  isUnnormalized,
   normalizeFragmentData,
+  unnormalizedData,
 } from '../util/fragment-data.ts';
 import type {
   FragmentIdentifier,
@@ -895,16 +895,18 @@ export default class FragmentStateManager {
     definition: any,
     attributes: any,
   ): FragmentIdentifier {
+    // Payload data the serializer left for us: resolve the type from it,
+    // then normalize it with that type's serializer
+    const payloadData = unnormalizedData(attributes);
     const type = getActualFragmentType(
       definition.modelName,
       definition.options,
-      attributes,
+      payloadData ?? attributes,
       this._getRecord(ownerIdentifier),
     );
 
-    // Payload data the serializer left for us, now that the type is known
-    if (isUnnormalized(attributes)) {
-      attributes = normalizeFragmentData(this.store, type, attributes);
+    if (payloadData) {
+      attributes = normalizeFragmentData(this.store, type, payloadData);
     }
 
     const fragmentIdentifier =
@@ -1381,13 +1383,15 @@ export default class FragmentStateManager {
   // Normalizes payload data that the serializer left for us (see
   // `_newFragmentIdentifier`) with the existing fragment's type
   _normalizedFragmentData(identifier: FragmentIdentifier, data: any): any {
-    if (isUnnormalized(data?.attributes)) {
+    const payloadData = unnormalizedData(data?.attributes);
+
+    if (payloadData) {
       return {
         ...data,
         attributes: normalizeFragmentData(
           this.store,
           identifier.type,
-          data.attributes,
+          payloadData,
         ),
       };
     }

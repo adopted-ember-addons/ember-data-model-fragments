@@ -3,23 +3,34 @@
   normalize. A function `typeKey` is called with the owner record, which may
   not exist yet while the payload is normalized, so the fragment's type, and
   with it the serializer to normalize with, is only known in the cache.
-*/
-const unnormalized = new WeakSet<object>();
 
-// Marks a copy, so the app's own payload object isn't marked, and passes
-// anything but an object through for the cache to reject
+  The data is wrapped under a string key, so the marker survives copies of
+  the normalized document (spreads, `structuredClone`, JSON) and shows up in
+  a debugger.
+*/
+const UNNORMALIZED = '__unnormalizedFragmentData';
+
 export function leaveUnnormalized(data: unknown): unknown {
+  // Anything but an object is passed through for the cache to reject
   if (typeof data !== 'object' || data === null) {
     return data;
   }
 
-  const copy = { ...data };
-  unnormalized.add(copy);
-  return copy;
+  // A copy, as normalizing it mutates it
+  return { [UNNORMALIZED]: { ...data } };
 }
 
-export function isUnnormalized(data: unknown): data is object {
-  return typeof data === 'object' && data !== null && unnormalized.has(data);
+// The payload data a `leaveUnnormalized` wrapper holds, if `value` is one
+export function unnormalizedData(value: unknown): object | undefined {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.hasOwn(value, UNNORMALIZED)
+  ) {
+    return (value as Record<string, object>)[UNNORMALIZED];
+  }
+
+  return undefined;
 }
 
 /**

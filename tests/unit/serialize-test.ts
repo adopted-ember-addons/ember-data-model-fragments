@@ -672,6 +672,40 @@ module('unit - Serialization', function (hooks) {
       assert.deepEqual(warnings, [], 'without warnings');
     });
 
+    test('FragmentJSONAPISerializer uses and reads keys mapped in attrs', function (this: TestContext, assert: Assert) {
+      registerFragmentOnly();
+      owner.register(
+        'serializer:fragment-only',
+        class extends FragmentJSONAPISerializer {
+          attrs = { timestamps: 'times' };
+        },
+      );
+
+      let serialized: any;
+      const warnings = warningsFrom(() => {
+        store.push(
+          store.normalize('fragment-only', {
+            id: '1',
+            type: 'fragment-only',
+            attributes: { times: { createdAt: 'a', updatedAt: 'b' } },
+          }),
+        );
+        serialized = store.peekRecord('fragment-only', '1').serialize();
+      });
+
+      assert.strictEqual(
+        store.peekRecord('fragment-only', '1').timestamps.createdAt,
+        'a',
+        'reads the mapped key',
+      );
+      assert.deepEqual(
+        serialized.data.attributes,
+        { times: { createdAt: 'a', updatedAt: 'b' } },
+        'writes the mapped key',
+      );
+      assert.deepEqual(warnings, [], 'without warnings');
+    });
+
     test('fragment serializers serialize fragments without warnings', function (this: TestContext, assert: Assert) {
       registerFragmentOnly();
       owner.register(
