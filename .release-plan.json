@@ -1,14 +1,14 @@
 {
   "solution": {
     "ember-data-model-fragments": {
-      "impact": "major",
-      "oldVersion": "8.0.2",
-      "newVersion": "9.0.0",
+      "impact": "patch",
+      "oldVersion": "9.0.0",
+      "newVersion": "9.0.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         },
         {
           "impact": "patch",
@@ -18,5 +18,5 @@
       "pkgJSONPath": "./package.json"
     }
   },
-  "description": "## Release (2026-08-15)\n\n* ember-data-model-fragments 9.0.0 (major)\n\n#### :boom: Breaking Change\n* `ember-data-model-fragments`\n  * [#534](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/534) Convert to a v2 addon ([@aklkv](https://github.com/aklkv))\n\n#### :house: Internal\n* `ember-data-model-fragments`\n  * [#537](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/537) fix: push-dist CI ([@aklkv](https://github.com/aklkv))\n\n#### Committers: 1\n- Alexey Kulakov ([@aklkv](https://github.com/aklkv))\n"
+  "description": "## Release (2026-10-20)\n\n* ember-data-model-fragments 9.0.1 (patch)\n\n#### :bug: Bug Fix\n* `ember-data-model-fragments`\n  * [#546](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/546) Fix fragment normalization and serialization across ember-data versions ([@aklkv](https://github.com/aklkv))\n  * [#545](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/545) Fix Fragment#copy for nested, polymorphic and key-mapped fragments ([@aklkv](https://github.com/aklkv))\n  * [#544](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/544) Fix copy() of Date values and changedAttributes() after a fragment save ([@aklkv](https://github.com/aklkv))\n  * [#538](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/538) Fix 9.0.0 build failure and /attributes import ([@grayt0r](https://github.com/grayt0r))\n  * [#540](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/540) Stop applying the Comparable mixin on ember-source 7.3+ ([@aklkv](https://github.com/aklkv))\n\n#### :house: Internal\n* `ember-data-model-fragments`\n  * [#543](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/543) Update dependencies and switch to pnpm 12 ([@aklkv](https://github.com/aklkv))\n  * [#541](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/541) Run the ember-lts-5.x try scenarios against ember-source 5.x ([@aklkv](https://github.com/aklkv))\n\n#### Committers: 2\n- Alexey Kulakov ([@aklkv](https://github.com/aklkv))\n- Ross Grayton ([@grayt0r](https://github.com/grayt0r))\n"
 }

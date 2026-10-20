@@ -1,5 +1,26 @@
 # Changelog
 
+## Release (2026-10-20)
+
+* ember-data-model-fragments 9.0.1 (patch)
+
+#### :bug: Bug Fix
+* `ember-data-model-fragments`
+  * [#546](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/546) Fix fragment normalization and serialization across ember-data versions ([@aklkv](https://github.com/aklkv))
+  * [#545](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/545) Fix Fragment#copy for nested, polymorphic and key-mapped fragments ([@aklkv](https://github.com/aklkv))
+  * [#544](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/544) Fix copy() of Date values and changedAttributes() after a fragment save ([@aklkv](https://github.com/aklkv))
+  * [#538](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/538) Fix 9.0.0 build failure and /attributes import ([@grayt0r](https://github.com/grayt0r))
+  * [#540](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/540) Stop applying the Comparable mixin on ember-source 7.3+ ([@aklkv](https://github.com/aklkv))
+
+#### :house: Internal
+* `ember-data-model-fragments`
+  * [#543](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/543) Update dependencies and switch to pnpm 12 ([@aklkv](https://github.com/aklkv))
+  * [#541](https://github.com/adopted-ember-addons/ember-data-model-fragments/pull/541) Run the ember-lts-5.x try scenarios against ember-source 5.x ([@aklkv](https://github.com/aklkv))
+
+#### Committers: 2
+- Alexey Kulakov ([@aklkv](https://github.com/aklkv))
+- Ross Grayton ([@grayt0r](https://github.com/grayt0r))
+
 ## Release (2026-08-15)
 
 * ember-data-model-fragments 9.0.0 (major)
