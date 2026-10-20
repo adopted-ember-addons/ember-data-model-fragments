@@ -1,0 +1,152 @@
+{
+  "name": "ember-data-model-fragments",
+  "version": "9.0.1",
+  "description": "Ember Data addon to support nested JSON documents",
+  "keywords": [
+    "ember-addon",
+    "ember",
+    "ember-data",
+    "ember-cli",
+    "fragments"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adopted-ember-addons/ember-data-model-fragments.git"
+  },
+  "license": "MIT",
+  "author": "Steven Lindberg <steven@lytics.io>",
+  "imports": {
+    "#src/*": "./src/*"
+  },
+  "exports": {
+    ".": {
+      "types": "./declarations/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./addon-main.js": "./addon-main.cjs",
+    "./*.css": "./dist/*.css",
+    "./attributes": {
+      "types": "./declarations/attributes/index.d.ts",
+      "default": "./dist/attributes/index.js"
+    },
+    "./*": {
+      "types": "./declarations/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "files": [
+    "addon-main.cjs",
+    "blueprints",
+    "declarations",
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "rollup --config",
+    "format": "prettier . --cache --write",
+    "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
+    "lint:fix": "concurrently \"pnpm:lint:*:fix\" --names \"fix:\" --prefixColors auto && pnpm format",
+    "lint:format": "prettier . --cache --check",
+    "lint:hbs": "ember-template-lint . --no-error-on-unmatched-pattern",
+    "lint:hbs:fix": "ember-template-lint . --fix --no-error-on-unmatched-pattern",
+    "lint:js": "eslint . --cache",
+    "lint:js:fix": "eslint . --fix",
+    "lint:publish": "pnpm build && publint run --level error",
+    "lint:types": "ember-tsc --noEmit",
+    "start": "vite dev",
+    "test": "vite build --mode=development --out-dir dist-tests && testem --file testem.cjs ci --port 0"
+  },
+  "dependencies": {
+    "@embroider/addon-shim": "^1.10.3",
+    "decorator-transforms": "^2.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.7",
+    "@babel/eslint-parser": "^8.0.7",
+    "@babel/plugin-transform-typescript": "^8.0.6",
+    "@babel/runtime": "^8.0.7",
+    "@ember-data/adapter": "~5.8.2",
+    "@ember-data/json-api": "~5.8.2",
+    "@ember-data/legacy-compat": "~5.8.2",
+    "@ember-data/model": "~5.8.2",
+    "@ember-data/serializer": "~5.8.2",
+    "@ember-data/store": "~5.8.2",
+    "@ember/app-tsconfig": "^2.1.0",
+    "@ember/library-tsconfig": "^3.0.0",
+    "@ember/test-helpers": "^5.7.0",
+    "@ember/test-waiters": "^4.1.2",
+    "@embroider/addon-dev": "^8.4.2",
+    "@embroider/compat": "^4.1.27",
+    "@embroider/core": "^4.6.9",
+    "@embroider/macros": "^1.21.3",
+    "@embroider/vite": "^1.7.15",
+    "@eslint/js": "^10.0.1",
+    "@glimmer/component": "^2.1.1",
+    "@glimmer/env": "^0.1.7",
+    "@glint/ember-tsc": "^1.11.6",
+    "@glint/template": "^1.9.0",
+    "@glint/tsserver-plugin": "^2.7.9",
+    "@rollup/plugin-babel": "^7.1.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@types/qunit": "^2.19.14",
+    "@warp-drive/build-config": "~5.8.2",
+    "@warp-drive/ember": "~5.8.2",
+    "babel-plugin-ember-template-compilation": "^4.0.1",
+    "concurrently": "^10.0.6",
+    "ember-cli-deprecation-workflow": "^4.0.1",
+    "ember-data": "~5.8.2",
+    "ember-page-title": "^9.0.3",
+    "ember-qunit": "^9.2.0",
+    "ember-source": "^7.3.0",
+    "ember-strict-application-resolver": "^0.1.1",
+    "ember-template-lint": "^7.9.4",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-ember": "^13.6.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-n": "^18.4.1",
+    "eslint-plugin-qunit": "^8.2.6",
+    "globals": "^17.13.0",
+    "pretender": "^3.4.7",
+    "prettier": "^3.9.10",
+    "prettier-plugin-ember-template-tag": "^2.1.8",
+    "publint": "^0.3.25",
+    "qunit": "^3.0.0",
+    "qunit-dom": "^3.6.0",
+    "release-plan": "^0.20.1",
+    "rollup": "^4.64.6",
+    "testem": "^3.21.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vite": "^8.3.4"
+  },
+  "peerDependencies": {
+    "@ember-data/json-api": ">= 4.12.0",
+    "@ember-data/legacy-compat": ">= 4.12.0",
+    "@ember-data/model": ">= 4.12.0",
+    "@ember-data/serializer": ">= 4.12.0",
+    "@ember-data/store": ">= 4.12.0",
+    "ember-data": ">= 4.12.0",
+    "ember-source": ">= 5.0.0"
+  },
+  "packageManager": "pnpm@12.11.2+sha512.25a51652a196785af5f28bda6dfe8dc582ebefa4ac1d180221ce1390231c5fb76637822ea4b6e4633ce74acdcb0a77f725af11bad38177fdeddaee818a955cb9",
+  "engines": {
+    "node": ">= 22.19"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "ember": {
+    "edition": "octane"
+  },
+  "ember-addon": {
+    "version": 2,
+    "type": "addon",
+    "main": "addon-main.cjs",
+    "app-js": {
+      "./transforms/array.js": "./dist/_app_/transforms/array.js",
+      "./transforms/fragment-array.js": "./dist/_app_/transforms/fragment-array.js",
+      "./transforms/fragment.js": "./dist/_app_/transforms/fragment.js"
+    }
+  }
+}
