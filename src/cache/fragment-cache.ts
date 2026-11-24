@@ -276,9 +276,29 @@ export default class FragmentCache {
         id: resource.id,
       });
 
+    const fragmentData = this._takeFragmentAttributes(resource);
+    if (fragmentData) {
+      // Store fragment data for later processing (AFTER inner cache put)
+      fragmentDataByIdentifier.set(identifier, fragmentData);
+    }
+  }
+
+  /**
+   * Remove a resource's fragment attributes and return them, or null if it has
+   * none.
+   *
+   * @private
+   */
+  _takeFragmentAttributes(
+    resource: any,
+  ): { attributes: Record<string, any> } | null {
+    if (!resource || !resource.attributes || !resource.type) {
+      return null;
+    }
+
     const definitions = this.__storeWrapper
       .getSchemaDefinitionService()
-      .attributesDefinitionFor(identifier);
+      .attributesDefinitionFor({ type: resource.type });
 
     const fragmentData: Record<string, any> = {};
     const fragmentKeys: string[] = [];
@@ -293,18 +313,19 @@ export default class FragmentCache {
       }
     }
 
-    // Store fragment data for later processing (AFTER inner cache put)
-    if (fragmentKeys.length > 0) {
-      fragmentDataByIdentifier.set(identifier, { attributes: fragmentData });
-
-      // Clone attributes and remove fragment keys to avoid mutating original data
-      // This is necessary because resource.attributes may reference user-provided data
-      const cleanedAttributes = { ...resource.attributes };
-      for (const key of fragmentKeys) {
-        delete cleanedAttributes[key];
-      }
-      resource.attributes = cleanedAttributes;
+    if (fragmentKeys.length === 0) {
+      return null;
     }
+
+    // Clone attributes and remove fragment keys to avoid mutating original data
+    // This is necessary because resource.attributes may reference user-provided data
+    const cleanedAttributes = { ...resource.attributes };
+    for (const key of fragmentKeys) {
+      delete cleanedAttributes[key];
+    }
+    resource.attributes = cleanedAttributes;
+
+    return { attributes: fragmentData };
   }
 
   /**
@@ -539,6 +560,17 @@ export default class FragmentCache {
       };
     }
 
+    // The inner cache's didCommit stores `included` without going through
+    // put() or upsert(), so take out its fragment attributes first.
+    const includedFragmentData: [any, { attributes: Record<string, any> }][] =
+      [];
+    for (const resource of data?.content?.included ?? []) {
+      const fragmentData = this._takeFragmentAttributes(resource);
+      if (fragmentData) {
+        includedFragmentData.push([resource, fragmentData]);
+      }
+    }
+
     // Let inner cache handle the owner record commit first
     const result = this.__innerCache.didCommit(identifier, data);
 
@@ -579,6 +611,20 @@ export default class FragmentCache {
         this.__storeWrapper.notifyChange(identifier, 'attributes', key);
       });
     }
+
+    // Pushed last so that, as with plain attributes, a saved record repeated in
+    // `included` takes its fragments from that copy. Identifiers are looked up
+    // only now, as the commit can give a new record its id or match a resource
+    // to a local record by lid.
+    const { identifierCache } = this.__storeWrapper;
+    for (const [resource, fragmentData] of includedFragmentData) {
+      this.__fragmentState.pushFragmentData(
+        identifierCache.getOrCreateRecordIdentifier(resource),
+        fragmentData,
+        false,
+      );
+    }
+
     return result;
   }
 
