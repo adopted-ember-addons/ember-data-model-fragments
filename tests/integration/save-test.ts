@@ -1,6 +1,8 @@
 /* eslint-disable ember/no-observers */
 import Model, { attr } from '@ember-data/model';
+import JSONAPIAdapter from '@ember-data/adapter/json-api';
 import { array } from '#src/attributes/index.ts';
+import { FragmentJSONAPISerializer } from '#src/serializer.ts';
 import EmberObject, { observer } from '@ember/object';
 import { addObserver } from '@ember/object/observers';
 import ObjectProxy from '@ember/object/proxy';
@@ -9,6 +11,10 @@ import { module, test, skip } from 'qunit';
 import { setupApplicationTest, createClassic } from '../helpers/index.ts';
 import type { TestContext, TestStore } from '../helpers/index.ts';
 import Pretender from 'pretender';
+import { recordIdentifierFor } from '@ember-data/store';
+import ApplicationSerializer from '../../demo-app/serializers/application.ts';
+import Lion from '../../demo-app/models/lion.ts';
+import Elephant from '../../demo-app/models/elephant.ts';
 import type { ResponseHandler } from 'pretender';
 
 /** The request object pretender hands to a response handler. */
@@ -1119,4 +1125,324 @@ module('integration - Persistence', function (hooks) {
     component.options.lastOrder.products.createFragment({ name: 'Baby Yoda' });
     assert.ok(component.hasDirtyAttributes, 'component record is dirty');
   });
+
+  module(
+    'fragments on records sideloaded in a save response',
+    function (hooks) {
+      let person: any;
+      let zoo: any;
+
+      hooks.beforeEach(function () {
+        person = store.push({
+          data: {
+            type: 'person',
+            id: 1,
+            attributes: {
+              name: {
+                first: 'Eddard',
+                last: 'Stark',
+                prefixes: [{ name: 'Lord' }, { name: 'Warden' }],
+              },
+              addresses: [
+                {
+                  street: '1 Great Keep',
+                  city: 'Winterfell',
+                  region: 'North',
+                  country: 'Westeros',
+                },
+                {
+                  street: '1 Tower of the Hand',
+                  city: "King's Landing",
+                  region: 'Crownlands',
+                  country: 'Westeros',
+                },
+              ],
+            },
+          },
+        });
+
+        zoo = store.push({
+          data: {
+            type: 'zoo',
+            id: 1,
+            attributes: { name: 'Winterfell Kennels' },
+            relationships: {
+              manager: { data: { type: 'person', id: '1' } },
+            },
+          },
+        });
+      });
+
+      function respondWithPerson(personPayload: Record<string, any>) {
+        server.put('/zoos/1', () => [
+          200,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify({
+            zoo: { id: 1, name: 'Winterfell Kennels', manager: 1 },
+            people: [{ id: 1, ...personPayload }],
+          }),
+        ]);
+      }
+
+      test('updates their fragment, nested fragment and fragment array attributes', async function (this: TestContext, assert: Assert) {
+        // Read the fragments first, so the save has to update them in place
+        const name = person.name;
+        const addresses = person.addresses;
+        assert.strictEqual(name.first, 'Eddard', 'fragment is loaded');
+        assert.strictEqual(addresses.length, 2, 'fragment array is loaded');
+
+        respondWithPerson({
+          name: {
+            first: 'Ned',
+            last: 'Stark',
+            prefixes: [{ name: 'Hand of the King' }],
+          },
+          addresses: [
+            {
+              street: '1 Godswood',
+              city: 'Winterfell',
+              region: 'North',
+              country: 'Westeros',
+            },
+          ],
+        });
+
+        await zoo.save();
+
+        assert.strictEqual(name.first, 'Ned', 'fragment is updated');
+        assert.deepEqual(
+          name.prefixes.map((prefix: any) => prefix.name),
+          ['Hand of the King'],
+          'nested fragment array is updated',
+        );
+        assert.deepEqual(
+          addresses.map((address: any) => address.street),
+          ['1 Godswood'],
+          'fragment array is updated',
+        );
+        assert.notOk(person.hasDirtyAttributes, 'sideloaded record is clean');
+      });
+
+      test('rolling back a sideloaded record keeps the saved fragments', async function (this: TestContext, assert: Assert) {
+        person.addresses.removeObject(person.addresses.objectAt(1));
+        person.name.prefixes.removeObject(person.name.prefixes.objectAt(1));
+
+        respondWithPerson({
+          name: {
+            first: 'Eddard',
+            last: 'Stark',
+            prefixes: [{ name: 'Lord' }],
+          },
+          addresses: [
+            {
+              street: '1 Great Keep',
+              city: 'Winterfell',
+              region: 'North',
+              country: 'Westeros',
+            },
+          ],
+        });
+
+        await zoo.save();
+
+        person.rollbackAttributes();
+
+        assert.deepEqual(
+          person.addresses.map((address: any) => address.street),
+          ['1 Great Keep'],
+          'removed fragment array item is not restored',
+        );
+        assert.deepEqual(
+          person.name.prefixes.map((prefix: any) => prefix.name),
+          ['Lord'],
+          'removed nested fragment array item is not restored',
+        );
+      });
+
+      test('loads fragments for a record first seen in the save response', async function (this: TestContext, assert: Assert) {
+        server.put('/people/1', () => [
+          200,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify({
+            person: { id: 1, name: { first: 'Eddard', last: 'Stark' } },
+            zoos: [
+              {
+                id: 2,
+                name: 'Godswood',
+                star: { $type: 'lion', name: 'Grey Wind', hasManes: true },
+                animals: [
+                  { $type: 'elephant', name: 'Hodor', trunkLength: 12 },
+                ],
+              },
+            ],
+          }),
+        ]);
+
+        await person.save();
+
+        const newZoo = store.peekRecord('zoo', 2);
+        const elephant = newZoo.animals.objectAt(0);
+
+        assert.ok(newZoo.star instanceof Lion, 'the star is a lion');
+        assert.strictEqual(newZoo.star.name, 'Grey Wind', 'fragment is loaded');
+        assert.strictEqual(
+          newZoo.animals.length,
+          1,
+          'fragment array is loaded',
+        );
+        assert.ok(elephant instanceof Elephant, 'the animal is an elephant');
+        assert.strictEqual(elephant.trunkLength, 12, 'with a trunk');
+        assert.notOk(newZoo.hasDirtyAttributes, 'sideloaded record is clean');
+      });
+
+      // JSON:API forbids this payload, but a server may still send one. The
+      // REST serializer would fold the repeated record into `data`, so this
+      // uses JSON:API.
+      test('the saved record repeated in `included` takes its fragments from there', async function (this: TestContext, assert: Assert) {
+        owner.register('adapter:zoo', class extends JSONAPIAdapter {});
+        owner.register(
+          'serializer:zoo',
+          class extends FragmentJSONAPISerializer {},
+        );
+
+        store.push({
+          data: {
+            type: 'zoo',
+            id: 1,
+            attributes: { star: { $type: 'lion', name: 'Grey Wind' } },
+          },
+        });
+        zoo.star = store.createFragment('lion', { name: 'Summer' });
+
+        server.patch('/zoos/1', () => [
+          200,
+          { 'Content-Type': 'application/vnd.api+json' },
+          JSON.stringify({
+            data: {
+              type: 'zoos',
+              id: '1',
+              attributes: { name: 'Winterfell Kennels' },
+            },
+            included: [
+              {
+                type: 'zoos',
+                id: '1',
+                attributes: {
+                  city: 'Winterfell',
+                  star: { $type: 'lion', name: 'Ghost' },
+                },
+              },
+            ],
+          }),
+        ]);
+
+        await zoo.save();
+
+        assert.strictEqual(zoo.city, 'Winterfell', 'attribute is updated');
+        assert.ok(zoo.star instanceof Lion, 'the star is a lion');
+        assert.strictEqual(zoo.star.name, 'Ghost', 'fragment is updated');
+        assert.notOk(zoo.hasDirtyAttributes, 'saved record is clean');
+      });
+
+      test('a record created by the save and repeated in `included` takes its fragments from there', async function (this: TestContext, assert: Assert) {
+        owner.register('adapter:zoo', class extends JSONAPIAdapter {});
+        owner.register(
+          'serializer:zoo',
+          class extends FragmentJSONAPISerializer {},
+        );
+
+        const newZoo = store.createRecord('zoo', {
+          name: 'Godswood',
+          star: store.createFragment('lion', { name: 'Summer' }),
+        });
+
+        server.post('/zoos', () => [
+          201,
+          { 'Content-Type': 'application/vnd.api+json' },
+          JSON.stringify({
+            data: { type: 'zoos', id: '5', attributes: { name: 'Godswood' } },
+            included: [
+              {
+                type: 'zoos',
+                id: '5',
+                attributes: {
+                  city: 'Winterfell',
+                  star: { $type: 'lion', name: 'Ghost' },
+                },
+              },
+            ],
+          }),
+        ]);
+
+        await newZoo.save();
+
+        assert.strictEqual(newZoo.id, '5', 'the record has its id');
+        assert.strictEqual(newZoo.city, 'Winterfell', 'attribute is updated');
+        assert.ok(newZoo.star instanceof Lion, 'the star is a lion');
+        assert.strictEqual(newZoo.star.name, 'Ghost', 'fragment is updated');
+        assert.notOk(newZoo.hasDirtyAttributes, 'saved record is clean');
+      });
+
+      test('loads fragments for a local record that `included` matches by lid', async function (this: TestContext, assert: Assert) {
+        const bran = store.createRecord('person', {
+          name: { first: 'Bran', last: 'Stark' },
+        });
+        const { lid } = recordIdentifierFor(bran);
+
+        // A server or serializer can tie a sideloaded resource to a record
+        // created on the client by giving it that record's lid
+        owner.register(
+          'serializer:zoo',
+          class extends ApplicationSerializer {
+            normalizeResponse(
+              store: any,
+              primaryModelClass: any,
+              payload: any,
+              id: any,
+              requestType: any,
+            ): any {
+              const document: any = super.normalizeResponse(
+                store,
+                primaryModelClass,
+                payload,
+                id,
+                requestType,
+              );
+              for (const resource of document.included) {
+                if (resource.type === 'person') {
+                  resource.lid = lid;
+                }
+              }
+              return document;
+            }
+          },
+        );
+
+        server.put('/zoos/1', () => [
+          200,
+          { 'Content-Type': 'application/json' },
+          JSON.stringify({
+            zoo: { id: 1, name: 'Winterfell Kennels' },
+            people: [
+              {
+                id: 9,
+                nickName: 'Bran the Broken',
+                name: { first: 'Brandon', last: 'Stark' },
+              },
+            ],
+          }),
+        ]);
+
+        await zoo.save();
+
+        assert.strictEqual(bran.id, '9', 'the local record has its id');
+        assert.strictEqual(
+          bran.nickName,
+          'Bran the Broken',
+          'attribute is updated',
+        );
+        assert.strictEqual(bran.name.first, 'Brandon', 'fragment is updated');
+      });
+    },
+  );
 });
